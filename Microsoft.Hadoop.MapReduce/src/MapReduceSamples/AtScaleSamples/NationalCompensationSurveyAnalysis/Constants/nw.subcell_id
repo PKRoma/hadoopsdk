@@ -1,0 +1,28 @@
+subcell_id_code	subcell_id_text	display_level	selectable	sort_sequence
+00	All workers	0	T	1	
+01	Less than 100 workers	2	T	3	
+02	Less than 50 workers	3	T	4	
+03	50 or more workers	3	T	5	
+04	50-99 workers	3	T	6	
+05	100 workers or more	2	T	7	
+06	100-499 workers	3	T	8	
+07	500 workers or more	3	T	9	
+21	Metropolitan	2	T	25	
+22	Nonmetropolitan	2	T	26	
+23	Union	2	T	28	
+24	Nonunion	2	T	29	
+25	Full time	2	T	31	
+26	Part time	2	T	32	
+27	Time	2	T	34	
+28	Incentive	2	T	35	
+AA	Establishment Size	1	F	2	
+AB	Region and Division	1	F	10	
+AC	Metropolitan Statistical Areas	1	F	24	
+AD	Bargaining Status	1	F	27	
+AE	Full-time and Part-time Work Status	1	F	30	
+AF	Time and Incentive Status	1	F	33	
+AG	Average Wage	1	F	36	
+AH	Civilian Wage Percentiles	1	F	42	
+AI	Private Wage Percentiles	1	F	48	
+AJ	Government Wage Percentiles	1	F	55	
+AK	Plan Sponsor	1	F	62	

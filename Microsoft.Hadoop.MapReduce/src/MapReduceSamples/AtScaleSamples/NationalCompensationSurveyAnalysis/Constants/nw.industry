@@ -1,0 +1,28 @@
+industry_code	industry_text	display_level	selectable	sort_sequence
+000000	All workers	0	T	1	
+210000	Mining	2	T	102	
+220000	Utilities	2	T	149	
+230000	Construction	2	T	166	
+300000	Manufacturing	2	T	212	
+400000	Trade, transportation, and utilities	2	T	915	
+412000	Retail trade	2	T	1011	
+420000	Wholesale trade	2	T	917	
+430000	Transportation and warehousing	2	T	1137	
+510000	Information	2	T	1248	
+520000	Finance and insurance	2	T	1312	
+520A00	Financial activities	2	T	1311	
+530000	Real estate and rental and leasing	2	T	1376	
+540000	Professional, scientific, and technical services	2	T	1417	
+540A00	Professional and business services	2	T	1416	
+550000	Management of companies and enterprises	2	T	1482	
+560000	Administrative and support and waste management and remediation services	2	T	1489	
+600000	Education and health services	2	T	1557	
+610000	Educational services	2	T	1558	
+620000	Health care and social assistance	2	T	1589	
+622000	Hospitals	3	T	1625	
+700000	Leisure and hospitality	2	T	1660	
+710000	Arts, entertainment, and recreation	2	T	1661	
+720000	Accommodation and food services	2	T	1700	
+810000	Other services (except public administration)	2	T	1728	
+G00000	Goods producing	1	T	2	
+S00000	Service providing	1	T	914	

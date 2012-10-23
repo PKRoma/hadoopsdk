@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AMD64</Platform>
+    <PublishDirectory>.\Target</PublishDirectory>
+    <BuildOutputDirectory>$(PublishDirectory)\Build</BuildOutputDirectory>
+    <SetupOutputDirectory>$(PublishDirectory)\Setup</SetupOutputDirectory>
+    <VSIXOutputDirectory>$(PublishDirectory)\VSIX</VSIXOutputDirectory>
+    <NuGetOutputDirectory>$(PublishDirectory)\NuGet</NuGetOutputDirectory>
+    <SrcDirectory>.\src</SrcDirectory>
+    <MRSlnDirectory>.\src</MRSlnDirectory>
+    <SamplesDirectory>$(SrcDirectory)\MapReduceSamples</SamplesDirectory>
+    <GettingStartedDirectory>$(PublishDirectory)\GettingStarted</GettingStartedDirectory>
+    <SolutionDir>.\src</SolutionDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <MapReduceSolution Include="$(MRSlnDirectory)\Microsoft.Hadoop.MapReduce.sln"/>
+    <SampleSolution Include="$(SrcDirectory)\Microsoft.Hadoop.MapReduce.Samples.sln"/>
+    <MrNuSpec Include=".\src\packaging\nuget\Microsoft.Hadoop.MapReduce.NuGet.msbuild"/>
+  </ItemGroup>
+  <Target Name="CopyExternals">
+    <ItemGroup>
+      <ExternalDlls Include=".\External\*.*"/>
+    </ItemGroup>
+    <MakeDir
+      Directories="$(BuildOutputDirectory)\External"
+      ContinueOnError="true" />
+    <Copy
+      SourceFiles="@(ExternalDlls)"
+      DestinationFiles="@(ExternalDlls->'$(BuildOutputDirectory)\External\%(Filename)%(Extension)')"
+      SkipUnchangedFiles="false"
+      ContinueOnError="false"/>
+  </Target>
+  <Target Name="BuildMapReduce">
+    <MSBuild Projects="@(MapReduceSolution)" Targets="Build" Properties="Configuration=$(Configuration);Platform=Any CPU" />
+    <ItemGroup>
+      <FrameworkDlls Include="$(MRSlnDirectory)\MapReduce\Microsoft.Hadoop.MapReduce\bin\$(Configuration)\*.dll"/>
+      <FrameworkPDBs Include="$(MRSlnDirectory)\MapReduce\Microsoft.Hadoop.MapReduce\bin\$(Configuration)\*.pdb"/>
+      <FrameworkXMLs Include="$(MRSlnDirectory)\MapReduce\Microsoft.Hadoop.MapReduce\bin\$(Configuration)\*.xml"/>
+      <DriverExes Include="$(MRSlnDirectory)\MapReduce\Drivers\*\bin\$(Configuration)\*.exe" />
+      <DriverDlls Include="$(MRSlnDirectory)\MapReduce\Drivers\*\bin\$(Configuration)\*.dll" />
+    </ItemGroup>
+    <MakeDir
+      Directories="$(BuildOutputDirectory)\Framework"
+      ContinueOnError="true" />
+    <Copy
+      SourceFiles="@(FrameworkDlls)"
+      DestinationFiles="@(FrameworkDlls->'$(BuildOutputDirectory)\Framework\%(Filename)%(Extension)')"
+      SkipUnchangedFiles="false"
+      ContinueOnError="false"/>
+    <Copy
+      SourceFiles="@(FrameworkPDBs)"
+      DestinationFiles="@(FrameworkPDBs->'$(BuildOutputDirectory)\Framework\%(Filename)%(Extension)')"
+      SkipUnchangedFiles="false"
+      ContinueOnError="false"/>
+    <Copy
+      SourceFiles="@(FrameworkXMLs)"
+      DestinationFiles="@(FrameworkXMLs->'$(BuildOutputDirectory)\Framework\%(Filename)%(Extension)')"
+      SkipUnchangedFiles="false"
+      ContinueOnError="false"/>
+    <MakeDir
+      Directories="$(BuildOutputDirectory)\Drivers"
+      ContinueOnError="true" />
+    <Copy
+      SourceFiles="@(DriverExes)"
+      DestinationFiles="@(DriverExes->'$(BuildOutputDirectory)\Drivers\%(Filename)%(Extension)')"
+      SkipUnchangedFiles="false"
+      ContinueOnError="false"/>
+    <Copy
+      SourceFiles="@(Driverdlls)"
+      DestinationFiles="@(DriverDlls->'$(BuildOutputDirectory)\Drivers\%(Filename)%(Extension)')"
+      SkipUnchangedFiles="false"
+      ContinueOnError="false"/>
+  </Target>
+  <Target Name="CopyScenarioBinaries" DependsOnTargets="BuildMapReduce">
+    <ItemGroup>
+      <FrameworkDlls Include="$(MRSlnDirectory)\MapReduce\Microsoft.Hadoop.MapReduce\bin\$(Configuration)\**\*.dll"/>
+      <DriverExes Include="$(MRSlnDirectory)\MapReduce\Drivers\**\$(Configuration)\*.exe" />
+      <DriverDlls Include="$(MRSlnDirectory)\MapReduce\Drivers\**\$(Configuration)\*.dll" />
+    </ItemGroup>
+    <MakeDir
+      Directories="$(GettingStartedDirectory)\Binaries"
+      ContinueOnError="true" />
+    <Copy
+      SourceFiles="@(FrameworkDlls)"
+      DestinationFiles="@(FrameworkDlls->'$(GettingStartedDirectory)\Binaries\%(Filename)%(Extension)')"
+      SkipUnchangedFiles="false"
+      ContinueOnError="false"/>
+    <Copy
+      SourceFiles="@(DriverExes)"
+      DestinationFiles="@(DriverExes->'$(GettingStartedDirectory)\Binaries\%(Filename)%(Extension)')"
+      SkipUnchangedFiles="false"
+      ContinueOnError="false"/>
+    <Copy
+      SourceFiles="@(DriverDlls)"
+      DestinationFiles="@(DriverDlls->'$(GettingStartedDirectory)\Binaries\%(Filename)%(Extension)')"
+      SkipUnchangedFiles="false"
+      ContinueOnError="false"/>
+  </Target> 
+  <Target Name="BuildSamples">
+    <ItemGroup>
+      <CSharpFiles Include="$(SamplesDirectory)\**\*.cs"/>
+      <FSharpFiles Include="$(SamplesDirectory)\**\*.fs"/>
+      <CSharpProjects Include="$(SamplesDirectory)\**\*.csproj"/>
+      <FSharpProjects Include="$(SamplesDirectory)\**\*.fsproj"/>
+      <ConfigFiles Include="$(SamplesDirectory)\**\*.config"/>
+    </ItemGroup>
+    <MSBuild Projects="@(SampleSolution)" Targets="Build" Properties="Configuration=$(Configuration);Platform=Any CPU" />
+    <MakeDir
+      Directories="$(BuildOutputDirectory)\Samples"
+      ContinueOnError="true" />
+    <Copy
+      SourceFiles="@(CSharpFiles)"
+      DestinationFiles="@(CSharpFiles->'$(BuildOutputDirectory)\Samples\%(RecursiveDir)%(Filename)%(Extension)')"
+      SkipUnchangedFiles="false"
+      ContinueOnError="false"/>
+    <Copy
+      SourceFiles="@(FSharpFiles)"
+      DestinationFiles="@(FSharpFiles->'$(BuildOutputDirectory)\Samples\%(RecursiveDir)%(Filename)%(Extension)')"
+      SkipUnchangedFiles="false"
+      ContinueOnError="false"/>
+    <Copy
+      SourceFiles="@(CSharpProjects)"
+      DestinationFiles="@(CSharpProjects->'$(BuildOutputDirectory)\Samples\%(RecursiveDir)%(Filename)%(Extension)')"
+      SkipUnchangedFiles="false"
+      ContinueOnError="false"/>
+    <Copy
+      SourceFiles="@(FSharpProjects)"
+      DestinationFiles="@(FSharpProjects->'$(BuildOutputDirectory)\Samples\%(RecursiveDir)%(Filename)%(Extension)')"
+      SkipUnchangedFiles="false"
+      ContinueOnError="false"/>
+    <Copy
+      SourceFiles="@(ConfigFiles)"
+      DestinationFiles="@(ConfigFiles->'$(BuildOutputDirectory)\Samples\%(RecursiveDir)%(Filename)%(Extension)')"
+      SkipUnchangedFiles="false"
+      ContinueOnError="false"/>
+  </Target>
+
+  <Target Name="CreateNuGet">
+    <MSBuild Projects="@(MrNuSpec)" Targets="CreatePackage"/>
+  </Target>
+  <Target Name="Build" DependsOnTargets="BuildMapReduce;BuildSamples;CopyExternals;CreateNuGet;CopyScenarioBinaries">
+  </Target>
+
+  <Target Name="Publish">
+  </Target>
+
+  <Target Name="CleanSolutions">
+    <MSBuild Projects="@(SampleSolution)" Targets="Clean" />
+    <MSBuild Projects="@(MapReduceSolution)" Targets="Clean" />
+  </Target>
+</Project>
+
