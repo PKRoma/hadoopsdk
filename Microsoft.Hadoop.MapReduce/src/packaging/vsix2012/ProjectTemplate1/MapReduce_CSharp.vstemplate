@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<VSTemplate Version="3.0.0" Type="Project" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005" xmlns:sdk="http://schemas.microsoft.com/developer/vstemplate-sdkextension/2010">
+  <TemplateData>
+    <Name>MapReduce</Name>
+    <Description>A C# project to build Map/Reduce applications for Apache Hadoop</Description>
+    <Icon>winhadoop.ico</Icon>
+    <ProjectType>CSharp</ProjectType>
+    <RequiredFrameworkVersion>2.0</RequiredFrameworkVersion>
+    <SortOrder>1000</SortOrder>
+    <TemplateID>79252327-bb7b-40fc-bc88-5b733057af4e</TemplateID>
+    <CreateNewFolder>true</CreateNewFolder>
+    <DefaultName>MapReduce</DefaultName>
+    <ProvideDefaultName>true</ProvideDefaultName>
+  </TemplateData>
+  <TemplateContent>
+    <Project File="ProjectTemplate.csproj" ReplaceParameters="true">
+      <ProjectItem ReplaceParameters="true" TargetFileName="Properties\AssemblyInfo.cs">AssemblyInfo.cs</ProjectItem>
+      <ProjectItem ReplaceParameters="true" OpenInEditor="true">Mapper.cs</ProjectItem>
+      <ProjectItem ReplaceParameters="true" OpenInEditor="true">Reducer.cs</ProjectItem>
+    </Project>
+  </TemplateContent>
+  <WizardExtension>
+    <Assembly>NuGet.VisualStudio.Interop, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</Assembly>
+    <FullClassName>NuGet.VisualStudio.TemplateWizard</FullClassName>
+</WizardExtension>
+<WizardData>
+    <packages repository="extension" repositoryId="VSIXProject1..b43530ee-0284-4e2d-a9ba-2ea114063ae8">
+        <package id="Microsoft.Hadoop.MapReduce" version="0.0.2" />
+    </packages>
+</WizardData>
+</VSTemplate>

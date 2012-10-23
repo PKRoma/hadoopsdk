@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Hadoop.Vsix", "VSIXProject1\Microsoft.Hadoop.Vsix.csproj", "{34A10643-95EF-45DA-8263-B25BEF79613F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MapReduce_CSharp", "ProjectTemplate1\MapReduce_CSharp.csproj", "{17EC89E5-CA87-409C-B912-D072E37BD830}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{17EC89E5-CA87-409C-B912-D072E37BD830}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{17EC89E5-CA87-409C-B912-D072E37BD830}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{17EC89E5-CA87-409C-B912-D072E37BD830}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{17EC89E5-CA87-409C-B912-D072E37BD830}.Release|Any CPU.Build.0 = Release|Any CPU
+		{34A10643-95EF-45DA-8263-B25BEF79613F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{34A10643-95EF-45DA-8263-B25BEF79613F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{34A10643-95EF-45DA-8263-B25BEF79613F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{34A10643-95EF-45DA-8263-B25BEF79613F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
