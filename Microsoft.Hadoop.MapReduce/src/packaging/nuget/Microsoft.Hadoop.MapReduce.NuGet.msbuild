@@ -2,7 +2,7 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0" DefaultTargets="CreatePackage">
   <Import Project="..\..\version.props"/>
   <PropertyGroup>
-    <NuGetApplication>..\..\..\Tools\NuGet.exe</NuGetApplication>
+    <NuGetApplication>..\..\.nuget\NuGet.exe</NuGetApplication>
     <NuGetOutputDirectory>..\..\..\Target\Publish\</NuGetOutputDirectory>
     <NugetNamespaces>
       <![CDATA[
