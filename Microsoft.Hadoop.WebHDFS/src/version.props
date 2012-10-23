@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MicrosoftHadoopWebHDFSVersion>0.0.0.1</MicrosoftHadoopWebHDFSVersion>
+    <MicrosoftHadoopWebHDFSRootDirectory>$(MSBuildThisFileDirectory)</MicrosoftHadoopWebHDFSRootDirectory>
+  </PropertyGroup>
+  <Target Name="WriteVersionCs" Outputs="$(MicrosoftHadoopWebHDFSRootDirectory)\Version.cs" BeforeTargets="BeforeBuild">
+    <WriteLinesToFile
+      File="$(MicrosoftHadoopWebHDFSRootDirectory)\Version.cs"
+      Lines="[assembly: System.Reflection.AssemblyVersion(&quot;$(MicrosoftHadoopWebHDFSVersion)&quot;)]"
+      Overwrite="true"
+      Encoding="Unicode"/>
+  </Target>
+  <Target Name="DeleteVersionCs" AfterTargets="Clean">
+    <Delete Files="$(MicrosoftHadoopWebHDFSRootDirectory)\Version.cs"/>
+  </Target>
+</Project>
