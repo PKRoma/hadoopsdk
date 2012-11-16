@@ -11,23 +11,37 @@ namespace WebHDFSTest
     [TestClass]
     public class OperationalTests
     {
+        WebHDFSClient client;
 
+        [TestInitialize]
+        public void setupTests()
+        {
+            client = new WebHDFSClient();
+        }
+
+        [TestMethod]
+        public void GetHomeDirectory()
+        {
+            var path = client.GetHomeDirectory();
+            path.Wait();
+            Assert.AreEqual("/user/webuser", path.Result, "Home directory paths are the same");
+        }
 
         [TestMethod]
         public void RenameDirectory()
         {
-            var deleted = WebHDFSClient.DeleteDirectory("/UNIT_TEST_CREATE_23");
+            var deleted = client.DeleteDirectory("/UNIT_TEST_CREATE_23");
             deleted.Wait();
             System.Threading.Tasks.Task<DirectoryListing> entries;
             System.Threading.Tasks.Task<bool> created;
             CreateDirectory(out entries, out created);
-            var renameDir = WebHDFSClient.RenameDirectory("/UNIT_TEST_CREATE", "/UNIT_TEST_CREATE_23");
+            var renameDir = client.RenameDirectory("/UNIT_TEST_CREATE", "/UNIT_TEST_CREATE_23");
             renameDir.Wait();
-            var contentSummaryAfter = WebHDFSClient.GetContentSummary("/UNIT_TEST_CREATE_23");
+            var contentSummaryAfter = client.GetContentSummary("/UNIT_TEST_CREATE_23");
             contentSummaryAfter.Wait();
             Assert.AreEqual(1, contentSummaryAfter.Result.DirectoryCount, "Same Number of Directories");
 
-            var deleted2 = WebHDFSClient.DeleteDirectory("/UNIT_TEST_CREATE_23");
+            var deleted2 = client.DeleteDirectory("/UNIT_TEST_CREATE_23");
             deleted2.Wait();
         }
 
@@ -39,41 +53,41 @@ namespace WebHDFSTest
             CreateDirectory(out entries, out created);
             Assert.IsTrue(created.Result, "should have created a new directory");
             int numDirectories = entries.Result.Directories.Count();
-            var entriesPost = WebHDFSClient.GetDirectoryStatus("/");
+            var entriesPost = client.GetDirectoryStatus("/");
             entriesPost.Wait();
             Assert.AreEqual(entriesPost.Result.Directories.Count(), entries.Result.Directories.Count() + 1, "Should see an additional directory created");
             DeleteDirectory();
     
         }
 
-        private static void DeleteDirectory()
+        private void DeleteDirectory()
         {
-            var deleted2 = WebHDFSClient.DeleteDirectory("/UNIT_TEST_CREATE");
+            var deleted2 = client.DeleteDirectory("/UNIT_TEST_CREATE");
             deleted2.Wait();
         }
 
         [TestMethod]
         public void ValidateContentSummary()
         {
-            var contentSummaryBefore = WebHDFSClient.GetContentSummary("/");
+            var contentSummaryBefore = client.GetContentSummary("/");
             contentSummaryBefore.Wait();
             System.Threading.Tasks.Task<DirectoryListing> entries;
             System.Threading.Tasks.Task<bool> created;
             CreateDirectory(out entries, out created);
-            var contentSummaryAfter = WebHDFSClient.GetContentSummary("/");
+            var contentSummaryAfter = client.GetContentSummary("/");
             contentSummaryAfter.Wait();
             Assert.AreEqual(contentSummaryBefore.Result.DirectoryCount + 1, contentSummaryAfter.Result.DirectoryCount, "Same Number of Directories");
 
             DeleteDirectory();
         }
 
-        private static void CreateDirectory(out System.Threading.Tasks.Task<DirectoryListing> entries, out System.Threading.Tasks.Task<bool> created)
+        private  void CreateDirectory(out System.Threading.Tasks.Task<DirectoryListing> entries, out System.Threading.Tasks.Task<bool> created)
         {
-            var deleted = WebHDFSClient.DeleteDirectory("/UNIT_TEST_CREATE", true);
+            var deleted = client.DeleteDirectory("/UNIT_TEST_CREATE", true);
             deleted.Wait();
-            entries = WebHDFSClient.GetDirectoryStatus("/");
+            entries = client.GetDirectoryStatus("/");
             entries.Wait();
-            created = WebHDFSClient.CreateDirectory("/UNIT_TEST_CREATE");
+            created = client.CreateDirectory("/UNIT_TEST_CREATE");
             created.Wait();
         }
 
@@ -85,9 +99,9 @@ namespace WebHDFSTest
             DeleteTextFile();
         }
 
-        private static void DeleteTextFile()
+        private  void DeleteTextFile()
         {
-            var deleted2 = WebHDFSClient.DeleteDirectory("/UNIT_TEST_CREATE_FILE", true);
+            var deleted2 = client.DeleteDirectory("/UNIT_TEST_CREATE_FILE", true);
             deleted2.Wait();
         }
 
@@ -96,7 +110,7 @@ namespace WebHDFSTest
         public void ValidateFile()
         {
             CreateFile();
-            var fileStatus = WebHDFSClient.GetFileStatus("/UNIT_TEST_CREATE_FILE/basicInput.txt");
+            var fileStatus = client.GetFileStatus("/UNIT_TEST_CREATE_FILE/basicInput.txt");
             fileStatus.Wait();
             Assert.IsTrue(fileStatus.Result.Length > 10, "file exists");
             DeleteTextFile();
@@ -106,9 +120,87 @@ namespace WebHDFSTest
         public void ValidateChecksum()
         {
             CreateFile();
-            var fileChecksum = WebHDFSClient.GetFileChecksum("/UNIT_TEST_CREATE_FILE/basicInput.txt");
+            var fileChecksum = client.GetFileChecksum("/UNIT_TEST_CREATE_FILE/basicInput.txt");
             fileChecksum.Wait();
             Assert.AreEqual(fileChecksum.Result.Checksum, "0000020000000000000000002b5681a8c222c7cd2deff67f303b8fc800000000", "file exists");
+            DeleteTextFile();
+        }
+
+        [TestMethod]
+        public void SetReplicationFactor()
+        {
+            CreateFile();
+            var fileChecksum = client.SetReplicationFactor("/UNIT_TEST_CREATE_FILE/basicInput.txt",1);
+            fileChecksum.Wait();
+            Assert.IsTrue(fileChecksum.Result);
+            DeleteTextFile();
+        }
+
+        [TestMethod]
+        public void SetOwner()
+        {
+            CreateFile();
+            var response = client.SetOwner("/UNIT_TEST_CREATE_FILE/basicInput.txt", "hadoop");
+            response.Wait();
+            Assert.IsTrue(response.Result, "file changed"); 
+            var fileStatus = client.GetFileStatus("/UNIT_TEST_CREATE_FILE/basicInput.txt");
+            fileStatus.Wait();
+            Assert.AreEqual(fileStatus.Result.Owner,"hadoop");
+            DeleteTextFile();
+        }
+
+
+
+        [TestMethod]
+        public void SetGroup()
+        {
+            CreateFile();
+            var response = client.SetGroup("/UNIT_TEST_CREATE_FILE/basicInput.txt", "admin");
+            response.Wait();
+            Assert.IsTrue(response.Result, "file changed");
+            var fileStatus = client.GetFileStatus("/UNIT_TEST_CREATE_FILE/basicInput.txt");
+            fileStatus.Wait();
+            Assert.AreEqual(fileStatus.Result.Group, "admin");
+            DeleteTextFile();
+        }
+
+        [TestMethod]
+        public void SetPermission()
+        {
+            CreateFile();
+            var response = client.SetPermissions("/UNIT_TEST_CREATE_FILE/basicInput.txt", "333");
+            response.Wait();
+            Assert.IsTrue(response.Result, "file changed");
+            var fileStatus = client.GetFileStatus("/UNIT_TEST_CREATE_FILE/basicInput.txt");
+            fileStatus.Wait();
+            Assert.AreEqual(fileStatus.Result.Permission, "333");
+            DeleteTextFile();
+        }
+
+
+        [TestMethod]
+        public void SetAccessTime()
+        {
+            CreateFile();
+            var response = client.SetAccessTime("/UNIT_TEST_CREATE_FILE/basicInput.txt", "23");
+            response.Wait();
+            Assert.IsTrue(response.Result, "file changed");
+            var fileStatus = client.GetFileStatus("/UNIT_TEST_CREATE_FILE/basicInput.txt");
+            fileStatus.Wait();
+            Assert.AreEqual(fileStatus.Result.AccessTime, "23");
+            DeleteTextFile();
+        }
+
+        [TestMethod]
+        public void SetModificationTime()
+        {
+            CreateFile();
+            var response = client.SetModificationTime("/UNIT_TEST_CREATE_FILE/basicInput.txt", "23");
+            response.Wait();
+            Assert.IsTrue(response.Result, "file changed");
+            var fileStatus = client.GetFileStatus("/UNIT_TEST_CREATE_FILE/basicInput.txt");
+            fileStatus.Wait();
+            Assert.AreEqual(fileStatus.Result.ModificationTime, "23");
             DeleteTextFile();
         }
 
@@ -116,7 +208,7 @@ namespace WebHDFSTest
         public void OpenAndReadFile()
         {
             CreateFile();
-            var fileRead = WebHDFSClient.OpenFile("/UNIT_TEST_CREATE_FILE/basicInput.txt");
+            var fileRead = client.OpenFile("/UNIT_TEST_CREATE_FILE/basicInput.txt");
             fileRead.Wait();
             var content = fileRead.Result.Content.ReadAsStringAsync();
             content.Wait();
@@ -124,13 +216,13 @@ namespace WebHDFSTest
             DeleteTextFile();
         }
 
-        private static string CreateFile()
+        private  string CreateFile()
         {
-            var deleted = WebHDFSClient.DeleteDirectory("/UNIT_TEST_CREATE_FILE", true);
+            var deleted = client.DeleteDirectory("/UNIT_TEST_CREATE_FILE", true);
             deleted.Wait();
-            var created = WebHDFSClient.CreateDirectory("/UNIT_TEST_CREATE_FILE");
+            var created =  client.CreateDirectory("/UNIT_TEST_CREATE_FILE");
             created.Wait();
-            var createdFile = WebHDFSClient.CreateFile("./basicInput.txt", "/UNIT_TEST_CREATE_FILE/basicInput.txt");
+            var createdFile = client.CreateFile("./basicInput.txt", "/UNIT_TEST_CREATE_FILE/basicInput.txt");
             createdFile.Wait();
             return createdFile.Result;
         }
