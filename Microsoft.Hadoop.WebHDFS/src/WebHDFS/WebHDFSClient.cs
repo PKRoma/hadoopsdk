@@ -108,6 +108,22 @@ namespace Microsoft.Hadoop.WebHDFS
             return resp;
         }
 
+        /// <summary>
+        /// Opens an FSDataInputStream at the indicated Path.  The offset and length will allow 
+        /// you to get a subset of the file.  
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="offset">This includes any header bytes</param>
+        /// <param name="length"></param>
+        /// <returns></returns>
+        public async Task<HttpResponseMessage> OpenFile(string path, int offset, int length)
+        {
+            HttpClient hc = new HttpClient();
+            var resp = await hc.GetAsync(GetRootUri() + path + "?op=OPEN&offset="+offset.ToString() + "&length="+length.ToString());
+            resp.EnsureSuccessStatusCode();
+            return resp;
+        }
+
         #endregion
 
         #region "put"
