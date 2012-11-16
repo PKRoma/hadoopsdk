@@ -30,7 +30,7 @@ namespace Microsoft.Hadoop.WebHDFS
             Length = value.Value<Int64>("length");
             ModificationTime = value.Value<string>("modificationTime");
             Owner = value.Value<string>("owner");
-            PathSuffix = value.Value<string>("fileSuffix");
+            PathSuffix = value.Value<string>("pathSuffix");
             Permission = value.Value<string>("permission");
             Replication = value.Value<int>("replication");
             Type = value.Value<string>("type");
