@@ -117,6 +117,18 @@ namespace WebHDFSTest
         }
 
         [TestMethod]
+        public void OpenPartOfAFile()
+        {
+            CreateFile();
+            var fileStatus = client.OpenFile("/UNIT_TEST_CREATE_FILE/basicInput.txt",3,3);
+            fileStatus.Wait();
+            var readFile = fileStatus.Result.Content.ReadAsStringAsync();
+            readFile.Wait();
+            Assert.AreEqual("thr",readFile.Result, "correct offset & characters.");
+            DeleteTextFile();
+        }
+
+        [TestMethod]
         public void ValidateChecksum()
         {
             CreateFile();
