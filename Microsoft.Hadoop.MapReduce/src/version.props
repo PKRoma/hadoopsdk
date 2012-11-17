@@ -1,13 +1,15 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <MicrosoftHadoopMRVersion>0.0.0.4</MicrosoftHadoopMRVersion>
+    <MicrosoftHadoopMRVersion>0.1.0.0-prerelease</MicrosoftHadoopMRVersion>
+    <MicrosoftHadoopMRVersionAssembly>0.1.0.0</MicrosoftHadoopMRVersionAssembly>
+    
     <MicrosoftHadoopMRRootDirectory>$(MSBuildThisFileDirectory)</MicrosoftHadoopMRRootDirectory>
   </PropertyGroup>
   <Target Name="WriteVersionCs" Outputs="$(MicrosoftHadoopMRRootDirectory)\Version.cs" BeforeTargets="BeforeBuild">
     <WriteLinesToFile
       File="$(MicrosoftHadoopMRRootDirectory)\Version.cs"
-      Lines="[assembly: System.Reflection.AssemblyVersion(&quot;$(MicrosoftHadoopMRVersion)&quot;)]"
+      Lines="[assembly: System.Reflection.AssemblyVersion(&quot;$(MicrosoftHadoopMRVersionAssembly)&quot;)]"
       Overwrite="true"
       Encoding="Unicode"/>
   </Target>
