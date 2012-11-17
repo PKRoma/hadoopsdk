@@ -1,0 +1,149 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{5B50D6B3-0981-4FB5-9FCC-C1BC51DBA2A4}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Microsoft.Hadoop.Hive</RootNamespace>
+    <AssemblyName>Microsoft.Hadoop.Hive</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Hive API\HiveConnection.cs" />
+    <Compile Include="Hive API\HiveExtensionMethods.cs" />
+    <Compile Include="Hive API\HiveQueryProvider.cs" />
+    <Compile Include="Hive API\HiveRow.cs" />
+    <Compile Include="Hive API\HiveTable.cs" />
+    <Compile Include="Hive API\HiveTableOfT.cs" />
+    <Compile Include="IQToolkit.Data\Common\ExecutionBuilder.cs" />
+    <Compile Include="IQToolkit.Data\Common\FieldReader.cs" />
+    <Compile Include="IQToolkit.Data\Common\Language\Expressions\Aggregator.cs" />
+    <Compile Include="IQToolkit.Data\Common\Language\Expressions\DbExpressionComparer.cs" />
+    <Compile Include="IQToolkit.Data\Common\Language\Expressions\DbExpressionExtensions.cs" />
+    <Compile Include="IQToolkit.Data\Common\Language\Expressions\DbExpressionReplacer.cs" />
+    <Compile Include="IQToolkit.Data\Common\Language\Expressions\DbExpressions.cs" />
+    <Compile Include="IQToolkit.Data\Common\Language\Expressions\DbExpressionVisitor.cs" />
+    <Compile Include="IQToolkit.Data\Common\Language\Expressions\DbExpressionWriter.cs" />
+    <Compile Include="IQToolkit.Data\Common\Language\QueryLanguage.cs" />
+    <Compile Include="IQToolkit.Data\Common\Language\QueryTypeSystem.cs" />
+    <Compile Include="IQToolkit.Data\Common\Language\SqlFormatter.cs" />
+    <Compile Include="IQToolkit.Data\Common\Mapping\AdvancedMapping.cs" />
+    <Compile Include="IQToolkit.Data\Common\Mapping\BasicMapping.cs" />
+    <Compile Include="IQToolkit.Data\Common\Mapping\QueryMapping.cs" />
+    <Compile Include="IQToolkit.Data\Common\QueryCommand.cs" />
+    <Compile Include="IQToolkit.Data\Common\QueryExecutor.cs" />
+    <Compile Include="IQToolkit.Data\Common\QueryPolicy.cs" />
+    <Compile Include="IQToolkit.Data\Common\QueryTranslator.cs" />
+    <Compile Include="IQToolkit.Data\Common\Translation\AggregateChecker.cs" />
+    <Compile Include="IQToolkit.Data\Common\Translation\AggregateRewriter.cs" />
+    <Compile Include="IQToolkit.Data\Common\Translation\ClientJoinedProjectionRewriter.cs" />
+    <Compile Include="IQToolkit.Data\Common\Translation\ColumnMapper.cs" />
+    <Compile Include="IQToolkit.Data\Common\Translation\ColumnProjector.cs" />
+    <Compile Include="IQToolkit.Data\Common\Translation\ComparisonRewriter.cs" />
+    <Compile Include="IQToolkit.Data\Common\Translation\CrossApplyRewriter.cs" />
+    <Compile Include="IQToolkit.Data\Common\Translation\CrossJoinIsolator.cs" />
+    <Compile Include="IQToolkit.Data\Common\Translation\CrossJoinRewriter.cs" />
+    <Compile Include="IQToolkit.Data\Common\Translation\DeclaredAliasGatherer.cs" />
+    <Compile Include="IQToolkit.Data\Common\Translation\NamedValueGatherer.cs" />
+    <Compile Include="IQToolkit.Data\Common\Translation\OrderByRewriter.cs" />
+    <Compile Include="IQToolkit.Data\Common\Translation\Parameterizer.cs" />
+    <Compile Include="IQToolkit.Data\Common\Translation\QueryBinder.cs" />
+    <Compile Include="IQToolkit.Data\Common\Translation\QueryDuplicator.cs" />
+    <Compile Include="IQToolkit.Data\Common\Translation\RedundantColumnRemover.cs" />
+    <Compile Include="IQToolkit.Data\Common\Translation\RedundantJoinRemover.cs" />
+    <Compile Include="IQToolkit.Data\Common\Translation\RedundantSubqueryRemover.cs" />
+    <Compile Include="IQToolkit.Data\Common\Translation\ReferencedAliasGatherer.cs" />
+    <Compile Include="IQToolkit.Data\Common\Translation\ReferencedColumnGatherer.cs" />
+    <Compile Include="IQToolkit.Data\Common\Translation\RelationshipBinder.cs" />
+    <Compile Include="IQToolkit.Data\Common\Translation\RelationshipIncluder.cs" />
+    <Compile Include="IQToolkit.Data\Common\Translation\SelectGatherer.cs" />
+    <Compile Include="IQToolkit.Data\Common\Translation\SingletonProjectionRewriter.cs" />
+    <Compile Include="IQToolkit.Data\Common\Translation\SkipToNestedOrderByRewriter.cs" />
+    <Compile Include="IQToolkit.Data\Common\Translation\SkipToRowNumberRewriter.cs" />
+    <Compile Include="IQToolkit.Data\Common\Translation\SubqueryRemover.cs" />
+    <Compile Include="IQToolkit.Data\Common\Translation\UnusedColumnRemover.cs" />
+    <Compile Include="IQToolkit.Data\DbEntityProvider.cs" />
+    <Compile Include="IQToolkit.Data\DbTypeSystem.cs" />
+    <Compile Include="IQToolkit.Data\EntityPolicy.cs" />
+    <Compile Include="IQToolkit.Data\EntityProvider.cs" />
+    <Compile Include="IQToolkit.Data\EntitySession.cs" />
+    <Compile Include="IQToolkit.Data\Mapping\AttributeMapping.cs" />
+    <Compile Include="IQToolkit.Data\Mapping\ImplicitMapping.cs" />
+    <Compile Include="IQToolkit.Data\Mapping\XmlMapping.cs" />
+    <Compile Include="IQToolkit\CompoundKey.cs" />
+    <Compile Include="IQToolkit\DeferredList.cs" />
+    <Compile Include="IQToolkit\DeferredValue.cs" />
+    <Compile Include="IQToolkit\EnumerateOnce.cs" />
+    <Compile Include="IQToolkit\ExpressionComparer.cs" />
+    <Compile Include="IQToolkit\ExpressionEvaluator.cs" />
+    <Compile Include="IQToolkit\ExpressionExtensions.cs" />
+    <Compile Include="IQToolkit\ExpressionReplacer.cs" />
+    <Compile Include="IQToolkit\ExpressionVisitor.cs" />
+    <Compile Include="IQToolkit\ExpressionWriter.cs" />
+    <Compile Include="IQToolkit\Grouping.cs" />
+    <Compile Include="IQToolkit\IEntityProvider.cs" />
+    <Compile Include="IQToolkit\IEntitySession.cs" />
+    <Compile Include="IQToolkit\MostRecentlyUsedCache.cs" />
+    <Compile Include="IQToolkit\PartialEvaluator.cs" />
+    <Compile Include="IQToolkit\Query.cs" />
+    <Compile Include="IQToolkit\QueryCache.cs" />
+    <Compile Include="IQToolkit\QueryCompiler.cs" />
+    <Compile Include="IQToolkit\QueryProvider.cs" />
+    <Compile Include="IQToolkit\ReadOnlyExtensions.cs" />
+    <Compile Include="IQToolkit\ReflectionExtensions.cs" />
+    <Compile Include="IQToolkit\ScopedDictionary.cs" />
+    <Compile Include="IQToolkit\StrongDelegate.cs" />
+    <Compile Include="IQToolkit\TopologicalSort.cs" />
+    <Compile Include="IQToolkit\TypedSubtreeFinder.cs" />
+    <Compile Include="IQToolkit\TypeHelper.cs" />
+    <Compile Include="IQToolkit\Updatable.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Translator\HiveFormatter.cs" />
+    <Compile Include="Translator\HiveLanguage.cs" />
+    <Compile Include="Translator\HiveMapping.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
