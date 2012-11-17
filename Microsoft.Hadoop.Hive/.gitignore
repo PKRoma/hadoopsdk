@@ -1,0 +1,33 @@
+# Build Folders (you can keep bin if you'd like, to store dlls and pdbs)
+bin
+obj
+backup
+Debug
+Release
+Target
+Packages
+build.out
+
+#Temp folders
+Temp
+
+#Scenario Binaries
+Binaries
+
+# mstest test results
+TestResults
+
+# suo
+*.bak
+*.suo
+*.user
+*.nupkg
+nuget.exe
+UpgradeLog.xml
+_UpgradeReport_Files
+UpgradeLog.htm
+*.class
+*.jar
+
+# Auto-generated files
+Version.cs
