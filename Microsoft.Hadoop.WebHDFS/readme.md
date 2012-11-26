@@ -1,0 +1,1 @@
+a simple .NET client for WebHDFS
