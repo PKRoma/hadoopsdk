@@ -23,6 +23,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AtScaleSamples", "AtScaleSa
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpWordCount", "MapReduceSamples\BasicSamples\FSharpWordCount\FSharpWordCount.fsproj", "{C18CDF1A-9D65-4408-B8DC-CE0071213AB8}"
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "FSharpJsonEncodedValues", "MapReduceSamples\BasicSamples\FSharpJsonEncodedValues\FSharpJsonEncodedValues.fsproj", "{6794300F-BFD2-4053-9D21-28CB31875311}"
+EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = Microsoft.Hadoop.MapReduce.Samples.vsmdi
@@ -100,6 +102,14 @@ Global
 		{C18CDF1A-9D65-4408-B8DC-CE0071213AB8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C18CDF1A-9D65-4408-B8DC-CE0071213AB8}.Release|x64.ActiveCfg = Release|Any CPU
 		{C18CDF1A-9D65-4408-B8DC-CE0071213AB8}.Release|x86.ActiveCfg = Release|Any CPU
+		{6794300F-BFD2-4053-9D21-28CB31875311}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6794300F-BFD2-4053-9D21-28CB31875311}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6794300F-BFD2-4053-9D21-28CB31875311}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{6794300F-BFD2-4053-9D21-28CB31875311}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{6794300F-BFD2-4053-9D21-28CB31875311}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6794300F-BFD2-4053-9D21-28CB31875311}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6794300F-BFD2-4053-9D21-28CB31875311}.Release|x64.ActiveCfg = Release|Any CPU
+		{6794300F-BFD2-4053-9D21-28CB31875311}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -110,6 +120,7 @@ Global
 		{B0341526-3E74-48C5-99E0-43A2C0962208} = {DAEDCAEF-4585-4BC8-9C2E-7882E74127BF}
 		{BA539DCF-53C6-4C37-839B-202231B227CB} = {DAEDCAEF-4585-4BC8-9C2E-7882E74127BF}
 		{C18CDF1A-9D65-4408-B8DC-CE0071213AB8} = {DAEDCAEF-4585-4BC8-9C2E-7882E74127BF}
+		{6794300F-BFD2-4053-9D21-28CB31875311} = {DAEDCAEF-4585-4BC8-9C2E-7882E74127BF}
 		{677336BC-A585-4219-BC57-F177C6A2FDBD} = {2AD86199-38DF-4B9B-83A1-EDD668ECD8DE}
 	EndGlobalSection
 EndGlobal
