@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebHDFS", "WebHDFS\WebHDFS.csproj", "{7FB39B26-95E5-404C-94DB-6CB462BB98F8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebHDFSTest", "WebHDFSTest\WebHDFSTest.csproj", "{59F7D6DE-6380-485F-8371-BAF4621F311B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7FB39B26-95E5-404C-94DB-6CB462BB98F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7FB39B26-95E5-404C-94DB-6CB462BB98F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7FB39B26-95E5-404C-94DB-6CB462BB98F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7FB39B26-95E5-404C-94DB-6CB462BB98F8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{59F7D6DE-6380-485F-8371-BAF4621F311B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{59F7D6DE-6380-485F-8371-BAF4621F311B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{59F7D6DE-6380-485F-8371-BAF4621F311B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{59F7D6DE-6380-485F-8371-BAF4621F311B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

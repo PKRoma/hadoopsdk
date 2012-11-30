@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <PublishDirectory>.\Target</PublishDirectory>
+    <BuildOutputDirectory>$(PublishDirectory)\Build</BuildOutputDirectory>
+    <NuGetOutputDirectory>$(PublishDirectory)\NuGet</NuGetOutputDirectory>
+    <SrcDirectory>.\src</SrcDirectory>
+    <SamplesDirectory>$(SrcDirectory)\WebHDFSSamples</SamplesDirectory>
+    <SolutionDir>.\src</SolutionDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <WebHDFSSolution Include="$(SrcDirectory)\Microsoft.Hadoop.WebHDFS.sln"/>
+    <SampleSolution Include="$(SrcDirectory)\Microsoft.Hadoop.WebHDFS.Samples.sln"/>
+    <MrNuSpec Include=".\src\packaging\nuget\Microsoft.Hadoop.WebHDFS.NuGet.msbuild"/>
+  </ItemGroup>
+  <!--<Target Name="BuildSamples">
+    <ItemGroup>
+      <CSharpFiles Include="$(SamplesDirectory)\**\*.cs"/>
+      <FSharpFiles Include="$(SamplesDirectory)\**\*.fs"/>
+      <CSharpProjects Include="$(SamplesDirectory)\**\*.csproj"/>
+      <FSharpProjects Include="$(SamplesDirectory)\**\*.fsproj"/>
+      <ConfigFiles Include="$(SamplesDirectory)\**\*.config"/>
+    </ItemGroup>
+    <MSBuild Projects="@(SampleSolution)" Targets="Build" Properties="Configuration=$(Configuration);Platform=Any CPU" />
+    <MakeDir
+      Directories="$(BuildOutputDirectory)\Samples"
+      ContinueOnError="true" />
+    <Copy
+      SourceFiles="@(CSharpFiles)"
+      DestinationFiles="@(CSharpFiles->'$(BuildOutputDirectory)\Samples\%(RecursiveDir)%(Filename)%(Extension)')"
+      SkipUnchangedFiles="false"
+      ContinueOnError="false"/>
+    <Copy
+      SourceFiles="@(FSharpFiles)"
+      DestinationFiles="@(FSharpFiles->'$(BuildOutputDirectory)\Samples\%(RecursiveDir)%(Filename)%(Extension)')"
+      SkipUnchangedFiles="false"
+      ContinueOnError="false"/>
+    <Copy
+      SourceFiles="@(CSharpProjects)"
+      DestinationFiles="@(CSharpProjects->'$(BuildOutputDirectory)\Samples\%(RecursiveDir)%(Filename)%(Extension)')"
+      SkipUnchangedFiles="false"
+      ContinueOnError="false"/>
+    <Copy
+      SourceFiles="@(FSharpProjects)"
+      DestinationFiles="@(FSharpProjects->'$(BuildOutputDirectory)\Samples\%(RecursiveDir)%(Filename)%(Extension)')"
+      SkipUnchangedFiles="false"
+      ContinueOnError="false"/>
+    <Copy
+      SourceFiles="@(ConfigFiles)"
+      DestinationFiles="@(ConfigFiles->'$(BuildOutputDirectory)\Samples\%(RecursiveDir)%(Filename)%(Extension)')"
+      SkipUnchangedFiles="false"
+      ContinueOnError="false"/>
+  </Target>-->
+
+   <Target Name="BuildWebHDFS">
+    <MSBuild Projects="@(WebHDFSSolution)" Targets="Build" Properties="Configuration=$(Configuration);Platform=Any CPU" />
+    <ItemGroup>
+      <FrameworkDlls Include="$(SrcDirectory)\WebHDFS\bin\$(Configuration)\*.dll"/>
+      <FrameworkPDBs Include="$(SrcDirectory)\WebHDFS\bin\$(Configuration)\*.pdb"/>
+      <FrameworkXMLs Include="$(SrcDirectory)\WebHDFS\bin\$(Configuration)\*.xml"/>
+    </ItemGroup>
+    <MakeDir
+      Directories="$(BuildOutputDirectory)\Framework"
+      ContinueOnError="true" />
+    <Copy
+      SourceFiles="@(FrameworkDlls)"
+      DestinationFiles="@(FrameworkDlls->'$(BuildOutputDirectory)\Framework\%(Filename)%(Extension)')"
+      SkipUnchangedFiles="false"
+      ContinueOnError="false"/>
+    <Copy
+      SourceFiles="@(FrameworkPDBs)"
+      DestinationFiles="@(FrameworkPDBs->'$(BuildOutputDirectory)\Framework\%(Filename)%(Extension)')"
+      SkipUnchangedFiles="false"
+      ContinueOnError="false"/>
+    <Copy
+      SourceFiles="@(FrameworkXMLs)"
+      DestinationFiles="@(FrameworkXMLs->'$(BuildOutputDirectory)\Framework\%(Filename)%(Extension)')"
+      SkipUnchangedFiles="false"
+      ContinueOnError="false"/>
+  </Target>
+
+  <Target Name="CreateNuGet">
+    <MSBuild Projects="@(MrNuSpec)" Targets="CreatePackage"/>
+  </Target>
+  <Target Name="Build" DependsOnTargets="BuildWebHDFS;CreateNuGet">
+  </Target>
+
+  <Target Name="CleanSolutions">
+    <MSBuild Projects="@(SampleSolution)" Targets="Clean" />
+    <MSBuild Projects="@(WebHDFSSolution)" Targets="Clean" />
+  </Target>
+</Project>
+
