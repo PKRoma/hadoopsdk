@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/10/nuspec.xsd">
+    <metadata>
+        <id>Microsoft.Hadoop.Hive</id>
+        <version>0.2.0.0-prerelease</version>
+        <title>Microsoft Linq to Hive</title>
+        <authors>Microsoft</authors>
+        <owners>Microsoft</owners>
+        <projectUrl>http://hadoopsdk.codeplex.com/</projectUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>Provides a .NET Linq implementation for accessing Hadoop Hive services.</description>
+        <tags>Hadoop Linq Hive</tags>
+        <frameworkAssemblies>
+            <frameworkAssembly assemblyName="System.Data" targetFramework=".NETFramework4.5" />
+            <frameworkAssembly assemblyName="System.Core" targetFramework=".NETFramework4.5" />
+        </frameworkAssemblies>
+    </metadata>
+    <files>
+        <file src="lib\Microsoft.Hadoop.Hive.dll" target="lib\Microsoft.Hadoop.Hive.dll" />
+    </files>
+</package>
