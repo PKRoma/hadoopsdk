@@ -22,7 +22,7 @@
       Directories="$(NuGetOutputDirectory)"
       ContinueOnError="true" />
     <Exec WorkingDirectory=".\"
-          Command="$(NuGetApplication) pack .\$(GeneratedSpecFile) -Verbose -Prop Configuration=Release -OutputDirectory $(NuGetOutputDirectory)"/>
+          Command="$(NuGetApplication) pack .\$(GeneratedSpecFile) -Verbosity detailed -Prop Configuration=Release -OutputDirectory $(NuGetOutputDirectory)"/>
     <Delete Files="$(GeneratedSpecFile)" />
   </Target>
 </Project>
