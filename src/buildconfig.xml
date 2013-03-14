@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<BuildConfig xmlns="http://microsoft.com/sat/buildconfig.xsd">
+   <Product>
+      <Group>Microsoft HDInsight</Group>
+      <ShortName>ModelProject</ShortName>
+      <Name>ModelProject</Name>
+      <Description>ModelProject projects through the build system</Description>
+      <Url>https://www.hadooponazure.com/</Url>
+      <Eula>HadoopSdkLicense.rtf</Eula>
+   </Product>
+   <Engineering>
+      <CodeReviewAlias>tistocksdirs</CodeReviewAlias>
+   </Engineering>
+   <Version>
+      <Major>0</Major>
+      <Minor>4</Minor>
+   </Version>
+   <Prepare>
+      <NuGet id="Microsoft.Hadoop.MapReduce" outputFolder="MapReduce" >
+         <Title>Microsoft .NET Map Reduce API For Hadoop</Title>
+         <ProjectUrl>http://hadoopsdk.codeplex.com</ProjectUrl>
+         <Description>Provides a .NET API for the Map/Reduce functionality of Hadoop Streaming.</Description>
+         <Dependencies>
+            <Dependency id="Newtonsoft.Json" version="4.5.11" />
+         </Dependencies>
+      </NuGet>
+      <NuGet id="Microsoft.Hadoop.WebClient" outputFolder="WebClient" >
+         <Title>Microsoft .NET API For Hadoop WebClient</Title>
+         <ProjectUrl>http://hadoopsdk.codeplex.com</ProjectUrl>
+         <Description>Provides a .NET API for WebClient</Description>
+         <Dependencies>
+            <Dependency id="Microsoft.AspNet.WebApi.Client" />
+            <Dependency id="WindowsAzure.Storage" version="2.0.4.1" />
+            <Dependency id="Microsoft.WindowsAzure.ConfigurationManager" version="1.8.0.0" />
+            <Dependency id="Microsoft.Data.OData" version="5.2.0" />
+            <Dependency id="Microsoft.CompilerServices.AsyncTargetingPack" version="1.0.0" />
+            <Dependency id="Microsoft.Data.Edm" version="5.2.0" />
+            <Dependency id="Newtonsoft.Json" version="4.5.11" />
+         </Dependencies>
+      </NuGet>
+      <NuGet id="Microsoft.Hadoop.Hive" outputFolder="Hive" >
+         <Title>Microsoft Linq to Hive</Title>
+         <ProjectUrl>http://hadoopsdk.codeplex.com</ProjectUrl>
+         <Description>Provides a .NET Linq implementation for accessing Hadoop Hive services.</Description>
+         <Dependencies>
+           <Dependency id="Microsoft.CompilerServices.AsyncTargetingPack" version="1.0.0" />
+           <Dependency id="Newtonsoft.Json" version="4.5.11" />
+         </Dependencies>
+        <FrameworkAssemblies>
+            <FrameworkAssembly assemblyName="System.Data" targetFramework=".NETFramework4.0" />
+         </FrameworkAssemblies>
+      </NuGet>
+   </Prepare>
+   <Package>
+      <None/>
+   </Package>
+   <Release push="HDInsight.SDK">
+      <Public>
+         <ApiScan name="HDInsight DevEx" />
+         <PoliCheck workspace="SAT/SC/ModelProject" />
+      </Public>
+   </Release>
+</BuildConfig>

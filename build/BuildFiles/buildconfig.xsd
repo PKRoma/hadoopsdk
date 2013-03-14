@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema targetNamespace="http://microsoft.com/sat/buildconfig.xsd"
+    elementFormDefault="qualified"
+    xmlns="http://microsoft.com/sat/buildconfig.xsd"
+    xmlns:mstns="http://microsoft.com/sat/buildconfig.xsd"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="ctVersion">
+    <xs:sequence>
+      <xs:element minOccurs="1" maxOccurs="1" name="Major" type="xs:integer" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Minor" type="xs:integer" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ctEngineering">
+    <xs:sequence >
+      <xs:element minOccurs="1" maxOccurs="1" name="CodeReviewAlias" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ctCertificates">
+    <xs:sequence>
+      <xs:element minOccurs="1" maxOccurs="1" name="PortableExecutable" >
+        <xs:complexType>
+          <xs:sequence minOccurs="1" maxOccurs="1">
+            <xs:element minOccurs="1" maxOccurs="1" name="StrongName" type="xs:integer" />
+            <xs:element minOccurs="1" maxOccurs="1" name="Authenticode" type="xs:integer" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ctSigning">
+    <xs:sequence>
+      <xs:element minOccurs="1" maxOccurs="1" name="Approvers" type="xs:string" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Certificates" type="ctCertificates" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ctProduct">
+    <xs:sequence>
+      <xs:element minOccurs="1" maxOccurs="1" name="Name" type="xs:string" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Description" type="xs:string" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Url" type="xs:anyURI" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ctApiScan">
+    <xs:attribute name="name" type="xs:string" />
+  </xs:complexType>
+  <xs:complexType name="ctPublic">
+    <xs:sequence>
+      <xs:element minOccurs="1" maxOccurs="1" name="ApiScan" type="ctApiScan" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ctInternal">
+  </xs:complexType>
+  <xs:complexType name="ctBuildConfig">
+    <xs:sequence>
+      <xs:element name="Product" type="ctProduct" minOccurs="1" maxOccurs="1" />
+      <xs:element name="Engineering" type="ctEngineering" minOccurs="1" maxOccurs="1" />
+      <xs:element name="Version" type="ctVersion" minOccurs="1" maxOccurs="1" />
+      <xs:element name="Signing" type="ctSigning" minOccurs="1" maxOccurs="1" />
+      <xs:choice minOccurs="1" maxOccurs="1">
+        <xs:element minOccurs="1" maxOccurs="1" name="Public" type="ctPublic" />
+        <xs:element minOccurs="1" maxOccurs="1" name="Internal" type="ctInternal" />
+      </xs:choice>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="BuildConfig" type="ctBuildConfig" />
+</xs:schema>

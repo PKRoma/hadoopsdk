@@ -1,0 +1,197 @@
+﻿<Project InitialTargets="BuildSetup" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+   <!-- 
+       MSBuildAppProjects is used to specify all projects that this build is dependent on,
+       this ensures that if this file changes it forces a rebuild -->
+   <PropertyGroup>
+      <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFile)</MSBuildAllProjects>
+   </PropertyGroup>
+
+   <!-- Set Basic Paths -->
+   <PropertyGroup>
+      <RootPath>$([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..\..\..))</RootPath>
+      <SolutionDirectory Condition="'$(SolutionPath)' != ''">$([System.IO.Path]::GetDirectoryName($(SolutionPath)))</SolutionDirectory> 
+      <SolutionDirectory Condition="'$(SolutionDirectory)' == ''">$([System.IO.Path]::Combine($([System.IO.Path]::GetFullPath($(MSBuildThisFileDirectory)..\..)),"src"))</SolutionDirectory> 
+      <BuildScriptRoot>$(MSBuildThisFileDirectory)..</BuildScriptRoot>
+      <BuildFilesPath>$(BuildScriptRoot)\BuildFiles</BuildFilesPath>
+	  <SignKeyPath>C:\BuildTools\CodeSigning</SignKeyPath>
+      <GenPath>$(RootPath)\obj</GenPath>
+   </PropertyGroup>
+
+   <PropertyGroup>
+      <EmbeddedResourceManifestFile>$(GenPath)\$(MSBuildProjectFile).embedded-resource.map</EmbeddedResourceManifestFile>
+      <TestResourceManifestFile>$(GenPath)\$(MSBuildProjectFile).test-resource.list</TestResourceManifestFile>
+   </PropertyGroup>
+
+   <!-- Turn overflow/underflow checking on -->
+   <PropertyGroup>
+      <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+   </PropertyGroup>
+
+   <!-- Set a flag to determine if this is a test project -->
+   <PropertyGroup>
+      <TestProject>false</TestProject>
+   </PropertyGroup>
+   <PropertyGroup Condition="'$(ProjectTypeGuids)' != '' and $(ProjectTypeGuids.Contains('3AC096D0-A1C2-E12C-1390-A8335801FDAB'))">
+      <TestProject>true</TestProject>
+   </PropertyGroup>
+   
+   <!-- Determine if we are building from an IDE -->
+   <PropertyGroup>
+      <!-- Visual Studio IDE -->
+      <INVS Condition="'$(BuildingInsideVisualStudio)' == 'true' and '$(SharpDevelopBinPath)' == ''">true</INVS>
+      <!-- Sharp Develop IDE -->
+      <INSD Condition="'$(BuildingInsideVisualStudio)' == 'true' and '$(SharpDevelopBinPath)' != ''">true</INSD>
+      <INIDE Condition="'$(INVS)' == 'true' or '$(INSD)' == 'true'">true</INIDE>
+      <DefineConstants Condition="'$(BuildingInsideVisualStudio)' == 'true' and '$(SharpDevelopBinPath)' == ''">$(DefineConstants);INVS</DefineConstants>
+      <DefineConstants Condition="'$(BuildingInsideVisualStudio)' == 'true' and '$(SharpDevelopBinPath)' != ''">$(DefineConstants);INSD</DefineConstants>
+      <DefineConstants Condition="'$(INIDE)' == 'true'">$(DefineConstants);INIDE</DefineConstants>
+   </PropertyGroup>
+
+   <!-- Override the FxCop Rules and RuleSets to team standard -->
+   <PropertyGroup>
+      <CodeAnalysisRuleSet>$(BuildFilesPath)\Production.FxCop.ruleset</CodeAnalysisRuleSet>
+      <CodeAnalysisRuleSet Condition="'$(TestProject)' == 'true'">$(BuildFilesPath)\Test.FxCop.ruleset</CodeAnalysisRuleSet>
+      <CodeAnalysisRuleSet Condition="'$(SampleProject)' == 'true'">$(BuildFilesPath)\Sample.FxCop.ruleset</CodeAnalysisRuleSet>
+      <CodeAnalysisRuleSet Condition="Exists('$(MSBuildProjectDirectory)\FxCop.ruleset')">$(MSBuildProjectDirectory)\FxCop.ruleset</CodeAnalysisRuleSet>
+   </PropertyGroup>
+
+   <Target Name="OutputCodeAnalysisSettings" BeforeTargets="RunCodeAnalysis">
+      <Message Text=
+"Code Analysis Rule Set: $(CodeAnalysisRuleSet)
+Code Analysis Rule Dirs: $(CodeAnalysisRuleDirectories)" />
+   </Target>
+
+
+   <PropertyGroup>
+      <OutputPath>$(RootPath)\bin\$(Configuration)\$(AssemblyName)</OutputPath>
+	  <RootObjPath>$(RootPath)\obj</RootObjPath>
+      <BaseIntermediateOutputPath>$(RootPath)\obj\$(AssemblyName)</BaseIntermediateOutputPath>
+      <IntermediateOutputPath>$(RootPath)\obj\$(Configuration)\$(AssemblyName)</IntermediateOutputPath>
+   </PropertyGroup>
+
+   <Target Name="BuildSetup">
+      <MakeDir Condition="!Exists('$(IntermediateOutputPath)')" Directories="$(IntermediateOutputPath)"/>
+   </Target>
+
+   <Import Project="Project.Tests.targets"/>
+
+   <Target Name="CleanEmbeddedResourceMap"
+           BeforeTargets="CoreClean">
+      <Delete Files="$(EmbeddedResourceManifestFile)" />
+      <WriteLinesToFile File="$(EmbeddedResourceManifestFile)"
+                        Lines="Embedded Resources located in this assembly relative to: $(MSBuildProjectDirectory)"/>
+   </Target>
+
+   <Target Name="CreateEmbeddedResourceMap"
+           AfterTargets="BuildSetup"
+           Inputs="@(EmbeddedResource)"
+           Outputs="@(IntermediateAssembly)">
+      <Message Text="CreateEmbeddedResourceMap" />
+      <Delete Files="$(EmbeddedResourceManifestFile)" />
+      <WriteLinesToFile File="$(EmbeddedResourceManifestFile)"
+                        Lines="Embedded Resources located in this assembly relative to: $(MSBuildProjectDirectory)"/>
+      <ItemGroup>
+         <EmbeddedResource Include="$(EmbeddedResourceManifestFile)" />
+      </ItemGroup>
+   </Target>
+
+   <Target Name="PushEmbeddedResourceMap"
+           AfterTargets="CreateManifestResourceNames"
+           Inputs="@(EmbeddedResource)"
+           Outputs="@(IntermediateAssembly)">
+      <Message Text="PushEmbeddedResourceMap" />
+      <Delete Files="$(EmbeddedResourceManifestFile)" />
+      <WriteLinesToFile File="$(EmbeddedResourceManifestFile)"
+                        Lines="Embedded Resources located in this assembly relative to: $(MSBuildProjectDirectory)"/>
+      <WriteLinesToFile File="$(EmbeddedResourceManifestFile)"
+                        Lines="%(EmbeddedResource.ManifestResourceName) %(EmbeddedResource.fullpath)" />
+   </Target>
+
+   <!-- Set the Official Build Properties -->
+   <PropertyGroup Condition="'$(OfficialBuild)' == 'true'">
+      <SignAssembly>true</SignAssembly>
+      <DelaySign>true</DelaySign>
+      <AssemblyOriginatorKeyFile>$(SignKeyPath)\PublicKey.snk</AssemblyOriginatorKeyFile>
+      <SourceAnalysisTreatErrorsAsWarnings>false</SourceAnalysisTreatErrorsAsWarnings>
+      <StyleCopTreatErrorsAsWarnings>false</StyleCopTreatErrorsAsWarnings>
+      <CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
+      <FxCopDir>C:\BuildTools\FxCop</FxCopDir> 
+      <CodeAnalysisRuleDirectories>$(FxCopDir)\Rules</CodeAnalysisRuleDirectories>
+   </PropertyGroup>
+   <!-- Use these Settings instead for Non Official Builds -->
+   <PropertyGroup Condition=" '$(OfficialBuild)' != 'true' ">
+      <SourceAnalysisTreatErrorsAsWarnings>true</SourceAnalysisTreatErrorsAsWarnings>
+      <StyleCopTreatErrorsAsWarnings>true</StyleCopTreatErrorsAsWarnings>
+      <CodeAnalysisTreatWarningsAsErrors>false</CodeAnalysisTreatWarningsAsErrors>
+   </PropertyGroup>
+
+   <!-- Default project settings for all projects. -->
+   <PropertyGroup>
+      <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+      <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+      <FileAlignment>512</FileAlignment>
+      <AppDesignerFolder>Properties</AppDesignerFolder>
+      <!-- Note: CODE_ANALYSIS is defined in Project.SourceAnalysis.Targets -->
+      <DefineConstants>$(DefineConstants);TRACE</DefineConstants>
+      <WarningLevel>4</WarningLevel>
+
+      <!-- set up defaults for stylecop/fxcop-->
+      <RunCodeAnalysis Condition="'RunCodeAnalysis' != ''">true</RunCodeAnalysis>
+      <!--      <CodeAnalysisRuleSet>$(toolspath)\settings\Default.Production.FxCop.2010.ruleset</CodeAnalysisRuleSet> -->
+      <CodeAnalysisTreatWarningsAsErrors Condition="'$(INVS)' == 'true' or '$(INSD)' == 'true'">false</CodeAnalysisTreatWarningsAsErrors>
+      <CodeAnalysisFailOnMissingRules>true</CodeAnalysisFailOnMissingRules>
+
+      <!-- get clean, stay clean with compiler errors -->
+      <TreatWarningsAsErrors Condition="'$(INVS)' != 'true' and '$(INSD)' != 'true'">true</TreatWarningsAsErrors>
+   </PropertyGroup>
+
+   <ItemGroup>
+      <CodeAnalysisDictionary Include="$(BuildFilesPath)\FxCopCustomDictionary.xml" />
+      <CodeAnalysisDictionary Condition="Exists('$(SolutionPath)\FxCopCustomDictionary.xml')" Include="$(SolutionPath)\FxCopCustomDictionary.xml" />
+      <CodeAnalysisDictionary Condition="Exists('$(ProjectDir)\..\FxCopCustomDictionary.xml')" Include="$(ProjectDir)\..\FxCopCustomDictionary.xml" />
+      <CodeAnalysisDictionary Condition="Exists('$(ProjectDir)\FxCopCustomDictionary.xml')" Include="$(ProjectDir)\FxCopCustomDictionary.xml" />
+   </ItemGroup>
+
+   <!-- Set defaults regardless of config -->
+   <PropertyGroup>
+      <RunCatNet>false</RunCatNet>
+      <!--
+        [tgs] We haven't solved versioning or CodeSigning yet.
+        <LightweightBuildVersioning>true</LightweightBuildVersioning>
+        <LightweightBuildTestSigning>true</LightweightBuildTestSigning>
+        <LightweightBuildDelaySigning>false</LightweightBuildDelaySigning>
+    -->
+      <!--    <UseHostCompilerIfAvailable>false</UseHostCompilerIfAvailable> -->
+   </PropertyGroup>
+
+   <!-- Provide config for debug Any CPU -->
+   <!-- [tgs] I hear you micheal... I still don't believe we can't DRY this out -->
+   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+      <DebugSymbols>true</DebugSymbols>
+      <DebugType>full</DebugType>
+      <Optimize>false</Optimize>
+      <DefineConstants>$(DefineConstants);DEBUG</DefineConstants>
+      <ErrorReport>prompt</ErrorReport>
+      <WarningLevel>4</WarningLevel>
+   </PropertyGroup>
+
+   <!-- Provide config for release Any CPU -->
+   <!-- [tgs] I hear you micheal... I still don't believe we can't DRY this out -->
+   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+      <DebugType>pdbonly</DebugType>
+      <Optimize>true</Optimize>
+      <ErrorReport>prompt</ErrorReport>
+      <WarningLevel>4</WarningLevel>
+   </PropertyGroup>
+
+   <!-- Provide config for coverage Any CPU -->
+   <!-- [tgs] I hear you micheal... I still don't believe we can't DRY this out -->
+   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Coverage|AnyCPU' ">
+      <DebugType>pdbonly</DebugType>
+      <Optimize>true</Optimize>
+      <!-- Set PlatformTarget to x86 to keep instrumentation tools from giving us warnings -->
+      <PlatformTarget>x86</PlatformTarget>
+      <ErrorReport>prompt</ErrorReport>
+      <WarningLevel>4</WarningLevel>
+   </PropertyGroup>
+</Project>

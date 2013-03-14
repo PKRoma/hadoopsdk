@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0" DefaultTargets="CreatePackage">
+  <Import Project="..\..\version.props"/>
+  <PropertyGroup>
+    <NuGetApplication>..\..\.nuget\NuGet.exe</NuGetApplication>
+    <NuGetOutputDirectory>..\..\..\Target\Publish\</NuGetOutputDirectory>
+    <NugetNamespaces>
+      <![CDATA[
+      <Namespace Prefix='nu' Uri='http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd'/>
+      ]]>      
+    </NugetNamespaces>
+    <GeneratedSpecFile>Microsoft.Hadoop.WebClient.$(MicrosoftHadoopMRVersion).nuspec</GeneratedSpecFile>
+  </PropertyGroup>
+  <Target Name="CreatePackage">
+    <Copy SourceFiles="Microsoft.Hadoop.WebClient.nuspec.template" DestinationFiles="$(GeneratedSpecFile)" />
+    <XmlPoke
+      XmlInputPath="$(GeneratedSpecFile)"
+      Query="nu:package/nu:metadata/nu:version"
+      Value="$(MicrosoftHadoopMRVersion)"
+      Namespaces="$(NugetNamespaces)"/>
+    <MakeDir
+      Directories="$(NuGetOutputDirectory)"
+      ContinueOnError="true" />
+    <Exec WorkingDirectory=".\"
+          Command="$(NuGetApplication) pack .\$(GeneratedSpecFile) -Verbosity detailed -Prop Configuration=Release -OutputDirectory $(NuGetOutputDirectory)"/>
+    <Delete Files="$(GeneratedSpecFile)" />
+  </Target>
+</Project>

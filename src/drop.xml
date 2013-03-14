@@ -1,0 +1,55 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<Drop xmlns="http://microsoft.com/sat/drop.xsd">
+   <!-- Microsoft.Hadoop.MapReduce -->
+   <Copy>
+      <From>Microsoft.Hadoop.MapReduce\Microsoft.Hadoop.MapReduce.dll</From>
+      <To>Microsoft.Hadoop.MapReduce\lib\net40\Microsoft.Hadoop.MapReduce.dll</To>
+   </Copy>
+   <!-- <Copy>
+      <From>Microsoft.Hadoop.MapReduce\Microsoft.Hadoop.MapReduce.dll</From>
+      <To>Microsoft.Hadoop.MapReduce\lib\net45\Microsoft.Hadoop.MapReduce.dll</To>
+   </Copy>-->
+  <Copy>
+      <From>Microsoft.Hadoop.MapReduce\Microsoft.Hadoop.MapReduce.dll</From>
+      <To>Microsoft.Hadoop.MapReduce\content\MRLib\Microsoft.Hadoop.MapReduce.dll</To>
+   </Copy>
+   <Copy>
+      <From>Microsoft.Hadoop.MapDriver\Microsoft.Hadoop.MapDriver.exe</From>
+      <To>Microsoft.Hadoop.MapReduce\content\MRLib\Microsoft.Hadoop.MapDriver.exe</To>
+   </Copy>
+   <Copy>
+      <From>Microsoft.Hadoop.CombineDriver\Microsoft.Hadoop.CombineDriver.exe</From>
+      <To>Microsoft.Hadoop.MapReduce\content\MRLib\Microsoft.Hadoop.CombineDriver.exe</To>
+   </Copy>
+   <Copy>
+      <From>Microsoft.Hadoop.ReduceDriver\Microsoft.Hadoop.ReduceDriver.exe</From>
+      <To>Microsoft.Hadoop.MapReduce\content\MRLib\Microsoft.Hadoop.ReduceDriver.exe</To>
+   </Copy>
+   <Copy>
+      <From>MRRunner\MRRunner.exe</From>
+      <To>Microsoft.Hadoop.MapReduce\content\MRLib\MRRunner.exe</To>
+   </Copy>
+   <!-- Microsoft.Hadoop.WebClient -->
+   <!-- <Copy>
+      <From>Microsoft.Hadoop.WebClient\Microsoft.Hadoop.WebClient.dll</From>
+      <To>Microsoft.Hadoop.WebClient\lib\net45\Microsoft.Hadoop.WebClient.dll</To>
+   </Copy> -->
+  <Copy>
+    <From>Microsoft.Hadoop.WebClient\Microsoft.Hadoop.WebClient.dll</From>
+    <To>Microsoft.Hadoop.WebClient\lib\net40\Microsoft.Hadoop.WebClient.dll</To>
+  </Copy>
+  <Copy>
+    <From>Microsoft.Hadoop.WebClient\install.ps1</From>
+    <To>Microsoft.Hadoop.WebClient\tools\install.ps1</To>
+  </Copy>
+   <!-- Microsoft.Hadoop.Hive -->
+   <Copy>
+      <From>Microsoft.Hadoop.Hive\Microsoft.Hadoop.Hive.dll</From>
+      <To>Microsoft.Hadoop.Hive\lib\net40\Microsoft.Hadoop.Hive.dll</To>
+   </Copy>
+  <!-- <Copy>
+    <From>Microsoft.Hadoop.Hive\Microsoft.Hadoop.Hive.dll</From>
+    <To>Microsoft.Hadoop.Hive\lib\net45\Microsoft.Hadoop.Hive.dll</To>
+  </Copy> -->
+</Drop>

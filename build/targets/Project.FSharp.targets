@@ -1,0 +1,36 @@
+﻿<Project InitialTargets="BuildSetup" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+   <!-- Include the "Pre" targets -->
+   <Import Project="Project.CommonPre.targets" />
+
+   <!-- F# corecompile (Fsc task) does not support delay signing.  Turn signing off -->
+   <PropertyGroup>
+      <SignAssembly>false</SignAssembly>
+      <DelaySign>true</DelaySign>
+      <AssemblyOriginatorKeyFile></AssemblyOriginatorKeyFile>
+   </PropertyGroup>
+   
+   <!-- Include the FSharp Targets -->
+   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.FSharp.Targets')" />
+
+  	<Target Name="LocalBuildSetup" BeforeTargets="BuildSetup" Condition="'$(OfficialBuild)' != 'true'">
+		<ItemGroup>
+			<_compile Include="@(Compile)" />
+			<Compile Remove="@(_compile)" />
+		    <Compile Include="$(BuildScriptRoot)\BuildFiles\BuildAssemblyVersion.fs" />
+			<Compile Include="@(_compile)" />
+		</ItemGroup>
+	</Target>
+
+   <!-- Run the Official Build Targets -->
+   <Target Name="OfficialBuildSetup" Condition="'$(OfficialBuild)'=='true'" BeforeTargets="BuildSetup">
+      <ItemGroup>
+	     <_compile Include="@(Compile)" />
+	     <Compile Remove="@(_compile)" />
+         <Compile Include="$(GenPath)\OfficialAssemblyVersion.fs" />
+	     <Compile Include="@(_compile)" />
+      </ItemGroup>
+   </Target>
+
+   <!-- Include the "Post" targets -->
+   <Import Project="Project.CommonPost.targets" />
+</Project>
