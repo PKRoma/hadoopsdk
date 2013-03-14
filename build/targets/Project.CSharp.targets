@@ -1,0 +1,34 @@
+﻿<Project InitialTargets="BuildSetup" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+   <!-- Run the Official Build Targets -->
+   <Target Name="OfficialBuildSetup" Condition="'$(OfficialBuild)'=='true'" BeforeTargets="BuildSetup">
+      <ItemGroup>
+         <Compile Remove="**\AssemblyInternalsVisibleTo.cs" />
+         <Compile Include="$(GenPath)\OfficialAssemblyInternalsVisibleTo.cs" />
+      </ItemGroup>
+   </Target>
+   
+   <PropertyGroup>
+      <!-- These stylecop configurations affect command-line builds only, not IDE builds -->
+      <RunSourceAnalysis Condition="'RunSourceAnalysis' != ''">true</RunSourceAnalysis>
+      <!--      <StyleCopOverrideSettingsFile>$(toolspath)\settings\Default.Production.Settings.StyleCop</StyleCopOverrideSettingsFile> -->
+      <StyleCopForceFullAnalysis>true</StyleCopForceFullAnalysis>
+      <StyleCopCacheResults>false</StyleCopCacheResults>
+   </PropertyGroup>
+
+   <!-- Include the "Pre" targets -->
+   <Import Project="Project.CommonPre.targets" />
+
+   <!-- Include the CSharp Targets -->
+   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+
+   <ItemGroup Condition="'$(OfficialBuild)' != 'true'">
+	  <Compile Include="$(BuildScriptRoot)\BuildFiles\BuildAssemblyVersion.cs" />
+   </ItemGroup>
+
+   <ItemGroup Condition="'$(OfficialBuild)' == 'true'">
+	  <Compile Include="$(GenPath)\OfficialAssemblyVersion.cs" />
+   </ItemGroup>
+   
+   <!-- Include the "Post" targets -->
+   <Import Project="Project.CommonPost.targets" />
+</Project>

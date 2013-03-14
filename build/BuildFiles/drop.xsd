@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema targetNamespace="http://microsoft.com/sat/drop.xsd"
+    elementFormDefault="qualified"
+    xmlns="http://microsoft.com/sat/drop.xsd"
+    xmlns:mstns="http://microsoft.com/sat/drop.xsd"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="ctCopy">
+    <xs:sequence>
+      <xs:element minOccurs="1" maxOccurs="1" name="From" type="xs:string" />
+      <xs:element minOccurs="1" maxOccurs="1" name="To" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ctDrop">
+    <xs:choice>
+      <xs:element name="Copy" type="ctCopy" maxOccurs="unbounded"/>
+    </xs:choice>
+  </xs:complexType>
+  <xs:element name="Drop" type="ctDrop" />
+</xs:schema>

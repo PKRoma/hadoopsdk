@@ -29,5 +29,9 @@ UpgradeLog.htm
 *.class
 *.jar
 
+# ncrunchfiles
+*.ncrunchsolution
+_NCrunch_Microsoft.Hadoop.WebClient
+
 # Auto-generated files
 Version.cs

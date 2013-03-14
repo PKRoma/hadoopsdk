@@ -1,0 +1,51 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Condition="'$(TestProject)' == 'true'">
+    <TestResources Include="$(MSBuildProjectDirectory)\TestResources\**\*.*" />
+    <EmbeddedResource Condition="Exists('$(MSBuildProjectDirectory)\App.config')" Include="$(MSBuildProjectDirectory)\App.config" />
+    <EmbeddedResource Include="@(TestResources)" />
+  </ItemGroup>
+
+  <Target Name="CreateTestResourceList"
+          AfterTargets="BuildSetup"
+          Inputs="@(TestResources)"
+          Outputs="@(IntermediateAssembly)"
+          Condition="'$(TestProject)' == 'true'">
+    <Message Text="CreateTestResourceList" />
+    <Delete Files="$(TestResourceManifestFile)" />
+    <WriteLinesToFile File="$(TestResourceManifestFile)"
+                      Lines="Test Resources located in this assembly relative to: $(MSBuildProjectDirectory)"/>
+    <ItemGroup>
+      <EmbeddedResource Include="$(TestResourceManifestFile)" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="PushTestResourceList"
+          AfterTargets="CreateManifestResourceNames"
+          Condition="'$(TestProject)' == 'true'"
+          Inputs="@(TestResources)"
+          Outputs="@(IntermediateAssembly)">
+    <Message Text="PushTestResourceList" />
+    <Delete Files="$(TestResourceManifestFile)" />
+    <WriteLinesToFile File="$(TestResourceManifestFile)"
+                      Lines="Test Resources located in this assembly relative to: $(MSBuildProjectDirectory)"/>
+    <WriteLinesToFile File="$(TestResourceManifestFile)"
+                      Lines="%(TestResources.fullpath)" />
+  </Target>
+
+  <Target Name="CopyTestSettingsFile"
+          AfterTargets="BuildSetup"
+          Condition="'$(TestProject)' == 'true'"
+          Inputs="$(BuildFilesPath)\Default.Test.Settings.StyleCop"
+          Outputs="$(MSBuildProjectDirectory)\Settings.StyleCop" >
+    <Copy OverwriteReadOnlyFiles="true" SourceFiles="$(BuildFilesPath)\Default.Test.Settings.StyleCop" DestinationFiles="$(MSBuildProjectDirectory)\Settings.StyleCop"/>
+  </Target>
+
+  <Target Name="CleanTestResourceList"
+        BeforeTargets="CoreClean">
+    <Delete Files="$(TestResourceManifestFile)" />
+    <WriteLinesToFile File="$(TestResourceManifestFile)"
+                      Lines="Test Resources located in this assembly relative to: $(MSBuildProjectDirectory)"/>
+  </Target>
+
+
+</Project>

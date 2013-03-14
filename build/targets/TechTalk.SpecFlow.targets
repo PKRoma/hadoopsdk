@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <Import Project="TechTalk.SpecFlow.tasks"/>
+  <PropertyGroup>
+    <ShowTrace Condition="'$(ShowTrace)'==''">false</ShowTrace>
+
+    <OverwriteReadOnlyFiles Condition="'$(OverwriteReadOnlyFiles)'==''">true</OverwriteReadOnlyFiles>
+    <ForceGeneration Condition="'$(ForceGeneration)'==''">false</ForceGeneration>
+    <VerboseOutput Condition="'$(VerboseOutput)'==''">false</VerboseOutput>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(BuildServerMode)' == ''">
+    <BuildServerMode Condition="'$(INIDE)'=='true'">false</BuildServerMode>
+    <BuildServerMode Condition="'$(INIDE)'!='true'">true</BuildServerMode>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <SpecFlowFeatures Include="$(MSBuildProjectDirectory)\Include\**\*.feature" />
+    <SpecFlowTests Include="$(MSBuildProjectDirectory)\Include\**\*.feature.cs" />
+  </ItemGroup>
+
+  <Target Name="CleanSpecFlowFeatureFiles" BeforeTargets="CoreClean">
+    <Message Text="CleanSpecFlowFeatureFiles: @(SpecFlowTests)" />
+    <Message Text="Feature File Sources are: @(SpecFlowFeatures)" />
+     <ItemGroup>
+        <SpecFlowClean Include="**\*.feature.cs" />
+     </ItemGroup>
+    <Delete Files="@(SpecFlowClean)" />
+    <ItemGroup>
+      <SpecFlowTests Include="**\*.feature.cs" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="IncludeSpecFiles"
+          Condition="'$(TestProject)' == 'true'"
+          AfterTargets="RecreateSpecFlowTestFiles">
+    <ItemGroup>
+      <Compile Include="Include\**\*.feature.cs" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="RecreateSpecFlowTestFiles" 
+          BeforeTargets="CoreCompile"
+          Inputs="@(SpecFlowFeatures)"
+          Outputs="@(IntermediateAssembly)">
+    <Message Text="RecreateSpecFlowTestFiles: @(SpecFlowFeatures)" />
+     <ItemGroup>
+        <SpecFlowClean Include="**\*.feature.cs" />
+     </ItemGroup>
+     <Delete Files="@(SpecFlowClean)" />
+     <Delete Files="$(IntermediateOutputPath)\SpecFlowFilesRead.txt" />
+      <WriteLinesToFile File="$(IntermediateOutputPath)\SpecFlowFilesGenerated.txt" Lines="@(SpecFlowFeatures)" />
+    <GenerateAll
+      ShowTrace="$(ShowTrace)"
+
+      BuildServerMode="$(BuildServerMode)"
+      OverwriteReadOnlyFiles="$(OverwriteReadOnlyFiles)"
+      
+      ProjectPath="$(MSBuildProjectFullPath)"
+      ForceGeneration="$(ForceGeneration)"
+      VerboseOutput="$(VerboseOutput)"
+      />
+
+  </Target>
+
+</Project>
