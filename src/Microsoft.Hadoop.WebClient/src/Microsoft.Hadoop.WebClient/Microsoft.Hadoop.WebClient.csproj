@@ -64,8 +64,37 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Common\HttpClientTools.cs" />
     <Compile Include="Common\Resource.cs" />
     <Compile Include="Common\HttpClientExtension.cs" />
+    <Compile Include="OozieClient\Contracts\OozieJobProperties.cs" />
+    <Compile Include="OozieClient\Contracts\OozieJobStatus.cs" />
+    <Compile Include="OozieClient\Contracts\OozieSystemMode.cs" />
+    <Compile Include="OozieClient\OozieHttpClient.cs" />
+    <Compile Include="OozieClient\OozieResources.cs" />
+    <Compile Include="OozieClient\OozieUrlBuilder.cs" />
+    <Compile Include="Hadoop.cs" />
+    <Compile Include="HadoopImplementations\HadoopOnAzure.cs" />
+    <Compile Include="HadoopImplementations\LocalHadoop.cs" />
+    <Compile Include="HadoopImplementations\WebHadoop.cs" />
+    <Compile Include="JobManagement\HCatJobClient.cs" />
+    <Compile Include="JobManagement\IHCatJobClient.cs" />
+    <Compile Include="JobManagement\IJob.cs" />
+    <Compile Include="JobManagement\IJobManager.cs" />
+    <Compile Include="JobManagement\IWebHCatHttpClient.cs" />
+    <Compile Include="JobManagement\JobManager.cs" />
+    <Compile Include="JobManagement\WebHCatHttpClient.cs" />
+    <Compile Include="Storage\HdfsClient.cs" />
+    <Compile Include="IHadoop.cs" />
+    <Compile Include="Storage\IHdfsClient.cs" />
+    <Compile Include="Storage\AzureHdfsClientAdapter.cs" />
+    <Compile Include="Storage\AzureHdfsHttpClient.cs" />
+    <Compile Include="Storage\IAzureHdfsHttpClient.cs" />
+    <Compile Include="Storage\IHdfsClientAdapter.cs" />
+    <Compile Include="Storage\IWebHdfsHttpClient.cs" />
+    <Compile Include="Storage\WebHdfsClientAdapter.cs" />
+    <Compile Include="Storage\WebHdfsHttpClient.cs" />
+    <Compile Include="Storage\WebHdfsOperation.cs" />
     <Compile Include="WebHCatClient\HCatTypes\HiveJob.cs" />
     <Compile Include="WebHCatClient\HCatTypes\Job.cs" />
     <Compile Include="WebHCatClient\HCatTypes\PigJob.cs" />
@@ -75,6 +104,8 @@
     <Compile Include="WebHCatClient\WebHCatResources.cs" />
     <Compile Include="WebHDFSClient\BlobStorageAdapter\BlobStorageAdapter.cs" />
     <Compile Include="WebHDFSClient\BlobStorageAdapter\BlobStorageClient.cs" />
+    <Compile Include="WebHDFSClient\BlobStorageAdapter\IStorageAccountNameResolver.cs" />
+    <Compile Include="WebHDFSClient\BlobStorageAdapter\StorageAccountNameResolver.cs" />
     <Compile Include="WebHDFSClient\ContentSummary.cs" />
     <Compile Include="WebHDFSClient\DirectoryEntry.cs" />
     <Compile Include="WebHDFSClient\DirectoryListing.cs" />
@@ -86,6 +117,7 @@
     <Content Include="install.ps1">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Readme.txt" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="..\..\..\..\build\targets\Project.CSharp.targets" />

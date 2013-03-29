@@ -43,22 +43,29 @@
       <HintPath>..\..\..\packages\Newtonsoft.Json.4.5.11\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Net" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Net.Http.Formatting, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.Net.Http.WebRequest" />
     <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" /> 
+    <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BlobStorageAdapterTests.cs" />
+    <Compile Include="Common\FileUploaderDownloader.cs" />
     <Compile Include="MockServer.cs" />
+    <Compile Include="Oozie\OozieClientIntegrationTests.cs" />
+    <Compile Include="Oozie\OozieClientUnitTests.cs" />
+    <Compile Include="Oozie\OozieTestHelper.cs" />
+    <Compile Include="Oozie\OozieTestResources.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestConfig.cs" />
     <Compile Include="WebHCatHTTPTests.cs" />
+    <Compile Include="WebHdfsHttpClientTests.cs" />
     <Compile Include="WebHDFSTests.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -77,6 +84,9 @@
     <Content Include="testfiles\hadoopexamples.jar">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="testfiles\Oozie\map-reduce\input\data.txt" />
+    <Content Include="testfiles\Oozie\map-reduce\lib\oozie-examples-3.2.0-incubating.jar" />
+    <Content Include="testfiles\Oozie\map-reduce\workflow.xml" />
     <Content Include="testfiles\titles.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -90,6 +100,8 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
+    <None Include="testfiles\Oozie\map-reduce\job.properties" />
+    <None Include="testfiles\Oozie\map-reduce\out\expected.out" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.Hadoop.WebClient\Microsoft.Hadoop.WebClient.csproj">
@@ -98,7 +110,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />
- <Import Project="..\..\..\..\build\targets\Project.CSharp.targets" />
+  <Import Project="..\..\..\..\build\targets\Project.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

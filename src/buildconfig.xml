@@ -14,7 +14,7 @@
    </Engineering>
    <Version>
       <Major>0</Major>
-      <Minor>4</Minor>
+      <Minor>5</Minor>
    </Version>
    <Prepare>
       <NuGet id="Microsoft.Hadoop.MapReduce" outputFolder="MapReduce" >
@@ -22,6 +22,7 @@
          <ProjectUrl>http://hadoopsdk.codeplex.com</ProjectUrl>
          <Description>Provides a .NET API for the Map/Reduce functionality of Hadoop Streaming.</Description>
          <Dependencies>
+           <Dependency id="Microsoft.Hadoop.WebClient" version="0.4.0.0" />
             <Dependency id="Newtonsoft.Json" version="4.5.11" />
          </Dependencies>
       </NuGet>
@@ -44,6 +45,7 @@
          <ProjectUrl>http://hadoopsdk.codeplex.com</ProjectUrl>
          <Description>Provides a .NET Linq implementation for accessing Hadoop Hive services.</Description>
          <Dependencies>
+           <Dependency id="Microsoft.Hadoop.WebClient" version="0.4.0.0" />
            <Dependency id="Microsoft.CompilerServices.AsyncTargetingPack" version="1.0.0" />
            <Dependency id="Newtonsoft.Json" version="4.5.11" />
          </Dependencies>

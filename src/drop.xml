@@ -1,11 +1,19 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 
 <Drop xmlns="http://microsoft.com/sat/drop.xsd">
-   <!-- Microsoft.Hadoop.MapReduce -->
+   <!-- Microsoft.Hadoop.MapReduce --> 
    <Copy>
       <From>Microsoft.Hadoop.MapReduce\Microsoft.Hadoop.MapReduce.dll</From>
       <To>Microsoft.Hadoop.MapReduce\lib\net40\Microsoft.Hadoop.MapReduce.dll</To>
    </Copy>
+  <Copy>
+    <From>Microsoft.Hadoop.WebClient\Microsoft.Hadoop.WebClient.dll</From>
+    <To>Microsoft.Hadoop.MapReduce\lib\net40\Microsoft.Hadoop.WebClient.dll</To>
+  </Copy>
+  <Copy>
+    <From>Microsoft.Hadoop.WebClient\install.ps1</From>
+    <To>Microsoft.Hadoop.MapReduce\tools\install.ps1</To>
+  </Copy>
    <!-- <Copy>
       <From>Microsoft.Hadoop.MapReduce\Microsoft.Hadoop.MapReduce.dll</From>
       <To>Microsoft.Hadoop.MapReduce\lib\net45\Microsoft.Hadoop.MapReduce.dll</To>
@@ -48,6 +56,14 @@
       <From>Microsoft.Hadoop.Hive\Microsoft.Hadoop.Hive.dll</From>
       <To>Microsoft.Hadoop.Hive\lib\net40\Microsoft.Hadoop.Hive.dll</To>
    </Copy>
+  <Copy>
+    <From>Microsoft.Hadoop.WebClient\Microsoft.Hadoop.WebClient.dll</From>
+    <To>Microsoft.Hadoop.Hive\lib\net40\Microsoft.Hadoop.WebClient.dll</To>
+  </Copy>
+  <Copy>
+    <From>Microsoft.Hadoop.WebClient\install.ps1</From>
+    <To>Microsoft.Hadoop.Hive\tools\install.ps1</To>
+  </Copy>
   <!-- <Copy>
     <From>Microsoft.Hadoop.Hive\Microsoft.Hadoop.Hive.dll</From>
     <To>Microsoft.Hadoop.Hive\lib\net45\Microsoft.Hadoop.Hive.dll</To>

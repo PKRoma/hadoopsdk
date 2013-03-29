@@ -31,7 +31,7 @@ namespace Microsoft.Hadoop.MapReduce.HadoopImplementations
         {
             BlobStorageAdapter adapter = new BlobStorageAdapter(storageAccount, storageKey, container, createContainerIfMissing);
             IHdfsFile storageSystem = WebHdfsFile.Create(hadoopUserName, new WebHDFSClient(hadoopUserName, adapter));
-            return new LocalHadoop(storageSystem, WebHcatStreamingJobExecutor.Create(clusterName, userName, password, storageSystem));
+            return new HadoopOnAzure(storageSystem, WebHcatStreamingJobExecutor.Create(clusterName, userName, password, storageSystem));
         }
 
         /// <inheritdoc />

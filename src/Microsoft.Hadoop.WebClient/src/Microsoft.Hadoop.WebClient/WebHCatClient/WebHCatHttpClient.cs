@@ -248,7 +248,8 @@ namespace Microsoft.Hadoop.WebHCat.Protocol
             request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue(WebHCatResources.ApplicationJson));
             if (method == HttpMethod.Post || method == HttpMethod.Put)
             {
-                request.Content = new FormUrlEncodedContent(parameters.Where(kvp => kvp.Value != null));
+                var content = new FormUrlEncodedContent(parameters.Where(kvp => kvp.Value != null));
+                request.Content = content;
             }
             var response = await client.SendAsync(request, HttpCompletionOption.ResponseContentRead);
             

@@ -88,7 +88,7 @@ namespace Microsoft.Hadoop.WebHDFS
             else
             {
                 var asAdapter = (BlobStorageAdapter)this.handler;
-                return "asv://" + asAdapter.ContainerName + "@" + asAdapter.Account + path;
+                return "asv://" + asAdapter.ContainerName + "@" + asAdapter.FullAccountName + path;
             }
         }
 

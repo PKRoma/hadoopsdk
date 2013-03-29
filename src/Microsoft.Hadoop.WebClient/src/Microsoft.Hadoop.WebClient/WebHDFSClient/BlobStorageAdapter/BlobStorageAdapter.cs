@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 namespace Microsoft.Hadoop.WebHDFS.Adapters
 {
     using System.Globalization;
+    using Microsoft.Hadoop.WebClient.WebHDFSClient.BlobStorageAdapter;
 
     public abstract class WebHDFSStorageAdapter : HttpMessageHandler
     {
@@ -21,7 +22,17 @@ namespace Microsoft.Hadoop.WebHDFS.Adapters
 
     public class BlobStorageAdapter : WebHDFSStorageAdapter
     {
-        public string Account { get; private set; }
+        private IStorageAccountNameResolver accountNameResolver;
+
+        public string Account
+        {
+            get { return this.accountNameResolver.AccountName; }
+        }
+
+        public string FullAccountName
+        {
+            get { return this.accountNameResolver.FullAccount; }
+        }
 
         private string key;
 
@@ -29,11 +40,10 @@ namespace Microsoft.Hadoop.WebHDFS.Adapters
 
         private BlobStorageClient blobStorageClient;
 
-        private string azureBlobStorage = @"blob.core.windows.net";
 
         internal BlobStorageAdapter(string account, string key)
         {
-            this.Account = account;
+            this.accountNameResolver = new StorageAccountNameResolver(account);
             this.key = key;
         }
 
@@ -46,20 +56,20 @@ namespace Microsoft.Hadoop.WebHDFS.Adapters
         public BlobStorageAdapter(string account, string key, string blobStorageAddress, string containerName, bool createContainerIfDoesNotExist)
             : this(account, key)
         {
-            this.azureBlobStorage = blobStorageAddress;
+            this.accountNameResolver = new StorageAccountNameResolver(account + "." + blobStorageAddress);
             this.Connect(containerName, createContainerIfDoesNotExist);
         }
 
         internal void Connect(string containerName, bool createContainerIfDoesNotExist)
         {
             this.ContainerName = containerName;
-            this.blobStorageClient = new BlobStorageClient(string.Format(CultureInfo.InvariantCulture,"http://{0}.{1}", this.Account, this.azureBlobStorage), this.Account, this.key);
+            this.blobStorageClient = new BlobStorageClient(this.accountNameResolver.FullAccountUrl.ToString(), this.Account, this.key);
             this.blobStorageClient.SetContainer(containerName, createContainerIfDoesNotExist);
         }
 
         public override Uri BaseUri
         {
-            get { return new Uri("http://" + this.Account + "." + this.azureBlobStorage); }
+            get { return this.accountNameResolver.FullAccountUrl; }
         }
 
         public void Disconnect()
@@ -195,7 +205,7 @@ namespace Microsoft.Hadoop.WebHDFS.Adapters
 
                 blobStorageClient.CreateFile(path, contents, true);
                 resp.StatusCode = HttpStatusCode.Created;
-                var location = new Uri(new Uri("asv://" + this.ContainerName + "@" + this.Account + "." + this.azureBlobStorage + "/"), new Uri(path, UriKind.Relative));
+                var location = new Uri(new Uri("asv://" + this.ContainerName + "@" + this.accountNameResolver.FullAccount + "/"), new Uri(path, UriKind.Relative));
                 resp.Headers.Add("Location", location.ToString());
             }
             return resp;

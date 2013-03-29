@@ -24,7 +24,7 @@ namespace Microsoft.Hadoop.MapReduce.HadoopImplementations
             string clusterAddress = clusterName.Scheme + "://" + clusterName.Host + ":50111";
             string storageAddress = clusterName.Scheme + "://" + clusterName.Host + ":50070";
             IHdfsFile storageSystem = WebHdfsFile.Create(userName, new WebHDFSClient(new Uri(storageAddress), userName));
-            return new LocalHadoop(storageSystem, WebHcatStreamingJobExecutor.Create(new Uri(clusterAddress), userName, password, storageSystem));
+            return new WebHadoop(storageSystem, WebHcatStreamingJobExecutor.Create(new Uri(clusterAddress), userName, password, storageSystem));
         }
 
         /// <inheritdoc />
