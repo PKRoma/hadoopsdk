@@ -80,6 +80,11 @@ namespace Microsoft.Hadoop.WebHDFS
 
         public string GetFullyQualifiedPath(string path)
         {
+            if (path.Contains(":"))
+            {
+                return path;
+            }
+
             path = this.GetAbsolutePath(path);
             if (this.handler == null)
             {

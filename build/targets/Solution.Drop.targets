@@ -1,0 +1,206 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<!-- 
+	   MSBuildAllProjects is used to specify all projects that this build is dependent on,
+	   this ensures that if this file changes it forces a rebuild 
+	-->
+	<PropertyGroup>
+		<MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFile)</MSBuildAllProjects>
+	</PropertyGroup>
+
+    <UsingTask TaskName="DetermineDropLocations" TaskFactory="CodeTaskFactory" AssemblyFile="C:\Windows\Microsoft.NET\Framework\v4.0.30319\Microsoft.Build.Tasks.v4.0.dll">
+        <ParameterGroup>
+			<!-- NOTE: One of DropFile or ProjectTypeFilesPath is required -->
+			
+			<!-- 
+				If a DropFile  is supplied, the drop file is used to determine how to 
+				drop the files.
+			-->
+            <DropFile ParameterType="System.String" /> 
+
+			<!--
+				If SourceRootPaths is supplied, then all files under each of the paths
+				(but not the path itself; ie. a tree move) will be used to determin 
+				what files to move.
+			-->
+			<SourceRootPaths ParameterType="Microsoft.Build.Framework.ITaskItem[]" />
+			
+			<SourceRoot ParameterType="System.String" Required="true" />
+			<DestinationRoot ParameterType="System.String" Required="true"/>
+			
+			<SourceFiles ParameterType="Microsoft.Build.Framework.ITaskItem[]" Output="true" />
+			<DestinationFiles ParameterType="Microsoft.Build.Framework.ITaskItem[]" Output="true" />
+        </ParameterGroup>
+        <Task>
+            <Reference Include="System.Core" />
+            <Reference Include="System.Xml.Linq" />
+			<Reference Include="System.Xml" />
+            <Using Namespace="System" />
+            <Using Namespace="System.IO" />
+            <Using Namespace="System.Net" />
+            <Using Namespace="System.Xml.Linq" />
+            <Using Namespace="Microsoft.Build.Framework" />
+            <Using Namespace="Microsoft.Build.Utilities" />
+            <Code Type="Fragment" Language="cs">
+            <![CDATA[
+				List<string> inputItem = new List<string>();
+				List<string> outputItem = new List<string>();
+	
+				if ((SourceRootPaths == null ||
+				     SourceRootPaths.Length == 0) &&
+					string.IsNullOrEmpty(DropFile))
+				{
+					// If there are no source root paths, then a drop XML is required.
+					Log.LogError("Neither a drop.xml file and a SorceRoot, or a set of SourceRootPaths were supplied.  One or the other is required");
+					return false;
+				}
+				
+				// Ensure all source root paths are rooted.
+				List<string> newSourceRootPaths = new List<string>();
+				if (SourceRootPaths != null)
+				{
+					foreach (var item in SourceRootPaths)
+					{
+						var path = item.GetMetadata("FullPath");
+						if (!Path.IsPathRooted(path))
+						{
+							newSourceRootPaths.Add(Path.Combine(SourceRoot, path));
+						}
+						else
+						{
+							newSourceRootPaths.Add(path);
+						}
+					}
+				}
+
+				// If Drop and SourceRoot along with SourceRootPaths are supplied, Drop and SourceRoot wins.
+				// This is because it is easier for a build system to supply both than to perform the determiniation.
+
+				if (!string.IsNullOrEmpty(DropFile) &&
+				    !string.IsNullOrEmpty(SourceRoot))
+				{
+					// Peform an explicit move.
+					if (!File.Exists(DropFile))
+					{
+						Log.LogError("Drop.XML file does not exist!");
+						return false;
+					}
+					if (!Directory.Exists(SourceRoot))
+					{
+						Log.LogError("Source directory does not exist (or is not a directory)!");
+						return false;
+					}
+
+					XDocument doc = XDocument.Load(DropFile);
+					XNamespace ns = XNamespace.Get("http://microsoft.com/sat/drop.xsd");
+					var elements = doc.Element(XName.Get("Drop", ns.NamespaceName)).Elements();
+					foreach (var element in elements)
+					{
+						var copyType = element.Name.LocalName;
+						var copyFrom = element.Element(XName.Get("From", ns.NamespaceName)).Value;
+						var copyTo = element.Element(XName.Get("To", ns.NamespaceName)).Value;
+	
+						copyFrom = Path.GetFullPath(Path.Combine(SourceRoot, copyFrom));
+						if (!Path.GetFullPath(copyFrom).StartsWith(Path.GetFullPath(SourceRoot),StringComparison.InvariantCultureIgnoreCase))
+						{
+							var msg = string.Format("The From Path must be relative to the Source Root.  Resolved Source Path = '{0}'. Supplied Source Root = '{1}'",
+													copyFrom, SourceRoot);
+							Log.LogError(msg);
+							return false;
+						}
+						
+						copyTo = Path.GetFullPath(Path.Combine(DestinationRoot, copyTo));
+						if (!Path.GetFullPath(copyTo).StartsWith(Path.GetFullPath(DestinationRoot),StringComparison.InvariantCultureIgnoreCase))
+						{
+							var msg = string.Format("The To Path must be relative to the Destination Root.  Resolved Source Path = '{0}'. Supplied Destination Root = '{1}'",
+													copyTo, DestinationRoot);
+							Log.LogError(msg);
+							return false;
+						}
+						
+						if (copyType == "Copy")
+						{
+							if (!File.Exists(copyFrom))
+							{
+								var msg = string.Format("The supplied source file ({0}) could not be found.",
+														copyFrom);
+								Log.LogError(msg);
+								return false;
+							}
+							var copyToFullDirectory = Path.GetDirectoryName(copyTo);
+							if (!Directory.Exists(copyToFullDirectory))
+							{
+								Directory.CreateDirectory(copyToFullDirectory);
+							}
+
+							inputItem.Add(copyFrom);
+							outputItem.Add(copyTo);
+						}
+	
+						if (copyType == "CopyTree")
+						{
+							if (!Directory.Exists(copyFrom))
+							{
+								var msg = string.Format("The supplied source directory ({0}) could not be found.",
+														copyFrom);
+								Log.LogError(msg);
+								return false;
+							}
+							var files = Directory.GetFiles(copyFrom);
+							foreach (var copyFromFile in files)
+							{
+								var copyFromAbsolutePath = Path.GetFullPath(copyFrom);
+								var copyFromFileRelative = copyFromFile.Substring(copyFromAbsolutePath.Length + 1);
+								var copyToFile = Path.Combine(DestinationRoot, copyFromFileRelative);
+								var copyToFullDirectory = Path.GetDirectoryName(copyToFile);
+								if (!Directory.Exists(copyToFullDirectory))
+								{
+									Directory.CreateDirectory(copyToFullDirectory);
+								}
+
+								inputItem.Add(copyFromFile);
+								outputItem.Add(copyToFile);
+							}
+						}
+					}
+					
+					SourceFiles = (from f in inputItem
+								select new TaskItem(f)).ToArray();
+					DestinationFiles = (from f in outputItem
+									select new TaskItem(f)).ToArray();
+									
+					return true;
+				}
+
+				// Otherwise, perform an implicit move.
+				
+				foreach (var item in SourceRootPaths)
+				{
+					string path = Path.GetFullPath(item.GetMetadata("FullPath"));
+					string[] sourceFiles = Directory.GetFiles(path, "*.*", SearchOption.AllDirectories);
+					foreach (var file in sourceFiles)
+					{
+						var sourceFile = file;
+						var relativeFile = file.Substring(path.Length);
+						if (relativeFile[0] == Path.DirectorySeparatorChar ||
+						    relativeFile[0] == Path.AltDirectorySeparatorChar)
+						{
+							relativeFile = relativeFile.Substring(1);
+						}
+						if (!string.IsNullOrWhiteSpace(relativeFile))
+						{
+							inputItem.Add(sourceFile);
+							outputItem.Add(Path.Combine(DestinationRoot, relativeFile));
+						}
+					}
+				}
+				SourceFiles = (from f in inputItem
+				             select new TaskItem(f)).ToArray();
+				DestinationFiles = (from f in outputItem
+				                  select new TaskItem(f)).ToArray();
+				
+            ]]>
+            </Code>
+        </Task>
+    </UsingTask>
+	
+</Project>

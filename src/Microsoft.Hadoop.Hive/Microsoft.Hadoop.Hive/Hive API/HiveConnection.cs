@@ -94,7 +94,7 @@ namespace Microsoft.Hadoop.Hive
             this.WebHdfsClient = new WebHDFSClient(this.HadoopUserName, Adapter);
         }
 
-        private HiveConnection(Uri webHCatUri, string userName, string password)
+        public HiveConnection(Uri webHCatUri, string userName, string password)
         {
             this.UserName = userName;
             this.Password = password;
@@ -106,7 +106,7 @@ namespace Microsoft.Hadoop.Hive
             this.TypeToTableMap = new Dictionary<Type, string>();
         }
 
-        private HiveConnection(Uri webHCatUri, string userName, string password, string hadoopUserName)
+        public HiveConnection(Uri webHCatUri, string userName, string password, string hadoopUserName)
         {
             this.UserName = userName;
             this.Password = password;

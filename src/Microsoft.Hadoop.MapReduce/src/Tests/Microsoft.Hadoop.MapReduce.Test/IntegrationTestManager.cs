@@ -5,11 +5,12 @@
     using System.IO;
     using System.Linq;
     using System.Text;
+    using System.Xml;
     using System.Xml.Serialization;
 
     public class IntegrationTestManager
     {
-        private Dictionary<string, AzureTestCredentials> credentialSets = new Dictionary<string, AzureTestCredentials>(); 
+        private Dictionary<string, AzureTestCredentials> credentialSets = new Dictionary<string, AzureTestCredentials>();
         public IntegrationTestManager()
         {
             string file = this.GetConfigPath();
@@ -19,8 +20,9 @@
                 {
                     XmlSerializer ser = new XmlSerializer(typeof(List<AzureTestCredentials>));
                     using (var stream = File.OpenRead(file))
+                    using (var xmlReader = XmlReader.Create(stream))
                     {
-                        List<AzureTestCredentials> list = (List<AzureTestCredentials>)ser.Deserialize(stream);
+                        List<AzureTestCredentials> list = (List<AzureTestCredentials>)ser.Deserialize(xmlReader);
                         foreach (var cred in list)
                         {
                             this.credentialSets.Add(cred.CredentailsName, cred);

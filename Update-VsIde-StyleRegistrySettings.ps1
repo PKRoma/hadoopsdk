@@ -16,15 +16,15 @@ function global:update-VsIde-StyleRegistrySettings
     $pathToKey = "$global:VsRegKeyRoot\$global:VsVersionSubKey\Text Editor\Basic"
     set-RegistryKeyProperty -keyPath $pathToKey -propertyName "Insert Tabs" -propertyValue 0 -propertyType "DWord"
     set-RegistryKeyProperty -keyPath $pathToKey -propertyName "Indent Style" -propertyValue 2 -propertyType "DWord"
-    set-RegistryKeyProperty -keyPath $pathToKey -propertyName "Indent Size" -propertyValue 3 -propertyType "DWord"
-    set-RegistryKeyProperty -keyPath $pathToKey -propertyName "Tab Size" -propertyValue 3 -propertyType "DWord"
+    set-RegistryKeyProperty -keyPath $pathToKey -propertyName "Indent Size" -propertyValue 4 -propertyType "DWord"
+    set-RegistryKeyProperty -keyPath $pathToKey -propertyName "Tab Size" -propertyValue 4 -propertyType "DWord"
 
     # C# tabs:  smart, insert spaces
     $pathToKey = "$global:VsRegKeyRoot\$global:VsVersionSubKey\Text Editor\CSharp"
     set-RegistryKeyProperty -keyPath $pathToKey -propertyName "Insert Tabs" -propertyValue 0 -propertyType "DWord"
     set-RegistryKeyProperty -keyPath $pathToKey -propertyName "Indent Style" -propertyValue 2 -propertyType "DWord"
-    set-RegistryKeyProperty -keyPath $pathToKey -propertyName "Indent Size" -propertyValue 3 -propertyType "DWord"
-    set-RegistryKeyProperty -keyPath $pathToKey -propertyName "Tab Size" -propertyValue 3 -propertyType "DWord"
+    set-RegistryKeyProperty -keyPath $pathToKey -propertyName "Indent Size" -propertyValue 4 -propertyType "DWord"
+    set-RegistryKeyProperty -keyPath $pathToKey -propertyName "Tab Size" -propertyValue 4 -propertyType "DWord"
 
     # C# editor formatting
     $pathToKey = "$global:VsRegKeyRoot\$global:VsVersionSubKey\CSharp\Options\Editor"
@@ -82,8 +82,8 @@ function global:update-VsIde-StyleRegistrySettings
     $pathToKey = "$global:VsRegKeyRoot\$global:VsVersionSubKey\Text Editor\Xaml"
     set-RegistryKeyProperty -keyPath $pathToKey -propertyName "Insert Tabs" -propertyValue 0 -propertyType "DWord"
     set-RegistryKeyProperty -keyPath $pathToKey -propertyName "Indent Style" -propertyValue 2 -propertyType "DWord"
-    set-RegistryKeyProperty -keyPath $pathToKey -propertyName "Indent Size" -propertyValue 3 -propertyType "DWord"
-    set-RegistryKeyProperty -keyPath $pathToKey -propertyName "Tab Size" -propertyValue 3 -propertyType "DWord"
+    set-RegistryKeyProperty -keyPath $pathToKey -propertyName "Indent Size" -propertyValue 4 -propertyType "DWord"
+    set-RegistryKeyProperty -keyPath $pathToKey -propertyName "Tab Size" -propertyValue 4 -propertyType "DWord"
 
     # XAML editor:    attribute format, blank line option
     $pathToKey = "$global:VsRegKeyRoot\$global:VsVersionSubKey\XamlEditor"
@@ -95,8 +95,8 @@ function global:update-VsIde-StyleRegistrySettings
     $pathToKey = "$global:VsRegKeyRoot\$global:VsVersionSubKey\Text Editor\Xml"
     set-RegistryKeyProperty -keyPath $pathToKey -propertyName "Insert Tabs" -propertyValue 0 -propertyType "DWord"
     set-RegistryKeyProperty -keyPath $pathToKey -propertyName "Indent Style" -propertyValue 2 -propertyType "DWord"
-    set-RegistryKeyProperty -keyPath $pathToKey -propertyName "Indent Size" -propertyValue 3 -propertyType "DWord"
-    set-RegistryKeyProperty -keyPath $pathToKey -propertyName "Tab Size" -propertyValue 3 -propertyType "DWord"
+    set-RegistryKeyProperty -keyPath $pathToKey -propertyName "Indent Size" -propertyValue 4 -propertyType "DWord"
+    set-RegistryKeyProperty -keyPath $pathToKey -propertyName "Tab Size" -propertyValue 4 -propertyType "DWord"
 
     # TASK LIST ITEMS
     $pathToKey = "$global:VsRegKeyRoot\$global:VsVersionSubKey\TaskList\Options\BUG"

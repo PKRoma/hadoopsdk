@@ -64,6 +64,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AmbariClient\AmbariClient.cs" />
+    <Compile Include="AmbariClient\AmbariHttpClient.cs" />
+    <Compile Include="AmbariClient\AmbariResources.cs" />
+    <Compile Include="AmbariClient\AmbariUrlBuilder.cs" />
+    <Compile Include="AmbariClient\Contracts\ClusterInfo.cs" />
+    <Compile Include="AmbariClient\Contracts\HostComponentMetric.cs" />
     <Compile Include="Common\HttpClientTools.cs" />
     <Compile Include="Common\Resource.cs" />
     <Compile Include="Common\HttpClientExtension.cs" />
@@ -120,6 +126,7 @@
     <Content Include="Readme.txt" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="..\..\..\..\build\targets\Project.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

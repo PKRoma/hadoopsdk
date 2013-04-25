@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<!-- 
+	   MSBuildAllProjects is used to specify all projects that this build is dependent on,
+	   this ensures that if this file changes it forces a rebuild 
+	-->
+	<PropertyGroup>
+		<MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFile)</MSBuildAllProjects>
+	</PropertyGroup>
+
+    <UsingTask TaskName="ExtractItemsFromFiles" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+        <ParameterGroup>
+            <Files ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
+			<Results ParameterType="Microsoft.Build.Framework.ITaskItem[]" Output="true" />
+        </ParameterGroup>
+        <Task>
+            <Reference Include="System.Core" />
+            <Using Namespace="System" />
+            <Using Namespace="System.IO" />
+            <Using Namespace="System.Net" />
+            <Using Namespace="Microsoft.Build.Framework" />
+            <Using Namespace="Microsoft.Build.Utilities" />
+            <Code Type="Fragment" Language="cs">
+            <![CDATA[
+				List<ITaskItem> results = new List<ITaskItem>();
+				foreach (var file in Files)
+				{
+					string path = file.GetMetadata("FullPath");
+					var lines = File.ReadAllLines(path);
+					foreach (var line in lines)
+					{
+						if (line != string.Empty)
+						{
+							results.Add(new TaskItem(line));
+						}
+					}
+				}
+				Results = results.ToArray();
+            ]]>
+            </Code>
+        </Task>
+    </UsingTask>
+
+    <UsingTask TaskName="MergeIdentities" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+        <ParameterGroup>
+            <Files ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
+			<Identities ParameterType="Microsoft.Build.Framework.ITaskItem[]" Output="true" />
+			<Results ParameterType="Microsoft.Build.Framework.ITaskItem[]" Output="true" />
+        </ParameterGroup>
+        <Task>
+            <Reference Include="System.Core" />
+            <Using Namespace="System" />
+            <Using Namespace="System.IO" />
+            <Using Namespace="System.Net" />
+            <Using Namespace="Microsoft.Build.Framework" />
+            <Using Namespace="Microsoft.Build.Utilities" />
+            <Code Type="Fragment" Language="cs">
+            <![CDATA[
+				List<ITaskItem> results = new List<ITaskItem>();
+				if (Files == null)
+				{
+					Files = new List<TaskItem>().ToArray();
+				}
+				if (Identities == null)
+				{
+					Identities = new List<TaskItem>().ToArray();
+				}
+				if (Files.Length != Identities.Length)
+				{
+					Log.LogError("The number of items for both sets must be the same.");
+					return false;
+				}
+				for (int i = 0; i < Files.Length; i++)
+				{
+					var newItem = new TaskItem(Files[i].GetMetadata("FullPath"));
+					newItem.SetMetadata("AssemblyIdentity", Identities[i].GetMetadata("Identity"));
+					results.Add(newItem);
+				}
+				Results = results.ToArray();
+            ]]>
+            </Code>
+        </Task>
+    </UsingTask>
+	
+    <UsingTask TaskName="ExtractTestResults" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+        <ParameterGroup>
+            <TestFiles ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
+			<FailOnMissingFile ParameterType="System.Boolean" Required="true" />
+			<FailOnInconclusive ParameterType="System.Boolean" Required="true" />
+        </ParameterGroup>
+        <Task>
+            <Reference Include="System.Core" />
+			<Reference Include="System.Xml" />
+            <Using Namespace="System" />
+            <Using Namespace="System.IO" />
+            <Using Namespace="System.Net" />
+            <Using Namespace="System.Xml" />
+            <Using Namespace="Microsoft.Build.Framework" />
+            <Using Namespace="Microsoft.Build.Utilities" />
+            <Code Type="Fragment" Language="cs">
+            <![CDATA[
+				bool taskFailed = false;
+				
+				foreach (var item in TestFiles)
+				{
+					var file = item.GetMetadata("FullPath");
+					if (!File.Exists(file))
+					{
+						var msg = string.Format("The File '{0}' was not found.", file);
+						if (FailOnMissingFile)
+						{
+							taskFailed = true;
+							Log.LogError(msg);
+						}
+						else
+						{
+							Log.LogMessage(msg);
+						}
+					}
+					else
+					{
+						XmlDocument doc = new XmlDocument();
+						var man = new XmlNamespaceManager(doc.NameTable);
+						man.AddNamespace("tr", "http://microsoft.com/schemas/VisualStudio/TeamTest/2010");
+						doc.Load(file);
+						var results = doc.SelectNodes("/tr:TestRun/tr:Results/tr:UnitTestResult", man);
+						foreach (var node in results)
+						{
+							XmlElement element = (XmlElement) node;
+							var testName = element.GetAttribute("testName");
+							var outcome = element.GetAttribute("outcome");
+							if (outcome == "Inconclusive")
+							{
+								var msg = string.Format("The test '{0}' was Inconclusive", testName);
+								if (FailOnInconclusive)
+								{
+									Log.LogError(msg);
+									taskFailed = true;
+								}
+								else
+								{
+									Log.LogMessage(msg);
+								}
+							}
+							else if (outcome != "Passed")
+							{
+								var msg = string.Format("The test '{0}' did not pass.", testName);
+								Log.LogError(msg);
+								taskFailed = true;
+							}
+						}
+					}
+				}
+				return taskFailed;
+            ]]>
+            </Code>
+        </Task>
+    </UsingTask>
+	
+    <UsingTask TaskName="GetChildItems" TaskFactory="CodeTaskFactory" AssemblyFile="C:\Windows\Microsoft.NET\Framework\v4.0.30319\Microsoft.Build.Tasks.v4.0.dll">
+        <ParameterGroup>
+            <Items ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
+			<Results ParameterType="Microsoft.Build.Framework.ITaskItem[]" Output="true" />
+        </ParameterGroup>
+        <Task>
+            <Reference Include="System.Core" />
+            <Using Namespace="System" />
+            <Using Namespace="System.IO" />
+            <Using Namespace="System.Net" />
+            <Using Namespace="Microsoft.Build.Framework" />
+            <Using Namespace="Microsoft.Build.Utilities" />
+            <Code Type="Fragment" Language="cs">
+            <![CDATA[
+				List<ITaskItem> results = new List<ITaskItem>();
+				foreach (var item in Items)
+				{
+					string path = item.GetMetadata("FullPath");
+					if (Directory.Exists(path))
+					{
+						var files = Directory.GetFiles(path, "*.*", SearchOption.AllDirectories);
+						results.AddRange(from f in files
+									   select new TaskItem(f));
+					}
+				}
+				Results = results.ToArray();
+            ]]>
+            </Code>
+        </Task>
+    </UsingTask>
+
+    <UsingTask TaskName="RebaseItems" TaskFactory="CodeTaskFactory" AssemblyFile="C:\Windows\Microsoft.NET\Framework\v4.0.30319\Microsoft.Build.Tasks.v4.0.dll">
+        <ParameterGroup>
+            <Items ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />
+			<OriginalRoot ParameterType="System.String" Required="true" />
+			<NewRoot ParameterType="System.String" Required="true" />
+			<Results ParameterType="Microsoft.Build.Framework.ITaskItem[]" Output="true" />
+        </ParameterGroup>
+        <Task>
+            <Reference Include="System.Core" />
+            <Using Namespace="System" />
+            <Using Namespace="System.IO" />
+            <Using Namespace="System.Net" />
+            <Using Namespace="Microsoft.Build.Framework" />
+            <Using Namespace="Microsoft.Build.Utilities" />
+            <Code Type="Fragment" Language="cs">
+            <![CDATA[
+				OriginalRoot = Path.GetFullPath(OriginalRoot);
+				if (OriginalRoot[OriginalRoot.Length - 1] == Path.DirectorySeparatorChar ||
+				    OriginalRoot[OriginalRoot.Length - 1] == Path.AltDirectorySeparatorChar)
+				{
+					OriginalRoot = OriginalRoot.Substring(0, OriginalRoot.Length - 1);
+				}
+
+				string[] paths = (from i in Items
+				                select i.GetMetadata("FullPath")).ToArray();
+								
+				List<string> newPaths = new List<string>();
+				foreach (var str in paths)
+				{
+					if (!str.StartsWith(OriginalRoot, StringComparison.OrdinalIgnoreCase))
+					{
+						Log.LogError("One or more of the supplied items was not rooted with the original root");
+						return false;
+					}
+					string newPath = str.Substring(OriginalRoot.Length);
+					if (newPath[0] == Path.DirectorySeparatorChar ||
+					    newPath[0] == Path.AltDirectorySeparatorChar)
+					{
+						newPath = newPath.Substring(1);
+					}
+					newPaths.Add(Path.Combine(NewRoot, newPath));
+				}
+				Results = (from p in newPaths
+				         select new TaskItem(p)).ToArray();
+            ]]>
+            </Code>
+        </Task>
+    </UsingTask>
+
+    <Import Project="Solution.Drop.targets" />
+</Project>

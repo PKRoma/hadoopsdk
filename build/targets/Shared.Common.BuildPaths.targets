@@ -1,0 +1,73 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<!-- 
+	   MSBuildAllProjects is used to specify all projects that this build is dependent on,
+	   this ensures that if this file changes it forces a rebuild 
+	-->
+	<PropertyGroup>
+		<MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFile)</MSBuildAllProjects>
+	</PropertyGroup>
+	
+	<PropertyGroup>
+		<!-- This is the root of the source repository enlistment -->
+	    <EnlistmentPath>$(MSBuildThisFileDirectory)..\..</EnlistmentPath>
+		<!-- This is the root of all build scripts -->
+		<BuildScriptRoot>$(MSBuildThisFileDirectory)..</BuildScriptRoot>
+		<!-- This is the location of "build files" wich are helper files used by the build system -->
+		<BuildFilesPath>$(BuildScriptRoot)\BuildFiles</BuildFilesPath>
+		<!-- This is the source of "build tools" which are tools used by the build system -->
+	    <ProjectBuildToolsPath>$(BuildScriptRoot)\BuildTools</ProjectBuildToolsPath>
+		<!-- This is where all the build system target files are located -->
+		<!-- (with the exception of onces that VS requires be held somewhere else such as before and after sln targets) -->
+		<BuildTargetsPath>$(MSBuildThisFileDirectory)</BuildTargetsPath>
+	</PropertyGroup>
+	
+    <!-- This allows one project to override common paths as needed without changing the standard targets -->
+    <Import Condition="EXISTS('$(EnlistmentPath)\paths.target')" Project="$(EnlistmentPath)\paths.target" />
+	
+	<!-- Determin what the root of all builds are, from there standard project outpus (Obj, Bin, Prepare, etc.) will be based. -->
+	<PropertyGroup>
+		<!-- "SATCI" Builds place all output up one directory from the enlistment so that output from the  -->
+		<!-- build can never be merged by the build system. -->
+		<RootPath Condition="'$(SATCIBUILD)' == 'true' and '$(RootPath)' == ''">$(EnlistmentPath)\..</RootPath>
+		<!-- Builds not run via SATCI do not need this requirment so keeping everything under the enlistment -->
+		<!-- with the appropriate "ignore" rules is good for normal users -->
+		<RootPath Condition="'$(RootPath)' == ''" >$(EnlistmentPath)</RootPath>
+	</PropertyGroup>
+
+	<!-- Set Basic Paths -->
+	<PropertyGroup>
+		<!-- Define the Intermediate Directory (the .obj directory) -->
+		<RootObjPath>$(RootPath)\Obj</RootObjPath>
+		<ObjBuildPath>$(RootObjPath)\Unsigned\$(ConfigurationType)</ObjBuildPath>
+		<ObjBuildPath Condition="'$(SignAssembly)' == 'true'">$(RootObjPath)\Signed\$(ConfigurationType)</ObjBuildPath>
+		<BaseIntermediateOutputPath>$(ObjBuildPath)\$(AssemblyName)</BaseIntermediateOutputPath>
+		<IntermediateOutputPath>$(BaseIntermediateOutputPath)</IntermediateOutputPath>
+
+		<!-- Determins where Generated Files should be placed -->
+        <GenPath>$(RootObjPath)</GenPath>
+		
+		<!-- Project Type Files are used to categorize projects by type -->
+		<ProjectTypeFilePath>$(GenPath)\ProjectTypeFiles\Unsigned\$(ConfigurationType)</ProjectTypeFilePath>
+		<ProjectTypeFilePath Condition="'$(SignAssembly)' == 'true'">$(GenPath)\ProjectTypeFiles\Signed\$(ConfigurationType)</ProjectTypeFilePath>
+		
+		<!-- Define the OutputDirectory (the .bin directory) -->
+	    <RootOutputPath>$(RootPath)\Bin\Unsigned\$(ConfigurationType)</RootOutputPath>
+		<RootOutputPath Condition="'$(SignAssembly)' == 'true'">$(RootPath)\Bin\Signed\$(ConfigurationType)</RootOutputPath>
+		<OutputPath>$(RootOutputPath)\$(AssemblyName)</OutputPath>
+		
+		<!-- The Orgnaized Directory are where files are droped after full build, it should look like you want the files on the client -->
+		<RootOrganizedPath>$(RootPath)\Organized</RootOrganizedPath>
+		<OrganizedPath>$(RootOrganizedPath)\Unsigned\$(ConfigurationType)</OrganizedPath>
+		<OrganizedPath Condition="'$(SignAssembly)' == 'true'">$(RootOrganizedPath)\Signed\$(ConfigurationType)</OrganizedPath>
+		
+		<!-- The Prepared Path are where pre-install steups are preformed (such as creating an IntegrationPack or an SCVMMAddIn -->
+		<RootPreparedPath>$(RootPath)\Prepared</RootPreparedPath>
+		<PreparedPath>$(RootPreparedPath)\Unsigned\$(ConfigurationType)</PreparedPath>
+		<PreparedPath Condition="'$(SignAssembly)' == 'true'">$(RootPreparedPath)\Signed\$(ConfigurationType)</PreparedPath>
+
+		<!-- The Packaged Path is where the final files (ready for the customer) are placed.  This would generally be an MSI or some install package -->
+		<RootPackagedPath>$(RootPath)\Packaged</RootPackagedPath>
+		<PackagedPath>$(RootPackagedPath)\Unsigned\$(ConfigurationType)</PackagedPath>
+		<PackagedPath Condition="'$(SignAssembly)' == 'true'">$(RootPackagedPath)\Signed\$(ConfigurationType)</PackagedPath>
+	</PropertyGroup>
+</Project>
