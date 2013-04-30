@@ -52,7 +52,6 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AzureTestCredentials.cs" />
     <Compile Include="BasicStreamingCorrectness.cs" />
     <Compile Include="Counters.cs" />
     <Compile Include="DevUnitLocal\BasicAPI.cs" />
@@ -64,7 +63,6 @@
     <Compile Include="ExecutorTests\ProcessExecutorTester.cs" />
     <Compile Include="ExecutorTests\ProcessExecutorTests.cs" />
     <Compile Include="IntegrationTestBase.cs" />
-    <Compile Include="IntegrationTestManager.cs" />
     <Compile Include="LocalScenarios\LocalWordCount.cs" />
     <Compile Include="ProcessDetailsParser\ProcessDetails.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -84,6 +82,10 @@
     <ProjectReference Include="..\..\..\..\Microsoft.Hadoop.WebClient\src\Microsoft.Hadoop.WebClient\Microsoft.Hadoop.WebClient.csproj">
       <Project>{96C56124-3593-469C-B3A9-620DD7D6D6F0}</Project>
       <Name>Microsoft.Hadoop.WebClient</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\Microsoft.WindowsAzure.Management.HDInsight.TestUtilities\Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.csproj">
+      <Project>{7dd88c8b-37ea-4353-8ed7-6971118d5fc3}</Project>
+      <Name>Microsoft.WindowsAzure.Management.HDInsight.TestUtilities</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\..\..\procdetails\procdetails.csproj">
       <Project>{fa6ec96e-2a3c-40ed-877b-e35d0f9b765e}</Project>

@@ -11,6 +11,7 @@ namespace Microsoft.Hadoop.MapReduce.Test
     using Microsoft.Hadoop.WebHDFS;
     using Microsoft.Hadoop.WebHDFS.Adapters;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities;
 
     public class IntegrationTestBase
     {
@@ -47,10 +48,10 @@ namespace Microsoft.Hadoop.MapReduce.Test
             string cluster = creds.Cluster;
             string userName = creds.AzureUserName;
             string password = creds.AzurePassword;
-            string container = creds.BlobStorageContainer;
+            string container = creds.DefaultStorageAccount.Container;
             string hadoopUser = creds.HadoopUserName;
-            string blobstorageaccountname = creds.BlobStorageAccount;
-            string blobstorageaccountkey = creds.BlobStorageKey;
+            string blobstorageaccountname = creds.DefaultStorageAccount.Name;
+            string blobstorageaccountkey = creds.DefaultStorageAccount.Key;
 
             var blobAdapter = new BlobStorageAdapter(blobstorageaccountname, blobstorageaccountkey, container, true);
             HdfsFile.InternalHdfsFile = WebHdfsFile.Create(hadoopUser, new WebHDFSClient(hadoopUser, blobAdapter));

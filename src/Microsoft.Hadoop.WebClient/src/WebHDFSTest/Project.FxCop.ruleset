@@ -1,0 +1,82 @@
+<?xml version='1.0' encoding='utf-8'?>
+<RuleSet Name='Project Level Rule Overrides'
+         Description='This rule set contains project level overrides for this project.'
+         ToolsVersion='10.0'>
+  <Rules AnalyzerId='Microsoft.Analyzers.ManagedCodeAnalysis' RuleNamespace='Microsoft.Rules.Managed'>
+
+    <!-- CA1704 == Microsoft.Naming:'Identifiers should be spelled correctly' -->
+    <!-- 17 violations found -->
+    <Rule Id='CA1704' Action='None' />
+
+
+    <!-- CA1001 == Microsoft.Design:'Types that own disposable fields should be disposable' -->
+    <!-- 3 violations found -->
+    <Rule Id='CA1001' Action='None' />
+
+
+    <!-- CA1804 == Microsoft.Performance:'Remove unused locals' -->
+    <!-- 6 violations found -->
+    <Rule Id='CA1804' Action='None' />
+
+
+    <!-- CA1811 == Microsoft.Performance:'Avoid uncalled private code' -->
+    <!-- 10 violations found -->
+    <Rule Id='CA1811' Action='None' />
+
+
+    <!-- CA1801 == Microsoft.Usage:'Review unused parameters' -->
+    <!-- 1 violations found -->
+    <Rule Id='CA1801' Action='None' />
+
+
+    <!-- CA2000 == Microsoft.Reliability:'Dispose objects before losing scope' -->
+    <!-- 7 violations found -->
+    <Rule Id='CA2000' Action='None' />
+
+
+    <!-- CA1305 == Microsoft.Globalization:'Specify IFormatProvider' -->
+    <!-- 13 violations found -->
+    <Rule Id='CA1305' Action='None' />
+
+
+    <!-- CA1062 == Microsoft.Design:'Validate arguments of public methods' -->
+    <!-- 1 violations found -->
+    <Rule Id='CA1062' Action='None' />
+
+
+    <!-- CA1823 == Microsoft.Performance:'Avoid unused private fields' -->
+    <!-- 1 violations found -->
+    <Rule Id='CA1823' Action='None' />
+
+
+    <!-- CA2201 == Microsoft.Usage:'Do not raise reserved exception types' -->
+    <!-- 3 violations found -->
+    <Rule Id='CA2201' Action='None' />
+
+
+    <!-- CA1709 == Microsoft.Naming:'Identifiers should be cased correctly' -->
+    <!-- 3 violations found -->
+    <Rule Id='CA1709' Action='None' />
+
+
+    <!-- CA1307 == Microsoft.Globalization:'Specify StringComparison' -->
+    <!-- 6 violations found -->
+    <Rule Id='CA1307' Action='None' />
+
+
+    <!-- CA1031 == Microsoft.Design:'Do not catch general exception types' -->
+    <!-- 1 violations found -->
+    <Rule Id='CA1031' Action='None' />
+
+
+    <!-- CA1304 == Microsoft.Globalization:'Specify CultureInfo' -->
+    <!-- 2 violations found -->
+    <Rule Id='CA1304' Action='None' />
+
+
+    <!-- CA2211 == Microsoft.Usage:'Non-constant fields should not be visible' -->
+    <!-- 1 violations found -->
+    <Rule Id='CA2211' Action='None' />
+
+  </Rules>
+</RuleSet>

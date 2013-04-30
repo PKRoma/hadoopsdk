@@ -1,22 +1,29 @@
-﻿<Project InitialTargets="BuildSetup" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-   <!-- Run the Official Build Targets -->
-   <Target Name="OfficialBuildSetup" Condition="'$(OfficialBuild)'=='true'" BeforeTargets="BuildSetup">
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+   <!-- Include the "Pre" targets -->
+   <Import Project="Project.CommonPre.targets" />
+
+   <Target Name="OfficialBuildSetup" Condition="'$(SignAssembly)'=='true'" BeforeTargets="BuildSetup">
       <ItemGroup>
          <Compile Remove="**\AssemblyInternalsVisibleTo.cs" />
-         <Compile Include="$(GenPath)\OfficialAssemblyInternalsVisibleTo.cs" />
+         <Compile Include="$(GenPath)\AssemblyInternalsVisibleTo.cs" />
       </ItemGroup>
    </Target>
    
+	<!-- Setup StyleCop -->
    <PropertyGroup>
-      <!-- These stylecop configurations affect command-line builds only, not IDE builds -->
       <RunSourceAnalysis Condition="'RunSourceAnalysis' != ''">true</RunSourceAnalysis>
-      <!--      <StyleCopOverrideSettingsFile>$(toolspath)\settings\Default.Production.Settings.StyleCop</StyleCopOverrideSettingsFile> -->
+		<SourceAnalysisOverrideSettingsFile>$(BuildFilesPath)\Settings.StyleCop</SourceAnalysisOverrideSettingsFile> 
+		<SourceAnalysisOverrideSettingsFile Condition="Exists('$(EnlistmentRoot)\Settings.StyleCop')">$(EnlistmentRoot)\Settings.StyleCop</SourceAnalysisOverrideSettingsFile>
+		<SourceAnalysisOverrideSettingsFile Condition="'$(SolutionDir)' != '' and '$(SolutionDir)' != '*Undefined*' and Exists('$(SolutionDir)\Settings.StyleCop')">$(SolutionDir)\Settings.StyleCop</SourceAnalysisOverrideSettingsFile>
+		<SourceAnalysisOverrideSettingsFile Condition="Exists('$(MSBuildProjectDirectory)\Settings.StyleCop')">$(MSBuildProjectDirectory)\Settings.StyleCop</SourceAnalysisOverrideSettingsFile>
       <StyleCopForceFullAnalysis>true</StyleCopForceFullAnalysis>
       <StyleCopCacheResults>false</StyleCopCacheResults>
+		<SourceAnalysisOutputFile>$(LogPath)\StyleCop\$(AssemblyName).StyleCopViolations.xml</SourceAnalysisOutputFile>
    </PropertyGroup>
 
-   <!-- Include the "Pre" targets -->
-   <Import Project="Project.CommonPre.targets" />
+	<Target Name="SetupSourceAnalysis" BeforeTargets="StyleCop">
+		<MakeDir Directories="$(LogPath)\StyleCop\" />
+	</Target>
 
    <!-- Include the CSharp Targets -->
    <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
@@ -26,7 +33,7 @@
    </ItemGroup>
 
    <ItemGroup Condition="'$(OfficialBuild)' == 'true'">
-	  <Compile Include="$(GenPath)\OfficialAssemblyVersion.cs" />
+	  <Compile Include="$(GenPath)\Version.cs" />
    </ItemGroup>
    
    <!-- Include the "Post" targets -->

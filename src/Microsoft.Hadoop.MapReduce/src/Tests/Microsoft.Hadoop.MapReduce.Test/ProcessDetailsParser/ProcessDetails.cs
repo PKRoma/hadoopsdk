@@ -18,7 +18,7 @@
             builder.Append(content);
             builder.Replace(ProcDetails.TabReplacementSequence.ToString(), "\t");
             builder.Replace(ProcDetails.CharacterReturnReplacementSequence.ToString(), "\r");
-            builder.Replace(ProcDetails.LineFeedReplacementSequence.ToString(), "\n");
+            builder.Replace(ProcDetails.LinefeedReplacementSequence.ToString(), "\n");
 
             this.EnvironmentVariables = new Dictionary<string, string>();
             string[] sections = content.Split(new string[] { ProcDetails.SectionDelimiter.ToString() }, StringSplitOptions.None);

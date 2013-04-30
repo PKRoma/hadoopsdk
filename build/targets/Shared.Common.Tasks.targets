@@ -8,6 +8,416 @@
 		<MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFile)</MSBuildAllProjects>
 	</PropertyGroup>
 
+    <UsingTask TaskName="ValidateAndExtractProjectNames" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+        <ParameterGroup>
+			<SolutionConfigurationContents ParameterType="System.String" Required="true" />
+			<ProjectFiles ParameterType="Microsoft.Build.Framework.ITaskItem[]" Output="true" />
+        </ParameterGroup>
+        <Task>
+            <Reference Include="System.Core" />
+			<Reference Include="System.Xml" />
+            <Using Namespace="System" />
+            <Using Namespace="System.IO" />
+            <Using Namespace="System.Net" />
+            <Using Namespace="System.Xml" />
+            <Using Namespace="Microsoft.Build.Framework" />
+            <Using Namespace="Microsoft.Build.Utilities" />
+            <Code Type="Fragment" Language="cs">
+            <![CDATA[
+				XmlDocument doc = new XmlDocument();
+				doc.LoadXml(SolutionConfigurationContents);
+				
+				List<ITaskItem> projectFiles = new List<ITaskItem>();
+				
+				var projectConfigs = doc.SelectNodes("//ProjectConfiguration");
+				
+				foreach (XmlElement projectConfig in projectConfigs)
+				{
+					string path = projectConfig.Attributes["AbsolutePath"].Value;
+					XmlDocument project = new XmlDocument();
+					project.Load(path);
+					XmlNamespaceManager manager = new XmlNamespaceManager(project.NameTable);
+					manager.AddNamespace("msb", "http://schemas.microsoft.com/developer/msbuild/2003");
+
+					// Verify that this project included the right targets
+					var imports = project.SelectNodes("//msb:Project//msb:Import", manager);
+					
+					bool importsProjectTargets = false;
+					foreach (XmlElement importStatement in imports)
+					{
+						string importString = null;
+						var importProject = importStatement.Attributes["Project"];
+						if (!ReferenceEquals(importProject, null))
+						{
+							importString = importProject.Value;
+						}
+						if (!string.IsNullOrWhiteSpace(importString) &&
+							(importString.IndexOf(@"build\targets\Project.CSharp.targets", StringComparison.OrdinalIgnoreCase) >= 0 ||
+							 importString.IndexOf(@"build\targets\Project.FSharp.targets", StringComparison.OrdinalIgnoreCase) >= 0 ||
+							 importString.IndexOf(@"build\targets\Project.VisualBasic.targets", StringComparison.OrdinalIgnoreCase) >= 0 ||
+							 importString.IndexOf(@"build\targets\Project.Cpp.targets", StringComparison.OrdinalIgnoreCase) >= 0))
+						{
+							importsProjectTargets = true;
+						}
+					}
+					
+					if (!importsProjectTargets)
+					{
+						string errMsg = string.Format("The project '{0}' does not import one of the required language specific target files for this build system.",
+													  path);
+						Log.LogError(errMsg);
+						Log.LogMessage("Supported language specific target files include:");
+						Log.LogMessage(@"{EnlistmentRoot}\build\targets\Project.CSharp.targets");
+						Log.LogMessage(@"{EnlistmentRoot}\build\targets\Project.FSharp.targets");
+						Log.LogMessage(@"{EnlistmentRoot}\build\targets\Project.VisualBasic.targets");
+						Log.LogMessage(@"{EnlistmentRoot}\build\targets\Project.Cpp.targets");
+						return false;
+					}
+					
+					projectFiles.Add(new TaskItem(path));
+				}
+				
+				ProjectFiles = projectFiles.ToArray();
+            ]]>
+            </Code>
+        </Task>
+    </UsingTask>
+	
+	
+    <UsingTask TaskName="ExtractPublicKey" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+        <ParameterGroup>
+			<PublicKeyFile ParameterType="System.String" Required="true" />
+			<PublicKey ParameterType="System.String" Output="true" />
+        </ParameterGroup>
+        <Task>
+            <Reference Include="System.Core" />
+			<Reference Include="System.Xml" />
+            <Using Namespace="System" />
+            <Using Namespace="System.IO" />
+            <Using Namespace="System.Net" />
+            <Using Namespace="System.Xml" />
+            <Using Namespace="Microsoft.Build.Framework" />
+            <Using Namespace="Microsoft.Build.Utilities" />
+            <Code Type="Fragment" Language="cs">
+            <![CDATA[
+				StringBuilder stringBuilder = new StringBuilder();
+				using (var stream = File.OpenRead(PublicKeyFile))
+				{
+					int read;
+					while((read = stream.ReadByte()) != -1)
+					{
+						stringBuilder.Append(read.ToString("X2"));
+					}
+				}
+				PublicKey = stringBuilder.ToString();
+            ]]>
+            </Code>
+        </Task>
+    </UsingTask>
+
+    <UsingTask TaskName="WriteAssemblyInternalsVisibleTo" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+        <ParameterGroup>
+            <ProjectTypeFileDirectory ParameterType="System.String" Required="true" />
+			<SignKey ParameterType="System.String" Required="false" />
+            <OutputDirectory ParameterType="System.String" Required="true" />
+        </ParameterGroup>
+        <Task>
+            <Reference Include="System.Core" />
+			<Reference Include="System.Xml" />
+            <Using Namespace="System" />
+            <Using Namespace="System.IO" />
+            <Using Namespace="System.Net" />
+            <Using Namespace="System.Xml" />
+            <Using Namespace="Microsoft.Build.Framework" />
+            <Using Namespace="Microsoft.Build.Utilities" />
+            <Code Type="Fragment" Language="cs">
+            <![CDATA[
+				string[] testFiles = Directory.GetFiles(ProjectTypeFileDirectory, "*.test");
+				
+				if (!Directory.Exists(OutputDirectory))
+				{
+					Directory.CreateDirectory(OutputDirectory);
+				}
+
+				using (var csStream = File.OpenWrite(Path.Combine(OutputDirectory, "AssemblyInternalsVisibleTo.cs")))
+				using (var csWriter = new StreamWriter(csStream))
+				{
+					csWriter.WriteLine("using System.Runtime.CompilerServices;");
+					csWriter.WriteLine();
+					foreach (string file in testFiles)
+					{
+						var assemblyName = Path.GetFileNameWithoutExtension(file);
+						if (string.IsNullOrWhiteSpace(SignKey))
+						{
+							csWriter.WriteLine("[assembly: InternalsVisibleTo(\"{0}\")]", assemblyName);
+						}
+						else
+						{
+							csWriter.WriteLine("[assembly: InternalsVisibleTo(\"{0}, PublicKey={1}\")]", assemblyName, SignKey);
+						}
+					}
+				}
+				
+				using (var fsStream = File.OpenWrite(Path.Combine(OutputDirectory, "AssemblyInternalsVisibleTo.fs")))
+				using (var fsWriter = new StreamWriter(fsStream))
+				{
+					fsWriter.WriteLine("namespace AssemblyInternalsVisibleTo");
+					fsWriter.WriteLine();
+					fsWriter.WriteLine("open System.Runtime.CompilerServices;");
+					fsWriter.WriteLine();
+					foreach (string file in testFiles)
+					{
+						var assemblyName = Path.GetFileNameWithoutExtension(file);
+						if (string.IsNullOrWhiteSpace(SignKey))
+						{
+							fsWriter.WriteLine("[<assembly: InternalsVisibleTo(\"{0}\")>]", assemblyName);
+						}
+						else
+						{
+							fsWriter.WriteLine("[<assembly: InternalsVisibleTo(\"{0}, PublicKey={1}\")>]", assemblyName, SignKey);
+						}
+					}
+					fsWriter.WriteLine();
+					fsWriter.WriteLine("do()");
+				}
+            ]]>
+            </Code>
+        </Task>
+    </UsingTask>
+	
+    <UsingTask TaskName="WriteVersionFiles" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+        <ParameterGroup>
+            <Major ParameterType="System.String" Required="true" />
+            <Minor ParameterType="System.String" Required="true" />
+            <Build ParameterType="System.String" Required="true" />
+            <Revision ParameterType="System.String" Required="true" />
+            <OutputDirectory ParameterType="System.String" Required="true" />
+        </ParameterGroup>
+        <Task>
+            <Reference Include="System.Core" />
+			<Reference Include="System.Xml" />
+            <Using Namespace="System" />
+            <Using Namespace="System.IO" />
+            <Using Namespace="System.Net" />
+            <Using Namespace="System.Xml" />
+            <Using Namespace="Microsoft.Build.Framework" />
+            <Using Namespace="Microsoft.Build.Utilities" />
+            <Code Type="Fragment" Language="cs">
+            <![CDATA[
+				var FullVersionNumber = string.Format("{0}.{1}.{2}.{3}", Major, Minor, Build, Revision);
+
+				if (!Directory.Exists(OutputDirectory))
+				{
+					Directory.CreateDirectory(OutputDirectory);
+				}
+				
+				using (var xmlStream = File.OpenWrite(Path.Combine(OutputDirectory, "version.xml")))
+				using (var xmlWriter = new StreamWriter(xmlStream))
+				{
+					xmlWriter.WriteLine("<Version Major='{0}' Minor='{1}' Build='{2}' Revision='{3}' FullVersion='{0}.{1}.{2}.{3}' />", Major, Minor, Build, Revision);
+				}
+				
+				using (var txtStream = File.OpenWrite(Path.Combine(OutputDirectory, "version.txt")))
+				using (var txtWriter = new StreamWriter(txtStream))
+				{
+					txtWriter.Write(FullVersionNumber);
+				}
+				
+				using (var csStream = File.OpenWrite(Path.Combine(OutputDirectory, "version.cs")))
+				using (var csWriter = new StreamWriter(csStream))
+				{
+					csWriter.WriteLine("using System;");
+					csWriter.WriteLine("using System.Reflection;");
+					csWriter.WriteLine();
+					csWriter.WriteLine("[assembly: AssemblyVersionAttribute(\"{0}\")]", FullVersionNumber);
+					csWriter.WriteLine("[assembly: AssemblyFileVersion(\"{0}\")]", FullVersionNumber);
+				}
+				
+				using (var fsStream = File.OpenWrite(Path.Combine(OutputDirectory, "version.fs")))
+				using (var fsWriter = new StreamWriter(fsStream))
+				{
+					fsWriter.WriteLine("namespace OfficialAssemblyVersion");
+					fsWriter.WriteLine();
+					fsWriter.WriteLine("open System;");
+					fsWriter.WriteLine("open System.Reflection;");
+					fsWriter.WriteLine();
+					fsWriter.WriteLine("[<assembly: AssemblyVersionAttribute(\"{0}\")>]", FullVersionNumber);
+					fsWriter.WriteLine("[<assembly: AssemblyFileVersion(\"{0}\")>]", FullVersionNumber);
+					fsWriter.WriteLine();
+					fsWriter.WriteLine("do()");
+				}
+            ]]>
+            </Code>
+        </Task>
+    </UsingTask>
+	
+    <UsingTask TaskName="ComputeBuildAndRevision" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+        <ParameterGroup>
+			<Build ParameterType="System.String" Output="true" />
+			<Revision ParameterType="System.String" Output="true" />
+        </ParameterGroup>
+        <Task>
+            <Reference Include="System.Core" />
+			<Reference Include="System.Xml" />
+            <Using Namespace="System" />
+            <Using Namespace="System.IO" />
+            <Using Namespace="System.Net" />
+            <Using Namespace="System.Xml" />
+            <Using Namespace="Microsoft.Build.Framework" />
+            <Using Namespace="Microsoft.Build.Utilities" />
+            <Code Type="Fragment" Language="cs">
+            <![CDATA[
+				var now = DateTime.Now;
+				Build = (Math.Floor((now - (new DateTime(2000,1,1))).TotalDays)).ToString();
+				Revision = ((int) (now - (new DateTime(now.Year, now.Month, now.Day))).TotalSeconds / 2).ToString();
+            ]]>
+            </Code>
+        </Task>
+    </UsingTask>
+	
+    <UsingTask TaskName="ReadMajorMinorFromBuildConfig" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+        <ParameterGroup>
+            <BuildConfigFile ParameterType="System.String" Required="true" />
+			<Major ParameterType="System.String" Output="true" />
+			<Minor ParameterType="System.String" Output="true" />
+        </ParameterGroup>
+        <Task>
+            <Reference Include="System.Core" />
+			<Reference Include="System.Xml" />
+            <Using Namespace="System" />
+            <Using Namespace="System.IO" />
+            <Using Namespace="System.Net" />
+            <Using Namespace="System.Xml" />
+            <Using Namespace="Microsoft.Build.Framework" />
+            <Using Namespace="Microsoft.Build.Utilities" />
+            <Code Type="Fragment" Language="cs">
+            <![CDATA[
+				XmlDocument buildConfig = new XmlDocument();
+				buildConfig.Load(BuildConfigFile);
+				XmlNamespaceManager manager = new XmlNamespaceManager(buildConfig.NameTable);
+				manager.AddNamespace("bc", "http://microsoft.com/sat/buildconfig.xsd");
+				
+				Major = buildConfig.SelectSingleNode("/bc:BuildConfig/bc:Version/bc:Major", manager).InnerText;
+				Minor = buildConfig.SelectSingleNode("/bc:BuildConfig/bc:Version/bc:Minor", manager).InnerText;
+            ]]>
+            </Code>
+        </Task>
+    </UsingTask>
+	
+    <UsingTask TaskName="MergeFxCopRuleSets" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+        <ParameterGroup>
+            <MasterRuleSet ParameterType="System.String" Required="true" />
+            <SolutionRuleSet ParameterType="System.String" Required="true" />
+            <ProjectRuleSet ParameterType="System.String" Required="true" />
+            <OutputRuleSet ParameterType="System.String" Required="true" />
+        </ParameterGroup>
+        <Task>
+            <Reference Include="System.Core" />
+			<Reference Include="System.Xml" />
+            <Using Namespace="System" />
+            <Using Namespace="System.IO" />
+            <Using Namespace="System.Net" />
+            <Using Namespace="System.Xml" />
+            <Using Namespace="Microsoft.Build.Framework" />
+            <Using Namespace="Microsoft.Build.Utilities" />
+            <Code Type="Fragment" Language="cs">
+            <![CDATA[
+				string MasterFile = MasterRuleSet;
+				string SolutionFile = SolutionRuleSet;
+				string ProjectFile = ProjectRuleSet;
+				string OutputFile = OutputRuleSet;
+			
+				XmlDocument masterDocument = new XmlDocument();
+				masterDocument.Load(MasterFile);
+				XmlElement masterDocumentRuleset = (XmlElement) masterDocument.DocumentElement.SelectSingleNode("//Rules");
+				
+				List<KeyValuePair<XmlElement, XmlComment>> pairs = new List<KeyValuePair<XmlElement, XmlComment>>();
+
+				foreach (XmlNode masterElement in masterDocumentRuleset.ChildNodes)
+				{
+					var asElement = masterElement as XmlElement;
+					if (!ReferenceEquals(asElement, null))
+					{
+						string commentString = string.Format(" Build System Ruleset has: Rule Id='{0}' Action='{1}' ", 
+															masterElement.Attributes["Id"].Value, 
+															masterElement.Attributes["Action"].Value);
+						var masterComment = masterDocument.CreateComment(commentString);
+						var pair = new KeyValuePair<XmlElement, XmlComment>(asElement, masterComment);
+						pairs.Add(pair);
+					}
+				}
+				
+				foreach (var pair in pairs)
+				{
+					masterDocumentRuleset.InsertBefore(pair.Value, pair.Key);
+				}
+
+				if (!string.IsNullOrWhiteSpace(SolutionFile) && File.Exists(SolutionFile))
+				{
+					XmlDocument solutionDocument = new XmlDocument();
+					solutionDocument.Load(SolutionFile);
+					var solutionRules = solutionDocument.DocumentElement.SelectNodes("//Rule");
+					
+					foreach (XmlElement solutionRule in solutionRules)
+					{
+						var nodeQuery = string.Format("//Rule[@Id = '{0}']", solutionRule.Attributes["Id"].Value);
+						var masterRuleNode = masterDocumentRuleset.SelectSingleNode(nodeQuery);
+						string commentString = string.Format(" Solution Override Ruleset has: Rule Id='{0}' Action='{1}' ", 
+															solutionRule.Attributes["Id"].Value, 
+															solutionRule.Attributes["Action"].Value);
+						var soltuionComment = masterDocument.CreateComment(commentString);
+						if (ReferenceEquals(masterRuleNode, null))
+						{
+							masterRuleNode = masterDocument.ImportNode(solutionRule, true);
+							masterDocumentRuleset.AppendChild(soltuionComment);
+							masterDocumentRuleset.AppendChild(masterRuleNode);
+						}
+						else
+						{
+							masterDocumentRuleset.InsertBefore(soltuionComment, masterRuleNode);
+							masterRuleNode.Attributes["Action"].Value = solutionRule.Attributes["Action"].Value;
+						}
+					}
+				}
+
+				if (!string.IsNullOrWhiteSpace(ProjectFile) && File.Exists(ProjectFile))
+				{
+					XmlDocument projectDocument = new XmlDocument();
+					projectDocument.Load(ProjectFile);
+					var projectRules = projectDocument.DocumentElement.SelectNodes("//Rule");
+				
+					foreach (XmlElement projectRule in projectRules)
+					{
+						var nodeQuery = string.Format("//Rule[@Id = '{0}']", projectRule.Attributes["Id"].Value);
+						var masterRuleNode = masterDocumentRuleset.SelectSingleNode(nodeQuery);
+						string commentString = string.Format(" Project Override Ruleset has: Rule Id='{0}' Action='{1}' ", 
+															projectRule.Attributes["Id"].Value, 
+															projectRule.Attributes["Action"].Value);
+						var projectComment = masterDocument.CreateComment(commentString);
+						if (ReferenceEquals(masterRuleNode, null))
+						{
+							masterRuleNode = masterDocument.ImportNode(projectRule, true);
+							masterDocumentRuleset.AppendChild(projectComment);
+							masterDocumentRuleset.AppendChild(masterRuleNode);
+						}
+						else
+						{
+							masterDocumentRuleset.InsertBefore(projectComment, masterRuleNode);
+							masterRuleNode.Attributes["Action"].Value = projectRule.Attributes["Action"].Value;
+						}
+					}
+				}
+
+				if (!Directory.Exists(Path.GetDirectoryName(OutputFile)))
+				{
+					Directory.CreateDirectory(Path.GetDirectoryName(OutputFile));
+				}
+				masterDocument.Save(OutputFile);
+            ]]>
+            </Code>
+        </Task>
+    </UsingTask>
+	
     <UsingTask TaskName="ExtractItemsFromFiles" TaskFactory="CodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
         <ParameterGroup>
             <Files ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true" />

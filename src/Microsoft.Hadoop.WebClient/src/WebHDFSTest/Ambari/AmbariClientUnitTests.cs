@@ -44,7 +44,7 @@ namespace WebClientTests.Ambari
         [TestMethod]
         public void AbmariGetGetAsvMetrics()
         {
-            IEnumerable<double> asvMetrics = client.GetAsvMetrics(TestConfig.StorageAccount, DateTime.Now, DateTime.Now);
+            var asvMetrics = client.GetAsvMetrics(TestConfig.StorageAccount, DateTime.Now, DateTime.Now);
         }
     }
 }

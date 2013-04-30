@@ -1,0 +1,119 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<!-- 
+	   MSBuildAllProjects is used to specify all projects that this build is dependent on,
+	   this ensures that if this file changes it forces a rebuild 
+	-->
+	<PropertyGroup>
+		<MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFile)</MSBuildAllProjects>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<SampleProjectTypeFiles Include="$(ProjectTypeFIlePath)\*.sample" />
+	</ItemGroup>
+	
+	<PropertyGroup>
+		<DropFile>$(SolutionDir)\drop.xml</DropFile>
+	</PropertyGroup>
+
+	<Target Name="OrganizeNoDropXml"
+	        AfterTargets="AfterSolutionBuild"
+			Condition="!Exists('$(DropFile)') and '$(NoOrganizeOnBuild)' != 'true'" >
+		<Message Importance="High" Text="Organizing Files (no drop.xml)" />
+
+		<ItemGroup>
+			<CoreProjectTypeFiles Include="$(ProjectTypeFilePath)\*.core" />
+		</ItemGroup>
+		
+		<ExtractItemsFromFiles Files="@(CoreProjectTypeFiles)" >
+			<Output ItemName="CoreAssemblyPaths" TaskParameter="Results" />
+		</ExtractItemsFromFiles>
+
+		<Message Importance="High" Text="Found Core Project Assembly: %(CoreAssemblyPaths.FullPath)" />
+
+		<ItemGroup>
+			<OrganizeFilesPaths Include="@(CoreAssemblyPaths->'%(RootDir)\%(Directory)')" />
+		</ItemGroup>
+
+		<Message Importance="High" Text="Organizing Core Project Directory: %(OrganizeFilesPaths.FullPath)" />
+		
+		<DetermineDropLocations SourceRootPaths="@(OrganizeFilesPaths)"
+								SourceRoot="$(RootOutputPath)"
+								DestinationRoot="$(OrganizedPath)" >
+			<Output ItemName="OrganizeSourceFiles" TaskParameter="SourceFiles" />
+			<Output ItemName="OrganizeDestinationFiles" TaskParameter="DestinationFiles" />
+		</DetermineDropLocations>
+		
+		<Copy SourceFiles="@(OrganizeSourceFiles)" DestinationFiles="@(OrganizeDestinationFiles)" />
+	</Target>
+	
+	<Target Name="OrganizeDropXml"
+	        AfterTargets="AfterSolutionBuild"
+			Condition="Exists('$(DropFile)')  and '$(NoOrganizeOnBuild)' != 'true'" >
+		<Message Importance="High" Text="Organizing Files (via drop.xml)" />
+
+		<ItemGroup>
+			<CoreProjectTypeFiles Include="$(ProjectTypeFilePath)\*.core" />
+		</ItemGroup>
+
+		<DetermineDropLocations DropFile="$(DropFile)"
+								SourceRoot="$(RootOutputPath)"
+								DestinationRoot="$(OrganizedPath)" >
+			<Output ItemName="OrganizeSourceFiles" TaskParameter="SourceFiles" /> 
+			<Output ItemName="OrganizeDestinationFiles" TaskParameter="DestinationFiles" />
+		</DetermineDropLocations>
+		
+		<Copy SourceFiles="@(OrganizeSourceFiles)" DestinationFiles="@(OrganizeDestinationFiles)" />
+	</Target>
+	
+	<!-- Run the unit tests -->
+	<Target Name="Test" AfterTargets="AfterSolutionBuild" Condition="'$(Configuration)' == 'Debug' and '$(NoTestsOnBuild)' != 'true'">
+		<PropertyGroup>
+			<TestSettings Condition="'$(TestSettings)' == ''">.\Local.testsettings</TestSettings>
+			<TestFilter Condition="'$(TestFilter)' == ''" >!Functional&#x26;!Scenario</TestFilter>
+			<TestFilter Condition="'$(NoInteractiveTests)' == 'true'">$(TestFilter)&#x26;!Interactive</TestFilter>
+		</PropertyGroup>
+	
+		<ItemGroup>
+			<TestProjectTypeFiles Include="$(ProjectTypeFIlePath)\*.test" />
+		</ItemGroup>
+
+		<Message Importance="high" Text="Running tests..." />
+		<Message Importance="high" Text="You are required to have installed a version of Visual Studio with support for MSTest (and MSTest on your path)." />
+		<MakeDir Directories="$(TestOutputDirectory)" ContinueOnError="false" />
+
+		<ExtractItemsFromFiles Files="@(TestProjectTypeFiles)" >
+			<Output ItemName="TestAssemblyPaths" TaskParameter="Results" />
+		</ExtractItemsFromFiles>
+
+		<Message Importance="high" Text="Debug tests: %(TestAssemblyPaths.FullPath)" />
+		
+		<ItemGroup>
+			<TestOutputFiles Include="$(TestOutputDirectory)\%(TestAssemblyPaths.FileName).trx" />
+		</ItemGroup>
+		
+		<Message Importance="high" Text="Test Output Files: %(TestOutputFiles.FullPath)" />
+		
+		<Exec
+		  Command="MSTest.exe /testcontainer:%(TestAssemblyPaths.FullPath) /testsettings:$(TestSettings) /category:&quot;$(TestFilter)&quot; /resultsfile:$(TestOutputDirectory)\%(TestAssemblyPaths.Filename).trx"
+		  ContinueOnError="true" />
+		  
+		<ExtractTestResults TestFiles="@(TestOutputFiles)"
+							FailOnMissingFile="$(FailOnMissingTestFile)"
+							FailOnInconclusive="$(FailOnInconclusiveTest)" />
+	</Target>
+	
+	<Target AfterTargets="Build;Rebuild" Name="AfterSolutionBuild">
+		<Message Importance="high" Text="After Solution Build Targets Running" />
+	</Target>
+	
+	<!-- For now we will go with a "None" prepare, we should the prepare app (back in) soon. -->
+	<Target AfterTargets="AfterSolutionBuild" Name="Prepare" Condition="'$(NoPrepareOnBuild)' != 'true'">
+		<ItemGroup>
+			<PreparedFileSources Include="$(OrganizedPath)\**\*.*" />
+		</ItemGroup>
+		<RebaseItems Items="@(PreparedFileSources)" OriginalRoot="$(OrganizedPath)" NewRoot="$(PreparedPath)" >
+			<Output ItemName="PreparedFileDestinations" TaskParameter="Results" />
+		</RebaseItems>
+		<Copy SourceFiles="@(PreparedFileSources)" DestinationFiles="@(PreparedFileDestinations)" />
+	</Target>
+</Project>

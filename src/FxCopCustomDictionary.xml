@@ -20,12 +20,16 @@
       (for example 'FileName' -> 'Filename').
     -->
     <Recognized>
+      <Word>procdetails</Word>
       <Word>Hadoop</Word>
       <Word>Bfs</Word>
       <Word>Chs</Word>
       <Word>Efi</Word>
+      <Word>Dyna</Word>
+      <Word>Ioc</Word>
       <Word>Endianness</Word>
       <Word>Esx</Word>
+      <Word>Awaiter</Word>
       <Word>Growable</Word>
       <Word>Lba</Word>
       <Word>Lsb</Word>
@@ -45,6 +49,11 @@
       <Word>Vmfs</Word>
       <Word>Vmk</Word>
       <Word>Xosl</Word>
+      <Word>Asv</Word>
+	  <Word>Hd</Word>
+      <Word>Oozie</Word>
+	  <Word>Metastore</Word>
+	  <Word>Metastores</Word>
     </Recognized>
     <Deprecated>
       <!-- 
@@ -82,6 +91,7 @@
         to 'Onset'.
       -->
       <Term>cmdlet</Term>
+	  <Term>HD</Term>
     </DiscreteExceptions>
   </Words>
   <Acronyms>

@@ -1,0 +1,162 @@
+<?xml version='1.0' encoding='utf-8'?>
+<RuleSet Name='Project Level Rule Overrides'
+         Description='This rule set contains project level overrides for this project.'
+         ToolsVersion='10.0'>
+  <Rules AnalyzerId='Microsoft.Analyzers.ManagedCodeAnalysis' RuleNamespace='Microsoft.Rules.Managed'>
+
+    <!-- CA1305 == Microsoft.Globalization:'Specify IFormatProvider' -->
+    <!-- 25 violations found -->
+    <Rule Id='CA1305' Action='None' />
+
+
+    <!-- CA1804 == Microsoft.Performance:'Remove unused locals' -->
+    <!-- 2 violations found -->
+    <Rule Id='CA1804' Action='None' />
+
+
+    <!-- CA2204 == Microsoft.Naming:'Literals should be spelled correctly' -->
+    <!-- 23 violations found -->
+    <Rule Id='CA2204' Action='None' />
+
+
+    <!-- CA1819 == Microsoft.Performance:'Properties should not return arrays' -->
+    <!-- 1 violations found -->
+    <Rule Id='CA1819' Action='None' />
+
+
+    <!-- CA1724 == Microsoft.Naming:'Type names should not match namespaces' -->
+    <!-- 1 violations found -->
+    <Rule Id='CA1724' Action='None' />
+
+
+    <!-- CA1005 == Microsoft.Design:'Avoid excessive parameters on generic types' -->
+    <!-- 1 violations found -->
+    <Rule Id='CA1005' Action='None' />
+
+
+    <!-- CA1002 == Microsoft.Design:'Do not expose generic lists' -->
+    <!-- 12 violations found -->
+    <Rule Id='CA1002' Action='None' />
+
+
+    <!-- CA2227 == Microsoft.Usage:'Collection properties should be read only' -->
+    <!-- 3 violations found -->
+    <Rule Id='CA2227' Action='None' />
+
+
+    <!-- CA1303 == Microsoft.Globalization:'Do not pass literals as localized parameters' -->
+    <!-- 4 violations found -->
+    <Rule Id='CA1303' Action='None' />
+
+
+    <!-- CA1062 == Microsoft.Design:'Validate arguments of public methods' -->
+    <!-- 14 violations found -->
+    <Rule Id='CA1062' Action='None' />
+
+
+    <!-- CA1702 == Microsoft.Naming:'Compound words should be cased correctly' -->
+    <!-- 2 violations found -->
+    <Rule Id='CA1702' Action='None' />
+
+
+    <!-- CA1053 == Microsoft.Design:'Static holder types should not have constructors' -->
+    <!-- 3 violations found -->
+    <Rule Id='CA1053' Action='None' />
+
+
+    <!-- CA2001 == Microsoft.Reliability:'Avoid calling problematic methods' -->
+    <!-- 2 violations found -->
+    <Rule Id='CA2001' Action='None' />
+
+
+    <!-- CA2201 == Microsoft.Usage:'Do not raise reserved exception types' -->
+    <!-- 1 violations found -->
+    <Rule Id='CA2201' Action='None' />
+
+
+    <!-- CA1012 == Microsoft.Design:'Abstract types should not have constructors' -->
+    <!-- 2 violations found -->
+    <Rule Id='CA1012' Action='None' />
+
+
+    <!-- CA1800 == Microsoft.Performance:'Do not cast unnecessarily' -->
+    <!-- 1 violations found -->
+    <Rule Id='CA1800' Action='None' />
+
+
+    <!-- CA1034 == Microsoft.Design:'Nested types should not be visible' -->
+    <!-- 1 violations found -->
+    <Rule Id='CA1034' Action='None' />
+
+
+    <!-- CA1710 == Microsoft.Naming:'Identifiers should have correct suffix' -->
+    <!-- 1 violations found -->
+    <Rule Id='CA1710' Action='None' />
+
+
+    <!-- CA1711 == Microsoft.Naming:'Identifiers should not have incorrect suffix' -->
+    <!-- 1 violations found -->
+    <Rule Id='CA1711' Action='None' />
+
+
+    <!-- CA2237 == Microsoft.Usage:'Mark ISerializable types with SerializableAttribute' -->
+    <!-- 1 violations found -->
+    <Rule Id='CA2237' Action='None' />
+
+
+    <!-- CA1823 == Microsoft.Performance:'Avoid unused private fields' -->
+    <!-- 3 violations found -->
+    <Rule Id='CA1823' Action='None' />
+
+
+    <!-- CA1810 == Microsoft.Performance:'Initialize reference type static fields inline' -->
+    <!-- 1 violations found -->
+    <Rule Id='CA1810' Action='None' />
+
+
+    <!-- CA1031 == Microsoft.Design:'Do not catch general exception types' -->
+    <!-- 2 violations found -->
+    <Rule Id='CA1031' Action='None' />
+
+
+    <!-- CA1307 == Microsoft.Globalization:'Specify StringComparison' -->
+    <!-- 2 violations found -->
+    <Rule Id='CA1307' Action='None' />
+
+
+    <!-- CA1021 == Microsoft.Design:'Avoid out parameters' -->
+    <!-- 3 violations found -->
+    <Rule Id='CA1021' Action='None' />
+
+
+    <!-- CA1704 == Microsoft.Naming:'Identifiers should be spelled correctly' -->
+    <!-- 12 violations found -->
+    <Rule Id='CA1704' Action='None' />
+
+
+    <!-- CA2000 == Microsoft.Reliability:'Dispose objects before losing scope' -->
+    <!-- 2 violations found -->
+    <Rule Id='CA2000' Action='None' />
+
+
+    <!-- CA1725 == Microsoft.Naming:'Parameter names should match base declaration' -->
+    <!-- 3 violations found -->
+    <Rule Id='CA1725' Action='None' />
+
+
+    <!-- CA1026 == Microsoft.Design:'Default parameters should not be used' -->
+    <!-- 3 violations found -->
+    <Rule Id='CA1026' Action='None' />
+
+
+    <!-- CA1709 == Microsoft.Naming:'Identifiers should be cased correctly' -->
+    <!-- 2 violations found -->
+    <Rule Id='CA1709' Action='None' />
+
+
+    <!-- CA1720 == Microsoft.Naming:'Identifiers should not contain type names' -->
+    <!-- 2 violations found -->
+    <Rule Id='CA1720' Action='None' />
+
+  </Rules>
+</RuleSet>

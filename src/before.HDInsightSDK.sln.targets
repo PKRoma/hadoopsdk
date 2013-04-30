@@ -1,0 +1,8 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <Target BeforeTargets="build" Name="BeforeSolutionBuild">
+     <Message Importance="high" Text="Before Solution Build Targets Running" />
+  </Target>
+
+  <Import Project="..\build\targets\Solution.CommonPre.targets" />
+  
+</Project>

@@ -100,6 +100,8 @@
 
     <Message Text="Excluding @(StyleCopExcludedFiles)" Importance="Normal" />
 
+	<Message Text="Override Settings File: $(StyleCopOverrideSettingsFile)" Importance="High" />
+	
     <!-- Run the StyleCop MSBuild task. -->
     <StyleCopTask
       ProjectFullPath="$(MSBuildProjectDirectory)"

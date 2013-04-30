@@ -1,14 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
+        <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">$(MSBuildProjectDirectory)\..\</SolutionDir>
+        
         <!-- Enable the restore command to run before builds -->
         <RestorePackages Condition="  '$(RestorePackages)' == '' ">false</RestorePackages>
 
         <!-- Property that enables building a package from a project -->
         <BuildPackage Condition=" '$(BuildPackage)' == '' ">false</BuildPackage>
         
+        <!-- Determines if package restore consent is required to restore packages -->
+        <RequireRestoreConsent Condition=" '$(RequireRestoreConsent)' != 'false' ">true</RequireRestoreConsent>
+        
         <!-- Download NuGet.exe if it does not already exist -->
-        <DownloadNuGetExe Condition=" '$(DownloadNuGetExe)' == '' ">true</DownloadNuGetExe>
+        <DownloadNuGetExe Condition=" '$(DownloadNuGetExe)' == '' ">false</DownloadNuGetExe>
     </PropertyGroup>
     
     <ItemGroup Condition=" '$(PackageSources)' == '' ">
@@ -17,11 +22,18 @@
         <PackageSource Include="https://www.myget.org/F/f05dce941ae4485090b04586209c8b08/" />
     </ItemGroup>
 
-    <PropertyGroup>
+    <PropertyGroup Condition=" '$(OS)' == 'Windows_NT'">
         <!-- Windows specific commands -->
-        <NuGetToolsPath>$([System.IO.Path]::Combine($(RootObjPath), ".nuget"))</NuGetToolsPath>
+        <NuGetToolsPath Condition="'$(NuGetToolsPath)' == ''">$([System.IO.Path]::Combine($(SolutionDir), ".nuget"))</NuGetToolsPath>
         <PackagesConfig>$([System.IO.Path]::Combine($(ProjectDir), "packages.config"))</PackagesConfig>
-        <PackagesDir>$([System.IO.Path]::Combine($(SolutionDirectory), "packages"))</PackagesDir>
+        <PackagesDir>$([System.IO.Path]::Combine($(SolutionDir), "packages"))</PackagesDir>
+    </PropertyGroup>
+    
+    <PropertyGroup Condition=" '$(OS)' != 'Windows_NT'">
+        <!-- We need to launch nuget.exe with the mono command if we're not on windows -->
+        <NuGetToolsPath Condition="'$(NuGetToolsPath)' == '''">$(SolutionDir).nuget</NuGetToolsPath>
+        <PackagesConfig>packages.config</PackagesConfig>
+        <PackagesDir>$(SolutionDir)packages</PackagesDir>
     </PropertyGroup>
     
     <PropertyGroup>
@@ -34,11 +46,14 @@
 
         <PackageOutputDir Condition="$(PackageOutputDir) == ''">$(TargetDir.Trim('\\'))</PackageOutputDir>
 
+        <RequireConsentSwitch Condition=" $(RequireRestoreConsent) == 'true' ">-RequireConsent</RequireConsentSwitch>
+        <NonInteractiveSwitch Condition=" '$(VisualStudioVersion)' != '' AND '$(OS)' == 'Windows_NT' ">-NonInteractive</NonInteractiveSwitch>
+        
         <!-- Commands -->
-        <RestoreCommand>$(NuGetCommand) install "$(PackagesConfig)" -source "$(PackageSources)" -o "$(PackagesDir)" > nul</RestoreCommand>
-        <BuildCommand>$(NuGetCommand) pack "$(ProjectPath)" -p Configuration=$(Configuration) -o "$(PackageOutputDir)" -symbols > nul</BuildCommand>
+        <RestoreCommand>$(NuGetCommand) install "$(PackagesConfig)" -source "$(PackageSources)"  $(NonInteractiveSwitch) $(RequireConsentSwitch) -solutionDir "$(SolutionDir) " </RestoreCommand>
+        <BuildCommand>$(NuGetCommand) pack "$(ProjectPath)" -Properties Configuration=$(Configuration) $(NonInteractiveSwitch) -OutputDirectory "$(PackageOutputDir)" -symbols</BuildCommand>
 
-        <!-- Make the build depend on restore packages -->
+        <!-- We need to ensure packages are restored prior to assembly resolve -->
         <BuildDependsOn Condition="$(RestorePackages) == 'true'">
             RestorePackages;
             $(BuildDependsOn);
@@ -76,8 +91,9 @@
         <Error Condition="'$(DownloadNuGetExe)' != 'true' AND !Exists('$(NuGetExePath)')" Text="Unable to locate '$(NuGetExePath)'" />
         <SetEnvironmentVariable EnvKey="VisualStudioVersion" EnvValue="$(VisualStudioVersion)" Condition=" '$(VisualStudioVersion)' != '' AND '$(OS)' == 'Windows_NT' " />
         <!--
-        Take advantage of MsBuild's build dependency tracking to make sure that we only ever download nuget.exe once. This effectively acts as
-        a lock that makes sure that the download operation will only happen once and all parallel builds will have to wait for it to complete.
+        Take advantage of MsBuild's build dependency tracking to make sure that we only ever download nuget.exe once.
+        This effectively acts as a lock that makes sure that the download operation will only happen once and all
+        parallel builds will have to wait for it to complete.
         -->
         <MsBuild Targets="_DownloadNuGet" Projects="$(MSBuildThisFileFullPath)" Properties="Configuration=NOT_IMPORTANT;NuGetToolsPath=$(NuGetToolsPath);" />
     </Target>
@@ -143,9 +159,15 @@
         </ParameterGroup>
         <Task>
             <Using Namespace="System" />
-            <Code Type="Fragment" Language="cs"><![CDATA[
+            <Code Type="Fragment" Language="cs">
+                <![CDATA[
+                try {
                 Environment.SetEnvironmentVariable(EnvKey, EnvValue, System.EnvironmentVariableTarget.Process);
-            ]]></Code>
+                }
+                catch  {
+                }
+            ]]>
+            </Code>
         </Task>
     </UsingTask>
 </Project>

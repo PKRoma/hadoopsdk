@@ -23,8 +23,43 @@
       <Word>MyWord</Word>
       -->
       <Recognized>
+		<Word>Hardcode</Word>
+		<Word>Hardcodes</Word>
+		<Word>Param</Word>
+		<Word>Util</Word>
+		<Word>Utils</Word>
+		<Word>Vm</Word>
+		<Word>Vhd</Word>
+		<Word>Uploader</Word>
+		<Word>Lun</Word>
+		<Word>Iaa</Word>
+		<Word>Paa</Word>
+		<Word>Git</Word>
+		<Word>Github</Word>
+		<Word>pfx</Word>
+		<Word>Deployer</Word>
+		<Word>str</Word>
+		<Word>Vip</Word> <!-- Virtual IP -->
+		<Word>Ip</Word>
+		<Word>Auth</Word>
+		<Word>MD</Word>
+		<Word>Acl</Word>
+		<Word>Dir</Word>
+		<Word>Dirs</Word>
+		<Word>Src</Word>
+		<Word>Dest</Word>
+
+		<!-- Hadoop Specific -->
         <Word>Hadoop</Word>
 		<Word>Hdfs</Word>
+
+		<!-- OneSdk Specific -->
+		<Word>Scaff</Word>
+		<Word>Django</Word>
+		<Word>Dac</Word>
+		<Word>Pac</Word>
+		<Word>webspace</Word>
+
       </Recognized>
       <Deprecated>
          <!-- 
@@ -67,7 +102,10 @@
         
         <Term>cmdlet</Term>
         -->
-         
+        <Term>VM</Term>
+		<Term>IaaS</Term>
+		<Term>PaaS</Term>
+		<Term>MD5</Term>
       </DiscreteExceptions>
    </Words>
    <Acronyms>
@@ -78,6 +116,10 @@
       -->
       <CasingExceptions>
 		<Acronym>HDFS</Acronym>
+		<Acronym>Vm</Acronym>
+		<Acronym>IaaS</Acronym>
+		<Acronym>PaaS</Acronym>
+		<Acronym>Md5</Acronym>
       </CasingExceptions>
    </Acronyms>
 </Dictionary>

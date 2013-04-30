@@ -2,55 +2,48 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <Import Project="TechTalk.SpecFlow.tasks"/>
+
+  <!-- this setting is to workaround the bug in VS (does not detect changes during the pre-build event)
+       see: https://connect.microsoft.com/VisualStudio/feedback/ViewFeedback.aspx?FeedbackID=423670&wa=wsignin1.0
+  -->
+  <PropertyGroup>
+    <UseHostCompilerIfAvailable>false</UseHostCompilerIfAvailable>
+  </PropertyGroup>
+
   <PropertyGroup>
     <ShowTrace Condition="'$(ShowTrace)'==''">false</ShowTrace>
-
-    <OverwriteReadOnlyFiles Condition="'$(OverwriteReadOnlyFiles)'==''">true</OverwriteReadOnlyFiles>
+    
+    <OverwriteReadOnlyFiles Condition="'$(OverwriteReadOnlyFiles)'==''">false</OverwriteReadOnlyFiles>
     <ForceGeneration Condition="'$(ForceGeneration)'==''">false</ForceGeneration>
     <VerboseOutput Condition="'$(VerboseOutput)'==''">false</VerboseOutput>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(BuildServerMode)' == ''">
-    <BuildServerMode Condition="'$(INIDE)'=='true'">false</BuildServerMode>
-    <BuildServerMode Condition="'$(INIDE)'!='true'">true</BuildServerMode>
+    <BuildServerMode Condition="'$(BuildingInsideVisualStudio)'=='true'">false</BuildServerMode>
+    <BuildServerMode Condition="'$(BuildingInsideVisualStudio)'!='true'">true</BuildServerMode>
   </PropertyGroup>
 
-  <ItemGroup>
-    <SpecFlowFeatures Include="$(MSBuildProjectDirectory)\Include\**\*.feature" />
-    <SpecFlowTests Include="$(MSBuildProjectDirectory)\Include\**\*.feature.cs" />
-  </ItemGroup>
+  <PropertyGroup>
+    <BuildDependsOn>
+      BeforeUpdateFeatureFilesInProject;
+      UpdateFeatureFilesInProject;
+      AfterUpdateFeatureFilesInProject;
+      $(BuildDependsOn)
+    </BuildDependsOn>
+    <RebuildDependsOn>
+      SwitchToForceGenerate;
+      $(RebuildDependsOn)
+    </RebuildDependsOn>
+  </PropertyGroup>
 
-  <Target Name="CleanSpecFlowFeatureFiles" BeforeTargets="CoreClean">
-    <Message Text="CleanSpecFlowFeatureFiles: @(SpecFlowTests)" />
-    <Message Text="Feature File Sources are: @(SpecFlowFeatures)" />
-     <ItemGroup>
-        <SpecFlowClean Include="**\*.feature.cs" />
-     </ItemGroup>
-    <Delete Files="@(SpecFlowClean)" />
-    <ItemGroup>
-      <SpecFlowTests Include="**\*.feature.cs" />
-    </ItemGroup>
+  <Target Name="SwitchToForceGenerate">
+    <PropertyGroup>
+      <ForceGeneration>true</ForceGeneration>
+      <OnlyUpdateIfChanged>true</OnlyUpdateIfChanged>
+    </PropertyGroup>
   </Target>
 
-  <Target Name="IncludeSpecFiles"
-          Condition="'$(TestProject)' == 'true'"
-          AfterTargets="RecreateSpecFlowTestFiles">
-    <ItemGroup>
-      <Compile Include="Include\**\*.feature.cs" />
-    </ItemGroup>
-  </Target>
-
-  <Target Name="RecreateSpecFlowTestFiles" 
-          BeforeTargets="CoreCompile"
-          Inputs="@(SpecFlowFeatures)"
-          Outputs="@(IntermediateAssembly)">
-    <Message Text="RecreateSpecFlowTestFiles: @(SpecFlowFeatures)" />
-     <ItemGroup>
-        <SpecFlowClean Include="**\*.feature.cs" />
-     </ItemGroup>
-     <Delete Files="@(SpecFlowClean)" />
-     <Delete Files="$(IntermediateOutputPath)\SpecFlowFilesRead.txt" />
-      <WriteLinesToFile File="$(IntermediateOutputPath)\SpecFlowFilesGenerated.txt" Lines="@(SpecFlowFeatures)" />
+  <Target Name="UpdateFeatureFilesInProject" DependsOnTargets="BeforeUpdateFeatureFilesInProject">
     <GenerateAll
       ShowTrace="$(ShowTrace)"
 
@@ -59,9 +52,14 @@
       
       ProjectPath="$(MSBuildProjectFullPath)"
       ForceGeneration="$(ForceGeneration)"
-      VerboseOutput="$(VerboseOutput)"
-      />
-
+      VerboseOutput="$(VerboseOutput)">
+      <Output TaskParameter="GeneratedFiles" ItemName="SpecFlowGeneratedFiles" />
+    </GenerateAll>
   </Target>
 
+  <Target Name="BeforeUpdateFeatureFilesInProject">
+  </Target>
+  
+  <Target Name="AfterUpdateFeatureFilesInProject" DependsOnTargets="UpdateFeatureFilesInProject">
+  </Target>
 </Project>

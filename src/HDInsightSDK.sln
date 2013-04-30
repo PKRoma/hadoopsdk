@@ -70,6 +70,18 @@ Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "LinqToHiveSampleProgramFSha
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "procdetails", "procdetails\procdetails.csproj", "{FA6EC96E-2A3C-40ED-877B-E35D0F9B765E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Management.Framework", "Microsoft.WindowsAzure.Management.Framework\Microsoft.WindowsAzure.Management.Framework.csproj", "{DB09F70B-FD28-4CC8-86B3-883D71CA9A02}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Management.Framework.Threading", "Microsoft.WindowsAzure.Management.Framework.Threading\Microsoft.WindowsAzure.Management.Framework.Threading.csproj", "{DBFFC131-E089-4173-9B9E-6826FE596FAF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Management.HDInsight", "Microsoft.WindowsAzure.Management.HDInsight\Microsoft.WindowsAzure.Management.HDInsight.csproj", "{CF2838EC-AF11-477B-A7E6-F59A70A0E67F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Management.HDInsight.Cmdlet", "Microsoft.WindowsAzure.Management.HDInsight.Cmdlet\Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.csproj", "{43333C08-29F5-4948-A8C6-4F486331CDC9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Management.HDInsight.Tests", "Microsoft.WindowsAzure.Management.HDInsight.Tests\Microsoft.WindowsAzure.Management.HDInsight.Tests.csproj", "{44E3641F-1854-4863-B29A-26A0AA0E2588}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Management.HDInsight.TestUtilities", "Microsoft.WindowsAzure.Management.HDInsight.TestUtilities\Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.csproj", "{7DD88C8B-37EA-4353-8ED7-6971118D5FC3}"
+EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = HDInsightSDK.vsmdi
@@ -204,14 +216,44 @@ Global
 		{FA6EC96E-2A3C-40ED-877B-E35D0F9B765E}.Coverage|Any CPU.Build.0 = Release|Any CPU
 		{FA6EC96E-2A3C-40ED-877B-E35D0F9B765E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{FA6EC96E-2A3C-40ED-877B-E35D0F9B765E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FA6EC96E-2A3C-40ED-877B-E35D0F9B765E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FA6EC96E-2A3C-40ED-877B-E35D0F9B765E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FA6EC96E-2A3C-40ED-877B-E35D0F9B765E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FA6EC96E-2A3C-40ED-877B-E35D0F9B765E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FA6EC96E-2A3C-40ED-877B-E35D0F9B765E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FA6EC96E-2A3C-40ED-877B-E35D0F9B765E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FA6EC96E-2A3C-40ED-877B-E35D0F9B765E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FA6EC96E-2A3C-40ED-877B-E35D0F9B765E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DB09F70B-FD28-4CC8-86B3-883D71CA9A02}.Coverage|Any CPU.ActiveCfg = Coverage|Any CPU
+		{DB09F70B-FD28-4CC8-86B3-883D71CA9A02}.Coverage|Any CPU.Build.0 = Coverage|Any CPU
+		{DB09F70B-FD28-4CC8-86B3-883D71CA9A02}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DB09F70B-FD28-4CC8-86B3-883D71CA9A02}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DB09F70B-FD28-4CC8-86B3-883D71CA9A02}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DB09F70B-FD28-4CC8-86B3-883D71CA9A02}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DBFFC131-E089-4173-9B9E-6826FE596FAF}.Coverage|Any CPU.ActiveCfg = Coverage|Any CPU
+		{DBFFC131-E089-4173-9B9E-6826FE596FAF}.Coverage|Any CPU.Build.0 = Coverage|Any CPU
+		{DBFFC131-E089-4173-9B9E-6826FE596FAF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DBFFC131-E089-4173-9B9E-6826FE596FAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DBFFC131-E089-4173-9B9E-6826FE596FAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DBFFC131-E089-4173-9B9E-6826FE596FAF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF2838EC-AF11-477B-A7E6-F59A70A0E67F}.Coverage|Any CPU.ActiveCfg = Coverage|Any CPU
+		{CF2838EC-AF11-477B-A7E6-F59A70A0E67F}.Coverage|Any CPU.Build.0 = Coverage|Any CPU
+		{CF2838EC-AF11-477B-A7E6-F59A70A0E67F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF2838EC-AF11-477B-A7E6-F59A70A0E67F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF2838EC-AF11-477B-A7E6-F59A70A0E67F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF2838EC-AF11-477B-A7E6-F59A70A0E67F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{43333C08-29F5-4948-A8C6-4F486331CDC9}.Coverage|Any CPU.ActiveCfg = Coverage|Any CPU
+		{43333C08-29F5-4948-A8C6-4F486331CDC9}.Coverage|Any CPU.Build.0 = Coverage|Any CPU
+		{43333C08-29F5-4948-A8C6-4F486331CDC9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{43333C08-29F5-4948-A8C6-4F486331CDC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{43333C08-29F5-4948-A8C6-4F486331CDC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{43333C08-29F5-4948-A8C6-4F486331CDC9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{44E3641F-1854-4863-B29A-26A0AA0E2588}.Coverage|Any CPU.ActiveCfg = Coverage|Any CPU
+		{44E3641F-1854-4863-B29A-26A0AA0E2588}.Coverage|Any CPU.Build.0 = Coverage|Any CPU
+		{44E3641F-1854-4863-B29A-26A0AA0E2588}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44E3641F-1854-4863-B29A-26A0AA0E2588}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44E3641F-1854-4863-B29A-26A0AA0E2588}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44E3641F-1854-4863-B29A-26A0AA0E2588}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7DD88C8B-37EA-4353-8ED7-6971118D5FC3}.Coverage|Any CPU.ActiveCfg = Release|Any CPU
+		{7DD88C8B-37EA-4353-8ED7-6971118D5FC3}.Coverage|Any CPU.Build.0 = Release|Any CPU
+		{7DD88C8B-37EA-4353-8ED7-6971118D5FC3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7DD88C8B-37EA-4353-8ED7-6971118D5FC3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7DD88C8B-37EA-4353-8ED7-6971118D5FC3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7DD88C8B-37EA-4353-8ED7-6971118D5FC3}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -221,6 +263,12 @@ Global
 		{477A0164-2499-4A95-BAD2-A27B28904066} = {2F9569F2-5EA1-4E69-8829-CD5688AC14AA}
 		{D9E183F4-B6C7-41E4-9D11-A5B795AFC20F} = {2F9569F2-5EA1-4E69-8829-CD5688AC14AA}
 		{5EAE17A7-9CB8-477D-AD5A-1D86BFA58AFE} = {2F9569F2-5EA1-4E69-8829-CD5688AC14AA}
+		{DB09F70B-FD28-4CC8-86B3-883D71CA9A02} = {2F9569F2-5EA1-4E69-8829-CD5688AC14AA}
+		{DBFFC131-E089-4173-9B9E-6826FE596FAF} = {2F9569F2-5EA1-4E69-8829-CD5688AC14AA}
+		{CF2838EC-AF11-477B-A7E6-F59A70A0E67F} = {2F9569F2-5EA1-4E69-8829-CD5688AC14AA}
+		{43333C08-29F5-4948-A8C6-4F486331CDC9} = {2F9569F2-5EA1-4E69-8829-CD5688AC14AA}
+		{44E3641F-1854-4863-B29A-26A0AA0E2588} = {2F9569F2-5EA1-4E69-8829-CD5688AC14AA}
+		{7DD88C8B-37EA-4353-8ED7-6971118D5FC3} = {2F9569F2-5EA1-4E69-8829-CD5688AC14AA}
 		{E064B500-67EA-4040-BEA2-5CFD2FC6E430} = {6A6FDCD8-FC62-493B-995D-D14D655BD5D7}
 		{AFD1BEFA-97CA-4E92-94F5-1F6E4E271B46} = {6A6FDCD8-FC62-493B-995D-D14D655BD5D7}
 		{58E84443-D4C1-4D31-AEA1-5C868006C85F} = {6A6FDCD8-FC62-493B-995D-D14D655BD5D7}

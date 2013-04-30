@@ -1,6 +1,35 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 
 <Drop xmlns="http://microsoft.com/sat/drop.xsd">
+<Copy>
+    <From>Microsoft.WindowsAzure.Management.Framework\Microsoft.WindowsAzure.Management.Framework.dll</From>
+    <To>Microsoft.WindowsAzure.Management.HDInsight\lib\net40\Microsoft.WindowsAzure.Management.Framework.dll</To>
+  </Copy>
+  <Copy>
+    <From>Microsoft.WindowsAzure.Management.Framework.Threading\Microsoft.WindowsAzure.Management.Framework.Threading.dll</From>
+    <To>Microsoft.WindowsAzure.Management.HDInsight\lib\net40\Microsoft.WindowsAzure.Management.Framework.Threading.dll</To>
+  </Copy>
+  <Copy>
+    <From>Microsoft.WindowsAzure.Management.HDInsight\Microsoft.WindowsAzure.Management.HDInsight.dll</From>
+    <To>Microsoft.WindowsAzure.Management.HDInsight\lib\net40\Microsoft.WindowsAzure.Management.HDInsight.dll</To>
+  </Copy>
+
+  <Copy>
+    <From>Microsoft.WindowsAzure.Management.Framework\Microsoft.WindowsAzure.Management.Framework.dll</From>
+    <To>Cmdlet\Microsoft.WindowsAzure.Management.Framework.dll</To>
+  </Copy>
+  <Copy>
+    <From>Microsoft.WindowsAzure.Management.Framework.Threading\Microsoft.WindowsAzure.Management.Framework.Threading.dll</From>
+    <To>Cmdlet\Microsoft.WindowsAzure.Management.Framework.Threading.dll</To>
+  </Copy>
+  <Copy>
+    <From>Microsoft.WindowsAzure.Management.HDInsight\Microsoft.WindowsAzure.Management.HDInsight.dll</From>
+    <To>Cmdlet\Microsoft.WindowsAzure.Management.HDInsight.dll</To>
+  </Copy>
+  <Copy>
+    <From>Microsoft.WindowsAzure.Management.HDInsight.Cmdlet\Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.dll</From>
+    <To>Cmdlet\Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.dll</To>
+  </Copy>
    <!-- Microsoft.Hadoop.MapReduce --> 
    <Copy>
       <From>Microsoft.Hadoop.MapReduce\Microsoft.Hadoop.MapReduce.dll</From>

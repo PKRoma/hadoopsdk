@@ -12,7 +12,7 @@ namespace Microsoft.Hadoop.WebClient.AmbariClient
         public static string GetAsvMetricsUrl(string storageAccount, DateTime start, DateTime end)
         {
             string timeStr = string.Format("[{0},{1}]", ToLinuxEpoch(start), ToLinuxEpoch(end));
-            return string.Format(@"/asvmetrics/IsotopeWorkerNode/{0}?fields=asv_raw_bytes_uploaded{1}", storageAccount, timeStr);
+            return string.Format(@"/ambari/asvmetrics/IsotopeWorkerNode/{0}?fields=asv_raw_bytes_uploaded{1}", storageAccount, timeStr);
         }
 
         public static long ToLinuxEpoch(DateTime val)

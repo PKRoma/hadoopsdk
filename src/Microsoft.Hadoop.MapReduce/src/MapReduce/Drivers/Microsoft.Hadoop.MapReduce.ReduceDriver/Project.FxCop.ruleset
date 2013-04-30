@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='utf-8'?>
+<RuleSet Name='Project Level Rule Overrides'
+         Description='This rule set contains project level overrides for this project.'
+         ToolsVersion='10.0'>
+  <Rules AnalyzerId='Microsoft.Analyzers.ManagedCodeAnalysis' RuleNamespace='Microsoft.Rules.Managed'>
+
+    <!-- CA1709 == Microsoft.Naming:'Identifiers should be cased correctly' -->
+    <!-- 1 violations found -->
+    <Rule Id='CA1709' Action='None' />
+
+
+    <!-- CA1704 == Microsoft.Naming:'Identifiers should be spelled correctly' -->
+    <!-- 2 violations found -->
+    <Rule Id='CA1704' Action='None' />
+
+
+    <!-- CA1801 == Microsoft.Usage:'Review unused parameters' -->
+    <!-- 1 violations found -->
+    <Rule Id='CA1801' Action='None' />
+
+  </Rules>
+</RuleSet>

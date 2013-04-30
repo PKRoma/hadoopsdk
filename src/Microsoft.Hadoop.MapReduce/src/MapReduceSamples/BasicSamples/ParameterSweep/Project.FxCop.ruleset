@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='utf-8'?>
+<RuleSet Name='Project Level Rule Overrides'
+         Description='This rule set contains project level overrides for this project.'
+         ToolsVersion='10.0'>
+  <Rules AnalyzerId='Microsoft.Analyzers.ManagedCodeAnalysis' RuleNamespace='Microsoft.Rules.Managed'>
+
+    <!-- CA2211 == Microsoft.Usage:'Non-constant fields should not be visible' -->
+    <!-- 3 violations found -->
+    <Rule Id='CA2211' Action='None' />
+
+
+    <!-- CA1305 == Microsoft.Globalization:'Specify IFormatProvider' -->
+    <!-- 4 violations found -->
+    <Rule Id='CA1305' Action='None' />
+
+
+    <!-- CA1062 == Microsoft.Design:'Validate arguments of public methods' -->
+    <!-- 1 violations found -->
+    <Rule Id='CA1062' Action='None' />
+
+
+    <!-- CA1053 == Microsoft.Design:'Static holder types should not have constructors' -->
+    <!-- 1 violations found -->
+    <Rule Id='CA1053' Action='None' />
+
+
+    <!-- CA1804 == Microsoft.Performance:'Remove unused locals' -->
+    <!-- 1 violations found -->
+    <Rule Id='CA1804' Action='None' />
+
+
+    <!-- CA1801 == Microsoft.Usage:'Review unused parameters' -->
+    <!-- 1 violations found -->
+    <Rule Id='CA1801' Action='None' />
+
+  </Rules>
+</RuleSet>

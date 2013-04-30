@@ -1,0 +1,114 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <ProjectGuid>{43333C08-29F5-4948-A8C6-4F486331CDC9}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Microsoft.WindowsAzure.Management.HDInsight.Cmdlet</RootNamespace>
+    <AssemblyName>Microsoft.WindowsAzure.Management.HDInsight.Cmdlet</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Management.Automation, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0__31bf3856ad364e35\System.Management.Automation.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="GetAzureHDInsightClusters\AddAzureHDInsightMetastoreCommand.cs" />
+    <Compile Include="GetAzureHDInsightClusters\AddAzureHDInsightStorageCommand.cs" />
+    <Compile Include="GetAzureHDInsightClusters\AzureHDInsightCommand.cs" />
+    <Compile Include="GetAzureHDInsightClusters\AzureHDInsightCommandBase.cs" />
+    <Compile Include="GetAzureHDInsightClusters\AzureHDInsightConfig.cs" />
+    <Compile Include="GetAzureHDInsightClusters\AzureHDInsightDefaultStorageAccount.cs" />
+    <Compile Include="GetAzureHDInsightClusters\AzureHDInsightMetastore.cs" />
+    <Compile Include="GetAzureHDInsightClusters\AzureHDInsightMetastoreType.cs" />
+    <Compile Include="GetAzureHDInsightClusters\AzureHDInsightStorageAccount.cs" />
+    <Compile Include="GetAzureHDInsightClusters\BaseInterfaces\IAzureHDInsightClusterCommand.cs" />
+    <Compile Include="GetAzureHDInsightClusters\AzureHDInsightClusterCommand.cs" />
+    <Compile Include="GetAzureHDInsightClusters\AzureHDInsightClusterCommandBase.cs" />
+    <Compile Include="GetAzureHDInsightClusters\IAddAzureHDInsightMetaStoreBase.cs" />
+    <Compile Include="GetAzureHDInsightClusters\IAddAzureHDInsightMetaStoreCommand.cs" />
+    <Compile Include="GetAzureHDInsightClusters\IAddAzureHDInsightStorageBase.cs" />
+    <Compile Include="GetAzureHDInsightClusters\IAddAzureHDInsightStorageCommand.cs" />
+    <Compile Include="GetAzureHDInsightClusters\INewAzureHDInsightConfigBase.cs" />
+    <Compile Include="GetAzureHDInsightClusters\ISetAzureHDInsightDefaultStorageBase.cs" />
+    <Compile Include="GetAzureHDInsightClusters\ISetAzureHDInsightDefaultStorageCommand.cs" />
+    <Compile Include="GetAzureHDInsightClusters\NewAzureHDInsightClusterCommand.cs" />
+    <Compile Include="GetAzureHDInsightClusters\RemoveAzureHDInsightClusterCommand.cs" />
+    <Compile Include="GetAzureHDInsightClusters\BaseInterfaces\IAzureHDInsightCommand.cs" />
+    <Compile Include="GetAzureHDInsightClusters\BaseInterfaces\IAzureHDInsightClusterCommandBase.cs" />
+    <Compile Include="GetAzureHDInsightClusters\BaseInterfaces\IAzureHDInsightCommandBase.cs" />
+    <Compile Include="GetAzureHDInsightClusters\INewAzureHDInsightClusterBase.cs" />
+    <Compile Include="GetAzureHDInsightClusters\INewAzureHDInsightClusterCommand.cs" />
+    <Compile Include="GetAzureHDInsightClusters\IRemoveAzureHDInsightClusterBase.cs" />
+    <Compile Include="GetAzureHDInsightClusters\IRemoveAzureHDInsightClusterCommand.cs" />
+    <Compile Include="GetAzureHDInsightClusters\IGetAzureHDInsightClusterBase.cs" />
+    <Compile Include="GetAzureHDInsightClusters\INewAzureHDInsightConfigCommand.cs" />
+    <Compile Include="GetAzureHDInsightClusters\NewAzureHDInsightConfigCommand.cs" />
+    <Compile Include="GetAzureHDInsightClusters\SetAzureHDInsightDefaultStorageCommand.cs" />
+    <Compile Include="GetAzureHDInsightClusters\AzureHDInsightCluster.cs" />
+    <Compile Include="PSCmdlets\AddAzureHDInsightMetastoreCmdlet.cs" />
+    <Compile Include="PSCmdlets\AddAzureHDInsightStorageCmdlet.cs" />
+    <Compile Include="PSCmdlets\AzureHDInsightCmdlet.cs" />
+    <Compile Include="GetAzureHDInsightClusters\IGetAzureHDInsightClusterCommand.cs" />
+    <Compile Include="GetAzureHDInsightClusters\IAzureHDInsightCommandFactory.cs" />
+    <Compile Include="GetAzureHDInsightClusters\AzureHDInsightCommandFactory.cs" />
+    <Compile Include="GetAzureHDInsightClusters\GetAzureHDInsightClusterCommand.cs" />
+    <Compile Include="InitializeIocContainers.cs" />
+    <Compile Include="PSCmdlets\NewAzureHDInsightClusterCmdlet.cs" />
+    <Compile Include="PSCmdlets\AzureHdInsightPowerShellHardCodes.cs" />
+    <Compile Include="PSCmdlets\NewAzureHDInsightConfigCmdlet.cs" />
+    <Compile Include="PSCmdlets\RemoveClusterHDInsightClusterCmdlet.cs" />
+    <Compile Include="PSCmdlets\GetAzureHDInsightClusterCmdlet.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\AssemblyInternalsVisibleTo.cs" />
+    <Compile Include="PSCmdlets\SetAzureHDInsightDefaultStorageCmdlet.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Microsoft.WindowsAzure.Management.Framework\Microsoft.WindowsAzure.Management.Framework.csproj">
+      <Project>{db09f70b-fd28-4cc8-86b3-883d71ca9a02}</Project>
+      <Name>Microsoft.WindowsAzure.Management.Framework</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Microsoft.WindowsAzure.Management.HDInsight\Microsoft.WindowsAzure.Management.HDInsight.csproj">
+      <Project>{cf2838ec-af11-477b-a7e6-f59a70a0e67f}</Project>
+      <Name>Microsoft.WindowsAzure.Management.HDInsight</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="..\..\build\targets\Project.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

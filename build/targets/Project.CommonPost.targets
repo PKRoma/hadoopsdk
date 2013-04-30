@@ -1,4 +1,6 @@
-﻿<Project InitialTargets="BuildSetup" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+   <Import Project="Project.Tests.targets" Condition="'$(TestProject)' == 'true'" />
+
    <Import Project="NuGet.targets" />
 
    <!-- Enable source analysis -->

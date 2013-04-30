@@ -84,13 +84,18 @@ namespace Microsoft.Hadoop.WebClient.AmbariClient
             return new HostComponentMetric(mapsLaunched, mapsCompleted, mapsFailed, mapsKilled, mapsWaiting, mapsRunning);
         }
 
-        public IEnumerable<double> GetAsvMetrics(string storageAccount, DateTime start, DateTime end)
+        public IEnumerable<Tuple<DateTime,double>> GetAsvMetrics(string storageAccount, DateTime start, DateTime end)
         {
             Task<HttpResponseMessage> t1 = client.GetAsvMetrics(storageAccount, start, end);
             JObject results = HttpClientTools.GetTaskResults(t1);
 
             JArray array = results["azureFileSystem.azureFileSystem"]["asv_raw_bytes_uploaded"].Value<JArray>();
-            return array.Select(token => token.Value<double>()).ToList();
+            return array.Select(token => {
+                var element = (JArray)token;
+                var time_unix = element[0].Value<long>();
+                var time = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(time_unix);
+                return new Tuple<DateTime, double>(time, element[1].Value<double>());
+            }).ToList();
         }
     }
 }

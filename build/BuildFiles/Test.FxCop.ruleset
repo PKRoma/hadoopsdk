@@ -33,6 +33,10 @@
       <!-- CA2210 - Microsoft.Design: Assemblies should have valid strong names -->
       <Rule Id="CA2210" Action="None" />
 
+	  <!-- CA2202 - Microsoft.Usage: Do not dispose of objects multiple times -->
+	  <!-- Turning off this rule because it is broken and serves no useful purpose -->
+	  <Rule Id="CA2202" Action="None" />
+	  
       <!-- Test Rules -->
       <!-- CA1005 - Microsoft.Design: Avoid excessive parameters on generic types -->
       <Rule Id="CA1005" Action="None" />
@@ -103,121 +107,8 @@
 	  <!-- CA1812 - Avoid uninstantiated internal classes -->
 	  <Rule Id="CA1812" Action="None" />
 	  
-<!-- Bringing in new system -->
-
-		<!-- CA1725 : 9 instances found -->
-		<Rule Id="CA1725" Action="None" />
-
-		<!-- CA1053 : 10 instances found -->
-		<Rule Id="CA1053" Action="None" />
-
-		<!-- CA1710 : 17 instances found -->
-		<Rule Id="CA1710" Action="None" />
-
-		<!-- CA1815 : 2 instances found -->
-		<Rule Id="CA1815" Action="None" />
-
-		<!-- CA2201 : 9 instances found -->
-		<Rule Id="CA2201" Action="None" />
-
-		<!-- CA1711 : 5 instances found -->
-		<Rule Id="CA1711" Action="None" />
-
-		<!-- CA2000 : 3 instances found -->
-		<Rule Id="CA2000" Action="None" />
-
-		<!-- CA1001 : 2 instances found -->
-		<Rule Id="CA1001" Action="None" />
-
-		<!-- CA1021 : 1 instances found -->
-		<Rule Id="CA1021" Action="None" />
-
-		<!-- CA1800 : 4 instances found -->
-		<Rule Id="CA1800" Action="None" />
-
-		<!-- CA2208 : 2 instances found -->
-		<Rule Id="CA2208" Action="None" />
-
-		<!-- CA1715 : 27 instances found -->
-		<Rule Id="CA1715" Action="None" />
-
-		<!-- CA1033 : 5 instances found -->
-		<Rule Id="CA1033" Action="None" />
-
-		<!-- CA1810 : 2 instances found -->
-		<Rule Id="CA1810" Action="None" />
-
-		<!-- CA2100 : 3 instances found -->
-		<Rule Id="CA2100" Action="None" />
-
-		<!-- CA1304 : 10 instances found -->
-		<Rule Id="CA1304" Action="None" />
-
-		<!-- CA1716 : 13 instances found -->
-		<Rule Id="CA1716" Action="None" />
-
-		<!-- CA1306 : 1 instances found -->
-		<Rule Id="CA1306" Action="None" />
-
-		<!-- CA1502 : 8 instances found -->
-		<Rule Id="CA1502" Action="None" />
-
-		<!-- CA1012 : 3 instances found -->
-		<Rule Id="CA1012" Action="None" />
-
-		<!-- CA2001 : 4 instances found -->
-		<Rule Id="CA2001" Action="None" />
-
-		<!-- CA1031 : 4 instances found -->
-		<Rule Id="CA1031" Action="None" />
-
-		<!-- CA1002 : 13 instances found -->
-		<Rule Id="CA1002" Action="None" />
-
-		<!-- CA1008 : 1 instances found -->
-		<Rule Id="CA1008" Action="None" />
-
-		<!-- CA1045 : 1 instances found -->
-		<Rule Id="CA1045" Action="None" />
-
-		<!-- CA1721 : 3 instances found -->
-		<Rule Id="CA1721" Action="None" />
-
-		<!-- CA2104 : 1 instances found -->
-		<Rule Id="CA2104" Action="None" />
-
-		<!-- CA1813 : 4 instances found -->
-		<Rule Id="CA1813" Action="None" />
-
-		<!-- CA1309 : 2 instances found -->
-		<Rule Id="CA1309" Action="None" />
-
-		<!-- CA2202 : 1 instances found -->
-		<Rule Id="CA2202" Action="None" />
-
-		<!-- CA1505 : 1 instances found -->
-		<Rule Id="CA1505" Action="None" />
-
-		<!-- CA1010 : 1 instances found -->
-		<Rule Id="CA1010" Action="None" />
-
-		<!-- CA1819 : 1 instances found -->
-		<Rule Id="CA1819" Action="None" />
-
-		<!-- CA2227 : 3 instances found -->
-		<Rule Id="CA2227" Action="None" />
-
-		<!-- CA2237 : 1 instances found -->
-		<Rule Id="CA2237" Action="None" />
-
-		<!-- CA1719 : 2 instances found -->
-		<Rule Id="CA1719" Action="None" />
-
-		<!-- CA1050 : 3 instances found -->
-		<Rule Id="CA1050" Action="None" />
-
-		<!-- CA1724 : 1 instances found -->
-		<Rule Id="CA1724" Action="None" />
-	  
+	  <!-- CA1031 - Do not catch general exception types -->
+	  <!-- Tests often need to catch general exception types to determin their type -->
+		<Rule Id="CA1031" Action="None" />	  
    </Rules>
 </RuleSet>

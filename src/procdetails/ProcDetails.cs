@@ -25,7 +25,7 @@ namespace ProcDetailsTestApplication
     /// This application when executed provides the details of it's execution
     /// space in a manner that can be later parsed by the test system.
     /// </summary>
-    public class ProcDetails
+    public static class ProcDetails
     {
         /* 
          * The Delimiters are used to safely (uniquely) delimit the data in a mannor that is
@@ -62,7 +62,7 @@ namespace ProcDetailsTestApplication
 
         public static readonly Guid TabReplacementSequence = new Guid("{0C5183EA-9C83-4E3D-AE6A-7E958228EE86}");
         public static readonly Guid CharacterReturnReplacementSequence = new Guid("{4F54BB4B-AEC1-43AE-B3C0-461B44D4C754}");
-        public static readonly Guid LineFeedReplacementSequence = new Guid("{42AEA506-8329-4188-BEB6-5D2B6218FED0}");
+        public static readonly Guid LinefeedReplacementSequence = new Guid("{42AEA506-8329-4188-BEB6-5D2B6218FED0}");
 
         private static StringBuilder stringBuilder = new StringBuilder();
         private static void Write(object value)
@@ -74,7 +74,7 @@ namespace ProcDetailsTestApplication
         {
             stringBuilder.Replace("\t", TabReplacementSequence.ToString());
             stringBuilder.Replace("\r", CharacterReturnReplacementSequence.ToString());
-            stringBuilder.Replace("\n", LineFeedReplacementSequence.ToString());
+            stringBuilder.Replace("\n", LinefeedReplacementSequence.ToString());
             Console.Write(stringBuilder);
         }
 

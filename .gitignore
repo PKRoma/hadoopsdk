@@ -2,6 +2,10 @@
 bin
 obj
 backup
+Logs
+Organized
+Packaged
+Prepared
 Debug
 Release
 Target
@@ -22,7 +26,6 @@ TestResults
 *.suo
 *.user
 *.nupkg
-nuget.exe
 UpgradeLog.xml
 _UpgradeReport_Files
 UpgradeLog.htm

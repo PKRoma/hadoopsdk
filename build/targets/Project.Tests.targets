@@ -47,5 +47,7 @@
                       Lines="Test Resources located in this assembly relative to: $(MSBuildProjectDirectory)"/>
   </Target>
 
+  <Import Project="TechTalk.SpecFlow.targets" Condition="'$(SpecFlowTasksPath)' != ''" />
+
 
 </Project>

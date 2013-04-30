@@ -40,14 +40,8 @@
 	  <!-- CA1303 - DO not pass literals as localized parameters -->
 	  <!-- Not really important for sample projects -->
 	  <Rule Id="CA1303" Action="None" />
-	  
-<!-- Turned of to bring SDK into new system -->	  
-	  
-	  <!-- CA2204 - Literals should be spelled correctly -->
-	  <Rule Id="CA2204" Action="None" />
-	  
-	  <!-- CA1005 - Avoid Excessive Parameters on Generic Types -->
-	  <Rule Id="CA1005" Action="None" />
-	  
-   </Rules>
+
+	  <!-- CA2202 - Microsoft.Usage: Do not dispose of objects multiple times -->
+	  <!-- Turning off this rule because it is broken and serves no useful purpose -->
+	  <Rule Id="CA2202" Action="None" />
 </RuleSet>

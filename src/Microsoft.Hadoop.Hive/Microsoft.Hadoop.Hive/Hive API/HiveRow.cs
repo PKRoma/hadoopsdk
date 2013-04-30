@@ -25,7 +25,7 @@ namespace Microsoft.Hadoop.Hive
     {
         public override bool TryGetMember(GetMemberBinder binder, out object result)
         {
-            string name = binder.Name.ToLower();
+//            string name = binder.Name.ToLower();
             result = null;
             return true;
         }

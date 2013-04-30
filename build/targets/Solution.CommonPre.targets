@@ -1,0 +1,99 @@
+﻿<Project InitialTargets="SolutionSetup" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+	<!-- 
+	   MSBuildAllProjects is used to specify all projects that this build is dependent on,
+	   this ensures that if this file changes it forces a rebuild 
+	-->
+	<PropertyGroup>
+		<MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFile)</MSBuildAllProjects>
+	</PropertyGroup>
+	
+	<PropertyGroup>
+		<!-- If no Configuration/Patform was specified, default to Debug/AnyCPU -->
+		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+		<Platform Condition=" '$(Platform)' == '' ">Any CPU</Platform>
+		<ConfigurationType>$(Configuration)</ConfigurationType>
+		<FailOnMissingTestFile Condition="'$(FailOnMissingTestFile)' == ''">false</FailOnMissingTestFile>
+		<FailOnInconclusiveTest Condition="'$(FailOnInconclusiveTest)' == ''">true</FailOnInconclusiveTest>
+	</PropertyGroup>
+	
+	<!-- Provide config for debug Any CPU -->
+	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+	    <ConfigurationType>Debug</ConfigurationType>
+	</PropertyGroup>
+	
+	<!-- Provide config for release Any CPU -->
+	<PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+	    <ConfigurationType>Release</ConfigurationType>
+	</PropertyGroup>
+	
+	<!-- Provide config for debug Any CPU -->
+	<PropertyGroup Condition=" '$(Configuration)' == 'DebugSigned' ">
+	    <ConfigurationType>Debug</ConfigurationType>
+        <SignAssembly>true</SignAssembly>
+	</PropertyGroup>
+
+	<!-- Provide config for release Any CPU -->
+	<PropertyGroup Condition=" '$(Configuration)' == 'ReleaseSigned' ">
+	    <ConfigurationType>Release</ConfigurationType>
+        <SignAssembly>true</SignAssembly>
+	</PropertyGroup>
+	
+    <Import Project="Shared.Common.Properties.targets" />
+    <Import Project="Shared.Common.Tasks.targets" />
+
+	<ItemGroup>
+		<ProjectTypeFiles Include="$(ProjectTypeFilePath)\**\*.*" />
+	</ItemGroup>
+	
+	<Target Name="SolutionSetup">
+		<Delete Files="@(ProjectTypeFiles)" />
+		
+		<ValidateAndExtractProjectNames SolutionConfigurationContents="$(CurrentSolutionConfigurationContents)" >
+			<Output ItemName="InternalBuildProjectFiles" TaskParameter="ProjectFiles" />
+		</ValidateAndExtractProjectNames>
+	
+		<ReadMajorMinorFromBuildConfig BuildConfigFile="$(SolutionDir)\buildconfig.xml">
+			<Output PropertyName="BuildVersionMajor" TaskParameter="Major" />
+			<Output PropertyName="BuildVersionMinor" TaskParameter="Minor" />
+		</ReadMajorMinorFromBuildConfig>
+		
+		<ComputeBuildAndRevision>
+			<Output PropertyName="BuildVersionBuild" TaskParameter="Build" />
+			<Output PropertyName="BuildVersionRevision" TaskParameter="Revision" />
+		</ComputeBuildAndRevision>
+		
+		<PropertyGroup>
+			<BuildVersionFull>$(BuildVersionMajor).$(BuildVersionMinor).$(BuildVersionBuild).$(BuildVersionRevision)</BuildVersionFull>
+		</PropertyGroup>
+		
+		<Message Text="Computed BuildVersion as: $(BuildVersionFull)" Importance="High" />
+		
+		<WriteVersionFiles Major="$(BuildVersionMajor)"
+						   Minor="$(BuildVersionMinor)"
+						   Build="$(BuildVersionBuild)"
+						   Revision="$(BuildVersionRevision)"
+						   OutputDirectory="$(GenPath)" />
+						   
+		<!-- Execute a write ProjectTypeFile only build -->
+		<MSBuild Projects="@(InternalBuildProjectFiles)" Targets="WriteProjectTypeFile" BuildInParallel="True" ToolsVersion="$(ProjectToolsVersion)" Properties="Configuration=$(Configuration); Platform=$(Platform);BuildingSolutionFile=true; CurrentSolutionConfigurationContents=$(CurrentSolutionConfigurationContents); SolutionDir=$(SolutionDir); SolutionExt=$(SolutionExt); SolutionFileName=$(SolutionFileName); SolutionName=$(SolutionName); SolutionPath=$(SolutionPath)" />
+
+		<Message Text="Project Files Built By This Solution: %(InternalBuildProjectFiles.FullPath)" Importance="High" />
+
+		<PropertyGroup>
+			<SolutionBuildPublicKeyIdentity></SolutionBuildPublicKeyIdentity>
+		</PropertyGroup>
+		
+		<Message Importance="high" Text="Delay Signing with following public key file: $(AssemblyOriginatorKeyFile)" />
+		
+		<ExtractPublicKey Condition="'$(SignAssembly)' == 'true'"
+						  PublicKeyFile="$(AssemblyOriginatorKeyFile)">
+			<Output PropertyName="SolutionBuildPublicKeyIdentity" TaskParameter="PublicKey" />
+		</ExtractPublicKey>
+		
+		<Message Importance="high" Text="Using following public key for dealy signing: $(SolutionBuildPublicKeyIdentity)" />
+		
+		<WriteAssemblyInternalsVisibleTo ProjectTypeFileDirectory="$(ProjectTypeFilePath)"
+									     SignKey="$(SolutionBuildPublicKeyIdentity)"
+										 OutputDirectory="$(GenPath)" />
+	</Target>
+</Project>

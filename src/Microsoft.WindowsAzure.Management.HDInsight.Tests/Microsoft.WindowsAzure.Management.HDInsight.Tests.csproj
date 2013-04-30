@@ -1,0 +1,217 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{44E3641F-1854-4863-B29A-26A0AA0E2588}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Microsoft.WindowsAzure.Management.HDInsight.Tests</RootNamespace>
+    <AssemblyName>Microsoft.WindowsAzure.Management.HDInsight.Tests</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+    <ReferencePath>$(ProgramFiles)\Common Files\microsoft shared\VSTT\$(VisualStudioVersion)\UITestExtensionPackages</ReferencePath>
+    <IsCodedUITest>False</IsCodedUITest>
+    <TestProjectType>UnitTest</TestProjectType>
+    <TargetFrameworkProfile />
+    <SpecFlowTasksPath>$(SolutionDir)\packages\SpecFlow.1.9.0\tools\specflow.exe</SpecFlowTasksPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Moq">
+      <HintPath>$(SolutionDir)\packages\Moq.4.0.10827\lib\NET40\Moq.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Management.Automation, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.ServiceModel.Web" />
+    <Reference Include="System.XML" />
+    <Reference Include="TechTalk.SpecFlow">
+      <HintPath>$(SolutionDir)\packages\SpecFlow.1.9.0\lib\net35\TechTalk.SpecFlow.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <Choose>
+    <When Condition="('$(VisualStudioVersion)' == '10.0' or '$(VisualStudioVersion)' == '') and '$(TargetFrameworkVersion)' == 'v3.5'">
+      <ItemGroup>
+        <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+      </ItemGroup>
+    </When>
+    <Otherwise>
+      <ItemGroup>
+        <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework" />
+      </ItemGroup>
+    </Otherwise>
+  </Choose>
+  <ItemGroup>
+    <Compile Include="ClientAbstractionTests\AsvClientTests.cs" />
+    <Compile Include="ClientAbstractionTests\HttpClientTests.cs" />
+    <Compile Include="ClientAbstractionTests\PayloadTests.cs" />
+    <Compile Include="ClientAbstractionTests\PocoClientTests.cs" />
+    <Compile Include="ClientAbstractionTests\RestClientTests.cs" />
+    <Compile Include="BasicTests.cs" />
+    <Compile Include="ClientAbstractionTests\SyncTests.cs" />
+    <Compile Include="CmdLetTests\CmdletHardCodes.cs" />
+    <Compile Include="CmdLetTests\NewClusterCmdletTests.cs" />
+    <Compile Include="CmdLetTests\PowerShellTestAbstraction\Concreates\CommandAbstraction.cs" />
+    <Compile Include="CmdLetTests\PowerShellTestAbstraction\Concreates\PipelineAbstraction.cs" />
+    <Compile Include="CmdLetTests\PowerShellTestAbstraction\Concreates\PipelineResultsAbstraction.cs" />
+    <Compile Include="CmdLetTests\PowerShellTestAbstraction\Concreates\RunspaceAbstraction.cs" />
+    <Compile Include="CmdLetTests\PowerShellTestAbstraction\Interfaces\ICommand.cs" />
+    <Compile Include="CmdLetTests\PowerShellTestAbstraction\Interfaces\IPipelineResult.cs" />
+    <Compile Include="CmdLetTests\PowerShellTestAbstraction\Interfaces\IPipeline.cs" />
+    <Compile Include="CmdLetTests\PowerShellTestAbstraction\Interfaces\IRunspace.cs" />
+    <Compile Include="CmdLetTests\PowerShellTestAbstraction\Interfaces\IRunspaceBase.cs" />
+    <Compile Include="CmdLetTests\GetCommandCmdletTests.cs" />
+    <Compile Include="CmdletAbstractionTests\HDInsightGetCommandTests.cs" />
+    <Compile Include="ConnectionCredentials\AlternativeEnvironmentConnectionCredentialsFactory.cs" />
+    <Compile Include="DynamicXml\DynaXmlBuilderTest.cs" />
+    <Compile Include="Gherkin\Add-AzureHDInsightMetastoreCmdlet.feature.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Add-AzureHDInsightMetastoreCmdlet.feature</DependentUpon>
+    </Compile>
+    <Compile Include="Gherkin\Add-AzureHDInsightStorageCmdlet.feature.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Add-AzureHDInsightStorageCmdlet.feature</DependentUpon>
+    </Compile>
+    <Compile Include="Gherkin\Get-AzureHDInsightClusterCmdlet.feature.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Get-AzureHDInsightClusterCmdlet.feature</DependentUpon>
+    </Compile>
+    <Compile Include="Gherkin\New-AzureHDInsightClusterCmdlet.feature.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>New-AzureHDInsightClusterCmdlet.feature</DependentUpon>
+    </Compile>
+    <Compile Include="Gherkin\New-AzureHDInsightConfig.feature.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>New-AzureHDInsightConfig.feature</DependentUpon>
+    </Compile>
+    <Compile Include="Gherkin\Remove-AzureHDInsightClusterCmdlet.feature.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Remove-AzureHDInsightClusterCmdlet.feature</DependentUpon>
+    </Compile>
+    <Compile Include="Gherkin\SetAzureHDInsightDefaultStorageCmdlet.feature.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>SetAzureHDInsightDefaultStorageCmdlet.feature</DependentUpon>
+    </Compile>
+    <Compile Include="RestSimulator\HDInsightManagementRestSimulatorClient.cs" />
+    <Compile Include="RestSimulator\HDInsightManagementRestSimulatorClientFactory.cs" />
+    <Compile Include="Scenario\ClientScenarioTests.cs" />
+    <Compile Include="IntegrationTestBase.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Scenario\CmdletScenarioTests.cs" />
+    <Compile Include="StepDefinitions\PowerShellCmdletSteps.cs" />
+    <Compile Include="TestPocoClientFactoryFlowThrough.cs" />
+    <Compile Include="TestPocoClientFlowThrough.cs" />
+    <Compile Include="TestRunMode.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="Gherkin\Add-AzureHDInsightMetastoreCmdlet.feature">
+      <Generator>SpecFlowSingleFileGenerator</Generator>
+      <LastGenOutput>Add-AzureHDInsightMetastoreCmdlet.feature.cs</LastGenOutput>
+    </None>
+    <None Include="Gherkin\Add-AzureHDInsightStorageCmdlet.feature">
+      <Generator>SpecFlowSingleFileGenerator</Generator>
+      <LastGenOutput>Add-AzureHDInsightStorageCmdlet.feature.cs</LastGenOutput>
+    </None>
+    <None Include="Gherkin\Get-AzureHDInsightClusterCmdlet.feature">
+      <Generator>SpecFlowSingleFileGenerator</Generator>
+      <LastGenOutput>Get-AzureHDInsightClusterCmdlet.feature.cs</LastGenOutput>
+    </None>
+    <None Include="Gherkin\New-AzureHDInsightClusterCmdlet.feature">
+      <Generator>SpecFlowSingleFileGenerator</Generator>
+      <LastGenOutput>New-AzureHDInsightClusterCmdlet.feature.cs</LastGenOutput>
+    </None>
+    <None Include="Gherkin\New-AzureHDInsightConfig.feature">
+      <Generator>SpecFlowSingleFileGenerator</Generator>
+      <LastGenOutput>New-AzureHDInsightConfig.feature.cs</LastGenOutput>
+    </None>
+    <None Include="Gherkin\Remove-AzureHDInsightClusterCmdlet.feature">
+      <Generator>SpecFlowSingleFileGenerator</Generator>
+      <LastGenOutput>Remove-AzureHDInsightClusterCmdlet.feature.cs</LastGenOutput>
+    </None>
+    <None Include="Gherkin\SetAzureHDInsightDefaultStorageCmdlet.feature">
+      <Generator>SpecFlowSingleFileGenerator</Generator>
+      <LastGenOutput>SetAzureHDInsightDefaultStorageCmdlet.feature.cs</LastGenOutput>
+    </None>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Microsoft.WindowsAzure.Management.Framework\Microsoft.WindowsAzure.Management.Framework.csproj">
+      <Project>{db09f70b-fd28-4cc8-86b3-883d71ca9a02}</Project>
+      <Name>Microsoft.WindowsAzure.Management.Framework</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Microsoft.WindowsAzure.Management.HDInsight.Cmdlet\Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.csproj">
+      <Project>{43333c08-29f5-4948-a8c6-4f486331cdc9}</Project>
+      <Name>Microsoft.WindowsAzure.Management.HDInsight.Cmdlet</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Microsoft.WindowsAzure.Management.HDInsight.TestUtilities\Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.csproj">
+      <Project>{7DD88C8B-37EA-4353-8ED7-6971118D5FC3}</Project>
+      <Name>Microsoft.WindowsAzure.Management.HDInsight.TestUtilities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Microsoft.WindowsAzure.Management.HDInsight\Microsoft.WindowsAzure.Management.HDInsight.csproj">
+      <Project>{cf2838ec-af11-477b-a7e6-f59a70a0e67f}</Project>
+      <Name>Microsoft.WindowsAzure.Management.HDInsight</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Choose>
+    <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
+      <ItemGroup>
+        <Reference Include="Microsoft.VisualStudio.QualityTools.CodedUITestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Microsoft.VisualStudio.TestTools.UITest.Common, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Microsoft.VisualStudio.TestTools.UITest.Extension, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Microsoft.VisualStudio.TestTools.UITesting, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+          <Private>False</Private>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
+  <Import Project="..\..\build\targets\Project.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

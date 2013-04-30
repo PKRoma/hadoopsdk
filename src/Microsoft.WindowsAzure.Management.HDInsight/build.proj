@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <PublishDirectory>.\Target</PublishDirectory>
+    <BuildOutputDirectory>$(PublishDirectory)\Build</BuildOutputDirectory>
+    <NuGetOutputDirectory>$(PublishDirectory)\NuGet</NuGetOutputDirectory>
+    <SrcDirectory>.\src</SrcDirectory>
+    <SolutionDir>.\src</SolutionDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <WebClientSolution Include="$(SrcDirectory)\Microsoft.Hadoop.WebClient.sln"/>
+    <MrNuSpec Include="$(SrcDirectory)\packaging\nuget\Microsoft.Hadoop.WebClient.NuGet.msbuild"/>
+  </ItemGroup>
+ 
+
+   <Target Name="BuildLinqToHive">
+    <MSBuild Projects="@(WebClientSolution)" Targets="Build"  />
+    <ItemGroup>
+      <FrameworkDlls Include="$(SrcDirectory)\Microsoft.Hadoop.WebClient\bin\$(Configuration)\*.dll"/>
+      <FrameworkPDBs Include="$(SrcDirectory)\Microsoft.Hadoop.WebClient\bin\$(Configuration)\*.pdb"/>
+      <FrameworkXMLs Include="$(SrcDirectory)\Microsoft.Hadoop.WebClient\bin\$(Configuration)\*.xml"/>
+    </ItemGroup>
+    <MakeDir
+      Directories="$(BuildOutputDirectory)\Framework"
+      ContinueOnError="true" />
+    <Copy
+      SourceFiles="@(FrameworkDlls)"
+      DestinationFiles="@(FrameworkDlls->'$(BuildOutputDirectory)\Framework\%(Filename)%(Extension)')"
+      SkipUnchangedFiles="false"
+      ContinueOnError="false"/>
+    <Copy
+      SourceFiles="@(FrameworkPDBs)"
+      DestinationFiles="@(FrameworkPDBs->'$(BuildOutputDirectory)\Framework\%(Filename)%(Extension)')"
+      SkipUnchangedFiles="false"
+      ContinueOnError="false"/>
+    <Copy
+      SourceFiles="@(FrameworkXMLs)"
+      DestinationFiles="@(FrameworkXMLs->'$(BuildOutputDirectory)\Framework\%(Filename)%(Extension)')"
+      SkipUnchangedFiles="false"
+      ContinueOnError="false"/>
+  </Target>
+
+  <Target Name="CreateNuGet">
+    <MSBuild Projects="@(MrNuSpec)" Targets="CreatePackage"/>
+  </Target>
+  <Target Name="Build" DependsOnTargets="BuildLinqToHive;CreateNuGet">
+  </Target>
+
+  <Target Name="CleanSolutions">
+    <MSBuild Projects="@(WebClientSolution)" Targets="Clean" />
+  </Target>
+</Project>
+
