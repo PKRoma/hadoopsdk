@@ -2,7 +2,7 @@
 {
     using System;
     using System.Diagnostics.CodeAnalysis;
-    using Microsoft.WindowsAzure.Management.HDInsight.Data;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data;
 
     /// <summary>
     /// Represents an Azure HD Insight Cluster for the PowerShell Cmdlets.

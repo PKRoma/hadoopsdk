@@ -16,12 +16,12 @@
 namespace Microsoft.WindowsAzure.Management.Framework.InversionOfControl
 {
     /// <summary>
-    ///     Allows a service to provide additional registrations when it is registered with the IocServiceLocator.
+    ///     Allows a service to provide additional registrations when it is registered with the ServiceLocator.
     /// </summary>
     public interface IRegisteringService
     {
         /// <summary>
-        ///     Allows a service to provide additional registrations when it is registered with the IocServiceLocator.
+        ///     Allows a service to provide additional registrations when it is registered with the ServiceLocator.
         /// </summary>
         /// <param name="manager">
         ///     The runtime service location manager to use to register additional services.

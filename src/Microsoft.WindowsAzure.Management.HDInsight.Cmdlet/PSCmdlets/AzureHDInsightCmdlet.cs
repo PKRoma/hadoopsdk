@@ -11,9 +11,5 @@
     /// </summary>
     public class AzureHDInsightCmdlet : PSCmdlet
     {
-        static AzureHDInsightCmdlet()
-        {
-            InitializeIocContainers.Register();
-        }
     }
 }

@@ -54,9 +54,11 @@
     <Compile Include="InversionOfControl\IIocServiceLocationManager.cs" />
     <Compile Include="InversionOfControl\IIocServiceLocationRuntimeManager.cs" />
     <Compile Include="InversionOfControl\IIocServiceLocationIndividualTestManager.cs" />
-    <Compile Include="InversionOfControl\IIocServiceLocator.cs" />
-    <Compile Include="InversionOfControl\IocServiceLocator.cs" />
+    <Compile Include="InversionOfControl\IServiceLocator.cs" />
+    <Compile Include="InversionOfControl\ServiceLocator.cs" />
     <Compile Include="InversionOfControl\IocTestMockingLevel.cs" />
+    <Compile Include="InversionOfControl\IServiceLocationRegistrar.cs" />
+    <Compile Include="InversionOfControl\ServiceLocationAssemblySweep.cs" />
     <Compile Include="IQueryDisposable.cs" />
     <Compile Include="ObjectExtensions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

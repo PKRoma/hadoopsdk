@@ -6,6 +6,7 @@
     using System.Management.Automation;
     using System.Text;
     using Microsoft.WindowsAzure.Management.Framework;
+    using Microsoft.WindowsAzure.Management.Framework.InversionOfControl;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters;
     using Microsoft.WindowsAzure.Management.HDInsight.InversionOfControl;
 

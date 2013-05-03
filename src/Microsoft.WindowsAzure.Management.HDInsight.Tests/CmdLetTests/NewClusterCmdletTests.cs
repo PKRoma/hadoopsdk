@@ -5,12 +5,11 @@
     using System.Security.Cryptography.X509Certificates;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Microsoft.WindowsAzure.Management.Framework.InversionOfControl;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoClient;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets;
-    using Microsoft.WindowsAzure.Management.HDInsight.Data;
     using Microsoft.WindowsAzure.Management.Framework;
     using Microsoft.WindowsAzure.Management.HDInsight.InversionOfControl;
-    using Microsoft.WindowsAzure.Management.HDInsight.PocoClient;
 
     [TestClass]
     public class NewClusterCmdletTests : IntegrationTestBase

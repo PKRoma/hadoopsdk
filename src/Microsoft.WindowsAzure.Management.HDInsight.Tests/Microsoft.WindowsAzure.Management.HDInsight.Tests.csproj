@@ -136,6 +136,7 @@
     <Compile Include="TestPocoClientFactoryFlowThrough.cs" />
     <Compile Include="TestPocoClientFlowThrough.cs" />
     <Compile Include="TestRunMode.cs" />
+    <Compile Include="TestSetupCleanup.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

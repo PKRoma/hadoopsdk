@@ -20,9 +20,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
     using System.Globalization;
     using System.Linq;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Microsoft.WindowsAzure.Management.HDInsight.Data;
-    using Microsoft.WindowsAzure.Management.HDInsight.Old;
     using System.Collections.ObjectModel;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Old;
 
     [TestClass]
     public class PayloadTests : IntegrationTestBase

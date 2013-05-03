@@ -7,10 +7,10 @@
     using System.Threading.Tasks;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Microsoft.WindowsAzure.Management.Framework.InversionOfControl;
-    using Microsoft.WindowsAzure.Management.HDInsight.Client;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Client;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestClient;
     using Microsoft.WindowsAzure.Management.HDInsight.ConnectionContext;
     using Microsoft.WindowsAzure.Management.HDInsight.InversionOfControl;
-    using Microsoft.WindowsAzure.Management.HDInsight.RestClient;
 
     [TestClass]
     public class SyncTests : IntegrationTestBase

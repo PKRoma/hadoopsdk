@@ -83,7 +83,7 @@
     <Compile Include="GetAzureHDInsightClusters\IAzureHDInsightCommandFactory.cs" />
     <Compile Include="GetAzureHDInsightClusters\AzureHDInsightCommandFactory.cs" />
     <Compile Include="GetAzureHDInsightClusters\GetAzureHDInsightClusterCommand.cs" />
-    <Compile Include="InitializeIocContainers.cs" />
+    <Compile Include="InversionOfControl\CmdletServiceLocationRegistrar.cs" />
     <Compile Include="PSCmdlets\NewAzureHDInsightClusterCmdlet.cs" />
     <Compile Include="PSCmdlets\AzureHdInsightPowerShellHardCodes.cs" />
     <Compile Include="PSCmdlets\NewAzureHDInsightConfigCmdlet.cs" />

@@ -18,7 +18,7 @@
       <Minor>6</Minor>
    </Version>
    <Prepare>
-      <Zip folder="Cmdlet" name="Microsoft.WindowsAzure.Management.HDInsight.Cmdlets\Microsoft.WindowsAzure.Management.HDInsight.Cmdlets.zip" />
+      <Zip folder="Cmdlet" name="Microsoft.WindowsAzure.Management.HDInsight.Cmdlets.zip" />
       <NuGet id="Microsoft.Hadoop.MapReduce" outputFolder="MapReduce" >
          <Title>Microsoft .NET Map Reduce API For Hadoop</Title>
          <ProjectUrl>http://hadoopsdk.codeplex.com</ProjectUrl>

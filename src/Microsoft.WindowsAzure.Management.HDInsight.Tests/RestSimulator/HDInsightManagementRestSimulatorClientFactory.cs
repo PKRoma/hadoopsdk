@@ -1,7 +1,7 @@
 ﻿namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.RestSimulator
 {
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestClient;
     using Microsoft.WindowsAzure.Management.HDInsight.ConnectionContext;
-    using Microsoft.WindowsAzure.Management.HDInsight.RestClient;
 
     internal class HDInsightManagementRestSimulatorClientFactory : IHDInsightManagementRestClientFactory
     {

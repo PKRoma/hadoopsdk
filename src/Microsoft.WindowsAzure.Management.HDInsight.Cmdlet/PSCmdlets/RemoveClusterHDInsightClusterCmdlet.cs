@@ -3,6 +3,7 @@
     using System;
     using System.Management.Automation;
     using System.Security.Cryptography.X509Certificates;
+    using Microsoft.WindowsAzure.Management.Framework.InversionOfControl;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters;
     using Microsoft.WindowsAzure.Management.HDInsight.InversionOfControl;
 

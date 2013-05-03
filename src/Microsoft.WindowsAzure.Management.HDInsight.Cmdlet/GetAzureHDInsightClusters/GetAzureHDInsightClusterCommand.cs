@@ -5,9 +5,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightCl
     using System.Collections.ObjectModel;
     using System.Linq;
     using System.Security.Cryptography.X509Certificates;
-    using Microsoft.WindowsAzure.Management.HDInsight.Client;
+    using Microsoft.WindowsAzure.Management.Framework.InversionOfControl;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Client;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets;
-    using Microsoft.WindowsAzure.Management.HDInsight.Data;
     using Microsoft.WindowsAzure.Management.HDInsight.InversionOfControl;
     using Microsoft.WindowsAzure.Management.Framework;
 

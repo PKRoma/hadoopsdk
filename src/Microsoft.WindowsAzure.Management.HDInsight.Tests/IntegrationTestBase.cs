@@ -23,13 +23,13 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Microsoft.WindowsAzure.Management.Framework;
     using Microsoft.WindowsAzure.Management.Framework.InversionOfControl;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoClient;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestClient;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets;
     using Microsoft.WindowsAzure.Management.HDInsight.ConnectionContext;
-    using Microsoft.WindowsAzure.Management.HDInsight.Data;
     using Microsoft.WindowsAzure.Management.HDInsight.InversionOfControl;
-    using Microsoft.WindowsAzure.Management.HDInsight.PocoClient;
-    using Microsoft.WindowsAzure.Management.HDInsight.RestClient;
     using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities;
     using Microsoft.WindowsAzure.Management.HDInsight.Tests.CmdLetTests.PowerShellTestAbstraction.Concreates;
     using Microsoft.WindowsAzure.Management.HDInsight.Tests.CmdLetTests.PowerShellTestAbstraction.Interfaces;
@@ -49,6 +49,41 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests
         private static IConnectionCredentials invalidSubscriptionId;
         private static IConnectionCredentials invalidCertificate;
     
+        internal static void TestSetup()
+        {
+            var testManager = new IntegrationTestManager();
+            if (!testManager.RunAzureTests())
+            {
+                Assert.Inconclusive("Azure tests are not configured on this machine.");
+            }
+            IntegrationTestBase.TestCredentials = testManager.GetCredentials("default");
+            if (IntegrationTestBase.TestCredentials == null)
+            {
+                Assert.Inconclusive("No entry was found in the credential config file for the specified test configuration.");
+            }
+
+            // Sets the certificate
+            var defaultCertificate = new X509Certificate2(IntegrationTestBase.TestCredentials.Certificate); ;
+
+
+            // Sets the test static properties
+            IntegrationTestBase.ClusterPrefix = string.Format("CLITest-{0}", Environment.GetEnvironmentVariable("computername") ?? "unknown");
+
+            // Sets the credential objects
+            IntegrationTestBase.validCredentials = ServiceLocator.Instance
+                                                .Locate<IConnectionCredentialsFactory>()
+                                                .Create(TestCredentials.SubscriptionId, defaultCertificate);
+            IntegrationTestBase.invalidSubscriptionId = ServiceLocator.Instance
+                                                     .Locate<IConnectionCredentialsFactory>()
+                                                     .Create(Guid.NewGuid(), defaultCertificate);
+            IntegrationTestBase.invalidCertificate = ServiceLocator.Instance
+                                                  .Locate<IConnectionCredentialsFactory>()
+                                                  .Create(TestCredentials.SubscriptionId, new X509Certificate2(TestCredentials.InvalidCertificate));
+
+            // Prepares the environment 
+            IntegrationTestBase.CleanUpClusters();
+        }
+
         internal IRunspace GetPowerShellRunspace()
         {
             var loc = typeof(GetAzureHDInsightClusterCmdlet).Assembly.Location;
@@ -82,47 +117,6 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests
         {
             var manager = ServiceLocator.Instance.Locate<IIocServiceLocationTestRunManager>();
             manager.MockingLevel = IocTestMockingLevel.ApplyNoMocking;
-        }
-
-        [AssemblyInitialize]
-        public static void AssemblyInit(TestContext context)
-        {
-            // Sets the simulator
-            var runManager = ServiceLocator.Instance.Locate<IIocServiceLocationTestRunManager>();
-            runManager.RegisterType<IHDInsightManagementRestClientFactory, HDInsightManagementRestSimulatorClientFactory>();
-
-            // Reads configurations
-            var testManager = new IntegrationTestManager();
-            if (!testManager.RunAzureTests())
-            {
-                Assert.Inconclusive("Azure tests are not configured on this machine.");
-            }
-            TestCredentials = testManager.GetCredentials("default");
-            if (TestCredentials == null)
-            {
-                Assert.Inconclusive("No entry was found in the credential config file for the specified test configuration.");
-            }
-
-            // Sets the certificate
-            var defaultCertificate = new X509Certificate2(TestCredentials.Certificate);;
-            
-            
-            // Sets the test static properties
-            ClusterPrefix = string.Format("CLITest-{0}", Environment.GetEnvironmentVariable("computername") ?? "unknown");
-
-            // Sets the credential objects
-            validCredentials = ServiceLocator.Instance
-                                             .Locate<IConnectionCredentialsFactory>()
-                                             .Create(TestCredentials.SubscriptionId, defaultCertificate);
-            invalidSubscriptionId = ServiceLocator.Instance
-                                                  .Locate<IConnectionCredentialsFactory>()
-                                                  .Create(Guid.NewGuid(), defaultCertificate);
-            invalidCertificate = ServiceLocator.Instance
-                                               .Locate<IConnectionCredentialsFactory>()
-                                               .Create(TestCredentials.SubscriptionId, new X509Certificate2(TestCredentials.InvalidCertificate));
-
-            // Prepares the environment 
-            CleanUpClusters();
         }
 
         internal static IConnectionCredentials GetValidCredentials()
@@ -175,7 +169,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests
             };
         }
 
-        protected static void CleanUpClusters()
+        internal static void CleanUpClusters()
         {
             var credentials = IntegrationTestBase.GetValidCredentials();
             using (var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(credentials))

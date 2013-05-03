@@ -7,9 +7,10 @@
     using System.Security.Cryptography.X509Certificates;
     using System.Text;
     using Microsoft.WindowsAzure.Management.Framework;
-    using Microsoft.WindowsAzure.Management.HDInsight.Client;
+    using Microsoft.WindowsAzure.Management.Framework.InversionOfControl;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Client;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets;
-    using Microsoft.WindowsAzure.Management.HDInsight.Data;
     using Microsoft.WindowsAzure.Management.HDInsight.InversionOfControl;
 
     internal class NewAzureHDInsightClusterCommand : AzureHDInsightClusterCommand<AzureHDInsightCluster>, INewAzureHDInsightClusterCommand

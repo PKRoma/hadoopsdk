@@ -20,9 +20,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
     using System.Linq;
     using Microsoft.WindowsAzure.Management.Framework;
     using Microsoft.WindowsAzure.Management.Framework.InversionOfControl;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Client;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data;
     using Microsoft.WindowsAzure.Management.HDInsight.ConnectionContext;
-    using Microsoft.WindowsAzure.Management.HDInsight.Client;
-    using Microsoft.WindowsAzure.Management.HDInsight.Data;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Microsoft.WindowsAzure.Management.HDInsight.InversionOfControl;
     using Microsoft.WindowsAzure.Management.HDInsight.Tests.ConnectionCredentials;

@@ -8,7 +8,6 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.CmdLetTests
     using Microsoft.WindowsAzure.Management.Framework.InversionOfControl;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets;
-    using Microsoft.WindowsAzure.Management.HDInsight.Data;
     using Microsoft.WindowsAzure.Management.HDInsight.InversionOfControl;
     using Microsoft.WindowsAzure.Management.HDInsight.Tests.CmdLetTests.PowerShellTestAbstraction.Concreates;
 

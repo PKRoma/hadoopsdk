@@ -5,8 +5,8 @@
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoClient;
     using Microsoft.WindowsAzure.Management.HDInsight.ConnectionContext;
-    using Microsoft.WindowsAzure.Management.HDInsight.PocoClient;
 
     class TestPocoClientFactoryFlowThrough : IHDInsightManagementPocoClientFactory
     {

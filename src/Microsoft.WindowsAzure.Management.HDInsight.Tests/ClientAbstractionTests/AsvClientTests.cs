@@ -10,12 +10,11 @@
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Microsoft.WindowsAzure.Management.Framework;
     using Microsoft.WindowsAzure.Management.Framework.InversionOfControl;
-    using Microsoft.WindowsAzure.Management.HDInsight.Asv;
-    using Microsoft.WindowsAzure.Management.HDInsight.Client;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Asv;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestClient;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.WebRequest;
     using Microsoft.WindowsAzure.Management.HDInsight.ConnectionContext;
     using Microsoft.WindowsAzure.Management.HDInsight.InversionOfControl;
-    using Microsoft.WindowsAzure.Management.HDInsight.RestClient;
-    using Microsoft.WindowsAzure.Management.HDInsight.WebRequest;
     using Moq;
 
     [TestClass]

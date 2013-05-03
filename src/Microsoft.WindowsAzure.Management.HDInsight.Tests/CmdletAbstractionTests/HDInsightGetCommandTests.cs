@@ -2,6 +2,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.CmdletAbstractionTes
 {
     using System.Linq;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Microsoft.WindowsAzure.Management.Framework.InversionOfControl;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters;
     using Microsoft.WindowsAzure.Management.HDInsight.InversionOfControl;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet;
@@ -21,13 +22,6 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.CmdletAbstractionTes
         {
             this.ApplyFullMocking();
             this.ResetIndividualMocks();
-        }
-
-        [AssemblyInitialize]
-        public static new void AssemblyInit(TestContext context)
-        {
-            InitializeIocContainers.Register();
-            IntegrationTestBase.AssemblyInit(context);
         }
 
         [TestMethod]

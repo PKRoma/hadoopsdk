@@ -25,11 +25,11 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.RestSimulator
     using System.Net;
     using System.Security.Cryptography.X509Certificates;
     using System.Threading.Tasks;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestClient;
     using Microsoft.WindowsAzure.Management.HDInsight.ConnectionContext;
     using Microsoft.WindowsAzure.Management.Framework;
-    using Microsoft.WindowsAzure.Management.HDInsight.Data;
     using Microsoft.WindowsAzure.Management.HDInsight.InversionOfControl;
-    using Microsoft.WindowsAzure.Management.HDInsight.RestClient;
 
     internal class HDInsightManagementRestSimulatorClient : DisposableObject, IHDInsightManagementRestClient
     {

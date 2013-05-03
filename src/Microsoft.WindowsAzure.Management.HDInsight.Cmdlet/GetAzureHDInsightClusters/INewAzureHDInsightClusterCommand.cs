@@ -6,7 +6,6 @@
     using System.Security.Cryptography.X509Certificates;
     using System.Text;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets;
-    using Microsoft.WindowsAzure.Management.HDInsight.Data;
 
     /// <summary>
     /// Worker object for creating a cluster via PowerShell.

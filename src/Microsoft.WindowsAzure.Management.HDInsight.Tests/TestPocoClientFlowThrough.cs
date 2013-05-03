@@ -2,14 +2,13 @@
 {
     using System.Collections.ObjectModel;
     using Microsoft.WindowsAzure.Management.Framework;
-    using Microsoft.WindowsAzure.Management.HDInsight.Data;
-    using Microsoft.WindowsAzure.Management.HDInsight.PocoClient;
-    using Microsoft.WindowsAzure.Management.HDInsight.RestClient;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoClient;
 
 
     internal class TestPocoClientFlowThrough : DisposableObject, IHDInsightManagementPocoClient

@@ -10,11 +10,11 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Microsoft.WindowsAzure.Management.Framework;
     using Microsoft.WindowsAzure.Management.Framework.InversionOfControl;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoClient;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestClient;
     using Microsoft.WindowsAzure.Management.HDInsight.ConnectionContext;
-    using Microsoft.WindowsAzure.Management.HDInsight.Data;
     using Microsoft.WindowsAzure.Management.HDInsight.InversionOfControl;
-    using Microsoft.WindowsAzure.Management.HDInsight.PocoClient;
-    using Microsoft.WindowsAzure.Management.HDInsight.RestClient;
 
     [TestClass]
     public class PocoClientTests : IntegrationTestBase
@@ -116,8 +116,8 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         {
             IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
             await ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>()
-                                .Create(credentials)
-                                .DeleteContainer(base.GetRandomClusterName());
+                                   .Create(credentials)
+                                   .DeleteContainer(base.GetRandomClusterName());
         }
 
         [TestMethod]
@@ -141,8 +141,8 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         {
             IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
             await ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>()
-                                .Create(credentials)
-                                .DeleteContainer(base.GetRandomClusterName(), "East US");
+                                   .Create(credentials)
+                                   .DeleteContainer(base.GetRandomClusterName(), "East US");
         }
 
         [TestMethod]
@@ -167,8 +167,8 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         {
             IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
             await ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>()
-                                .Create(credentials)
-                                .DeleteContainer(TestCredentials.DnsName, "Nowhere");
+                                   .Create(credentials)
+                                   .DeleteContainer(TestCredentials.DnsName, "Nowhere");
         }
 
         [TestMethod]
