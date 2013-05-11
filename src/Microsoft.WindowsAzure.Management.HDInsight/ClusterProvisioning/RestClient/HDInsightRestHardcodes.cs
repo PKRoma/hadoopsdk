@@ -2,7 +2,7 @@
 {
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
-    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.WebRequest;
+    using Microsoft.WindowsAzure.Management.Framework.WebRequest;
 
     /// <summary>
     /// Provides hard coded values to ensure type safety when interacting with key static values.

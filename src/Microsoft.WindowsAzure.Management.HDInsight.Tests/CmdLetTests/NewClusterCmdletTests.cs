@@ -109,7 +109,7 @@
             var manager = ServiceLocator.Instance.Locate<IIocServiceLocationIndividualTestManager>();
             manager.Override<IHDInsightManagementPocoClientFactory>(flowFactory);
 
-            var creds = this.GetCredentials("default");
+            var creds = GetCredentials(TestRunNames.Default);
             var certificate = new X509Certificate2(creds.Certificate);
 
             var dnsName = this.GetRandomClusterName();
@@ -128,13 +128,13 @@
                                       .AddCommand(CmdletHardCodes.AddAzureHDInsightMetastore)
                                       .WithParameter(CmdletHardCodes.SqlAzureServerName, creds.HiveStores[0].SqlServer)
                                       .WithParameter(CmdletHardCodes.DatabaseName, creds.HiveStores[0].Database)
-                                      .WithParameter(CmdletHardCodes.UserName, creds.HiveStores[0].Username)
+                                      .WithParameter(CmdletHardCodes.UserName, creds.HiveStores[0].UserName)
                                       .WithParameter(CmdletHardCodes.Password, creds.HiveStores[0].Password)
                                       .WithParameter(CmdletHardCodes.MetastoreType, AzureHDInsightMetastoreType.HiveMetastore)
                                       .AddCommand(CmdletHardCodes.AddAzureHDInsightMetastore)
                                       .WithParameter(CmdletHardCodes.SqlAzureServerName, creds.OozieStores[0].SqlServer)
                                       .WithParameter(CmdletHardCodes.DatabaseName, creds.OozieStores[0].Database)
-                                      .WithParameter(CmdletHardCodes.UserName, creds.OozieStores[0].Username)
+                                      .WithParameter(CmdletHardCodes.UserName, creds.OozieStores[0].UserName)
                                       .WithParameter(CmdletHardCodes.Password, creds.OozieStores[0].Password)
                                       .WithParameter(CmdletHardCodes.MetastoreType, AzureHDInsightMetastoreType.OozieMetastore)
                                       .AddCommand(CmdletHardCodes.NewAzureHDInsightCluster)

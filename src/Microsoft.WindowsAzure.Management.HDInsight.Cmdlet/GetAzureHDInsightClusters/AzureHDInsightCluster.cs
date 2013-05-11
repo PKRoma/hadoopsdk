@@ -15,19 +15,19 @@
         /// <param name="cluster">
         /// The underlying SDK data object representing the cluster.
         /// </param>
-        public AzureHDInsightCluster(ListClusterContainerResult cluster)
+        public AzureHDInsightCluster(HDInsightCluster cluster)
         {
             this.cluster = cluster;
         }
 
-        private ListClusterContainerResult cluster;
+        private HDInsightCluster cluster;
         
         /// <summary>
         /// Gets the name of the Azure HD Insight Cluster.
         /// </summary>
         public string Name
         {
-            get { return this.cluster.DnsName; }
+            get { return this.cluster.Name; }
         }
 
         /// <summary>
@@ -45,7 +45,7 @@
         /// </summary>
         public ClusterState State
         {
-            get { return this.cluster.ParsedState; }
+            get { return this.cluster.State; }
         }
 
         /// <summary>
@@ -77,7 +77,7 @@
         /// </summary>
         public int ClusterSizeInNodes
         {
-            get { return this.cluster.WorkerNodesCount; }
+            get { return this.cluster.ClusterSizeInNodes; }
         }
     }
 }

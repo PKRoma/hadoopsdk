@@ -7,9 +7,22 @@
 
     internal class ServiceLocationAssemblySweep
     {
+        private List<Type> knownRegistrars = new List<Type>();
+
+        public bool NewAssembliesPresent()
+        {
+            var registrars = this.GetRegistrarTypes().ToList();
+            this.knownRegistrars.All(r => registrars.Remove(r));
+            return registrars.Any();
+        }
+
         public IEnumerable<IServiceLocationRegistrar> GetRegistrars()
         {
-            var objects = (from t in this.GetRegistrarTypes()
+            var registrars = this.GetRegistrarTypes().ToList();
+            this.knownRegistrars.All(r => registrars.Remove(r));
+            this.knownRegistrars.AddRange(registrars);
+
+            var objects = (from t in registrars
                            select (IServiceLocationRegistrar)Activator.CreateInstance(t)).ToList();
             return objects;
         }

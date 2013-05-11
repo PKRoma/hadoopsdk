@@ -5,7 +5,7 @@
     using System.Linq;
     using System.Text;
     using Microsoft.WindowsAzure.Management.Framework.InversionOfControl;
-    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Client;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning;
     using Microsoft.WindowsAzure.Management.HDInsight.InversionOfControl;
 
     internal class RemoveAzureHDInsightClusterCommand : AzureHDInsightClusterCommandBase, IRemoveAzureHDInsightClusterCommand
@@ -15,16 +15,16 @@
 
         public override void EndProcessing()
         {
-            var client = ServiceLocator.Instance.Locate<IHDInsightSyncClientFactory>().Create(this.SubscriptionId,
+            var client = ServiceLocator.Instance.Locate<IClusterProvisioningClientFactory>().Create(this.SubscriptionId,
                                                                                               this.Certificate);
 
             if (!string.IsNullOrWhiteSpace(this.Location))
             {
-                client.DeleteContainer(this.Name);
+                client.DeleteCluster(this.Name);
             }
             else
             {
-                client.DeleteContainer(this.Name);
+                client.DeleteCluster(this.Name);
             }
             
         }

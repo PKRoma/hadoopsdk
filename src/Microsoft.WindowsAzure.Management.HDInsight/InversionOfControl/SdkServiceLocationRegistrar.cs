@@ -6,11 +6,12 @@
     using System.Text;
     using Microsoft.WindowsAzure.Management.Framework;
     using Microsoft.WindowsAzure.Management.Framework.InversionOfControl;
+    using Microsoft.WindowsAzure.Management.Framework.WebRequest;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Asv;
-    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Client;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.AzureManagementClient;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoClient;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestClient;
-    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.WebRequest;
     using Microsoft.WindowsAzure.Management.HDInsight.ConnectionContext;
 
     /// <summary>
@@ -26,14 +27,12 @@
                 throw new ArgumentNullException("manager");
             }
 
-            manager.RegisterType<IHttpClientAbstractionFactory, HttpClientAbstractionFactory>();
             manager.RegisterType<IHDInsightManagementRestClientFactory, HDInsightManagementRestClientFactory>();
             manager.RegisterType<IHDInsightManagementPocoClientFactory, HDInsightManagementPocoClientFactory>();
-            manager.RegisterType<IHDInsightClientFactory, HDInsightClientFactory>();
-            manager.RegisterType<IAsvClientFactory, AsvClientFactory>();
-            manager.RegisterType<IHDInsightClientFactory, HDInsightClientFactory>();
-            manager.RegisterType<IHDInsightSyncClientFactory, HDInsightSyncClientFactory>();
+            manager.RegisterType<IClusterProvisioningClientFactory, ClusterProvisioningClientFactory>();
+            manager.RegisterType<IAsvValidatorClientFactory, AsvValidatorValidatorClientFactory>();
             manager.RegisterType<IConnectionCredentialsFactory, ProductionConnectionCredentialsFactory>();
+            manager.RegisterType<ISubscriptionRegistrationClientFactory, SubscriptionRegistrationClientFactory>();
         }
     }
 }

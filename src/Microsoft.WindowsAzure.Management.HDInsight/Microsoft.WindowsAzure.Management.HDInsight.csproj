@@ -52,24 +52,27 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ClusterProvisioning\Asv\AsvClientFactory.cs" />
-    <Compile Include="ClusterProvisioning\Asv\IAsvClientFactory.cs" />
-    <Compile Include="ClusterProvisioning\Asv\IAsvClient.cs" />
-    <Compile Include="ClusterProvisioning\Client\HDInsightClient.cs" />
-    <Compile Include="ClusterProvisioning\Client\IHDInsightClient.cs" />
-    <Compile Include="ClusterProvisioning\Client\IHDInsightClientFactory.cs" />
-    <Compile Include="ClusterProvisioning\Client\HDInsightClientFactory.cs" />
-    <Compile Include="ClusterProvisioning\Client\HDInsightSyncClient.cs" />
-    <Compile Include="ClusterProvisioning\Client\HDInsightSyncClientFactory.cs" />
-    <Compile Include="ClusterProvisioning\Client\IHDInsightSyncClient.cs" />
-    <Compile Include="ClusterProvisioning\Client\IHDInsightSyncClientFactory.cs" />
+    <Compile Include="ClusterProvisioning\AsvValidator\AsvValidatorClientFactory.cs" />
+    <Compile Include="ClusterProvisioning\AsvValidator\IAsvValidatorClientFactory.cs" />
+    <Compile Include="ClusterProvisioning\AsvValidator\IAsvValidatorClient.cs" />
+    <Compile Include="ClusterProvisioning\ClusterProvisioningClient.cs" />
+    <Compile Include="ClusterProvisioning\IClusterProvisioningAsyncClient.cs" />
+    <Compile Include="ClusterProvisioning\IClusterProvisioningClient.cs" />
+    <Compile Include="ClusterProvisioning\IClusterProvisioningClientBase.cs" />
+    <Compile Include="ClusterProvisioning\IClusterProvisioningClientFactory.cs" />
+    <Compile Include="ClusterProvisioning\ClusterProvisioningClientFactory.cs" />
+    <Compile Include="ClusterProvisioning\IClusterProvisioningSyncClient.cs" />
+    <Compile Include="ClusterProvisioning\SubscriptionRegistration\SubscriptionRegistrationClient.cs" />
+    <Compile Include="ClusterProvisioning\SubscriptionRegistration\SubscriptionRegistrationClientFactory.cs" />
+    <Compile Include="ClusterProvisioning\SubscriptionRegistration\ISubscriptionRegistrationClientFactory.cs" />
+    <Compile Include="ClusterProvisioning\SubscriptionRegistration\ISubscriptionRegistrationClient.cs" />
     <Compile Include="ConnectionContext\ProductionConnectionCredentialsFactory.cs" />
     <Compile Include="ConnectionContext\IConnectionCredentialsFactory.cs" />
-    <Compile Include="ClusterProvisioning\Data\AsvAccountConfiguration.cs" />
-    <Compile Include="ClusterProvisioning\Data\ComponentMetastore.cs" />
-    <Compile Include="ClusterProvisioning\Data\CreateClusterRequest.cs" />
+    <Compile Include="ClusterProvisioning\Data\StorageAccountConfiguration.cs" />
+    <Compile Include="ClusterProvisioning\Data\HDInsightMetastore.cs" />
+    <Compile Include="ClusterProvisioning\Data\HDInsightClusterCreationDetails.cs" />
     <Compile Include="ClusterProvisioning\Data\ClusterState.cs" />
-    <Compile Include="ClusterProvisioning\Data\ListClusterContainerResult.cs" />
+    <Compile Include="ClusterProvisioning\Data\HDInsightCluster.cs" />
     <Compile Include="ClusterProvisioning\Data\ClusterErrorStatus.cs" />
     <Compile Include="ClusterProvisioning\Data\PayloadConverter.cs" />
     <Compile Include="ClusterProvisioning\Old\CloudService.cs" />
@@ -89,7 +92,7 @@
     <Compile Include="ClusterProvisioning\PocoClient\IHDInsightManagementPocoClient.cs" />
     <Compile Include="ClusterProvisioning\PocoClient\HDInsightManagementPocoClient.cs" />
     <Compile Include="ClusterProvisioning\PocoClient\IHDInsightManagementPocoClientFactory.cs" />
-    <Compile Include="ClusterProvisioning\Asv\AsvClient.cs" />
+    <Compile Include="ClusterProvisioning\AsvValidator\AsvValidatorClient.cs" />
     <Compile Include="ClusterProvisioning\RestClient\HDInsightManagementRestClientFactory.cs" />
     <Compile Include="ClusterProvisioning\RestClient\HDInsightRestHardcodes.cs" />
     <Compile Include="ClusterProvisioning\RestClient\IHDInsightManagementRestClientFactory.cs" />
@@ -104,13 +107,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\AssemblyInternalsVisibleTo.cs" />
     <Compile Include="ConnectionContext\ConnectionCredentials.cs" />
-    <Compile Include="ClusterProvisioning\WebRequest\HttpClientAbstraction.cs" />
-    <Compile Include="ClusterProvisioning\WebRequest\HttpClientAbstractionFactory.cs" />
-    <Compile Include="ClusterProvisioning\WebRequest\HttpHardcodes.cs" />
-    <Compile Include="ClusterProvisioning\WebRequest\HttpResponseMessageAbstraction.cs" />
-    <Compile Include="ClusterProvisioning\WebRequest\IHttpClientAbstraction.cs" />
-    <Compile Include="ClusterProvisioning\WebRequest\IHttpClientAbstractionFactory.cs" />
-    <Compile Include="ClusterProvisioning\WebRequest\IHttpResponseMessageAbstraction.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.WindowsAzure.Management.Framework.Threading\Microsoft.WindowsAzure.Management.Framework.Threading.csproj">

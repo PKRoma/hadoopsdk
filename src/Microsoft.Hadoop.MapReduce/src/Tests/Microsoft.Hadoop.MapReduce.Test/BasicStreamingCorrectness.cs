@@ -103,11 +103,18 @@ namespace Microsoft.Hadoop.MapReduce.Test
         /// Tests throwing in the mapper.
         /// </summary>
         [TestMethod]
-        [ExpectedException(typeof(StreamingException))]
         [TestCategory("CheckIn")]
         public void ThrowInMapper()
         {
-            SimpleJobExecutor.ExecuteMapOnly<int, int, int, ExceptionalMapper>(Enumerable.Range(1, 100), out _lastCounters);
+            try
+            {
+                SimpleJobExecutor.ExecuteMapOnly<int, int, int, ExceptionalMapper>(Enumerable.Range(1, 100), out _lastCounters);
+                Assert.Fail("The previous call was expected to throw an exception but failed to do so.");
+            }
+            catch (StreamingException)
+            {
+                // TODO: The exception is correct, we should evaluate the message to ensure it is thrown in the right place.
+            }
         }
 
         /// <summary>

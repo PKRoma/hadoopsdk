@@ -26,17 +26,17 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data
 
     internal static class PayloadConverter
     {
-        internal static Collection<ListClusterContainerResult> DeserializeListContainersResult(string payload, string deploymentNamespace)
+        internal static Collection<HDInsightCluster> DeserializeListContainersResult(string payload, string deploymentNamespace)
         {
             var data = from svc in DeserializeFromXml<CloudServiceList>(payload)
                        from res in svc.Resources
                        where (res.ResourceProviderNamespace != null && res.ResourceProviderNamespace == deploymentNamespace) && (res.Type != null && res.Type == "containers")
                        select ListClusterContainerResult_FromInternal(res, svc);
 
-            return new Collection<ListClusterContainerResult>(data.ToList());
+            return new Collection<HDInsightCluster>(data.ToList());
         }
 
-        internal static string SerializeListContainersResult(Collection<ListClusterContainerResult> containers, string deploymentNamespace)
+        internal static string SerializeListContainersResult(Collection<HDInsightCluster> containers, string deploymentNamespace)
         {
             var serviceList = new CloudServiceList();
             foreach (var containerGroup in containers.GroupBy(container => container.Location))
@@ -52,14 +52,14 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data
             return serviceList.SerializeToXml();
         }
 
-        internal static CreateClusterRequest DeserializeClusterCreateRequest(string payload)
+        internal static HDInsightClusterCreationDetails DeserializeClusterCreateRequest(string payload)
         {
             var resource = DeserializeFromXml<Resource>(payload);
             var createPayload = DeserializeFromXml<ClusterContainerPayload>(resource.IntrinsicSettings[0].OuterXml);
             return CreateClusterRequest_FromInternal(createPayload);
         }
 
-        internal static string SerializeClusterCreateRequest(CreateClusterRequest cluster, Guid subscriptionId)
+        internal static string SerializeClusterCreateRequest(HDInsightClusterCreationDetails cluster, Guid subscriptionId)
         {
             var payloadObject = CreateClusterRequest_ToInternal(cluster, subscriptionId);
             var input = new Resource { IntrinsicSettings = new[] { payloadObject.SerializeToXmlNode() } };
@@ -82,29 +82,29 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data
             return (T)Convert.ChangeType(value.Value, typeof(T), CultureInfo.InvariantCulture);
         }
 
-        private static CreateClusterRequest CreateClusterRequest_FromInternal(ClusterContainerPayload payloadObject)
+        private static HDInsightClusterCreationDetails CreateClusterRequest_FromInternal(ClusterContainerPayload payloadObject)
         {
-            var cluster = new CreateClusterRequest
+            var cluster = new HDInsightClusterCreationDetails
             {
                 Location = payloadObject.AzureStorageLocation,
-                DnsName = payloadObject.DnsName
+                Name = payloadObject.DnsName
             };
 
-            cluster.ClusterUserName = payloadObject.Deployment.ClusterUsername;
-            cluster.ClusterUserPassword = payloadObject.Deployment.ClusterPassword;
-            cluster.DefaultAsvAccountName = payloadObject.Deployment.ASVAccounts[0].AccountName;
-            cluster.DefaultAsvAccountKey = payloadObject.Deployment.ASVAccounts[0].SecretKey;
-            cluster.DefaultAsvContainer = payloadObject.Deployment.ASVAccounts[0].BlobContainerName;
+            cluster.UserName = payloadObject.Deployment.ClusterUsername;
+            cluster.Password = payloadObject.Deployment.ClusterPassword;
+            cluster.DefaultStorageAccountName = payloadObject.Deployment.ASVAccounts[0].AccountName;
+            cluster.DefaultStorageAccountKey = payloadObject.Deployment.ASVAccounts[0].SecretKey;
+            cluster.DefaultStorageContainer = payloadObject.Deployment.ASVAccounts[0].BlobContainerName;
             foreach (var asv in payloadObject.Deployment.ASVAccounts.Skip(1))
             {
-                cluster.AsvAccounts.Add(new AsvAccountConfiguration(asv.AccountName, asv.SecretKey));
+                cluster.AdditionalStorageAccounts.Add(new StorageAccountConfiguration(asv.AccountName, asv.SecretKey));
             }
 
             var oozieMetaStore = payloadObject.Deployment.SqlMetaStores.FirstOrDefault(
                 metastore => metastore.Type == SqlAzureMetaStorePayload.SqlMetastoreType.OozieMetastore);
             if (oozieMetaStore != null)
             {
-                cluster.OozieMetastore = new ComponentMetastore(oozieMetaStore.AzureServerName,
+                cluster.OozieMetastore = new HDInsightMetastore(oozieMetaStore.AzureServerName,
                                                                 oozieMetaStore.DatabaseName,
                                                                 oozieMetaStore.Username,
                                                                 oozieMetaStore.Password);
@@ -114,7 +114,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data
                 metastore => metastore.Type == SqlAzureMetaStorePayload.SqlMetastoreType.HiveMetastore);
             if (hiveMetaStore != null)
             {
-                cluster.HiveMetastore = new ComponentMetastore(hiveMetaStore.AzureServerName,
+                cluster.HiveMetastore = new HDInsightMetastore(hiveMetaStore.AzureServerName,
                                                                hiveMetaStore.DatabaseName,
                                                                hiveMetaStore.Username,
                                                                hiveMetaStore.Password);
@@ -123,17 +123,17 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data
             var workernodes = from nodes in payloadObject.Deployment.NodeSizes
                               where nodes.RoleType == ClusterNodeType.DataNode
                               select nodes;
-            cluster.WorkerNodeCount = workernodes.First().Count;
+            cluster.ClusterSizeInNodes = workernodes.First().Count;
             return cluster;
         }
 
-        private static ClusterContainerPayload CreateClusterRequest_ToInternal(CreateClusterRequest cluster, Guid subscriptionId)
+        private static ClusterContainerPayload CreateClusterRequest_ToInternal(HDInsightClusterCreationDetails cluster, Guid subscriptionId)
         {
             // Container with the basic info
             var deployment = new ClusterDeploymentPayload()
             {
-                ClusterPassword = cluster.ClusterUserPassword,
-                ClusterUsername = cluster.ClusterUserName,
+                ClusterPassword = cluster.Password,
+                ClusterUsername = cluster.UserName,
                 Version = ClusterDeploymentPayload.DEFAULTVERSION
             };
 
@@ -146,7 +146,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data
             });
             deployment.NodeSizes.Add(new ClusterNodeSizePayload()
             {
-                Count = cluster.WorkerNodeCount,
+                Count = cluster.ClusterSizeInNodes,
                 RoleType = ClusterNodeType.DataNode,
                 VMSize = NodeVMSize.Large
             });
@@ -154,13 +154,13 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data
             // ASV information
             deployment.ASVAccounts.Add(new ASVAccountPayload()
             {
-                AccountName = cluster.DefaultAsvAccountName,
-                SecretKey = cluster.DefaultAsvAccountKey,
-                BlobContainerName = cluster.DefaultAsvContainer
+                AccountName = cluster.DefaultStorageAccountName,
+                SecretKey = cluster.DefaultStorageAccountKey,
+                BlobContainerName = cluster.DefaultStorageContainer
             });
-            foreach (var asv in cluster.AsvAccounts)
+            foreach (var asv in cluster.AdditionalStorageAccounts)
             {
-                deployment.ASVAccounts.Add(new ASVAccountPayload() { AccountName = asv.AccountName, SecretKey = asv.Key, BlobContainerName = "deploymentcontainer" });
+                deployment.ASVAccounts.Add(new ASVAccountPayload() { AccountName = asv.Name, SecretKey = asv.Key, BlobContainerName = "deploymentcontainer" });
             }
 
             // Metastores
@@ -191,7 +191,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data
             return new ClusterContainerPayload()
             {
                 AzureStorageLocation = cluster.Location,
-                DnsName = cluster.DnsName,
+                DnsName = cluster.Name,
                 SubscriptionId = subscriptionId,
                 DeploymentAction = AzureClusterDeploymentAction.Create,
                 Deployment = deployment,
@@ -201,16 +201,16 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data
             // TODO: EXTRACT METADATA INFO
         }
 
-        private static Resource ListClusterContainerResult_ToInternal(ListClusterContainerResult result, string nameSpace)
+        private static Resource ListClusterContainerResult_ToInternal(HDInsightCluster result, string nameSpace)
         {
-            var resource = new Resource { Name = result.DnsName, SubState = result.State, ResourceProviderNamespace = nameSpace, Type = "containers" };
-            if (result.ResultError != null)
+            var resource = new Resource { Name = result.Name, SubState = result.StateString, ResourceProviderNamespace = nameSpace, Type = "containers" };
+            if (result.Error != null)
             {
-                resource.OperationStatus = new ResourceOperationStatus { Type = result.ResultError.OperationType };
+                resource.OperationStatus = new ResourceOperationStatus { Type = result.Error.OperationType };
                 resource.OperationStatus.Error = new ResourceErrorInfo
                 {
-                    HttpCode = result.ResultError.HttpCode,
-                    Message = result.ResultError.Message
+                    HttpCode = result.Error.HttpCode,
+                    Message = result.Error.Message
                 };
             }
 
@@ -219,25 +219,25 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data
                 new OutputItem { Key = "CreatedDate", Value = result.CreatedDate.ToString(CultureInfo.InvariantCulture) },
                 new OutputItem { Key = "ConnectionURL", Value = result.ConnectionUrl },
                 new OutputItem { Key = "ClusterUsername", Value = result.UserName },
-                new OutputItem { Key = "NodesCount", Value = result.WorkerNodesCount.ToString(CultureInfo.InvariantCulture) }
+                new OutputItem { Key = "NodesCount", Value = result.ClusterSizeInNodes.ToString(CultureInfo.InvariantCulture) }
             };
 
             return resource;
         }
 
-        private static ListClusterContainerResult ListClusterContainerResult_FromInternal(Resource res, CloudService service)
+        private static HDInsightCluster ListClusterContainerResult_FromInternal(Resource res, CloudService service)
         {
             // Extracts static properties from the Resource
-            var c = new ListClusterContainerResult(res.Name, res.SubState) { Location = service.GeoRegion };
+            var c = new HDInsightCluster(res.Name, res.SubState) { Location = service.GeoRegion };
 
             // Extracts dynamic properties from the resource
             c.CreatedDate = ExtractResourceOutputValue<DateTime>(res, "CreatedDate");
             c.ConnectionUrl = ExtractResourceOutputValue<string>(res, "ConnectionURL");
             c.UserName = ExtractResourceOutputValue<string>(res, "ClusterUsername");
-            c.WorkerNodesCount = ExtractResourceOutputValue<int>(res, "NodesCount");
+            c.ClusterSizeInNodes = ExtractResourceOutputValue<int>(res, "NodesCount");
 
             // Extracts a possible error status
-            c.ResultError = res.OperationStatus == null || res.OperationStatus.Error == null
+            c.Error = res.OperationStatus == null || res.OperationStatus.Error == null
                 ? null
                 : new ClusterErrorStatus(res.OperationStatus.Error.HttpCode, res.OperationStatus.Error.Message, res.OperationStatus.Type);
 

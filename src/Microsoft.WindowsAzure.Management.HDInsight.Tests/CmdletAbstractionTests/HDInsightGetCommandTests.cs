@@ -40,7 +40,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.CmdletAbstractionTes
                              select container;
             Assert.AreEqual(1, containers.Count());
 
-            //var result = client.ListContainer("tsthdx00hdxcibld02");
+            //var result = client.GetCluster("tsthdx00hdxcibld02");
             // Assert.IsNotNull(result);
             // Assert.AreEqual(result.Location, "East US");
             // Assert.AreEqual(result.UserName, "sa-po-svc");

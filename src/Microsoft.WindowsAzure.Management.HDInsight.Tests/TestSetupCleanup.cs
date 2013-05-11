@@ -8,6 +8,7 @@
     using System.Threading.Tasks;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Microsoft.WindowsAzure.Management.Framework.InversionOfControl;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.AzureManagementClient;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestClient;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets;
     using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities;
@@ -27,10 +28,16 @@
             // Sets the simulator
             var runManager = ServiceLocator.Instance.Locate<IIocServiceLocationTestRunManager>();
             runManager.RegisterType<IHDInsightManagementRestClientFactory, HDInsightManagementRestSimulatorClientFactory>();
+            runManager.RegisterType<ISubscriptionRegistrationClientFactory, SubscriptionRegistrationSimulatorClientFactory>();
 
             // Reads configurations
-            IntegrationTestBase.TestSetup();
+            IntegrationTestBase.TestRunSetup();
         }
 
+        [AssemblyCleanup]
+        public static void AssemblyCleanup()
+        {
+            IntegrationTestBase.TestRunCleanup();
+        }
     }
 }

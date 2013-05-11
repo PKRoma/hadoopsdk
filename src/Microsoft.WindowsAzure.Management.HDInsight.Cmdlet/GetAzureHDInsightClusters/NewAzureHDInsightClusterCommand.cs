@@ -8,7 +8,7 @@
     using System.Text;
     using Microsoft.WindowsAzure.Management.Framework;
     using Microsoft.WindowsAzure.Management.Framework.InversionOfControl;
-    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Client;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets;
     using Microsoft.WindowsAzure.Management.HDInsight.InversionOfControl;
@@ -43,33 +43,33 @@
 
         public override void EndProcessing()
         {
-            var client = ServiceLocator.Instance.Locate<IHDInsightSyncClientFactory>().Create(this.SubscriptionId,
+            var client = ServiceLocator.Instance.Locate<IClusterProvisioningClientFactory>().Create(this.SubscriptionId,
                                                                                               this.Certificate);
-            var createClusterRequest = new CreateClusterRequest();
-            createClusterRequest.DnsName = this.Name;
+            var createClusterRequest = new HDInsightClusterCreationDetails();
+            createClusterRequest.Name = this.Name;
             createClusterRequest.Location = this.Location;
-            createClusterRequest.DefaultAsvAccountName = this.DefaultStorageAccountName;
-            createClusterRequest.DefaultAsvAccountKey = this.DefaultStorageAccountKey;
-            createClusterRequest.DefaultAsvContainer = this.DefaultStorageContainerName;
-            createClusterRequest.ClusterUserName = this.UserName;
-            createClusterRequest.ClusterUserPassword = this.Password;
-            createClusterRequest.WorkerNodeCount = this.ClusterSizeInNodes;
-            createClusterRequest.AsvAccounts.AddRange(this.AdditionalStorageAccounts.Select(act => new AsvAccountConfiguration(act.StorageAccountName, act.StorageAccountKey)));
+            createClusterRequest.DefaultStorageAccountName = this.DefaultStorageAccountName;
+            createClusterRequest.DefaultStorageAccountKey = this.DefaultStorageAccountKey;
+            createClusterRequest.DefaultStorageContainer = this.DefaultStorageContainerName;
+            createClusterRequest.UserName = this.UserName;
+            createClusterRequest.Password = this.Password;
+            createClusterRequest.ClusterSizeInNodes = this.ClusterSizeInNodes;
+            createClusterRequest.AdditionalStorageAccounts.AddRange(this.AdditionalStorageAccounts.Select(act => new StorageAccountConfiguration(act.StorageAccountName, act.StorageAccountKey)));
             if (this.HiveMetastore.IsNotNull())
             {
-                createClusterRequest.HiveMetastore = new ComponentMetastore(this.HiveMetastore.SqlAzureServerName,
+                createClusterRequest.HiveMetastore = new HDInsightMetastore(this.HiveMetastore.SqlAzureServerName,
                                                                             this.HiveMetastore.DatabaseName,
                                                                             this.HiveMetastore.UserName,
                                                                             this.HiveMetastore.Password);
             }
             if (this.OozieMetastore.IsNotNull())
             {
-                createClusterRequest.OozieMetastore = new ComponentMetastore(this.OozieMetastore.SqlAzureServerName,
+                createClusterRequest.OozieMetastore = new HDInsightMetastore(this.OozieMetastore.SqlAzureServerName,
                                                                              this.OozieMetastore.DatabaseName,
                                                                              this.OozieMetastore.UserName,
                                                                              this.OozieMetastore.Password);
             }
-            this.Output.Add(new AzureHDInsightCluster(client.CreateContainer(createClusterRequest)));
+            this.Output.Add(new AzureHDInsightCluster(client.CreateCluster(createClusterRequest)));
         }
 
         public ICollection<AzureHDInsightStorageAccount> AdditionalStorageAccounts { get; private set; }

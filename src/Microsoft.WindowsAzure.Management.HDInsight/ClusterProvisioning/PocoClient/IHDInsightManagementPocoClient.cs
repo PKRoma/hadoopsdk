@@ -22,16 +22,16 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
 
     internal interface IHDInsightManagementPocoClient : IDisposable
     {
-        Task<Collection<ListClusterContainerResult>> ListContainers();
+        Task<Collection<HDInsightCluster>> ListContainers();
 
-        Task<ListClusterContainerResult> ListContainer(string dnsName);
+        Task<HDInsightCluster> ListContainer(string dnsName);
 
-        Task CreateContainer(CreateClusterRequest cluster);
+        Task CreateContainer(HDInsightClusterCreationDetails details);
 
         Task DeleteContainer(string dnsName);
 
         Task DeleteContainer(string dnsName, string location);
 
-        void WaitForClusterCondition(string dnsName, Func<ListClusterContainerResult, bool> evaluate, TimeSpan interval);
+        void WaitForClusterCondition(string dnsName, Func<HDInsightCluster, bool> evaluate, TimeSpan interval);
     }
 }

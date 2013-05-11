@@ -24,15 +24,13 @@
         [TestInitialize]
         public void Initialize()
         {
-            this.ApplyFullMocking();
-            this.ResetIndividualMocks();
+            this.IndividualTestSetup();
         }
 
         [TestCleanup]
         public void TestCleanup()
         {
-            this.ApplyFullMocking();
-            this.ResetIndividualMocks();
+            this.IndividualTestCleanup();
         }
 
         [TestMethod]
@@ -79,6 +77,7 @@
         [TestCategory("Production")]
         public async Task ICanPerformA_ListCloudServices_Using_AzureProduction()
         {
+            this.ApplyIndividualTestMockingOnly();
             await this.ICanPerformA_ListCloudServices_Using_RestClientAbstraction();
         }
 
@@ -91,6 +90,18 @@
             IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
             var client = ServiceLocator.Instance.Locate<IHDInsightManagementRestClientFactory>().Create(credentials);
             Assert.IsTrue(this.ContainsContainer(TestCredentials.DnsName, await client.ListCloudServices()));
+        }
+
+        [TestMethod]
+        [TestCategory("Integration")]
+        [TestCategory("Scenario")]
+        [TestCategory("CheckIn")]
+        [TestCategory("RestClient")]
+        [TestCategory("Production")]
+        public async Task ICanPerformA_CreateDeleteContainers_Using_RestClient_AzureProduction()
+        {
+            this.ApplyIndividualTestMockingOnly();
+            await this.ICanPerformA_ListCloudServices_Using_RestClientAbstraction();
         }
 
         [TestMethod]
@@ -127,7 +138,7 @@
                 Thread.Sleep(TimeSpan.FromSeconds(1));
             }
         }
-        
+
         [TestMethod]
         [TestCategory("Integration")]
         [TestCategory("Manual")]
@@ -170,7 +181,7 @@
         }
         
         // dnsName, location, subscriptionId, Guid.NewGuid()
-        private const string CreateContainerGenericRequest =
+        internal const string CreateContainerGenericRequest =
 @"<ClusterContainer xmlns=""http://schemas.datacontract.org/2004/07/Microsoft.ClusterServices.DataAccess.Context"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance"">
     <ExtendedProperties i:nil=""true"" />
     <AzureStorageAccount i:nil=""true"" />

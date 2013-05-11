@@ -1,19 +1,20 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 
 <Drop xmlns="http://microsoft.com/sat/drop.xsd">
-<Copy>
+  <!-- Managment SDK -->
+  <Copy>
     <From>Microsoft.WindowsAzure.Management.Framework\Microsoft.WindowsAzure.Management.Framework.dll</From>
     <To>Microsoft.WindowsAzure.Management.HDInsight\lib\net40\Microsoft.WindowsAzure.Management.Framework.dll</To>
   </Copy>
   <Copy>
     <From>Microsoft.WindowsAzure.Management.Framework.Threading\Microsoft.WindowsAzure.Management.Framework.Threading.dll</From>
-    <To>Microsoft.WindowsAzure.Management.HDInsight\lib\net40\Microsoft.WindowsAzure.Management.Framework.Threading.dll</To>
+    <To>Microsoft.WindowsAzure.Management.HDInsight\content\Microsoft.WindowsAzure.Management.Framework.Threading.dll</To>
   </Copy>
   <Copy>
     <From>Microsoft.WindowsAzure.Management.HDInsight\Microsoft.WindowsAzure.Management.HDInsight.dll</From>
     <To>Microsoft.WindowsAzure.Management.HDInsight\lib\net40\Microsoft.WindowsAzure.Management.HDInsight.dll</To>
   </Copy>
-
+  <!-- Cmdlets -->
   <Copy>
     <From>Microsoft.WindowsAzure.Management.Framework\Microsoft.WindowsAzure.Management.Framework.dll</From>
     <To>Cmdlet\Microsoft.WindowsAzure.Management.Framework.dll</To>
@@ -40,6 +41,10 @@
     <To>Microsoft.Hadoop.MapReduce\lib\net40\Microsoft.Hadoop.WebClient.dll</To>
   </Copy>
   <Copy>
+    <From>Microsoft.Hadoop.Client\Microsoft.Hadoop.Client.dll</From>
+    <To>Microsoft.Hadoop.MapReduce\lib\net40\Microsoft.Hadoop.Client.dll</To>
+  </Copy>
+  <Copy>
     <From>Microsoft.Hadoop.WebClient\install.ps1</From>
     <To>Microsoft.Hadoop.MapReduce\tools\install.ps1</To>
   </Copy>
@@ -56,11 +61,23 @@
       <From>Microsoft.Hadoop.CombineDriver\Microsoft.Hadoop.CombineDriver.exe</From>
       <To>Microsoft.Hadoop.MapReduce\content\MRLib\Microsoft.Hadoop.CombineDriver.exe</To>
    </Copy>
-   <Copy>
+  <Copy>
+    <From>Microsoft.Hadoop.Client\Microsoft.Hadoop.Client.dll</From>
+    <To>Microsoft.Hadoop.MapReduce\content\MRLib\Microsoft.Hadoop.Client.dll</To>
+  </Copy>
+  <Copy>
+    <From>Microsoft.Hadoop.CombineDriver\Microsoft.Hadoop.CombineDriver.exe</From>
+    <To>Microsoft.Hadoop.MapReduce\content\MRLib\Microsoft.WindowsAzure.Management.Framework.Threading.dll</To>
+  </Copy>
+  <Copy>
       <From>Microsoft.Hadoop.ReduceDriver\Microsoft.Hadoop.ReduceDriver.exe</From>
       <To>Microsoft.Hadoop.MapReduce\content\MRLib\Microsoft.Hadoop.ReduceDriver.exe</To>
    </Copy>
-   <Copy>
+  <Copy>
+    <From>Microsoft.Hadoop.WebClient\Microsoft.WindowsAzure.Management.Framework.Threading.dll</From>
+    <To>Microsoft.Hadoop.MapReduce\content\Microsoft.WindowsAzure.Management.Framework.Threading.dll</To>
+  </Copy>
+  <Copy>
       <From>MRRunner\MRRunner.exe</From>
       <To>Microsoft.Hadoop.MapReduce\content\MRLib\MRRunner.exe</To>
    </Copy>
@@ -70,21 +87,37 @@
       <To>Microsoft.Hadoop.WebClient\lib\net45\Microsoft.Hadoop.WebClient.dll</To>
    </Copy> -->
   <Copy>
+    <From>Microsoft.Hadoop.Client\Microsoft.Hadoop.Client.dll</From>
+    <To>Microsoft.Hadoop.WebClient\lib\net40\Microsoft.Hadoop.Client.dll</To>
+  </Copy>
+  <Copy>
     <From>Microsoft.Hadoop.WebClient\Microsoft.Hadoop.WebClient.dll</From>
     <To>Microsoft.Hadoop.WebClient\lib\net40\Microsoft.Hadoop.WebClient.dll</To>
+  </Copy>
+  <Copy>
+    <From>Microsoft.Hadoop.WebClient\Microsoft.WindowsAzure.Management.Framework.Threading.dll</From>
+    <To>Microsoft.Hadoop.WebClient\content\Microsoft.WindowsAzure.Management.Framework.Threading.dll</To>
   </Copy>
   <Copy>
     <From>Microsoft.Hadoop.WebClient\install.ps1</From>
     <To>Microsoft.Hadoop.WebClient\tools\install.ps1</To>
   </Copy>
    <!-- Microsoft.Hadoop.Hive -->
-   <Copy>
+  <Copy>
+    <From>Microsoft.Hadoop.Client\Microsoft.Hadoop.Client.dll</From>
+    <To>Microsoft.Hadoop.Client\lib\net40\Microsoft.Hadoop.Client.dll</To>
+  </Copy>
+  <Copy>
       <From>Microsoft.Hadoop.Hive\Microsoft.Hadoop.Hive.dll</From>
       <To>Microsoft.Hadoop.Hive\lib\net40\Microsoft.Hadoop.Hive.dll</To>
    </Copy>
   <Copy>
     <From>Microsoft.Hadoop.WebClient\Microsoft.Hadoop.WebClient.dll</From>
     <To>Microsoft.Hadoop.Hive\lib\net40\Microsoft.Hadoop.WebClient.dll</To>
+  </Copy>
+  <Copy>
+    <From>Microsoft.Hadoop.WebClient\Microsoft.WindowsAzure.Management.Framework.Threading.dll</From>
+    <To>Microsoft.Hadoop.Hive\content\Microsoft.WindowsAzure.Management.Framework.Threading.dll</To>
   </Copy>
   <Copy>
     <From>Microsoft.Hadoop.WebClient\install.ps1</From>

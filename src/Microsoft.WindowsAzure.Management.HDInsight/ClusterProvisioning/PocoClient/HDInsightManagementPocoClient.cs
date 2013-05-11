@@ -23,6 +23,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
     using Microsoft.WindowsAzure.Management.Framework;
     using Microsoft.WindowsAzure.Management.Framework.InversionOfControl;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Asv;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.AzureManagementClient;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestClient;
     using Microsoft.WindowsAzure.Management.HDInsight.ConnectionContext;
@@ -37,7 +38,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
             this.credentials = credentials;
         }
 
-        public async Task<Collection<ListClusterContainerResult>> ListContainers()
+        public async Task<Collection<HDInsightCluster>> ListContainers()
         {
             using (var client = ServiceLocator.Instance.Locate<IHDInsightManagementRestClientFactory>().Create(this.credentials))
             {
@@ -46,20 +47,20 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
             }
         }
 
-        public async Task<ListClusterContainerResult> ListContainer(string dnsName)
+        public async Task<HDInsightCluster> ListContainer(string dnsName)
         {
             var clusters = await this.ListContainers();
-            return clusters.FirstOrDefault(cluster => cluster.DnsName.Equals(dnsName));
+            return clusters.FirstOrDefault(cluster => cluster.Name.Equals(dnsName));
         }
 
-        public void ValidateAsvAccounts(CreateClusterRequest request)
+        public void ValidateAsvAccounts(HDInsightClusterCreationDetails details)
         {
             // Flats all the configurations into a single list for more uniform validation
-            var asvList = request.AsvAccounts.Select(asv => new { account = asv.AccountName, key = asv.Key }).ToList();
-            asvList.Add(new { account = request.DefaultAsvAccountName, key = request.DefaultAsvAccountKey });
+            var asvList = details.AdditionalStorageAccounts.Select(asv => new { account = asv.Name, key = asv.Key }).ToList();
+            asvList.Add(new { account = details.DefaultStorageAccountName, key = details.DefaultStorageAccountKey });
 
             // Basic validation on the ASV configurations
-            if (string.IsNullOrEmpty(request.DefaultAsvContainer))
+            if (string.IsNullOrEmpty(details.DefaultStorageContainer))
             {
                 throw new InvalidOperationException("Invalid Container. Default Storage Account Container cannot be null or empty");
             }
@@ -77,20 +78,31 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
             }
 
             // Validates that we can stablish the connection to the ASV accounts and the default container
-            var client = ServiceLocator.Instance.Locate<IAsvClientFactory>().Create();
+            var client = ServiceLocator.Instance.Locate<IAsvValidatorClientFactory>().Create();
             asvList.ForEach(asv => client.ValidateAccount(asv.account, asv.key).WaitForResult());
-            client.ValidateContainer(request.DefaultAsvAccountName,
-                                     request.DefaultAsvAccountKey,
-                                     request.DefaultAsvContainer).WaitForResult();
+            client.ValidateContainer(details.DefaultStorageAccountName,
+                                     details.DefaultStorageAccountKey,
+                                     details.DefaultStorageContainer).WaitForResult();
         }
 
-        public async Task CreateContainer(CreateClusterRequest request)
+        public async Task CreateContainer(HDInsightClusterCreationDetails details)
         {
-            this.ValidateAsvAccounts(request);
+            // Validates that the AzureStorage Configurations are valid.
+            this.ValidateAsvAccounts(details);
+            
+            // Validates whether the subscription\location needs to be initialized
+            var registrationClient = ServiceLocator.Instance.Locate<ISubscriptionRegistrationClientFactory>().Create(this.credentials);
+            if (!await registrationClient.ValidateSubscriptionLocation(details.Location))
+            {
+                await registrationClient.RegisterSubscription();
+                await registrationClient.RegisterSubscriptionLocation(details.Location);
+            }
+
+            // Creates the cluster
             using (var client = ServiceLocator.Instance.Locate<IHDInsightManagementRestClientFactory>().Create(this.credentials))
             {
-                string payload = PayloadConverter.SerializeClusterCreateRequest(request, this.credentials.SubscriptionId);
-                await client.CreateContainer(request.DnsName, request.Location, payload);
+                string payload = PayloadConverter.SerializeClusterCreateRequest(details, this.credentials.SubscriptionId);
+                await client.CreateContainer(details.Name, details.Location, payload);
             }
         }
 
@@ -104,7 +116,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
             {
                 throw new InvalidOperationException(string.Format("The cluster '{0}' doesn't exist.", dnsName));
             }
-            await this.DeleteContainer(cluster.DnsName, cluster.Location);
+            await this.DeleteContainer(cluster.Name, cluster.Location);
         }
 
         public async Task DeleteContainer(string dnsName, string location)
@@ -115,7 +127,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
             }
         }
 
-        public void WaitForClusterCondition(string dnsName, Func<ListClusterContainerResult, bool> evaluate, TimeSpan interval)
+        public void WaitForClusterCondition(string dnsName, Func<HDInsightCluster, bool> evaluate, TimeSpan interval)
         {
             while (true)
             {

@@ -48,6 +48,7 @@
     <Compile Include="System.Runtime.CompilerServices\INotifyCompletion.cs" />
     <Compile Include="System.Threading.Tasks\TaskAwaiter.cs" />
     <Compile Include="System.Threading.Tasks\TaskAwaiterOfT.cs" />
+    <Compile Include="System.Threading.Tasks\TaskCoreExtensions.cs" />
     <Compile Include="System.Threading.Tasks\TaskEx.cs" />
     <Compile Include="System.Threading.Tasks\TaskSchedularHelper.cs" />
   </ItemGroup>

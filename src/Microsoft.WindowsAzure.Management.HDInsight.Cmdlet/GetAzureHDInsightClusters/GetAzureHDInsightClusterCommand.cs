@@ -6,7 +6,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightCl
     using System.Linq;
     using System.Security.Cryptography.X509Certificates;
     using Microsoft.WindowsAzure.Management.Framework.InversionOfControl;
-    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Client;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets;
     using Microsoft.WindowsAzure.Management.HDInsight.InversionOfControl;
     using Microsoft.WindowsAzure.Management.Framework;
@@ -15,16 +15,16 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightCl
     {
         public override void EndProcessing()
         {
-            var client = ServiceLocator.Instance.Locate<IHDInsightSyncClientFactory>().Create(this.SubscriptionId,
+            var client = ServiceLocator.Instance.Locate<IClusterProvisioningClientFactory>().Create(this.SubscriptionId,
                                                                                               this.Certificate);
 
             if (!string.IsNullOrWhiteSpace(this.Name))
             {
-                this.Output.Add(new AzureHDInsightCluster(client.ListContainer(this.Name)));
+                this.Output.Add(new AzureHDInsightCluster(client.GetCluster(this.Name)));
             }
             else
             {
-                this.Output.AddRange(client.ListContainers().Select(c => new AzureHDInsightCluster(c)));
+                this.Output.AddRange(client.ListClusters().Select(c => new AzureHDInsightCluster(c)));
             }
         }
     }

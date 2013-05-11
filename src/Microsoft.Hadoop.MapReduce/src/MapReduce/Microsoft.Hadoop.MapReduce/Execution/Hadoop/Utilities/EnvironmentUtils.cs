@@ -35,6 +35,7 @@ namespace Microsoft.Hadoop.MapReduce
         internal const string MapDriverExeName = "Microsoft.Hadoop.MapDriver.exe";
         internal const string ReduceDriverExeName = "Microsoft.Hadoop.ReduceDriver.exe";
         internal const string CombineDriverExeName = "Microsoft.Hadoop.CombineDriver.exe";
+        internal const string ThreadingHelperDllName = "Microsoft.WindowsAzure.Management.Framework.Threading.dll";
 
         internal const string CmdLine_Stream_Num_Map_Output_Key_Fields = "-D stream.num.map.output.key.fields={0}"; // this is how to specify it on the hadoop cmd-line.
         internal const string EnvVar_Stream_Num_Map_Output_Key_Fields = "stream_num_map_output_key_fields"; // this is the matching env-var available to driver.exes
@@ -120,6 +121,11 @@ namespace Microsoft.Hadoop.MapReduce
             get {
                 return MakeMRLibPath(CombineDriverExeName);
             }
+        }
+
+        internal static string PathToThreadingHelperDll
+        {
+            get { return MakeMRLibPath(ThreadingHelperDllName); }
         }
 
 

@@ -15,7 +15,7 @@
 
    <Version>
       <Major>0</Major>
-      <Minor>6</Minor>
+      <Minor>7</Minor>
    </Version>
    <Prepare>
       <Zip folder="Cmdlet" name="Microsoft.WindowsAzure.Management.HDInsight.Cmdlets.zip" />
@@ -24,8 +24,7 @@
          <ProjectUrl>http://hadoopsdk.codeplex.com</ProjectUrl>
          <Description>Provides a .NET API for the Map/Reduce functionality of Hadoop Streaming.</Description>
          <Dependencies>
-           <Dependency id="Microsoft.Hadoop.WebClient" version="0.6.0.0" />
-            <Dependency id="Newtonsoft.Json" version="4.5.11" />
+           <Dependency id="Newtonsoft.Json" version="4.5.11" />
          </Dependencies>
       </NuGet>
       <NuGet id="Microsoft.Hadoop.WebClient" outputFolder="WebClient" >
@@ -37,7 +36,6 @@
             <Dependency id="WindowsAzure.Storage" version="2.0.4.1" />
             <Dependency id="Microsoft.WindowsAzure.ConfigurationManager" version="1.8.0.0" />
             <Dependency id="Microsoft.Data.OData" version="5.2.0" />
-            <Dependency id="Microsoft.CompilerServices.AsyncTargetingPack" version="1.0.0" />
             <Dependency id="Microsoft.Data.Edm" version="5.2.0" />
             <Dependency id="Newtonsoft.Json" version="4.5.11" />
          </Dependencies>
@@ -47,8 +45,6 @@
          <ProjectUrl>http://hadoopsdk.codeplex.com</ProjectUrl>
          <Description>Provides a .NET Linq implementation for accessing Hadoop Hive services.</Description>
          <Dependencies>
-           <Dependency id="Microsoft.Hadoop.WebClient" version="0.6.0.0" />
-           <Dependency id="Microsoft.CompilerServices.AsyncTargetingPack" version="1.0.0" />
            <Dependency id="Newtonsoft.Json" version="4.5.11" />
          </Dependencies>
         <FrameworkAssemblies>
@@ -56,9 +52,9 @@
          </FrameworkAssemblies>
       </NuGet>
       <NuGet id="Microsoft.WindowsAzure.Management.HDInsight" outputFolder="HDInsightSdk" >
-         <Title>Microsoft .NET API For HDInsight Managment</Title>
-         <ProjectUrl>http://hadoopsdkcli.codeplex.com</ProjectUrl>
-         <Description>Provides a .NET API managing HDInsight Windows Azure clusters</Description>
+         <Title>Microsoft .NET API For Windows Azure HDInsight Cluster Management</Title>
+         <ProjectUrl>http://hadoopsdk.codeplex.com</ProjectUrl>
+         <Description>Provides a .NET API for creating, listing and deleting Windows Azure HDInsight clusters.</Description>
       </NuGet>
    </Prepare>
    <Package>

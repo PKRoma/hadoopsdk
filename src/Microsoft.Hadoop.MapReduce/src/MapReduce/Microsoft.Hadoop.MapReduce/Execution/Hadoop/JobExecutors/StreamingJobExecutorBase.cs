@@ -207,6 +207,10 @@
             {
                 filesToInclude.Add(EnvironmentUtils.PathToCombineDriverExe);
             }
+            if (!filesToInclude.Contains(EnvironmentUtils.PathToThreadingHelperDll))
+            {
+                filesToInclude.Add(EnvironmentUtils.PathToThreadingHelperDll);
+            }
 
             foreach (var fileToInclude in filesToInclude)
             {

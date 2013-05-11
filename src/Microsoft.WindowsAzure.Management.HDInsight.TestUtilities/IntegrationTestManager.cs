@@ -64,7 +64,7 @@
                 SqlServer = "SqlServerLocation",
                 Database = "DatabaseName",
                 Description = "HiveStore1",
-                Username = "userName",
+                UserName = "userName",
                 Password = "password"
             };
             def.HiveStores[1] = new MetastoreCredentials()
@@ -72,7 +72,7 @@
                 SqlServer = "SqlServerLocation",
                 Database = "DatabaseName",
                 Description = "HiveStore2",
-                Username = "userName",
+                UserName = "userName",
                 Password = "password"
             };
             def.OozieStores = new MetastoreCredentials[2];
@@ -81,7 +81,7 @@
                 SqlServer = "SqlServerLocation",
                 Database = "DatabaseName",
                 Description = "OozieStore1",
-                Username = "userName",
+                UserName = "userName",
                 Password = "password"
             };
             def.OozieStores[1] = new MetastoreCredentials()
@@ -89,7 +89,7 @@
                 SqlServer = "SqlServerLocation",
                 Database = "DatabaseName",
                 Description = "OozieStore2",
-                Username = "userName",
+                UserName = "userName",
                 Password = "password"
             };
             List<AzureTestCredentials> data = new List<AzureTestCredentials>();

@@ -88,24 +88,24 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         public void InternalValidation_PayloadConverter_SerializationListContainersResult()
         {
             // Creates two random containers
-            var container1 = new ListClusterContainerResult(base.GetRandomClusterName(), "Running")
+            var container1 = new HDInsightCluster(base.GetRandomClusterName(), "Running")
             {
                 CreatedDate = DateTime.Now,
                 ConnectionUrl = @"https://some/long/uri/",
                 UserName = "someuser",
                 Location = "East US",
-                WorkerNodesCount = 20,
+                ClusterSizeInNodes = 20,
             };
-            var container2 = new ListClusterContainerResult(base.GetRandomClusterName(), "ClusterStorageProvisioned")
+            var container2 = new HDInsightCluster(base.GetRandomClusterName(), "ClusterStorageProvisioned")
             {
                 CreatedDate = DateTime.Now,
                 ConnectionUrl = @"https://some/long/uri/",
                 UserName = "someuser2",
                 Location = "West US",
-                WorkerNodesCount = 10,
-                ResultError = new ClusterErrorStatus(10, "error", "create")
+                ClusterSizeInNodes = 10,
+                Error = new ClusterErrorStatus(10, "error", "create")
             };
-            var originalContainers = new Collection<ListClusterContainerResult> { container1, container2 };
+            var originalContainers = new Collection<HDInsightCluster> { container1, container2 };
 
             // Roundtrip serialize\deserialize
             var payload = PayloadConverter.SerializeListContainersResult(originalContainers, "namespace");
@@ -116,7 +116,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             Assert.IsTrue(originalContainers.All(c1 => finalContainers.Count(c2 => Equals(c1, c2)) == 1));
         }
 
-        private static bool Equals(ListClusterContainerResult cluster1, ListClusterContainerResult cluster2)
+        private static bool Equals(HDInsightCluster cluster1, HDInsightCluster cluster2)
         {
             if (cluster1 == null && cluster2 == null)
             {
@@ -129,24 +129,24 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
 
             var comparisonTuples = new List<Tuple<object, object>>
             {
-                new Tuple<object, object>(cluster1.DnsName, cluster2.DnsName),
-                new Tuple<object, object>(cluster1.ParsedState, cluster2.ParsedState),
+                new Tuple<object, object>(cluster1.Name, cluster2.Name),
                 new Tuple<object, object>(cluster1.State, cluster2.State),
+                new Tuple<object, object>(cluster1.StateString, cluster2.StateString),
                 new Tuple<object, object>(TruncateMiliseconds(cluster1.CreatedDate), TruncateMiliseconds(cluster2.CreatedDate)),
                 new Tuple<object, object>(cluster1.Location, cluster2.Location),
                 new Tuple<object, object>(cluster1.UserName, cluster2.UserName),
                 new Tuple<object, object>(cluster1.ConnectionUrl, cluster2.ConnectionUrl),
-                new Tuple<object, object>(cluster1.WorkerNodesCount, cluster2.WorkerNodesCount),
+                new Tuple<object, object>(cluster1.ClusterSizeInNodes, cluster2.ClusterSizeInNodes),
             };
-            if (cluster1.ResultError == null && cluster2.ResultError != null)
+            if (cluster1.Error == null && cluster2.Error != null)
                 return false;
-            if (cluster1.ResultError != null && cluster2.ResultError == null)
+            if (cluster1.Error != null && cluster2.Error == null)
                 return false;
-            if (cluster1.ResultError != null && cluster2.ResultError != null)
+            if (cluster1.Error != null && cluster2.Error != null)
             {
-                comparisonTuples.Add(new Tuple<object, object>(cluster1.ResultError.HttpCode, cluster2.ResultError.HttpCode));
-                comparisonTuples.Add(new Tuple<object, object>(cluster1.ResultError.Message, cluster2.ResultError.Message));
-                comparisonTuples.Add(new Tuple<object, object>(cluster1.ResultError.OperationType, cluster2.ResultError.OperationType));
+                comparisonTuples.Add(new Tuple<object, object>(cluster1.Error.HttpCode, cluster2.Error.HttpCode));
+                comparisonTuples.Add(new Tuple<object, object>(cluster1.Error.Message, cluster2.Error.Message));
+                comparisonTuples.Add(new Tuple<object, object>(cluster1.Error.OperationType, cluster2.Error.OperationType));
             }
 
             return CompareTuples(comparisonTuples);
@@ -158,20 +158,20 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         [TestCategory("Payload")]
         public void InternalValidation_PayloadConverter_SerializationCreateRequest()
         {
-            var cluster1 = new CreateClusterRequest
+            var cluster1 = new HDInsightClusterCreationDetails
             {
-                ClusterUserName = Guid.NewGuid().ToString("N"),
-                ClusterUserPassword = Guid.NewGuid().ToString("N"),
-                DefaultAsvAccountKey = Guid.NewGuid().ToString("N"),
-                DefaultAsvAccountName = Guid.NewGuid().ToString("N"),
-                DefaultAsvContainer = Guid.NewGuid().ToString("N"),
-                DnsName = base.GetRandomClusterName(),
+                UserName = Guid.NewGuid().ToString("N"),
+                Password = Guid.NewGuid().ToString("N"),
+                DefaultStorageAccountKey = Guid.NewGuid().ToString("N"),
+                DefaultStorageAccountName = Guid.NewGuid().ToString("N"),
+                DefaultStorageContainer = Guid.NewGuid().ToString("N"),
+                Name = base.GetRandomClusterName(),
                 Location = "East US",
-                WorkerNodeCount = new Random().Next()
+                ClusterSizeInNodes = new Random().Next()
             };
-            cluster1.AsvAccounts.Add(new AsvAccountConfiguration(Guid.NewGuid().ToString("N"),
+            cluster1.AdditionalStorageAccounts.Add(new StorageAccountConfiguration(Guid.NewGuid().ToString("N"),
                                                                  Guid.NewGuid().ToString("N")));
-            cluster1.AsvAccounts.Add(new AsvAccountConfiguration(Guid.NewGuid().ToString("N"),
+            cluster1.AdditionalStorageAccounts.Add(new StorageAccountConfiguration(Guid.NewGuid().ToString("N"),
                                                                  Guid.NewGuid().ToString("N")));
 
             string payload = PayloadConverter.SerializeClusterCreateRequest(cluster1, Guid.NewGuid());
@@ -185,26 +185,26 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         [TestCategory("Payload")]
         public void InternalValidation_PayloadConverter_SerializationCreateRequestWithMetastore()
         {
-            var cluster1 = new CreateClusterRequest
+            var cluster1 = new HDInsightClusterCreationDetails
             {
-                ClusterUserName = Guid.NewGuid().ToString("N"),
-                ClusterUserPassword = Guid.NewGuid().ToString("N"),
-                DefaultAsvAccountKey = Guid.NewGuid().ToString("N"),
-                DefaultAsvAccountName = Guid.NewGuid().ToString("N"),
-                DefaultAsvContainer = Guid.NewGuid().ToString("N"),
-                DnsName = base.GetRandomClusterName(),
+                UserName = Guid.NewGuid().ToString("N"),
+                Password = Guid.NewGuid().ToString("N"),
+                DefaultStorageAccountKey = Guid.NewGuid().ToString("N"),
+                DefaultStorageAccountName = Guid.NewGuid().ToString("N"),
+                DefaultStorageContainer = Guid.NewGuid().ToString("N"),
+                Name = base.GetRandomClusterName(),
                 Location = "East US",
-                WorkerNodeCount = new Random().Next()
+                ClusterSizeInNodes = new Random().Next()
             };
-            cluster1.AsvAccounts.Add(new AsvAccountConfiguration(Guid.NewGuid().ToString("N"),
+            cluster1.AdditionalStorageAccounts.Add(new StorageAccountConfiguration(Guid.NewGuid().ToString("N"),
                                                                  Guid.NewGuid().ToString("N")));
-            cluster1.AsvAccounts.Add(new AsvAccountConfiguration(Guid.NewGuid().ToString("N"),
+            cluster1.AdditionalStorageAccounts.Add(new StorageAccountConfiguration(Guid.NewGuid().ToString("N"),
                                                                  Guid.NewGuid().ToString("N")));
-            cluster1.OozieMetastore = new ComponentMetastore(Guid.NewGuid().ToString("N"),
+            cluster1.OozieMetastore = new HDInsightMetastore(Guid.NewGuid().ToString("N"),
                                                              Guid.NewGuid().ToString("N"),
                                                              Guid.NewGuid().ToString("N"),
                                                              Guid.NewGuid().ToString("N"));
-            cluster1.HiveMetastore = new ComponentMetastore(Guid.NewGuid().ToString("N"),
+            cluster1.HiveMetastore = new HDInsightMetastore(Guid.NewGuid().ToString("N"),
                                                             Guid.NewGuid().ToString("N"),
                                                             Guid.NewGuid().ToString("N"),
                                                             Guid.NewGuid().ToString("N"));
@@ -214,7 +214,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             Assert.IsTrue(Equals(cluster1, cluster2));
         }
 
-        private static bool Equals(CreateClusterRequest req1, CreateClusterRequest req2)
+        private static bool Equals(HDInsightClusterCreationDetails req1, HDInsightClusterCreationDetails req2)
         {
             if (req1 == null && req2 == null)
             {
@@ -228,15 +228,15 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             // Compares the properties and fails if there is a mismatch
             var comparisonTuples = new List<Tuple<object, object>>
             {
-                new Tuple<object, object>(req1.ClusterUserName, req2.ClusterUserName),
-                new Tuple<object, object>(req1.ClusterUserPassword, req2.ClusterUserPassword),
-                new Tuple<object, object>(req1.DefaultAsvAccountKey, req2.DefaultAsvAccountKey),
-                new Tuple<object, object>(req1.DefaultAsvAccountName, req2.DefaultAsvAccountName),
-                new Tuple<object, object>(req1.DefaultAsvContainer, req2.DefaultAsvContainer),
-                new Tuple<object, object>(req1.DnsName, req2.DnsName),
+                new Tuple<object, object>(req1.UserName, req2.UserName),
+                new Tuple<object, object>(req1.Password, req2.Password),
+                new Tuple<object, object>(req1.DefaultStorageAccountKey, req2.DefaultStorageAccountKey),
+                new Tuple<object, object>(req1.DefaultStorageAccountName, req2.DefaultStorageAccountName),
+                new Tuple<object, object>(req1.DefaultStorageContainer, req2.DefaultStorageContainer),
+                new Tuple<object, object>(req1.Name, req2.Name),
                 new Tuple<object, object>(req1.Location, req2.Location),
-                new Tuple<object, object>(req1.WorkerNodeCount, req2.WorkerNodeCount),
-                new Tuple<object, object>(req1.AsvAccounts.Count, req2.AsvAccounts.Count),
+                new Tuple<object, object>(req1.ClusterSizeInNodes, req2.ClusterSizeInNodes),
+                new Tuple<object, object>(req1.AdditionalStorageAccounts.Count, req2.AdditionalStorageAccounts.Count),
             };
             if (req1.OozieMetastore != null)
             {
@@ -265,8 +265,8 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
                 return false;
             }
 
-            // Compares the AsvAccounts and fails if there is a mismatch
-            if (req1.AsvAccounts.Any(asv1 => req2.AsvAccounts.Count(asv2 => asv1.AccountName == asv2.AccountName && asv1.Key == asv2.Key) != 1))
+            // Compares the AdditionalStorageAccounts and fails if there is a mismatch
+            if (req1.AdditionalStorageAccounts.Any(asv1 => req2.AdditionalStorageAccounts.Count(asv2 => asv1.Name == asv2.Name && asv1.Key == asv2.Key) != 1))
             {
                 return false;
             }

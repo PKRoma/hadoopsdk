@@ -18,24 +18,42 @@ namespace Microsoft.WindowsAzure.Management.Framework.InversionOfControl
     using System;
     using System.Collections.Generic;
     using System.Globalization;
+    using System.Linq;
+    using System.Reflection;
 
     /// <summary>
     ///     The main service locator for any application.
     /// </summary>
     public class ServiceLocator : IServiceLocator
     {
-        private static readonly ServiceLocator SingletonInstance = new ServiceLocator();
+        private static ServiceLocator singletonInstance;
+        private static readonly object SyncObject = new object();
         private readonly Dictionary<Type, object> runtimeServices = new Dictionary<Type, object>();
         private readonly Dictionary<Type, object> testRunServices = new Dictionary<Type, object>();
         private Dictionary<Type, object> individualTestServices = new Dictionary<Type, object>();
         private IocTestMockingLevel mockingLevel = IocTestMockingLevel.ApplyFullMocking;
+        private readonly ServiceLocationAssemblySweep sweeper = new ServiceLocationAssemblySweep();
+        private IocServiceLocationRuntimeManager runtimeManager;
 
         /// <summary>
         ///     Gets the singleton instance of the ServiceLocator.
         /// </summary>
         public static IServiceLocator Instance
         {
-            get { return SingletonInstance; }
+            get
+            {
+                if (singletonInstance.IsNull())
+                {
+                    lock (SyncObject)
+                    {
+                        if (singletonInstance.IsNull())
+                        {
+                            singletonInstance = new ServiceLocator();
+                        }
+                    }
+                }
+                return singletonInstance;
+            }
         }
 
         /// <summary>
@@ -43,15 +61,20 @@ namespace Microsoft.WindowsAzure.Management.Framework.InversionOfControl
         /// </summary>
         private ServiceLocator()
         {
-            var runtimeManager = new IocServiceLocationRuntimeManager(this);
-            this.runtimeServices.Add(typeof(IIocServiceLocationRuntimeManager), runtimeManager);
+            this.runtimeManager = new IocServiceLocationRuntimeManager(this);
+            this.runtimeServices.Add(typeof(IIocServiceLocationRuntimeManager), this.runtimeManager);
             this.runtimeServices.Add(typeof(IIocServiceLocationTestRunManager), new IocServiceLocationTestRunManager(this));
             this.runtimeServices.Add(typeof(IIocServiceLocationIndividualTestManager), new IocServiceLocationIndividualTestManager(this));
             this.runtimeServices.Add(typeof(IServiceLocator), this);
-            var registrars = new ServiceLocationAssemblySweep().GetRegistrars();
+            this.RegisterAssemblies();
+        }
+
+        private void RegisterAssemblies()
+        {
+            var registrars = this.sweeper.GetRegistrars().ToList();
             foreach (var serviceLocationRegistrar in registrars)
             {
-                serviceLocationRegistrar.Register(runtimeManager);
+                serviceLocationRegistrar.Register(this.runtimeManager);
             }
         }
 
@@ -271,6 +294,27 @@ namespace Microsoft.WindowsAzure.Management.Framework.InversionOfControl
         /// <inheritdoc />
         public object Locate(Type type)
         {
+            var retval = this.InternalLocate(type);
+            if (retval.IsNull())
+            {
+                if (this.sweeper.NewAssembliesPresent())
+                {
+                    this.RegisterAssemblies();
+                    retval = this.InternalLocate(type);
+                }
+                if (retval.IsNull())
+                {
+                    string message = string.Format(CultureInfo.InvariantCulture,
+                                                   "Attempt to locate a service '{0}' that has not been registered",
+                                                   type.FullName);
+                    throw new InvalidOperationException(message);
+                }
+            }
+            return retval;
+        }
+
+        private object InternalLocate(Type type)
+        {
             if (ReferenceEquals(type,
                                 null))
             {
@@ -282,19 +326,15 @@ namespace Microsoft.WindowsAzure.Management.Framework.InversionOfControl
 
                 // First try to get a IndiviudalTest Mock
             if (!((this.mockingLevel == IocTestMockingLevel.ApplyFullMocking ||
-                   this.mockingLevel == IocTestMockingLevel.ApplyIndividualTestMockingOnly) && 
-                   this.individualTestServices.TryGetValue(type, out overrideVersion)) && 
+                   this.mockingLevel == IocTestMockingLevel.ApplyIndividualTestMockingOnly) &&
+                   this.individualTestServices.TryGetValue(type, out overrideVersion)) &&
                 // Next try to get a TestRun Mock
                 !((this.mockingLevel == IocTestMockingLevel.ApplyFullMocking ||
-                   this.mockingLevel == IocTestMockingLevel.ApplyTestRunMockingOnly) && 
+                   this.mockingLevel == IocTestMockingLevel.ApplyTestRunMockingOnly) &&
                    this.testRunServices.TryGetValue(type, out fakeVersion)) &&
                 // Finally try to get the actual service
                 !this.runtimeServices.TryGetValue(type, out runtimeVersion))
             {
-                string message = string.Format(CultureInfo.InvariantCulture,
-                                               "Attempt to locate a service '{0}' that has not been registered",
-                                               type.FullName);
-                throw new InvalidOperationException(message);
             }
             object retval = overrideVersion;
             if (retval.IsNull())

@@ -69,7 +69,8 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="ClientAbstractionTests\AsvClientTests.cs" />
+    <Compile Include="ClientAbstractionTests\AsvValidatorClientTests.cs" />
+    <Compile Include="ClientAbstractionTests\SubscriptionRegistrationTests.cs" />
     <Compile Include="ClientAbstractionTests\HttpClientTests.cs" />
     <Compile Include="ClientAbstractionTests\PayloadTests.cs" />
     <Compile Include="ClientAbstractionTests\PocoClientTests.cs" />
@@ -90,6 +91,8 @@
     <Compile Include="CmdLetTests\GetCommandCmdletTests.cs" />
     <Compile Include="CmdletAbstractionTests\HDInsightGetCommandTests.cs" />
     <Compile Include="ConnectionCredentials\AlternativeEnvironmentConnectionCredentialsFactory.cs" />
+    <Compile Include="SubscriptionValidatorSimulator\SubscriptionRegistrationSimulatorClient.cs" />
+    <Compile Include="SubscriptionValidatorSimulator\SubscriptionRegistrationSimulatorClientFactory.cs" />
     <Compile Include="DynamicXml\DynaXmlBuilderTest.cs" />
     <Compile Include="Gherkin\Add-AzureHDInsightMetastoreCmdlet.feature.cs">
       <AutoGen>True</AutoGen>
@@ -128,10 +131,11 @@
     </Compile>
     <Compile Include="RestSimulator\HDInsightManagementRestSimulatorClient.cs" />
     <Compile Include="RestSimulator\HDInsightManagementRestSimulatorClientFactory.cs" />
-    <Compile Include="Scenario\ClientScenarioTests.cs" />
     <Compile Include="IntegrationTestBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Scenario\ClientScenarioTests.cs" />
     <Compile Include="Scenario\CmdletScenarioTests.cs" />
+    <None Include="Scenario\ScenarioTests.cs" />
     <Compile Include="StepDefinitions\PowerShellCmdletSteps.cs" />
     <Compile Include="TestPocoClientFactoryFlowThrough.cs" />
     <Compile Include="TestPocoClientFlowThrough.cs" />

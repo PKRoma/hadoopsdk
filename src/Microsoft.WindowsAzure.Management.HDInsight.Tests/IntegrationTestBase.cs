@@ -16,6 +16,7 @@
 namespace Microsoft.WindowsAzure.Management.HDInsight.Tests
 {
     using System;
+    using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.Linq;
@@ -23,6 +24,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Microsoft.WindowsAzure.Management.Framework;
     using Microsoft.WindowsAzure.Management.Framework.InversionOfControl;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoClient;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestClient;
@@ -37,19 +39,66 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests
 
     public class IntegrationTestBase
     {
-        private readonly IntegrationTestManager testManager = new IntegrationTestManager();
+        private static readonly IntegrationTestManager testManager = new IntegrationTestManager();
         internal static AzureTestCredentials TestCredentials;
-        protected AzureTestCredentials GetCredentials(string name)
+        internal static Dictionary<string, string> testToClusterMap = new Dictionary<string, string>();
+
+        protected static AzureTestCredentials GetCredentials(string name)
         {
-            return this.testManager.GetCredentials(name);
+            return testManager.GetCredentials(name);
         }
 
         protected static string ClusterPrefix;
         private static IConnectionCredentials validCredentials;
         private static IConnectionCredentials invalidSubscriptionId;
         private static IConnectionCredentials invalidCertificate;
+        public TestContext TestContext { get; set; }
     
-        internal static void TestSetup()
+        protected void IndividualTestSetup()
+        {
+            this.ApplyFullMocking();
+            this.ResetIndividualMocks();
+        }
+
+        protected void IndividualTestCleanup()
+        {
+            this.ApplyFullMocking();
+            this.ResetIndividualMocks();
+        }
+
+        public static class TestRunNames
+        {
+            public const string Default = "default";
+        }
+
+        internal static void TestRunCleanup()
+        {
+            // First get the simulator clusters.
+            var runManager = ServiceLocator.Instance.Locate<IIocServiceLocationTestRunManager>();
+            runManager.MockingLevel = IocTestMockingLevel.ApplyTestRunMockingOnly;
+            var factory = ServiceLocator.Instance.Locate<IClusterProvisioningClientFactory>();
+            var creds = GetCredentials(TestRunNames.Default);
+            var client = factory.Create(creds.SubscriptionId, new X509Certificate2(creds.Certificate));
+            var simClusters = client.ListClusters().Where(c => c.Name.StartsWith(ClusterPrefix));
+
+            foreach (var cluster in simClusters)
+            {
+                client.DeleteCluster(cluster.Name);
+            }
+            
+            // Next get the live clusters.
+            runManager.MockingLevel = IocTestMockingLevel.ApplyNoMocking;
+            factory = ServiceLocator.Instance.Locate<IClusterProvisioningClientFactory>();
+            client = factory.Create(creds.SubscriptionId, new X509Certificate2(creds.Certificate));
+            var liveClusters = client.ListClusters().Where(c => c.Name.StartsWith(ClusterPrefix));
+
+            foreach (var cluster in liveClusters)
+            {
+                client.DeleteCluster(cluster.Name);
+            }
+        }
+
+        internal static void TestRunSetup()
         {
             var testManager = new IntegrationTestManager();
             if (!testManager.RunAzureTests())
@@ -140,12 +189,14 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests
             // Random DNS name.
             var time = DateTime.UtcNow;
             var machineName = Environment.GetEnvironmentVariable("computername") ?? "unknown";
-            return string.Format("{0}-{1}{2}{3}-{4}",
-                                 ClusterPrefix,
-                                 time.Month.ToString("00"),
-                                 time.Day.ToString("00"),
-                                 time.Hour.ToString("00"),
-                                 Guid.NewGuid().ToString("N")).ToLowerInvariant();
+            var retval = string.Format("{0}-{1}{2}{3}-{4}",
+                                       ClusterPrefix,
+                                       time.Month.ToString("00"),
+                                       time.Day.ToString("00"),
+                                       time.Hour.ToString("00"),
+                                       Guid.NewGuid().ToString("N")).ToLowerInvariant();
+            testToClusterMap.Add(retval, TestContext.FullyQualifiedTestClassName);
+            return retval;
         }
 
         public string GetRandomValidPassword()
@@ -153,19 +204,19 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests
             return Guid.NewGuid().ToString().ToUpperInvariant().Replace('A', 'a').Replace('B', 'b').Replace('C', 'c') + "forTest!";
         }
 
-        public CreateClusterRequest GetRandomCluster()
+        public HDInsightClusterCreationDetails GetRandomCluster()
         {
             // Creates the cluster
-            return new CreateClusterRequest
+            return new HDInsightClusterCreationDetails
             {
-                DnsName = this.GetRandomClusterName(),
-                ClusterUserName = TestCredentials.AzureUserName,
-                ClusterUserPassword = GetRandomValidPassword(),
+                Name = this.GetRandomClusterName(),
+                UserName = TestCredentials.AzureUserName,
+                Password = GetRandomValidPassword(),
                 Location = "East US",
-                DefaultAsvAccountName = TestCredentials.DefaultStorageAccount.Name,
-                DefaultAsvAccountKey = TestCredentials.DefaultStorageAccount.Key,
-                DefaultAsvContainer =  TestCredentials.DefaultStorageAccount.Container,
-                WorkerNodeCount = 3
+                DefaultStorageAccountName = TestCredentials.DefaultStorageAccount.Name,
+                DefaultStorageAccountKey = TestCredentials.DefaultStorageAccount.Key,
+                DefaultStorageContainer =  TestCredentials.DefaultStorageAccount.Container,
+                ClusterSizeInNodes = 3
             };
         }
 
@@ -176,9 +227,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests
             {
                 var clusters = client.ListContainers();
                 clusters.WaitForResult();
-                foreach (var cluster in clusters.Result.Where(c => c.DnsName.StartsWith(ClusterPrefix)))
+                foreach (var cluster in clusters.Result.Where(c => c.Name.StartsWith(ClusterPrefix)))
                 {
-                    client.DeleteContainer(cluster.DnsName, cluster.Location).WaitForResult();
+                    client.DeleteContainer(cluster.Name, cluster.Location).WaitForResult();
                 }
             }
         }

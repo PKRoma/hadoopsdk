@@ -34,10 +34,6 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.CompilerServices.AsyncTargetingPack.Net4, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\Microsoft.CompilerServices.AsyncTargetingPack.1.0.0\lib\net40\Microsoft.CompilerServices.AsyncTargetingPack.Net4.dll</HintPath>
-    </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\packages\Newtonsoft.Json.4.5.11\lib\net40\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -158,6 +154,10 @@
     <ProjectReference Include="..\..\Microsoft.Hadoop.WebClient\src\Microsoft.Hadoop.WebClient\Microsoft.Hadoop.WebClient.csproj">
       <Project>{96c56124-3593-469c-b3a9-620dd7d6d6f0}</Project>
       <Name>Microsoft.Hadoop.WebClient</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Microsoft.WindowsAzure.Management.Framework.Threading\Microsoft.WindowsAzure.Management.Framework.Threading.csproj">
+      <Project>{dbffc131-e089-4173-9b9e-6826fe596faf}</Project>
+      <Name>Microsoft.WindowsAzure.Management.Framework.Threading</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="..\..\..\build\targets\Project.CSharp.targets" />

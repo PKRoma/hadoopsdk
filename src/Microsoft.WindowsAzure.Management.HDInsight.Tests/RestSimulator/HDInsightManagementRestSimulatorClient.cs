@@ -25,6 +25,8 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.RestSimulator
     using System.Net;
     using System.Security.Cryptography.X509Certificates;
     using System.Threading.Tasks;
+    using Microsoft.WindowsAzure.Management.Framework.InversionOfControl;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.AzureManagementClient;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestClient;
     using Microsoft.WindowsAzure.Management.HDInsight.ConnectionContext;
@@ -39,18 +41,18 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.RestSimulator
 
         // List of Clusters stored.
         // Includes the expected 'tsthdx00hdxcibld02' cluster
-        private static readonly Collection<CreateClusterRequest> PendingCreateClusters = new Collection<CreateClusterRequest>();
-        private static readonly Collection<ListClusterContainerResult> PendingDeleteClusters = new Collection<ListClusterContainerResult>();
-        private static readonly Collection<ListClusterContainerResult> Clusters = new Collection<ListClusterContainerResult>()
+        private static readonly Collection<HDInsightClusterCreationDetails> PendingCreateClusters = new Collection<HDInsightClusterCreationDetails>();
+        private static readonly Collection<HDInsightCluster> PendingDeleteClusters = new Collection<HDInsightCluster>();
+        private static readonly Collection<HDInsightCluster> Clusters = new Collection<HDInsightCluster>()
         {
-            new ListClusterContainerResult(IntegrationTestBase.TestCredentials.DnsName, ClusterState.Running.ToString())
+            new HDInsightCluster(IntegrationTestBase.TestCredentials.DnsName, ClusterState.Running.ToString())
             {
                 ConnectionUrl = @"https://" + IntegrationTestBase.TestCredentials.DnsName + ".azurehdinsight.net",
                 CreatedDate = DateTime.UtcNow,
                 Location = "East US",
-                ResultError = null,
+                Error = null,
                 UserName = "sa-po-svc",
-                WorkerNodesCount = 4
+                ClusterSizeInNodes = 4
             }
         };
 
@@ -72,10 +74,10 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.RestSimulator
                 value = PayloadConverter.SerializeListContainersResult(Clusters, this.credentials.DeploymentNamespace);
 
                 // Advances the state of the clusters. Uses tempList to mark clusters for deletion
-                var tempList = new Collection<ListClusterContainerResult>();
+                var tempList = new Collection<HDInsightCluster>();
                 foreach (var cluster in Clusters)
                 {
-                    switch (cluster.ParsedState)
+                    switch (cluster.State)
                     {
                         case ClusterState.Accepted:
                             cluster.ChangeState(ClusterState.ClusterStorageProvisioned);
@@ -114,18 +116,18 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.RestSimulator
                 foreach (var pendingCluster in PendingCreateClusters)
                 {
 
-                    // If there are errors on the request, update ResultError
-                    var cluster = new ListClusterContainerResult(pendingCluster.DnsName, ClusterState.Accepted.ToString())
+                    // If there are errors on the request, update Error
+                    var cluster = new HDInsightCluster(pendingCluster.Name, ClusterState.Accepted.ToString())
                     {
-                        ConnectionUrl = string.Format(@"https://{0}.azurehdinsight.net", pendingCluster.DnsName),
+                        ConnectionUrl = string.Format(@"https://{0}.azurehdinsight.net", pendingCluster.Name),
                         CreatedDate = DateTime.UtcNow,
                         Location = pendingCluster.Location,
-                        ResultError = ValidateClusterCreation(pendingCluster),
-                        UserName = pendingCluster.ClusterUserName,
-                        WorkerNodesCount = pendingCluster.WorkerNodeCount
+                        Error = ValidateClusterCreation(pendingCluster),
+                        UserName = pendingCluster.UserName,
+                        ClusterSizeInNodes = pendingCluster.ClusterSizeInNodes
                     };
 
-                    cluster.ChangeState(cluster.ResultError == null
+                    cluster.ChangeState(cluster.Error == null
                                             ? ClusterState.Accepted
                                             : ClusterState.Unknown);
                     Clusters.Add(cluster);
@@ -142,7 +144,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.RestSimulator
             return await Task.FromResult(value);
         }
 
-        private ClusterErrorStatus ValidateClusterCreation(CreateClusterRequest cluster)
+        private ClusterErrorStatus ValidateClusterCreation(HDInsightClusterCreationDetails cluster)
         {
             if (!ValidateClusterCreationMetadata(cluster.HiveMetastore, cluster.OozieMetastore))
                 return new ClusterErrorStatus(400, "Invalid metastores", "create");
@@ -150,7 +152,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.RestSimulator
         }
 
 
-        private bool ValidateClusterCreationMetadata(ComponentMetastore hive, ComponentMetastore oozie)
+        private bool ValidateClusterCreationMetadata(HDInsightMetastore hive, HDInsightMetastore oozie)
         {
             if (hive == null && oozie == null)
                 return true;
@@ -159,7 +161,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.RestSimulator
 
             try
             {
-                foreach (var metastore in new ComponentMetastore[] { hive, oozie })
+                foreach (var metastore in new HDInsightMetastore[] { hive, oozie })
                 {
                     SqlConnectionStringBuilder connectionString = new SqlConnectionStringBuilder
                     {
@@ -189,9 +191,22 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.RestSimulator
         {
             ValidateConnection();
 
+            var registrationClient = ServiceLocator.Instance.Locate<ISubscriptionRegistrationClientFactory>().Create(this.credentials);
+            if (!await registrationClient.ValidateSubscriptionLocation(location))
+            {
+                string regionCloudServicename = HDInsightManagementRestClient.GetCloudServiceName(
+                    this.credentials.SubscriptionId, 
+                    this.credentials.DeploymentNamespace, 
+                    location);
+
+                throw new HDInsightRestClientException(
+                    HttpStatusCode.NotFound, 
+                    string.Format("The cloud service with name {0} was not found.", regionCloudServicename));
+            }
+
             lock (Clusters)
             {
-                var existingCluster = Clusters.FirstOrDefault(c => c.DnsName == dnsName);
+                var existingCluster = Clusters.FirstOrDefault(c => c.Name == dnsName);
                 if (existingCluster != null)
                     throw new ConfigurationErrorsException("cluster already exists");
 
@@ -206,7 +221,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.RestSimulator
 
             lock (Clusters)
             {
-                var cluster = Clusters.FirstOrDefault(c => c.DnsName == dnsName && c.Location == location);
+                var cluster = Clusters.FirstOrDefault(c => c.Name == dnsName && c.Location == location);
                 if (cluster == null)
                     throw new HDInsightRestClientException(HttpStatusCode.NotFound, "Cluster Not Found");
 

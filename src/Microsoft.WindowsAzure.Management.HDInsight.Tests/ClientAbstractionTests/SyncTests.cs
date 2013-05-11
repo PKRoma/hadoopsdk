@@ -7,7 +7,7 @@
     using System.Threading.Tasks;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Microsoft.WindowsAzure.Management.Framework.InversionOfControl;
-    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Client;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestClient;
     using Microsoft.WindowsAzure.Management.HDInsight.ConnectionContext;
     using Microsoft.WindowsAzure.Management.HDInsight.InversionOfControl;
@@ -66,11 +66,11 @@
         {
             var manager = ServiceLocator.Instance.Locate<IIocServiceLocationIndividualTestManager>();
             manager.Override<IHDInsightManagementRestClientFactory>(new ThrowMockRestClientFactory());
-            var factory = ServiceLocator.Instance.Locate<IHDInsightSyncClientFactory>();
+            var factory = ServiceLocator.Instance.Locate<IClusterProvisioningClientFactory>();
             try
             {
                 var syncClient = factory.Create(Guid.Empty, null);
-                syncClient.ListContainers();
+                syncClient.ListClusters();
                 Assert.Fail("This test expected an exception but failed to receive the exception.");
             }
             catch (Exception ex)
