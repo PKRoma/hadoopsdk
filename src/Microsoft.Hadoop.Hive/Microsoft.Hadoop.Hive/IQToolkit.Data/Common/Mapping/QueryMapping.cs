@@ -282,6 +282,7 @@ namespace IQToolkit.Data.Common
             expression = AggregateRewriter.Rewrite(this.Translator.Linguist.Language, expression);
 
             // do reduction so duplicate association's are likely to be clumped together
+            // !!!!
             expression = UnusedColumnRemover.Remove(expression);
             expression = RedundantColumnRemover.Remove(expression);
             expression = RedundantSubqueryRemover.Remove(expression);

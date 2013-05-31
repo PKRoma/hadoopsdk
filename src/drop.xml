@@ -1,6 +1,29 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 
 <Drop xmlns="http://microsoft.com/sat/drop.xsd">
+  <!-- Internal ONLY Test Utilities -->
+  <Copy>
+    <From>Microsoft.WindowsAzure.Management.HDInsight.TestUtilities\Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.dll</From>
+    <To>Microsoft.WindowsAzure.Management.HDInsight.TestUtilities\lib\net40\Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.dll</To>
+  </Copy>
+  <Copy>
+    <From>Microsoft.WindowsAzure.Management.Framework\Microsoft.WindowsAzure.Management.Framework.dll</From>
+    <To>Microsoft.WindowsAzure.Management.HDInsight.TestUtilities\lib\net40\Microsoft.WindowsAzure.Management.Framework.dll</To>
+  </Copy>
+  <Copy>
+    <From>Microsoft.WindowsAzure.Management.Framework.Threading\Microsoft.WindowsAzure.Management.Framework.Threading.dll</From>
+    <To>Microsoft.WindowsAzure.Management.HDInsight.TestUtilities\content\Microsoft.WindowsAzure.Management.Framework.Threading.dll</To>
+  </Copy>
+
+  <!-- Internal ONLY Framework -->
+  <Copy>
+    <From>Microsoft.WindowsAzure.Management.Framework\Microsoft.WindowsAzure.Management.Framework.dll</From>
+    <To>Microsoft.WindowsAzure.Management.Framework\lib\net40\Microsoft.WindowsAzure.Management.Framework.dll</To>
+  </Copy>
+  <Copy>
+    <From>Microsoft.WindowsAzure.Management.Framework.Threading\Microsoft.WindowsAzure.Management.Framework.Threading.dll</From>
+    <To>Microsoft.WindowsAzure.Management.Framework\content\Microsoft.WindowsAzure.Management.Framework.Threading.dll</To>
+  </Copy>
   <!-- Managment SDK -->
   <Copy>
     <From>Microsoft.WindowsAzure.Management.Framework\Microsoft.WindowsAzure.Management.Framework.dll</From>

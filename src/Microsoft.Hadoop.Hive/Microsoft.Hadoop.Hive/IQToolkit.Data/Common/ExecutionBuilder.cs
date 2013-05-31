@@ -257,7 +257,7 @@ namespace IQToolkit.Data.Common
 
             var saveScope = this.scope;
             ParameterExpression reader = Expression.Parameter(typeof(FieldReader), "r" + nReaders++);
-            this.scope = new Scope(this.scope, reader, projection.Select.Alias, projection.Select.Columns);
+            this.scope = new Scope(this.scope, reader, projection.Select.Alias, projection.Select.Map == null ? projection.Select.Columns : projection.Select.Map.OutputColumns);
             LambdaExpression projector = Expression.Lambda(this.Visit(projection.Projector), reader);
             this.scope = saveScope;
 

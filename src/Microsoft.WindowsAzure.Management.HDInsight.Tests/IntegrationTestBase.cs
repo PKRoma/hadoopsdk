@@ -33,8 +33,8 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests
     using Microsoft.WindowsAzure.Management.HDInsight.ConnectionContext;
     using Microsoft.WindowsAzure.Management.HDInsight.InversionOfControl;
     using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities;
-    using Microsoft.WindowsAzure.Management.HDInsight.Tests.CmdLetTests.PowerShellTestAbstraction.Concreates;
-    using Microsoft.WindowsAzure.Management.HDInsight.Tests.CmdLetTests.PowerShellTestAbstraction.Interfaces;
+    using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.PowerShellTestAbstraction.Concreates;
+    using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.PowerShellTestAbstraction.Interfaces;
     using Microsoft.WindowsAzure.Management.HDInsight.Tests.RestSimulator;
 
     public class IntegrationTestBase
@@ -79,7 +79,8 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests
             var factory = ServiceLocator.Instance.Locate<IClusterProvisioningClientFactory>();
             var creds = GetCredentials(TestRunNames.Default);
             var client = factory.Create(creds.SubscriptionId, new X509Certificate2(creds.Certificate));
-            var simClusters = client.ListClusters().Where(c => c.Name.StartsWith(ClusterPrefix));
+            var clusters = client.ListClusters().ToList();
+            var simClusters = clusters.Where(c => c.Name.StartsWith(ClusterPrefix, StringComparison.OrdinalIgnoreCase));
 
             foreach (var cluster in simClusters)
             {
@@ -90,7 +91,8 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests
             runManager.MockingLevel = IocTestMockingLevel.ApplyNoMocking;
             factory = ServiceLocator.Instance.Locate<IClusterProvisioningClientFactory>();
             client = factory.Create(creds.SubscriptionId, new X509Certificate2(creds.Certificate));
-            var liveClusters = client.ListClusters().Where(c => c.Name.StartsWith(ClusterPrefix));
+            clusters = client.ListClusters().ToList();
+            var liveClusters = clusters.Where(c => c.Name.StartsWith(ClusterPrefix, StringComparison.OrdinalIgnoreCase));
 
             foreach (var cluster in liveClusters)
             {

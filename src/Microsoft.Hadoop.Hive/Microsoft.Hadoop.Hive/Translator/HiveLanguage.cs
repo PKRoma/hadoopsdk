@@ -79,9 +79,13 @@ namespace Microsoft.Hadoop.Hive
 
             public override Expression Translate(Expression expression)
             {
+                // convert references to LINQ operators into Map specific nodes
+                //expression = HiveMapBinder.Bind(Translator.Mapper, expression);
+
                 // fix up any order-by's
                 expression = OrderByRewriter.Rewrite(this.Language, expression);
 
+                // !!!!
                 expression = base.Translate(expression);
 
                 // convert skip/take info into RowNumber pattern
@@ -90,6 +94,7 @@ namespace Microsoft.Hadoop.Hive
                 // fix up any order-by's we may have changed
                 expression = OrderByRewriter.Rewrite(this.Language, expression);
 
+                // !!!!
                 expression = RedundantColumnRemover.Remove(expression);
 
                 expression = UnusedColumnRemover.Remove(expression);

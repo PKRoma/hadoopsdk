@@ -36,7 +36,7 @@ namespace IQToolkit.Data.Common
 
         public static SelectExpression SetColumns(this SelectExpression select, IEnumerable<ColumnDeclaration> columns)
         {
-            return new SelectExpression(select.Alias, columns.OrderBy(c => c.Name), select.From, select.Where, select.OrderBy, select.GroupBy, select.IsDistinct, select.Skip, select.Take, select.IsReverse);
+            return new SelectExpression(select.Alias, columns.OrderBy(c => c.Name), select.From, select.Where, select.OrderBy, select.GroupBy, select.ClusterBy, select.IsDistinct, select.Map, select.Skip, select.Take, select.IsReverse);
         }
 
         public static SelectExpression AddColumn(this SelectExpression select, ColumnDeclaration column)
@@ -93,7 +93,7 @@ namespace IQToolkit.Data.Common
         {
             if (select.IsDistinct != isDistinct)
             {
-                return new SelectExpression(select.Alias, select.Columns, select.From, select.Where, select.OrderBy, select.GroupBy, isDistinct, select.Skip, select.Take, select.IsReverse);
+                return new SelectExpression(select.Alias, select.Columns, select.From, select.Where, select.OrderBy, select.GroupBy, select.ClusterBy, isDistinct, select.Map, select.Skip, select.Take, select.IsReverse);
             }
             return select;
         }
@@ -102,7 +102,7 @@ namespace IQToolkit.Data.Common
         {
             if (select.IsReverse != isReverse)
             {
-                return new SelectExpression(select.Alias, select.Columns, select.From, select.Where, select.OrderBy, select.GroupBy, select.IsDistinct, select.Skip, select.Take, isReverse);
+                return new SelectExpression(select.Alias, select.Columns, select.From, select.Where, select.OrderBy, select.GroupBy, select.ClusterBy, select.IsDistinct, select.Map, select.Skip, select.Take, isReverse);
             }
             return select;
         }
@@ -111,14 +111,14 @@ namespace IQToolkit.Data.Common
         {
             if (where != select.Where)
             {
-                return new SelectExpression(select.Alias, select.Columns, select.From, where, select.OrderBy, select.GroupBy, select.IsDistinct, select.Skip, select.Take, select.IsReverse);
+                return new SelectExpression(select.Alias, select.Columns, select.From, where, select.OrderBy, select.GroupBy, select.ClusterBy, select.IsDistinct, select.Map, select.Skip, select.Take, select.IsReverse);
             }
             return select;
         }
 
         public static SelectExpression SetOrderBy(this SelectExpression select, IEnumerable<OrderExpression> orderBy)
         {
-            return new SelectExpression(select.Alias, select.Columns, select.From, select.Where, orderBy, select.GroupBy, select.IsDistinct, select.Skip, select.Take, select.IsReverse);
+            return new SelectExpression(select.Alias, select.Columns, select.From, select.Where, orderBy, select.GroupBy, select.ClusterBy, select.IsDistinct, select.Map, select.Skip, select.Take, select.IsReverse);
         }
 
         public static SelectExpression AddOrderExpression(this SelectExpression select, OrderExpression ordering)
@@ -143,7 +143,7 @@ namespace IQToolkit.Data.Common
 
         public static SelectExpression SetGroupBy(this SelectExpression select, IEnumerable<Expression> groupBy)
         {
-            return new SelectExpression(select.Alias, select.Columns, select.From, select.Where, select.OrderBy, groupBy, select.IsDistinct, select.Skip, select.Take, select.IsReverse);
+            return new SelectExpression(select.Alias, select.Columns, select.From, select.Where, select.OrderBy, groupBy, select.ClusterBy, select.IsDistinct, select.Map, select.Skip, select.Take, select.IsReverse);
         }
 
         public static SelectExpression AddGroupExpression(this SelectExpression select, Expression expression)
@@ -170,7 +170,7 @@ namespace IQToolkit.Data.Common
         {
             if (skip != select.Skip)
             {
-                return new SelectExpression(select.Alias, select.Columns, select.From, select.Where, select.OrderBy, select.GroupBy, select.IsDistinct, skip, select.Take, select.IsReverse);
+                return new SelectExpression(select.Alias, select.Columns, select.From, select.Where, select.OrderBy, select.GroupBy, select.ClusterBy, select.IsDistinct, select.Map, skip, select.Take, select.IsReverse);
             }
             return select;
         }
@@ -179,7 +179,7 @@ namespace IQToolkit.Data.Common
         {
             if (take != select.Take)
             {
-                return new SelectExpression(select.Alias, select.Columns, select.From, select.Where, select.OrderBy, select.GroupBy, select.IsDistinct, select.Skip, take, select.IsReverse);
+                return new SelectExpression(select.Alias, select.Columns, select.From, select.Where, select.OrderBy, select.GroupBy, select.ClusterBy, select.IsDistinct, select.Map, select.Skip, take, select.IsReverse);
             }
             return select;
         }
@@ -191,8 +191,8 @@ namespace IQToolkit.Data.Common
                 let qt = (d.Expression is ColumnExpression) ? ((ColumnExpression)d.Expression).QueryType : language.TypeSystem.GetColumnType(d.Expression.Type)
                 select new ColumnDeclaration(d.Name, new ColumnExpression(d.Expression.Type, qt, newAlias, d.Name), qt);
 
-            var newFrom = new SelectExpression(newAlias, sel.Columns, sel.From, sel.Where, sel.OrderBy, sel.GroupBy, sel.IsDistinct, sel.Skip, sel.Take, sel.IsReverse);
-            return new SelectExpression(sel.Alias, newColumns, newFrom, null, null, null, false, null, null, false);
+            var newFrom = new SelectExpression(newAlias, sel.Columns, sel.From, sel.Where, sel.OrderBy, sel.GroupBy, sel.ClusterBy, sel.IsDistinct, sel.Map, sel.Skip, sel.Take, sel.IsReverse);
+            return new SelectExpression(sel.Alias, newColumns, newFrom, null, null, null, null, false, null, null, null, false);
         }
 
         public static SelectExpression RemoveRedundantFrom(this SelectExpression select)
@@ -209,7 +209,7 @@ namespace IQToolkit.Data.Common
         {
             if (select.From != from)
             {
-                return new SelectExpression(select.Alias, select.Columns, from, select.Where, select.OrderBy, select.GroupBy, select.IsDistinct, select.Skip, select.Take, select.IsReverse);
+                return new SelectExpression(select.Alias, select.Columns, from, select.Where, select.OrderBy, select.GroupBy, select.ClusterBy, select.IsDistinct, select.Map, select.Skip, select.Take, select.IsReverse);
             }
             return select;
         }

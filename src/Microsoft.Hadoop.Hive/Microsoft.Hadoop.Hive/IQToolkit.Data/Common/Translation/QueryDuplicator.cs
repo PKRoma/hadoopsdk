@@ -51,7 +51,7 @@ namespace IQToolkit.Data.Common
             TableAlias newAlias = new TableAlias();
             this.map[select.Alias] = newAlias;
             select = (SelectExpression)base.VisitSelect(select);
-            return new SelectExpression(newAlias, select.Columns, select.From, select.Where, select.OrderBy, select.GroupBy, select.IsDistinct, select.Skip, select.Take, select.IsReverse);
+            return new SelectExpression(newAlias, select.Columns, select.From, select.Where, select.OrderBy, select.GroupBy, select.ClusterBy, select.IsDistinct, select.Map, select.Skip, select.Take, select.IsReverse);
         }
 
         protected override Expression VisitColumn(ColumnExpression column)

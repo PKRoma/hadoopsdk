@@ -59,7 +59,7 @@ namespace IQToolkit.Data.Common
                     this.map.Add(ae, new ColumnExpression(ae.Type, colType, ae.GroupByAlias, name));
                     aggColumns.Add(cd);
                 }
-                return new SelectExpression(select.Alias, aggColumns, select.From, select.Where, select.OrderBy, select.GroupBy, select.IsDistinct, select.Skip, select.Take, select.IsReverse);
+                return new SelectExpression(select.Alias, aggColumns, select.From, select.Where, select.OrderBy, select.GroupBy, select.ClusterBy, select.IsDistinct, select.Map, select.Skip, select.Take, select.IsReverse);
             }
             return select;
         }

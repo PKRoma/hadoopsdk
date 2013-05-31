@@ -104,7 +104,7 @@ namespace IQToolkit.Data.Common
             for (int i = 0, n = select.Columns.Count; i < n; i++)
             {
                 ColumnDeclaration decl = select.Columns[i];
-                if (wasRetained || select.IsDistinct || IsColumnUsed(select.Alias, decl.Name))
+                if (wasRetained || select.IsDistinct || IsColumnUsed(select.Alias, decl.Name) || select.Map != null)
                 {
                     Expression expr = this.Visit(decl.Expression);
                     if (expr != decl.Expression)
@@ -137,6 +137,7 @@ namespace IQToolkit.Data.Common
             Expression take = this.Visit(select.Take);
             Expression skip = this.Visit(select.Skip);
             ReadOnlyCollection<Expression> groupbys = this.VisitExpressionList(select.GroupBy);
+            ReadOnlyCollection<Expression> clusterbys = this.VisitExpressionList(select.ClusterBy);
             ReadOnlyCollection<OrderExpression> orderbys = this.VisitOrderBy(select.OrderBy);
             Expression where = this.Visit(select.Where);
 
@@ -149,10 +150,11 @@ namespace IQToolkit.Data.Common
                 || skip != select.Skip
                 || orderbys != select.OrderBy 
                 || groupbys != select.GroupBy
+                || clusterbys != select.ClusterBy
                 || where != select.Where 
                 || from != select.From)
             {
-                select = new SelectExpression(select.Alias, columns, from, where, orderbys, groupbys, select.IsDistinct, skip, take, select.IsReverse);
+                select = new SelectExpression(select.Alias, columns, from, where, orderbys, groupbys, clusterbys, select.IsDistinct, select.Map, skip, take, select.IsReverse);
             }
 
             this.retainAllColumns = wasRetained;

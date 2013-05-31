@@ -27,7 +27,7 @@ namespace Microsoft.Hadoop.MapReduce
     //
     // !! This class is fragile when the input is read-once such as Stdin.
     //    ie debugger view/watch, multiple reads can destabilize it.
-    internal class Grouper
+    public class Grouper
     {
         internal string _currGroupKey; // the key associated with the most recent group
         internal string _currInputKey;
@@ -37,7 +37,7 @@ namespace Microsoft.Hadoop.MapReduce
         private int _numKeyFields = 1; 
         private IEnumerator<string> _inputEnumerator;
 
-        internal Grouper(int numKeyFields, IEnumerable<string> inputEnumerable)
+        public Grouper(int numKeyFields, IEnumerable<string> inputEnumerable)
         {
             _numKeyFields = numKeyFields;
             _inputEnumerator = inputEnumerable.GetEnumerator();

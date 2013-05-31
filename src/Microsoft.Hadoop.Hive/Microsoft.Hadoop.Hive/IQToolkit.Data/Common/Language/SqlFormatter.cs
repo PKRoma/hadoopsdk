@@ -16,6 +16,7 @@
 
 
 
+using Microsoft.Hadoop.Hive;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -846,16 +847,24 @@ namespace IQToolkit.Data.Common
         protected override Expression VisitSelect(SelectExpression select)
         {
             this.AddAliases(select.From);
-            this.Write("SELECT ");
-            if (select.IsDistinct)
+            if (select.Map == null)
             {
-                this.Write("DISTINCT ");
+                this.Write("SELECT ");
+                if (select.IsDistinct)
+                {
+                    this.Write("DISTINCT ");
+                }
+                if (select.Take != null)
+                {
+                    this.WriteTopClause(select.Take);
+                }
+                this.WriteColumns(select.Columns);
             }
-            if (select.Take != null)
+            else
             {
-                this.WriteTopClause(select.Take);
+                this.AddAliases(select.Map);
+                this.VisitMap(select.Map, select.Columns);
             }
-            this.WriteColumns(select.Columns);
             if (select.From != null)
             {
                 this.WriteLine(Indentation.Same);
@@ -880,6 +889,22 @@ namespace IQToolkit.Data.Common
                     }
                     this.VisitValue(select.GroupBy[i]);
                 }
+            }
+            if (select.ClusterBy != null && select.ClusterBy.Count > 0)
+            {
+                this.WriteLine(Indentation.Same);
+                this.Write("CLUSTER BY ");
+                var old = this.HideColumnAliases;
+                this.HideColumnAliases = true;
+                for (int i = 0, n = select.ClusterBy.Count; i < n; i++)
+                {
+                    if (i > 0)
+                    {
+                        this.Write(", ");
+                    }
+                    this.VisitValue(select.ClusterBy[i]);
+                }
+                this.HideColumnAliases = old;
             }
             if (select.OrderBy != null && select.OrderBy.Count > 0)
             {
@@ -972,6 +997,32 @@ namespace IQToolkit.Data.Common
             }
             this.isNested = saveIsNested;
             return source;
+        }
+
+        private Expression VisitMap(MapExpression map, ReadOnlyCollection<ColumnDeclaration> columns)
+        {
+            if (map.Mode == "REDUCE")
+            {
+                this.Write("REDUCE ");
+            }
+            else
+            {
+                this.Write("MAP ");
+            }
+            this.WriteColumns(columns);
+            this.WriteLine(Indentation.Same);
+            var usingStatement = string.Format("USING './HiveDriver.exe {0} {1} {2} {3}'",
+                map.Mode, map.AssemblyFullPath, map.ClassName, Base64Codec.EncodeTo64(map.MethodName));
+            this.Write(usingStatement);
+
+            this.WriteLine(Indentation.Same);
+            this.Write("AS ");
+
+            var old = this.HideColumnAliases;
+            this.HideColumnAliases = true;
+            this.WriteColumns(map.OutputColumns);
+            this.HideColumnAliases = old;
+            return map;
         }
 
         protected override Expression VisitJoin(JoinExpression join)

@@ -16,6 +16,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -68,5 +70,55 @@ namespace Microsoft.Hadoop.Hive
 
             await table.ExecuteQuery();
         }
+
+        public static IQueryable<TResult> Map<TSource, TResult>(this IQueryable<TSource> source, 
+                                                                              Func<TSource, TResult> lambda)
+        {
+            var method = typeof(HiveExtensionMethods).GetMethod("Map");
+            var param_expr = new ParameterExpression[] { Expression.Parameter(typeof(TSource)) };
+            var call_expr = Expression.Call(lambda.Method, param_expr);
+            var lambda_expr = Expression.Lambda(call_expr, param_expr);
+
+            return source.Provider.CreateQuery<TResult>(
+                        Expression.Call(method.MakeGenericMethod(new Type[] { typeof(TSource), typeof(TResult) }), source.Expression, lambda_expr));
+        }
+
+        public static IQueryable<TResult> FlatMap<TSource, TResult>(this IQueryable<TSource> source,
+                                                                              Func<TSource, IEnumerable<TResult>> lambda)
+        {
+            var method = typeof(HiveExtensionMethods).GetMethod("FlatMap");
+            var param_expr = new ParameterExpression[] { Expression.Parameter(typeof(TSource)) };
+            var call_expr = Expression.Call(lambda.Method, param_expr);
+            var lambda_expr = Expression.Lambda(call_expr, param_expr);
+
+            return source.Provider.CreateQuery<TResult>(
+                        Expression.Call(method.MakeGenericMethod(new Type[] { typeof(TSource), typeof(TResult) }), source.Expression, lambda_expr));
+        }
+
+        public static IQueryable<IGrouping<TKey, TSource>> ClusterBy<TSource, TKey>(this IQueryable<TSource> source, 
+                                                                                        Expression<Func<TSource, TKey>> keySelector)
+        {
+            var method = typeof(HiveExtensionMethods).GetMethod("ClusterBy");
+            return source.Provider.CreateQuery<IGrouping<TKey, TSource>>(
+                        Expression.Call(method.MakeGenericMethod(new Type[] { typeof(TSource), typeof(TKey) }), source.Expression, keySelector));
+        }
+
+        public static IQueryable<TResult> Reduce<TSource, TResult>(this IQueryable<TSource> source,
+                                                                              Func<TSource, IEnumerable<TResult>> lambda)
+        {
+            var method = typeof(HiveExtensionMethods).GetMethod("Reduce");
+            var param_expr = new ParameterExpression[] { Expression.Parameter(typeof(TSource)) };
+            var call_expr = Expression.Call(lambda.Method, param_expr);
+            var lambda_expr = Expression.Lambda(call_expr, param_expr);
+
+            return source.Provider.CreateQuery<TResult>(
+                        Expression.Call(method.MakeGenericMethod(new Type[] { typeof(TSource), typeof(TResult) }), source.Expression, lambda_expr));
+        }
+    }
+
+    public class StringPair
+    {
+        public string Item1 { get; set; }
+        public string Item2 { get; set; }
     }
 }

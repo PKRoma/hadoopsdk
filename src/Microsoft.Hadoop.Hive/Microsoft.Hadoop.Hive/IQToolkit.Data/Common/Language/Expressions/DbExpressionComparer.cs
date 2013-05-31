@@ -157,6 +157,7 @@ namespace IQToolkit.Data.Common
                 return this.Compare(a.Where, b.Where)
                     && this.CompareOrderList(a.OrderBy, b.OrderBy)
                     && this.CompareExpressionList(a.GroupBy, b.GroupBy)
+                    && this.CompareExpressionList(a.ClusterBy, b.ClusterBy)
                     && this.Compare(a.Skip, b.Skip)
                     && this.Compare(a.Take, b.Take)
                     && a.IsDistinct == b.IsDistinct

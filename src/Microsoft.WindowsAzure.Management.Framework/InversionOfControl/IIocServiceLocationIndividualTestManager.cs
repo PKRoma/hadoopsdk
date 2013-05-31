@@ -20,7 +20,7 @@ namespace Microsoft.WindowsAzure.Management.Framework.InversionOfControl
     /// <summary>
     ///     Provides services to override a service location for a single test.
     /// </summary>
-    internal interface IIocServiceLocationIndividualTestManager
+    public interface IIocServiceLocationIndividualTestManager
     {
         /// <summary>
         ///     Override default interface-to-implementation association.

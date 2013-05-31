@@ -48,7 +48,7 @@ namespace IQToolkit.Data.Common
             if (select.Skip != null)
             {
                 SelectExpression newSelect = select.SetSkip(null).SetTake(null);
-                bool canAddColumn = !select.IsDistinct && (select.GroupBy == null || select.GroupBy.Count == 0);
+                bool canAddColumn = !select.IsDistinct && (select.GroupBy == null || select.GroupBy.Count == 0) && (select.ClusterBy == null || select.ClusterBy.Count == 0);
                 if (!canAddColumn)
                 {
                     newSelect = newSelect.AddRedundantSelect(this.language, new TableAlias());

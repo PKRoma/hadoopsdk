@@ -51,6 +51,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ForceReferenceAttribute.cs" />
+    <Compile Include="Hive API\AddFileGatherer.cs" />
     <Compile Include="Hive API\HiveConnection.cs" />
     <Compile Include="Hive API\HiveExtensionMethods.cs" />
     <Compile Include="Hive API\HiveMaterializer.cs" />
@@ -145,6 +146,7 @@
     <Compile Include="Properties\AssemblyInternalsVisibleTo.cs" />
     <Compile Include="Translator\HiveFormatter.cs" />
     <Compile Include="Translator\HiveLanguage.cs" />
+    <Compile Include="Translator\HiveMapBinder.cs" />
     <Compile Include="Translator\HiveMapping.cs" />
   </ItemGroup>
   <ItemGroup>

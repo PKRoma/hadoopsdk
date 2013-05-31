@@ -58,7 +58,8 @@ namespace IQToolkit.Data.Common
         Block,
         If,
         Declaration,
-        Variable
+        Variable,
+        Map
     }
 
     public static class DbExpressionTypeExtensions
@@ -298,10 +299,12 @@ namespace IQToolkit.Data.Common
     {
         ReadOnlyCollection<ColumnDeclaration> columns;
         bool isDistinct;
+        MapExpression map;
         Expression from;
         Expression where;
         ReadOnlyCollection<OrderExpression> orderBy;
         ReadOnlyCollection<Expression> groupBy;
+        ReadOnlyCollection<Expression> clusterBy;
         Expression take;
         Expression skip;
         bool reverse;
@@ -313,7 +316,9 @@ namespace IQToolkit.Data.Common
             Expression where,
             IEnumerable<OrderExpression> orderBy,
             IEnumerable<Expression> groupBy,
+            IEnumerable<Expression> clusterBy,
             bool isDistinct,
+            MapExpression map,
             Expression skip,
             Expression take,
             bool reverse
@@ -322,10 +327,12 @@ namespace IQToolkit.Data.Common
         {
             this.columns = columns.ToReadOnly();
             this.isDistinct = isDistinct;
+            this.map = map;
             this.from = from;
             this.where = where;
             this.orderBy = orderBy.ToReadOnly();
             this.groupBy = groupBy.ToReadOnly();
+            this.clusterBy = clusterBy.ToReadOnly();
             this.take = take;
             this.skip = skip;
             this.reverse = reverse;
@@ -336,16 +343,17 @@ namespace IQToolkit.Data.Common
             Expression from,
             Expression where,
             IEnumerable<OrderExpression> orderBy,
-            IEnumerable<Expression> groupBy
+            IEnumerable<Expression> groupBy,
+            IEnumerable<Expression> clusterBy
             )
-            : this(alias, columns, from, where, orderBy, groupBy, false, null, null, false)
+            : this(alias, columns, from, where, orderBy, groupBy, clusterBy, false, null, null, null, false)
         {
         }
         public SelectExpression(
             TableAlias alias, IEnumerable<ColumnDeclaration> columns,
             Expression from, Expression where
             )
-            : this(alias, columns, from, where, null, null)
+            : this(alias, columns, from, where, null, null, null)
         {
         }
         public ReadOnlyCollection<ColumnDeclaration> Columns
@@ -368,9 +376,17 @@ namespace IQToolkit.Data.Common
         {
             get { return this.groupBy; }
         }
+        public ReadOnlyCollection<Expression> ClusterBy
+        {
+            get { return this.clusterBy; }
+        }
         public bool IsDistinct
         {
             get { return this.isDistinct; }
+        }
+        public MapExpression Map
+        {
+            get { return this.map; }
         }
         public Expression Skip
         {
@@ -383,6 +399,65 @@ namespace IQToolkit.Data.Common
         public bool IsReverse
         {
             get { return this.reverse; }
+        }
+        public string QueryText
+        {
+            get { return SqlFormatter.Format(this, true); }
+        }
+    }
+
+    /// <summary>
+    /// A custom expression representing the Map
+    /// </summary>
+    public class MapExpression : AliasedExpression
+    {
+        ReadOnlyCollection<ColumnDeclaration> outputColumns;
+        string mode;
+        string driverPath;
+        string assemblyFullPath;
+        string className;
+        string methodName;
+
+        public MapExpression(
+            TableAlias alias,
+            IEnumerable<ColumnDeclaration> outputColumns,
+            string mode,
+            string driverPath,
+            string assemblyFullPath,
+            string className,
+            string methodName)
+            : base(DbExpressionType.Map, typeof(void), alias)
+        {
+            this.outputColumns = outputColumns.ToReadOnly();
+            this.mode = mode;
+            this.driverPath = driverPath;
+            this.assemblyFullPath = assemblyFullPath;
+            this.className = className;
+            this.methodName = methodName;
+        }
+        public ReadOnlyCollection<ColumnDeclaration> OutputColumns
+        {
+            get { return this.outputColumns; }
+        }
+        public string Mode
+        {
+            get { return this.mode; }
+        }
+        public string DriverPath
+        {
+            get { return this.driverPath; }
+        }
+        public string AssemblyFullPath
+        {
+            get { return this.assemblyFullPath; }
+        }
+        public string ClassName
+        {
+            get { return this.className; }
+        }
+        public string MethodName
+        {
+            get { return this.methodName; }
         }
         public string QueryText
         {

@@ -497,7 +497,10 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
                 task.WaitForResult();
                 var container = task.Result;
                 Assert.IsNotNull(container);
-                Assert.IsNull(container.Error);
+                if (container.Error.IsNotNull())
+                {
+                    Assert.Fail("The Container was not expected to return an error but returned ({0}) ({1})", container.Error.HttpCode, container.Error.Message);
+                }
 
                 client.DeleteContainer(cluster.Name);
                 client.CreateContainer(cluster);
