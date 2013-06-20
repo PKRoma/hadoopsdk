@@ -360,8 +360,7 @@
                                   .Invoke();
 
                 Assert.AreEqual(0, results.Results.Count);
-
-
+                
                 getCommand = ServiceLocator.Instance.Locate<IAzureHDInsightCommandFactory>().CreateGet();
                 getCommand.SubscriptionId = creds.SubscriptionId;
                 getCommand.Certificate = creds.Certificate;

@@ -19,6 +19,7 @@
 	  <NoOrganizeOnBuild Condition="'$(SATCIBUILD)' == 'true'">true</NoOrganizeOnBuild>
 	  <NoPrepareOnBuild Condition="'$(SATCIBUILD)' == 'true'">true</NoPrepareOnBuild>
 	  <NoPackageOnBuild Condition="'$(SATCIBUILD)' == 'true'">true</NoPackageOnBuild>
+	  <NoVersionOnBuild Condition="'$(SATCIBUILD)' == 'true'">true</NoVersionOnBuild>
 	</PropertyGroup>
 	
 	<PropertyGroup>

@@ -10,6 +10,7 @@
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Asv;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.AzureManagementClient;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.LocationFinder;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoClient;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestClient;
     using Microsoft.WindowsAzure.Management.HDInsight.ConnectionContext;
@@ -33,6 +34,7 @@
             manager.RegisterType<IAsvValidatorClientFactory, AsvValidatorValidatorClientFactory>();
             manager.RegisterType<IConnectionCredentialsFactory, ProductionConnectionCredentialsFactory>();
             manager.RegisterType<ISubscriptionRegistrationClientFactory, SubscriptionRegistrationClientFactory>();
+            manager.RegisterType<ILocationFinderClientFactory, LocationFinderClientFactory>();
         }
     }
 }

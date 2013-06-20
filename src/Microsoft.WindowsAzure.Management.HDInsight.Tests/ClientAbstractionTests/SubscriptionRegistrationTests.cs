@@ -38,20 +38,19 @@
         [TestMethod]
         [TestCategory("Integration")]
         [TestCategory("CheckIn")]
-        [TestCategory("SubcriptionRegistrationClient")]
+        [TestCategory("SubscriptionRegistrationClient")]
         [TestCategory("Scenario")]
         public async Task ICanPerformA_PositiveSubscriptionValidation_Using_SubscriptionRegistrationAbstraction_AgainstAzure() // Always goes against azure to quickly validate end2end
         {
             IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
             var client = new SubscriptionRegistrationClient(credentials);
             Assert.IsTrue(await client.ValidateSubscriptionLocation("East US"));
-            Assert.IsFalse(await client.ValidateSubscriptionLocation("No Where"));
         }
 
         [TestMethod]
         [TestCategory("Integration")]
         [TestCategory("CheckIn")]
-        [TestCategory("SubcriptionRegistrationClient")]
+        [TestCategory("SubscriptionRegistrationClient")]
         public async Task ICanPerformA_PositiveSubscriptionValidation_Using_SubscriptionRegistrationAbstraction()
         {
             IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
@@ -63,7 +62,7 @@
         [TestMethod]
         [TestCategory("Integration")]
         [TestCategory("CheckIn")]
-        [TestCategory("SubcriptionRegistrationClient")]
+        [TestCategory("SubscriptionRegistrationClient")]
         public async Task ICanPerformA_RepeatedSubscriptionRegistration_Using_SubscriptionRegistrationAbstraction()
         {
             IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
@@ -78,7 +77,7 @@
         [TestMethod]
         [TestCategory("Integration")]
         [TestCategory("Scenario")]
-        [TestCategory("SubcriptionRegistrationClient")]
+        [TestCategory("SubscriptionRegistrationClient")]
         public async Task ICanPerformA_RepeatedSubscriptionRegistration_Using_SubscriptionRegistrationAbstraction_AgainstAzure()
         {
             this.ApplyIndividualTestMockingOnly();
@@ -88,7 +87,7 @@
         [TestMethod]
         [TestCategory("Integration")]
         [TestCategory("CheckIn")]
-        [TestCategory("SubcriptionRegistrationClient")]
+        [TestCategory("SubscriptionRegistrationClient")]
         public async Task ICannotPerformA_RepeatedUnregistration_Using_SubscriptionRegistrationAbstraction()
         {
             IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
@@ -117,7 +116,7 @@
         [TestMethod]
         [TestCategory("Integration")]
         [TestCategory("Scenario")]
-        [TestCategory("SubcriptionRegistrationClient")]
+        [TestCategory("SubscriptionRegistrationClient")]
         public async Task ICannotPerformA_RepeatedUnregistration_Using_SubscriptionRegistrationAbstraction_AgainstAzure()
         {
             this.ApplyIndividualTestMockingOnly();
@@ -127,7 +126,7 @@
         [TestMethod]
         [TestCategory("Integration")]
         [TestCategory("CheckIn")]
-        [TestCategory("SubcriptionRegistrationClient")]
+        [TestCategory("SubscriptionRegistrationClient")]
         public async Task ICannotPerformA_UnregisterIfClustersExist_Using_SubscriptionRegistrationAbstraction()
         {
             IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
@@ -149,7 +148,7 @@
         [TestMethod]
         [TestCategory("Integration")]
         [TestCategory("Scenario")]
-        [TestCategory("SubcriptionRegistrationClient")]
+        [TestCategory("SubscriptionRegistrationClient")]
         public async Task ICannotPerformA_UnregisterIfClustersExist_Using_SubscriptionRegistrationAbstraction_AgainstAzure()
         {
             this.ApplyIndividualTestMockingOnly();
@@ -159,7 +158,7 @@
         [TestMethod]
         [TestCategory("Integration")]
         [TestCategory("CheckIn")]
-        [TestCategory("SubcriptionRegistrationClient")]
+        [TestCategory("SubscriptionRegistrationClient")]
         public async Task ICanPerformA_UnregisterSubscription_Using_SubscriptionRegistrationAbstraction()
         {
             IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
@@ -173,7 +172,7 @@
         [TestMethod]
         [TestCategory("Integration")]
         [TestCategory("RestClient")]
-        [TestCategory("SubcriptionRegistrationClient")]
+        [TestCategory("SubscriptionRegistrationClient")]
         [TestCategory("CheckIn")]
         public async Task ICannotPerformA_CreateContainersOnUnregisterdSubscription_Using_RestClient()
         {
@@ -213,21 +212,12 @@
         [TestMethod]
         [TestCategory("Integration")]
         [TestCategory("RestClient")]
-        [TestCategory("SubcriptionRegistrationClient")]
+        [TestCategory("SubscriptionRegistrationClient")]
         [TestCategory("Scenario")]
         public async Task ICannotPerformA_CreateContainersOnUnregisterdSubscription_Using_RestClient_AgainstAzure()
         {
             this.ApplyIndividualTestMockingOnly();
             await ICannotPerformA_CreateContainersOnUnregisterdSubscription_Using_RestClient();
-        }
-
-
-        private void DeleteClusters(IConnectionCredentials credentials, string location)
-        {
-            var managementeClient = new ClusterProvisioningClient(credentials.SubscriptionId, credentials.Certificate);
-            var clusters = managementeClient.ListClustersAsync().WaitForResult().Where(cluster => cluster.Location == location).ToList();
-
-            Parallel.ForEach(clusters, cluster => managementeClient.DeleteClusterAsync(cluster.Name).WaitForResult());
         }
     }
 }

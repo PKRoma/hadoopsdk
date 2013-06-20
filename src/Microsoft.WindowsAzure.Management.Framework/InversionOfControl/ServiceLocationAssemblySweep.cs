@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Reflection;
     using System.Text;
 
     internal class ServiceLocationAssemblySweep
@@ -29,10 +30,18 @@
 
         internal IEnumerable<Type> GetRegistrarTypes()
         {
+            List<Type> types = new List<Type>();
             var asms = AppDomain.CurrentDomain.GetAssemblies();
-            var types = (from a in asms
-                         from t in a.GetTypes()
-                         select t).ToList();
+            foreach (var assembly in asms)
+            {
+                try
+                {
+                    types.AddRange(assembly.GetTypes());
+                }
+                catch (ReflectionTypeLoadException)
+                {
+                }
+            }
             var registrarTypes = (from t in types
                                   where typeof(IServiceLocationRegistrar).IsAssignableFrom(t) &&
                                         t.IsInterface == false

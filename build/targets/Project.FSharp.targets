@@ -26,7 +26,7 @@
       <ItemGroup>
 	     <_compile Include="@(Compile)" />
 	     <Compile Remove="@(_compile)" />
-         <Compile Include="$(GenPath)\OfficialAssemblyVersion.fs" />
+         <Compile Include="$(GenPath)\Version.fs" />
 	     <Compile Include="@(_compile)" />
       </ItemGroup>
    </Target>

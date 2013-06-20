@@ -15,11 +15,33 @@
 
 namespace Microsoft.WindowsAzure.Management.Framework.InversionOfControl
 {
-    internal enum IocTestMockingLevel
+    /// <summary>
+    /// Test Mocking Levels, which control how the service locator should work in 
+    /// a test environment.
+    /// </summary>
+    public enum IocTestMockingLevel
     {
+        /// <summary>
+        /// Apply Full Mocking, All mocking levels should be respected.
+        /// </summary>
         ApplyFullMocking,
+
+        /// <summary>
+        /// Apply Individual Test Mocking only.  Only individual test overrides
+        /// should be respected.
+        /// </summary>
         ApplyIndividualTestMockingOnly,
+
+        /// <summary>
+        /// Apply Test Run Mocking Only.  Only full test run overrides should 
+        /// be respected.
+        /// </summary>
         ApplyTestRunMockingOnly,
+
+        /// <summary>
+        /// Apply No Mocking.  No mocking should be respected and only runtime
+        /// objects should be utilized.
+        /// </summary>
         ApplyNoMocking
     }
 }

@@ -8,6 +8,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning
     using Microsoft.WindowsAzure.Management.Framework;
     using Microsoft.WindowsAzure.Management.Framework.InversionOfControl;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.LocationFinder;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoClient;
     using Microsoft.WindowsAzure.Management.HDInsight.ConnectionContext;
 
@@ -31,6 +32,13 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning
         {
             this.PollingInterval = TimeSpan.FromSeconds(5);
             this.credentials = ServiceLocator.Instance.Locate<IConnectionCredentialsFactory>().Create(subscriptionId, certificate);
+        }
+
+        /// <inheritdoc />
+        public async Task<Collection<string>> ListAvailableLocationsAsync()
+        {
+            var client = ServiceLocator.Instance.Locate<ILocationFinderClientFactory>().Create(this.credentials);
+            return await client.ListAvailableLocations();
         }
 
         /// <inheritdoc />
@@ -101,6 +109,12 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning
             var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(this.credentials);
             await client.DeleteContainer(name);
             client.WaitForClusterCondition(name, result => result == null, this.PollingInterval);
+        }
+
+        /// <inheritdoc />
+        public Collection<string> ListAvailableLocations()
+        {
+            return this.ListAvailableLocationsAsync().WaitForResult();
         }
 
         /// <inheritdoc />

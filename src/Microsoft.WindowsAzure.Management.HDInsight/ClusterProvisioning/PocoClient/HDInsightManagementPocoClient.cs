@@ -25,6 +25,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Asv;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.AzureManagementClient;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.LocationFinder;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestClient;
     using Microsoft.WindowsAzure.Management.HDInsight.ConnectionContext;
     using Microsoft.WindowsAzure.Management.HDInsight.InversionOfControl;
@@ -90,6 +91,17 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
             // Validates that the AzureStorage Configurations are valid.
             this.ValidateAsvAccounts(details);
             
+            // Validates the region for the cluster creation
+            var locationClient = ServiceLocator.Instance.Locate<ILocationFinderClientFactory>().Create(this.credentials);
+            var availableLocations = await locationClient.ListAvailableLocations();
+            if (!availableLocations.Contains(details.Location, StringComparer.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException(string.Format(
+                        "Cannot create a cluster in '{0}'. Available Locations for your subscription are: ",
+                        details.Location,
+                        string.Format(",", availableLocations)));
+            }
+
             // Validates whether the subscription\location needs to be initialized
             var registrationClient = ServiceLocator.Instance.Locate<ISubscriptionRegistrationClientFactory>().Create(this.credentials);
             if (!await registrationClient.ValidateSubscriptionLocation(details.Location))

@@ -478,6 +478,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
                                                            TestCredentials.HiveStores[0].Database,
                                                            TestCredentials.HiveStores[0].UserName,
                                                            TestCredentials.HiveStores[0].Password);
+            cluster.Location = cluster.Location.ToUpperInvariant();
 
             ValidateCreateClusterSucceeds(cluster);
         }
@@ -497,10 +498,12 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
                 task.WaitForResult();
                 var container = task.Result;
                 Assert.IsNotNull(container);
-                Assert.IsNull(container.Error);
+                if (container.Error.IsNotNull())
+                {
+                    Assert.Fail("The Container was not expected to return an error but returned ({0}) ({1})", container.Error.HttpCode, container.Error.Message);
+                }
 
                 client.DeleteContainer(cluster.Name);
-                client.CreateContainer(cluster);
                 client.WaitForClusterCondition(
                     cluster.Name,
                     c => c == null || c.Error != null,
@@ -620,6 +623,43 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             }
 
             Assert.Fail("ASV Validation should have failed.");
+        }
+        
+        [TestMethod]
+        [TestCategory("Integration")]
+        [TestCategory("Scenario")]
+        [TestCategory("Production")]
+        [TestCategory(TestRunMode.Nightly)]
+        [TestCategory("PocoClient")]
+        public async Task NegativeTest_InvalidLocation_Using_PocoClient_AgainstAzure()
+        {
+            this.ApplyIndividualTestMockingOnly();
+            await NegativeTest_InvalidLocation_Using_PocoClient();
+        }
+
+        [TestMethod]
+        [TestCategory("Integration")]
+        [TestCategory("CheckIn")]
+        [TestCategory("PocoClient")]
+        public async Task NegativeTest_InvalidLocation_Using_PocoClient()
+        {
+            var cluster = base.GetRandomCluster();
+            IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
+            cluster.Location = "nowhere";
+
+            try
+            {
+                await ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(credentials).CreateContainer(cluster);
+                Assert.Fail("Location Validation should have failed.");
+            }
+            catch (InvalidOperationException)
+            {
+                Console.WriteLine("THIS TEST SUCCEDED because the expected negative result was found");
+            }
+            catch (Exception e)
+            {
+                Assert.Fail("Expected exception 'InvalidOperationException'; found '{0}'. Message:{1}", e.GetType(), e.Message);
+            }
         }
 
         [TestMethod]

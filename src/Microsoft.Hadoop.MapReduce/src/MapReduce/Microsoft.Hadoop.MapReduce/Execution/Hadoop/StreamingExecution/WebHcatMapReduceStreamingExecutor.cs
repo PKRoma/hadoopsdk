@@ -17,6 +17,8 @@ namespace Microsoft.Hadoop.WebClient.WebHCatClient
     using Microsoft.Hadoop.WebHCat.Protocol;
     using Microsoft.Hadoop.WebHDFS;
     using Microsoft.Hadoop.WebHDFS.Adapters;
+    using Microsoft.WindowsAzure.Management.Framework.InversionOfControl;
+    using Microsoft.WindowsAzure.Management.Framework.Logging;
     using Newtonsoft.Json.Linq;
 
     public class WebHcatMapReduceStreamingExecutor : IMapReduceStreamingWebHcatExecutor
@@ -24,6 +26,7 @@ namespace Microsoft.Hadoop.WebClient.WebHCatClient
         private WebHCatHttpClient client;
         private string host;
         private IHdfsFile hdfsFile;
+        private ILogger logger;
 
         /// <inheritdoc />
         public Guid JobGuid { get; private set; }
@@ -42,6 +45,7 @@ namespace Microsoft.Hadoop.WebClient.WebHCatClient
             this.CmdEnv = new Dictionary<string, string>();
             this.Args = new List<string>();
             this.Inputs = new List<string>();
+            this.logger = ServiceLocator.Instance.Locate<ILogger>();
         }
 
         /// <summary>
@@ -119,7 +123,9 @@ namespace Microsoft.Hadoop.WebClient.WebHCatClient
 
             // Now to get the status information.
             var result = this.client.GetQueue(jobId).WaitForResult();
+            result.EnsureSuccessStatusCode();
             string queueResult = result.Content.ReadAsStringAsync().WaitForResult();
+            this.logger.LogMessage(queueResult);
             JObject queueResultReader = JObject.Parse(queueResult);
             int exitCode = queueResultReader.Value<int>("exitValue");
             string stdOut = this.hdfsFile.ReadAllText(statusLocation + "/stdout");

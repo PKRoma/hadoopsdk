@@ -18,8 +18,11 @@ namespace Microsoft.WindowsAzure.Management.Framework.InversionOfControl
     /// <summary>
     ///     Provides services to fake out service location during debugging and test scenarios.
     /// </summary>
-    internal interface IIocServiceLocationTestRunManager : IIocServiceLocationManager
+    public interface IIocServiceLocationTestRunManager : IIocServiceLocationManager
     {
+        /// <summary>
+        /// Gets or sets the mocking level to use when performing service location.
+        /// </summary>
         IocTestMockingLevel MockingLevel { get; set; }
     }
 }

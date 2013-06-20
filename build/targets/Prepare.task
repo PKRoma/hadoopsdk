@@ -1,0 +1,3 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <UsingTask TaskName="Microsoft.Accelerators.BuildTools.Prepare.PrepareTask" AssemblyFile="$(ProjectBuildToolsPath)\Prepare\Prepare.exe" />
+</Project>

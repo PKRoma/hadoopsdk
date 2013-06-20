@@ -13,6 +13,7 @@
 	
 	<PropertyGroup>
 		<DropFile>$(SolutionDir)\drop.xml</DropFile>
+		<BuildConfig>$(SolutionDir)\buildconfig.xml</BuildConfig>
 	</PropertyGroup>
 
 	<Target Name="OrganizeNoDropXml"
@@ -106,14 +107,9 @@
 		<Message Importance="high" Text="After Solution Build Targets Running" />
 	</Target>
 	
-	<!-- For now we will go with a "None" prepare, we should the prepare app (back in) soon. -->
-	<Target AfterTargets="AfterSolutionBuild" Name="Prepare" Condition="'$(NoPrepareOnBuild)' != 'true'">
-		<ItemGroup>
-			<PreparedFileSources Include="$(OrganizedPath)\**\*.*" />
-		</ItemGroup>
-		<RebaseItems Items="@(PreparedFileSources)" OriginalRoot="$(OrganizedPath)" NewRoot="$(PreparedPath)" >
-			<Output ItemName="PreparedFileDestinations" TaskParameter="Results" />
-		</RebaseItems>
-		<Copy SourceFiles="@(PreparedFileSources)" DestinationFiles="@(PreparedFileDestinations)" />
+	<Import Project="Prepare.task" />
+	
+	<Target AfterTargets="AfterSolutionBuild" DependsOnTargets="OrganizeNoDropXml;OrganizeDropXml" Name="Prepare" Condition="'$(NoPrepareOnBuild)' != 'true' and Exists('$(BuildConfig)')">
+		<PrepareTask PrepareFile="$(BuildConfig)" BuildToolsDirectory="$(ProjectBuildToolsPath)" OrganizedFolder="$(OrganizedPath)" PrepareOutputFolder="$(PreparedPath)" Version="$(BuildVersionFull)" WorkingFolder="$(ObjBuildPath)\Prepare" />
 	</Target>
 </Project>

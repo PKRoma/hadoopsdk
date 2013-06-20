@@ -70,6 +70,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="ClientAbstractionTests\AsvValidatorClientTests.cs" />
+    <Compile Include="ClientAbstractionTests\LocationFinderClientTests.cs" />
     <Compile Include="ClientAbstractionTests\SubscriptionRegistrationTests.cs" />
     <Compile Include="ClientAbstractionTests\HttpClientTests.cs" />
     <Compile Include="ClientAbstractionTests\PayloadTests.cs" />
@@ -79,15 +80,6 @@
     <Compile Include="ClientAbstractionTests\SyncTests.cs" />
     <Compile Include="CmdLetTests\CmdletHardCodes.cs" />
     <Compile Include="CmdLetTests\NewClusterCmdletTests.cs" />
-    <Compile Include="CmdLetTests\PowerShellTestAbstraction\Concreates\CommandAbstraction.cs" />
-    <Compile Include="CmdLetTests\PowerShellTestAbstraction\Concreates\PipelineAbstraction.cs" />
-    <Compile Include="CmdLetTests\PowerShellTestAbstraction\Concreates\PipelineResultsAbstraction.cs" />
-    <Compile Include="CmdLetTests\PowerShellTestAbstraction\Concreates\RunspaceAbstraction.cs" />
-    <Compile Include="CmdLetTests\PowerShellTestAbstraction\Interfaces\ICommand.cs" />
-    <Compile Include="CmdLetTests\PowerShellTestAbstraction\Interfaces\IPipelineResult.cs" />
-    <Compile Include="CmdLetTests\PowerShellTestAbstraction\Interfaces\IPipeline.cs" />
-    <Compile Include="CmdLetTests\PowerShellTestAbstraction\Interfaces\IRunspace.cs" />
-    <Compile Include="CmdLetTests\PowerShellTestAbstraction\Interfaces\IRunspaceBase.cs" />
     <Compile Include="CmdLetTests\GetCommandCmdletTests.cs" />
     <Compile Include="CmdletAbstractionTests\HDInsightGetCommandTests.cs" />
     <Compile Include="ConnectionCredentials\AlternativeEnvironmentConnectionCredentialsFactory.cs" />

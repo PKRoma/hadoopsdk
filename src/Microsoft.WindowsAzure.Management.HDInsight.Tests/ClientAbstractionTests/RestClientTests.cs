@@ -129,13 +129,13 @@
             await client.CreateContainer(dnsName, location, resource.SerializeToXml());
             while (!this.ContainsContainer(dnsName, await client.ListCloudServices()))
             {
-                Thread.Sleep(TimeSpan.FromSeconds(5));
+                Thread.Sleep(TimeSpan.FromMilliseconds(100));
             }
 
             await client.DeleteContainer(dnsName, location);
             while (this.ContainsContainer(dnsName, await client.ListCloudServices()))
             {
-                Thread.Sleep(TimeSpan.FromSeconds(1));
+                Thread.Sleep(TimeSpan.FromMilliseconds(100));
             }
         }
 
@@ -170,13 +170,13 @@
             await client.CreateContainer(dnsName, location, resource.SerializeToXml());
             while (!this.ContainsContainer(dnsName, await client.ListCloudServices()))
             {
-                Thread.Sleep(TimeSpan.FromSeconds(5));
+                Thread.Sleep(TimeSpan.FromSeconds(100));
             }
 
             await client.DeleteContainer(dnsName, location);
             while (this.ContainsContainer(dnsName, await client.ListCloudServices()))
             {
-                Thread.Sleep(TimeSpan.FromSeconds(1));
+                Thread.Sleep(TimeSpan.FromSeconds(100));
             }
         }
         

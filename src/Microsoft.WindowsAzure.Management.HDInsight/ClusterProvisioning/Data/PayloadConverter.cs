@@ -17,11 +17,14 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data
 {
     using System;
     using System.Collections.ObjectModel;
+    using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.IO;
     using System.Linq;
     using System.Runtime.Serialization;
     using System.Text;
+    using System.Xml;
+    using Microsoft.WindowsAzure.Management.Framework.DynamicXml.Writer;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Old;
 
     internal static class PayloadConverter
@@ -61,9 +64,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data
 
         internal static string SerializeClusterCreateRequest(HDInsightClusterCreationDetails cluster, Guid subscriptionId)
         {
-            var payloadObject = CreateClusterRequest_ToInternal(cluster, subscriptionId);
-            var input = new Resource { IntrinsicSettings = new[] { payloadObject.SerializeToXmlNode() } };
-            return input.SerializeToXml();
+            return CreateClusterRequest_ToInternal(cluster, subscriptionId);
         }
 
         internal static T ExtractResourceOutputValue<T>(Resource res, string name)
@@ -127,78 +128,188 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data
             return cluster;
         }
 
-        private static ClusterContainerPayload CreateClusterRequest_ToInternal(HDInsightClusterCreationDetails cluster, Guid subscriptionId)
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity",
+            Justification = "This is a result of interface flowing and not a true measure of complexity.")]
+        private static string CreateClusterRequest_ToInternal(HDInsightClusterCreationDetails cluster, Guid subscriptionId)
         {
-            // Container with the basic info
-            var deployment = new ClusterDeploymentPayload()
-            {
-                ClusterPassword = cluster.Password,
-                ClusterUsername = cluster.UserName,
-                Version = ClusterDeploymentPayload.DEFAULTVERSION
-            };
+            dynamic dynaXml = DynaXmlBuilder.Create(false, Formatting.None);
 
-            // Node information
-            deployment.NodeSizes.Add(new ClusterNodeSizePayload()
-            {
-                Count = 1,
-                RoleType = ClusterNodeType.HeadNode,
-                VMSize = NodeVMSize.ExtraLarge
-            });
-            deployment.NodeSizes.Add(new ClusterNodeSizePayload()
-            {
-                Count = cluster.ClusterSizeInNodes,
-                RoleType = ClusterNodeType.DataNode,
-                VMSize = NodeVMSize.Large
-            });
+            dynaXml.xmlns("http://schemas.microsoft.com/windowsazure")
+                   .Resource
+                   .b
+                     .IntrinsicSettings
+                     .b
+                       .xmlns("http://schemas.datacontract.org/2004/07/Microsoft.ClusterServices.DataAccess.Context")
+                       .ClusterContainer
+                       .b
+                         .AzureStorageLocation(cluster.Location)
+                         .Deployment
+                         .b
+                           .ASVAccounts
+                           .b
+                             .ASVAccount
+                             .b
+                               .AccountName(cluster.DefaultStorageAccountName)
+                               .BlobContainerName(cluster.DefaultStorageContainer)
+                               .SecretKey(cluster.DefaultStorageAccountKey)
+                             .d
+                             .sp("asv")
+                           .d
+                           .ClusterPassword(cluster.Password)
+                           .ClusterUsername(cluster.UserName)
+                           .NodeSizes
+                           .b
+                             .ClusterNodeSize
+                             .b
+                               .Count(1)
+                               .RoleType(ClusterNodeType.HeadNode)
+                               .VMSize(NodeVMSize.ExtraLarge)
+                             .d
+                             .ClusterNodeSize
+                             .b
+                               .Count(cluster.ClusterSizeInNodes)
+                               .RoleType(ClusterNodeType.DataNode)
+                               .VMSize(NodeVMSize.Large)
+                             .d
+                           .d
+                           .SqlMetaStores
+                           .b
+                             .xmlns("http://schemas.datacontract.org/2004/07/Microsoft.ClusterServices.DataAccess")
+                             .sp("metastore")
+                           .d
+                           .Version(ClusterDeploymentPayload.DEFAULTVERSION)
+                         .d
+                         .DeploymentAction(AzureClusterDeploymentAction.Create)
+                         .DnsName(cluster.Name)
+                         .IncarnationID(Guid.NewGuid())
+                         .SubscriptionId(subscriptionId)
+                       .d
+                     .d
+                   .d
+                   .End();
 
-            // ASV information
-            deployment.ASVAccounts.Add(new ASVAccountPayload()
-            {
-                AccountName = cluster.DefaultStorageAccountName,
-                SecretKey = cluster.DefaultStorageAccountKey,
-                BlobContainerName = cluster.DefaultStorageContainer
-            });
+            dynaXml.rp("asv");
             foreach (var asv in cluster.AdditionalStorageAccounts)
             {
-                deployment.ASVAccounts.Add(new ASVAccountPayload() { AccountName = asv.Name, SecretKey = asv.Key, BlobContainerName = "deploymentcontainer" });
+                dynaXml.ASVAccount
+                       .b
+                         .AccountName(asv.Name)
+                         .BlobContainerName("deploymentcontainer")
+                         .SecretKey(asv.Key)
+                       .d
+                       .End();
             }
 
-            // Metastores
             if (cluster.OozieMetastore != null)
             {
-                deployment.SqlMetaStores.Add(new SqlAzureMetaStorePayload
-                {
-                    AzureServerName = cluster.OozieMetastore.Server,
-                    DatabaseName = cluster.OozieMetastore.Database,
-                    Password = cluster.OozieMetastore.Password,
-                    Username = cluster.OozieMetastore.User,
-                    Type = SqlAzureMetaStorePayload.SqlMetastoreType.OozieMetastore
-                });
+                dynaXml.rp("metastore")
+                        .SqlAzureMetaStore
+                        .b
+                            .AzureServerName(cluster.OozieMetastore.Server)
+                            .DatabaseName(cluster.OozieMetastore.Database)
+                            .Password(cluster.OozieMetastore.Password)
+                            .Type(SqlAzureMetaStorePayload.SqlMetastoreType.OozieMetastore)
+                            .Username(cluster.OozieMetastore.User)
+                        .d
+                        .End();
             }
             if (cluster.HiveMetastore != null)
             {
-                deployment.SqlMetaStores.Add(new SqlAzureMetaStorePayload
-                {
-                    AzureServerName = cluster.HiveMetastore.Server,
-                    DatabaseName = cluster.HiveMetastore.Database,
-                    Password = cluster.HiveMetastore.Password,
-                    Username = cluster.HiveMetastore.User,
-                    Type = SqlAzureMetaStorePayload.SqlMetastoreType.HiveMetastore
-                });
+                dynaXml.rp("metastore")
+                        .SqlAzureMetaStore
+                        .b
+                            .AzureServerName(cluster.HiveMetastore.Server)
+                            .DatabaseName(cluster.HiveMetastore.Database)
+                            .Password(cluster.HiveMetastore.Password)
+                            .Type(SqlAzureMetaStorePayload.SqlMetastoreType.HiveMetastore)
+                            .Username(cluster.HiveMetastore.User)
+                        .d
+                        .End();
             }
 
-            // Container information
-            return new ClusterContainerPayload()
+            string xml;
+            using (var stream = new MemoryStream())
+            using (var reader = new StreamReader(stream))
             {
-                AzureStorageLocation = cluster.Location,
-                DnsName = cluster.Name,
-                SubscriptionId = subscriptionId,
-                DeploymentAction = AzureClusterDeploymentAction.Create,
-                Deployment = deployment,
-                IncarnationID = Guid.NewGuid(),
-            };
+                dynaXml.Save(stream);
+                stream.Position = 0;
+                xml = reader.ReadToEnd();
+            }
+            return xml;
 
-            // TODO: EXTRACT METADATA INFO
+            //// Container with the basic info
+            //var deployment = new ClusterDeploymentPayload()
+            //{
+            //    ClusterPassword = cluster.Password,
+            //    ClusterUsername = cluster.UserName,
+            //    Version = ClusterDeploymentPayload.DEFAULTVERSION
+            //};
+
+            //// Node information
+            //deployment.NodeSizes.Add(new ClusterNodeSizePayload()
+            //{
+            //    Count = 1,
+            //    RoleType = ClusterNodeType.HeadNode,
+            //    VMSize = NodeVMSize.ExtraLarge
+            //});
+            //deployment.NodeSizes.Add(new ClusterNodeSizePayload()
+            //{
+            //    Count = cluster.ClusterSizeInNodes,
+            //    RoleType = ClusterNodeType.DataNode,
+            //    VMSize = NodeVMSize.Large
+            //});
+
+            //// ASV information
+            //deployment.ASVAccounts.Add(new ASVAccountPayload()
+            //{
+            //    AccountName = cluster.DefaultStorageAccountName,
+            //    SecretKey = cluster.DefaultStorageAccountKey,
+            //    BlobContainerName = cluster.DefaultStorageContainer
+            //});
+            //foreach (var asv in cluster.AdditionalStorageAccounts)
+            //{
+            //    deployment.ASVAccounts.Add(new ASVAccountPayload() { AccountName = asv.Name, SecretKey = asv.Key, BlobContainerName = "deploymentcontainer" });
+            //}
+
+            //// Metastores
+            //if (cluster.OozieMetastore != null)
+            //{
+            //    deployment.SqlMetaStores.Add(new SqlAzureMetaStorePayload
+            //    {
+            //        AzureServerName = cluster.OozieMetastore.Server,
+            //        DatabaseName = cluster.OozieMetastore.Database,
+            //        Password = cluster.OozieMetastore.Password,
+            //        Username = cluster.OozieMetastore.User,
+            //        Type = SqlAzureMetaStorePayload.SqlMetastoreType.OozieMetastore
+            //    });
+            //}
+            //if (cluster.HiveMetastore != null)
+            //{
+            //    deployment.SqlMetaStores.Add(new SqlAzureMetaStorePayload
+            //    {
+            //        AzureServerName = cluster.HiveMetastore.Server,
+            //        DatabaseName = cluster.HiveMetastore.Database,
+            //        Password = cluster.HiveMetastore.Password,
+            //        Username = cluster.HiveMetastore.User,
+            //        Type = SqlAzureMetaStorePayload.SqlMetastoreType.HiveMetastore
+            //    });
+            //}
+
+            //// Container information
+            //var payloadObject = new ClusterContainerPayload()
+            //{
+            //    AzureStorageLocation = cluster.Location,
+            //    DnsName = cluster.Name,
+            //    SubscriptionId = subscriptionId,
+            //    DeploymentAction = AzureClusterDeploymentAction.Create,
+            //    Deployment = deployment,
+            //    IncarnationID = Guid.NewGuid(),
+            //};
+
+            //var input = new Resource { IntrinsicSettings = new[] { payloadObject.SerializeToXmlNode() } };
+            //return input.SerializeToXml();
+
+            //// TODO: EXTRACT METADATA INFO
         }
 
         private static Resource ListClusterContainerResult_ToInternal(HDInsightCluster result, string nameSpace)

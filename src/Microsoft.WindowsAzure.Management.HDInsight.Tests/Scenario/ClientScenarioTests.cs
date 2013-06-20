@@ -47,6 +47,33 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
         [TestMethod]
         [TestCategory(TestRunMode.Nightly)]
         [TestCategory("Scenario")]
+        public void ListAvailableLocations_AgainstAzure()
+        {
+            this.ApplyIndividualTestMockingOnly();
+            ListAvailableLocations();
+        }
+
+        [TestMethod]
+        [TestCategory("CheckIn")]
+        public void ListAvailableLocations()
+        {
+            // Creates the client
+            IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
+            var client = new ClusterProvisioningClient(credentials.SubscriptionId, credentials.Certificate);
+            var locations = client.ListAvailableLocations();
+            var locationsAsync = client.ListAvailableLocationsAsync().WaitForResult();
+            Assert.IsTrue(locations.Contains("East US", StringComparer.Ordinal));
+            Assert.IsTrue(locationsAsync.Contains("East US", StringComparer.Ordinal));
+            Assert.AreEqual(locations.Count, locationsAsync.Count);
+            foreach (var location in locations)
+            {
+                Assert.IsTrue(locationsAsync.Contains(location, StringComparer.Ordinal));
+            }
+        }
+
+        [TestMethod]
+        [TestCategory(TestRunMode.Nightly)]
+        [TestCategory("Scenario")]
         [TestCategory("LongRunning")]
         [Timeout(35 * 60 * 1000)] // ms
         public void CreateDeleteContainer_SyncClientWithTimeouts_AgainstAzure()
@@ -168,10 +195,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
         }
 
         [TestMethod]
-        [TestCategory("CheckIn")]
+        [TestCategory("Nightly")]
         [TestCategory("Scenario")]
         [Timeout(30 * 1000)] // ms
-        [ExpectedException(typeof(OperationCanceledException))]
         public void InvalidCreateDeleteContainer_FailsOnSdk_AgainstAzure()
         {
             this.ApplyIndividualTestMockingOnly();
@@ -182,7 +208,6 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
         [TestCategory("CheckIn")]
         [TestCategory("Scenario")]
         [Timeout(30 * 1000)] // ms
-        [ExpectedException(typeof(OperationCanceledException))]
         public void InvalidCreateDeleteContainer_FailsOnSdk()
         {            
             var clusterRequest = base.GetRandomCluster();
@@ -194,19 +219,33 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
             var client = new ClusterProvisioningClient(credentials.SubscriptionId, credentials.Certificate);
             client.PollingInterval = TimeSpan.FromMilliseconds(100);
 
-            TestClusterEndToEnd(
-                clusterRequest,
-                () => client.ListClustersAsync().WaitForResult(),
-                dnsName => client.GetClusterAsync(dnsName).WaitForResult(),
-                cluster => client.CreateClusterAsync(cluster).WaitForResult(),
-                dnsName => client.DeleteClusterAsync(dnsName).WaitForResult());
+            try
+            {
+                TestClusterEndToEnd(
+                    clusterRequest,
+                    () => client.ListClustersAsync().WaitForResult(),
+                    dnsName => client.GetClusterAsync(dnsName).WaitForResult(),
+                    cluster => client.CreateClusterAsync(cluster).WaitForResult(),
+                    dnsName => client.DeleteClusterAsync(dnsName).WaitForResult());
+                Assert.Fail("Expected exception.");
+            }
+            catch (OperationCanceledException e)
+            {
+                Assert.IsNotNull(e.Message);
+            }
+            finally
+            {
+                if (client.GetCluster(clusterRequest.Name) != null)
+                {
+                    client.DeleteCluster(clusterRequest.Name);
+                }
+            }
         }
 
         [TestMethod]
-        [TestCategory("CheckIn")]
+        [TestCategory("Nightly")]
         [TestCategory("Scenario")]
         [Timeout(30 * 1000)] // ms
-        [ExpectedException(typeof(InvalidOperationException))]
         public void InvalidCreateDeleteContainer_FailsOnServer_AgainstAzure()
         {
             this.ApplyIndividualTestMockingOnly();
@@ -217,7 +256,6 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
         [TestCategory("CheckIn")]
         [TestCategory("Scenario")]
         [Timeout(30 * 1000)] // ms
-        [ExpectedException(typeof(InvalidOperationException))]
         public void InvalidCreateDeleteContainer_FailsOnServer()
         {
             var clusterRequest = base.GetRandomCluster();
@@ -227,12 +265,27 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
             var client = new ClusterProvisioningClient(credentials.SubscriptionId, credentials.Certificate);
             client.PollingInterval = TimeSpan.FromMilliseconds(100);
 
-            TestClusterEndToEnd( 
-                clusterRequest,
-                client.ListClusters,
-                client.GetCluster,
-                client.CreateCluster,
-                client.DeleteCluster);
+            try
+            {
+                TestClusterEndToEnd( 
+                    clusterRequest,
+                    client.ListClusters,
+                    client.GetCluster,
+                    client.CreateCluster,
+                    client.DeleteCluster);
+                Assert.Fail("Expected exception.");
+            }
+            catch (InvalidOperationException e)
+            {
+                Assert.IsNotNull(e.Message);
+            }
+            finally
+            {
+                if (client.GetCluster(clusterRequest.Name) != null)
+                {
+                    client.DeleteCluster(clusterRequest.Name);
+                }
+            }
         }
     
         private void TestValidAdvancedCluster(

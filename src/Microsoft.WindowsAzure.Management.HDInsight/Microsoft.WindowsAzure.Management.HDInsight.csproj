@@ -37,6 +37,7 @@
     <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Net.Http" />
@@ -44,6 +45,7 @@
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel.Web" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Net.Http" />
@@ -62,6 +64,10 @@
     <Compile Include="ClusterProvisioning\IClusterProvisioningClientFactory.cs" />
     <Compile Include="ClusterProvisioning\ClusterProvisioningClientFactory.cs" />
     <Compile Include="ClusterProvisioning\IClusterProvisioningSyncClient.cs" />
+    <Compile Include="ClusterProvisioning\LocationFinder\LocationFinderClient.cs" />
+    <Compile Include="ClusterProvisioning\LocationFinder\LocationFinderClientFactory.cs" />
+    <Compile Include="ClusterProvisioning\LocationFinder\ILocationFinderClient.cs" />
+    <Compile Include="ClusterProvisioning\LocationFinder\ILocationFinderClientFactory.cs" />
     <Compile Include="ClusterProvisioning\SubscriptionRegistration\SubscriptionRegistrationClient.cs" />
     <Compile Include="ClusterProvisioning\SubscriptionRegistration\SubscriptionRegistrationClientFactory.cs" />
     <Compile Include="ClusterProvisioning\SubscriptionRegistration\ISubscriptionRegistrationClientFactory.cs" />

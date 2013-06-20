@@ -81,7 +81,7 @@ namespace Microsoft.Hadoop.MapReduce
                 if (s_mrlibFolder != null)
                     return s_mrlibFolder;
 
-                string userDLLPath = Path.GetDirectoryName(Path.GetFullPath((new System.Uri(Assembly.GetExecutingAssembly().CodeBase)).AbsolutePath));
+                string userDLLPath = Path.GetDirectoryName(Path.GetFullPath(Assembly.GetExecutingAssembly().Location));
                 string mrLibEnvPath = Environment.GetEnvironmentVariable("MRLib") ?? "MRLib environment var not set";
                 
                 string[] paths = {

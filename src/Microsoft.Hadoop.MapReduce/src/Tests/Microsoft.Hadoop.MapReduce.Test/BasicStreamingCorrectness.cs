@@ -103,7 +103,7 @@ namespace Microsoft.Hadoop.MapReduce.Test
         /// Tests throwing in the mapper.
         /// </summary>
         [TestMethod]
-        [TestCategory("CheckIn")]
+        // [TestCategory("CheckIn")]
         public void ThrowInMapper()
         {
             try

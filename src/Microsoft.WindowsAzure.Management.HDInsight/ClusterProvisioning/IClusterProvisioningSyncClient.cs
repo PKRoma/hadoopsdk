@@ -25,6 +25,12 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning
     public interface IClusterProvisioningSyncClient : IClusterProvisioningClientBase
     {
         /// <summary>
+        /// Queries the locations where HDInsight has been enabled for the subscription.
+        /// </summary>
+        /// <returns>List of sindows Azure locations.</returns>
+        Collection<string> ListAvailableLocations();
+
+        /// <summary>
         /// Queries the HDInsight Clusters registered.
         /// </summary>
         /// <returns>List of registered HDInsight Clusters.</returns>

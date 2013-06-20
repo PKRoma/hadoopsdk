@@ -145,19 +145,19 @@
 								Log.LogError(msg);
 								return false;
 							}
-							var files = Directory.GetFiles(copyFrom);
+							var files = Directory.GetFiles(copyFrom, "*.*", SearchOption.AllDirectories);
 							foreach (var copyFromFile in files)
 							{
-								var copyFromAbsolutePath = Path.GetFullPath(copyFrom);
-								var copyFromFileRelative = copyFromFile.Substring(copyFromAbsolutePath.Length + 1);
-								var copyToFile = Path.Combine(DestinationRoot, copyFromFileRelative);
+								var copyFromAbsolutePath = Path.GetFullPath(copyFromFile);
+								var copyFromFileRelative = copyFromFile.Substring(copyFrom.Length + 1);
+								var copyToFile = Path.Combine(copyTo, copyFromFileRelative);
 								var copyToFullDirectory = Path.GetDirectoryName(copyToFile);
 								if (!Directory.Exists(copyToFullDirectory))
 								{
 									Directory.CreateDirectory(copyToFullDirectory);
 								}
 
-								inputItem.Add(copyFromFile);
+								inputItem.Add(copyFromAbsolutePath);
 								outputItem.Add(copyToFile);
 							}
 						}

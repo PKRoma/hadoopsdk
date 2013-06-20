@@ -135,6 +135,10 @@
       <Project>{dbffc131-e089-4173-9b9e-6826fe596faf}</Project>
       <Name>Microsoft.WindowsAzure.Management.Framework.Threading</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\..\Microsoft.WindowsAzure.Management.Framework\Microsoft.WindowsAzure.Management.Framework.csproj">
+      <Project>{DB09F70B-FD28-4CC8-86B3-883D71CA9A02}</Project>
+      <Name>Microsoft.WindowsAzure.Management.Framework</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup />
   <Import Project="..\..\..\..\..\build\targets\Project.CSharp.targets" />

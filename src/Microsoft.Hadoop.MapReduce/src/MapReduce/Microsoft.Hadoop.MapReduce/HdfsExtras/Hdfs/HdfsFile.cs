@@ -18,6 +18,7 @@ namespace Microsoft.Hadoop.MapReduce.HdfsExtras.Hdfs
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.IO;
 
     /// <summary>
@@ -25,7 +26,9 @@ namespace Microsoft.Hadoop.MapReduce.HdfsExtras.Hdfs
     /// </summary>
     public static class HdfsFile
     {
-        internal static IHdfsFile InternalHdfsFile = LocalHdfsFile.Create();
+        [SuppressMessage("Microsoft.Usage", "CA2211:NonConstantFieldsShouldNotBeVisible", 
+            Justification = "Suppressing for now until we can bring in IOC and refactor. [tgs]")]
+        public static IHdfsFile InternalHdfsFile = LocalHdfsFile.Create();
 
         /// <summary>
         /// Writes text lines to a HDFS file

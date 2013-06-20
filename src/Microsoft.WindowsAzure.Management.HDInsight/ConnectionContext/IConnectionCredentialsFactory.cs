@@ -23,8 +23,20 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ConnectionContext
     /// <summary>
     /// Connection logic.
     /// </summary>
-    internal interface IConnectionCredentialsFactory
+    public interface IConnectionCredentialsFactory
     {
+        /// <summary>
+        /// Creates the connection credentials object that provides connection credentials.
+        /// </summary>
+        /// <param name="subscriptionId">
+        /// The subscription.
+        /// </param>
+        /// <param name="certificate">
+        /// The certificate.
+        /// </param>
+        /// <returns>
+        /// The connection credentials object.
+        /// </returns>
         IConnectionCredentials Create(Guid subscriptionId, X509Certificate2 certificate);
     }
 }

@@ -21,21 +21,18 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests
     using System.IO;
     using System.Linq;
     using System.Security.Cryptography.X509Certificates;
+    using System.Threading.Tasks;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Microsoft.WindowsAzure.Management.Framework;
     using Microsoft.WindowsAzure.Management.Framework.InversionOfControl;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoClient;
-    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestClient;
-    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets;
     using Microsoft.WindowsAzure.Management.HDInsight.ConnectionContext;
-    using Microsoft.WindowsAzure.Management.HDInsight.InversionOfControl;
     using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities;
-    using Microsoft.WindowsAzure.Management.HDInsight.Tests.CmdLetTests.PowerShellTestAbstraction.Concreates;
-    using Microsoft.WindowsAzure.Management.HDInsight.Tests.CmdLetTests.PowerShellTestAbstraction.Interfaces;
-    using Microsoft.WindowsAzure.Management.HDInsight.Tests.RestSimulator;
+    using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.PowerShellTestAbstraction.Concreates;
+    using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.PowerShellTestAbstraction.Interfaces;
 
     public class IntegrationTestBase
     {
@@ -79,7 +76,8 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests
             var factory = ServiceLocator.Instance.Locate<IClusterProvisioningClientFactory>();
             var creds = GetCredentials(TestRunNames.Default);
             var client = factory.Create(creds.SubscriptionId, new X509Certificate2(creds.Certificate));
-            var simClusters = client.ListClusters().Where(c => c.Name.StartsWith(ClusterPrefix));
+            var clusters = client.ListClusters().ToList();
+            var simClusters = clusters.Where(c => c.Name.StartsWith(ClusterPrefix, StringComparison.OrdinalIgnoreCase));
 
             foreach (var cluster in simClusters)
             {
@@ -90,7 +88,8 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests
             runManager.MockingLevel = IocTestMockingLevel.ApplyNoMocking;
             factory = ServiceLocator.Instance.Locate<IClusterProvisioningClientFactory>();
             client = factory.Create(creds.SubscriptionId, new X509Certificate2(creds.Certificate));
-            var liveClusters = client.ListClusters().Where(c => c.Name.StartsWith(ClusterPrefix));
+            clusters = client.ListClusters().ToList();
+            var liveClusters = clusters.Where(c => c.Name.StartsWith(ClusterPrefix, StringComparison.OrdinalIgnoreCase));
 
             foreach (var cluster in liveClusters)
             {
@@ -195,7 +194,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests
                                        time.Day.ToString("00"),
                                        time.Hour.ToString("00"),
                                        Guid.NewGuid().ToString("N")).ToLowerInvariant();
-            testToClusterMap.Add(retval, TestContext.FullyQualifiedTestClassName);
+            testToClusterMap.Add(retval, System.Environment.StackTrace.ToString());
             return retval;
         }
 
@@ -232,6 +231,14 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests
                     client.DeleteContainer(cluster.Name, cluster.Location).WaitForResult();
                 }
             }
+        }
+
+        internal static void DeleteClusters(IConnectionCredentials credentials, string location)
+        {
+            var client = new ClusterProvisioningClient(credentials.SubscriptionId, credentials.Certificate);
+            var clusters = client.ListClusters().Where(cluster => cluster.Location == location).ToList();
+
+            Parallel.ForEach(clusters, cluster => client.DeleteCluster(cluster.Name));
         }
     }
 }

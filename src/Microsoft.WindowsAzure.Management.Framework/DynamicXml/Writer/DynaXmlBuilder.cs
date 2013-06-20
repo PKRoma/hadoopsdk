@@ -97,7 +97,7 @@
         /// <returns>
         /// A new DynaXmlBuilder object that can be used to build Xml.
         /// </returns>
-        internal static dynamic Create(bool includeHeader, Formatting xmlFormatting)
+        public static dynamic Create(bool includeHeader, Formatting xmlFormatting)
         {
             var document = new XmlDocument();
             return new DynaXmlBuilder(document, includeHeader, xmlFormatting);

@@ -19,16 +19,16 @@ namespace Microsoft.Hadoop.MapReduce.Test
 
         protected static void PrepareForLocalRun()
         {
-            Hadoop.makeLocal = LocalHadoop.Create;
-            Hadoop.makeOneBox = (a, b, c) => LocalHadoop.Create();
-            Hadoop.makeAzure = (a, b, c, d, e, f, g, h) => LocalHadoop.Create();
+            Hadoop.MakeLocal = LocalHadoop.Create;
+            Hadoop.MakeOneBox = (a, b, c) => LocalHadoop.Create();
+            Hadoop.MakeAzure = (a, b, c, d, e, f, g, h) => LocalHadoop.Create();
         }
 
         protected static void PrepareForWebRun()
         {
-            Hadoop.makeLocal = () => WebHadoop.Create(new Uri(@"http://localhost:50111"), "hadoop", null);
-            Hadoop.makeOneBox = (a, b, c) => WebHadoop.Create(new Uri(@"http://localhost:50111"), "hadoop", null);
-            Hadoop.makeAzure = (a, b, c, d, e, f, g, h) => WebHadoop.Create(new Uri(@"http://localhost:50111"), "hadoop", null);
+            Hadoop.MakeLocal = () => WebHadoop.Create(new Uri(@"http://localhost:50111"), "hadoop", null);
+            Hadoop.MakeOneBox = (a, b, c) => WebHadoop.Create(new Uri(@"http://localhost:50111"), "hadoop", null);
+            Hadoop.MakeAzure = (a, b, c, d, e, f, g, h) => WebHadoop.Create(new Uri(@"http://localhost:50111"), "hadoop", null);
         }
 
         protected void PrepareForClusterRun(string configName)
@@ -56,7 +56,7 @@ namespace Microsoft.Hadoop.MapReduce.Test
             var blobAdapter = new BlobStorageAdapter(blobstorageaccountname, blobstorageaccountkey, container, true);
             HdfsFile.InternalHdfsFile = WebHdfsFile.Create(hadoopUser, new WebHDFSClient(hadoopUser, blobAdapter));
             
-            Hadoop.makeLocal = () => HadoopOnAzure.Create(new Uri(cluster), 
+            Hadoop.MakeLocal = () => HadoopOnAzure.Create(new Uri(cluster), 
                                                           userName, 
                                                           hadoopUser, 
                                                           password,
@@ -66,7 +66,7 @@ namespace Microsoft.Hadoop.MapReduce.Test
                                                           true);
 
             // NOTE: We ignore the supplied parameters and replace with the current config.
-            Hadoop.makeOneBox = (a, b, c) => HadoopOnAzure.Create(new Uri(cluster), 
+            Hadoop.MakeOneBox = (a, b, c) => HadoopOnAzure.Create(new Uri(cluster), 
                                                                   userName, 
                                                                   hadoopUser, 
                                                                   password,
@@ -76,7 +76,7 @@ namespace Microsoft.Hadoop.MapReduce.Test
                                                                   true);
 
             // NOTE: We ignore the supplied parameters and replace with the current config.
-            Hadoop.makeAzure = (a, b, c, d, e, f, g, h) => HadoopOnAzure.Create(new Uri(cluster), 
+            Hadoop.MakeAzure = (a, b, c, d, e, f, g, h) => HadoopOnAzure.Create(new Uri(cluster), 
                                                                                 userName, 
                                                                                 hadoopUser, 
                                                                                 password,
@@ -90,9 +90,9 @@ namespace Microsoft.Hadoop.MapReduce.Test
         [TestInitialize]
         public void SetupForNextTest()
         {
-            Hadoop.makeLocal = TestSetup.makeLocalHadoop;
-            Hadoop.makeOneBox = TestSetup.makeOneBoxHadoop;
-            Hadoop.makeAzure = TestSetup.makeAzureHadoop;
+            Hadoop.MakeLocal = TestSetup.makeLocalHadoop;
+            Hadoop.MakeOneBox = TestSetup.makeOneBoxHadoop;
+            Hadoop.MakeAzure = TestSetup.makeAzureHadoop;
             HdfsFile.InternalHdfsFile = TestSetup.OriginalHdfsFile;
         }
     }

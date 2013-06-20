@@ -68,7 +68,8 @@
 		
 		<Message Text="Computed BuildVersion as: $(BuildVersionFull)" Importance="High" />
 		
-		<WriteVersionFiles Major="$(BuildVersionMajor)"
+		<WriteVersionFiles Condition="'$(NoVersionOnBuild)' != 'true'"
+						   Major="$(BuildVersionMajor)"
 						   Minor="$(BuildVersionMinor)"
 						   Build="$(BuildVersionBuild)"
 						   Revision="$(BuildVersionRevision)"

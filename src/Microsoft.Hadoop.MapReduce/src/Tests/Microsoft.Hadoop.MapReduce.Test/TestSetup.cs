@@ -25,9 +25,9 @@ namespace Microsoft.Hadoop.MapReduce.Test
         [AssemblyInitialize]
         public static void AssemblyInit(TestContext context)
         {
-            makeLocalHadoop = Hadoop.makeLocal;
-            makeOneBoxHadoop = Hadoop.makeOneBox;
-            makeAzureHadoop = Hadoop.makeAzure;
+            makeLocalHadoop = Hadoop.MakeLocal;
+            makeOneBoxHadoop = Hadoop.MakeOneBox;
+            makeAzureHadoop = Hadoop.MakeAzure;
             OriginalHdfsFile = HdfsFile.InternalHdfsFile;
 
             types = new List<Type>();
