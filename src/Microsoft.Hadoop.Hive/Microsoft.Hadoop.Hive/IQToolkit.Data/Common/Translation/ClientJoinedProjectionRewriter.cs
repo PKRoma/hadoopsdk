@@ -92,7 +92,7 @@ namespace IQToolkit.Data.Common
                         var pc = ColumnProjector.ProjectColumns(this.language, newProjector, null, newAlias, newOuterSelect.Alias, newInnerSelect.Alias);
 
                         JoinExpression join = new JoinExpression(JoinType.OuterApply, newOuterSelect, newInnerSelect, null);
-                        SelectExpression joinedSelect = new SelectExpression(newAlias, pc.Columns, join, null, null, null, proj.IsSingleton, null, null, false);
+                        SelectExpression joinedSelect = new SelectExpression(newAlias, pc.Columns, join, null, null, null, null, proj.IsSingleton, null, null, null, false);
 
                         // apply client-join treatment recursively
                         this.currentSelect = joinedSelect;
@@ -141,6 +141,7 @@ namespace IQToolkit.Data.Common
                 && !this.policy.IsDeferLoaded(this.currentMember)
                 && !select.IsDistinct
                 && (select.GroupBy == null || select.GroupBy.Count == 0)
+                && (select.ClusterBy == null || select.ClusterBy.Count == 0)
                 && !AggregateChecker.HasAggregates(select);
         }
 

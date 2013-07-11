@@ -819,7 +819,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.DynamicXml
                 using (var reader = new StreamReader(stream))
                 {
                     string content = reader.ReadToEnd();
-                    Assert.AreEqual("<test1:Root xmlns:test1=\"http://test1.com\"><Child /><test2:Child xmlns:test2=\"http://test2.com\" /></test1:Root>", content);
+                    Assert.AreEqual("<test1:Root xmlns:test1=\"http://test1.com\" xmlns:test2=\"http://test2.com\"><Child /><test2:Child /></test1:Root>", content);
                 }
             }
         }
@@ -860,7 +860,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.DynamicXml
                 using (var reader = new StreamReader(stream))
                 {
                     string content = reader.ReadToEnd();
-                    Assert.AreEqual("<Root><test1:Child xmlns:test1=\"http://test1.com\" /><test2:Child xmlns:test2=\"http://test2.com\" /></Root>", content);
+                    Assert.AreEqual("<Root xmlns:test1=\"http://test1.com\" xmlns:test2=\"http://test2.com\"><test1:Child /><test2:Child /></Root>", content);
                 }
             }
         }

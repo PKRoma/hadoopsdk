@@ -141,6 +141,10 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
 
         public void WaitForClusterCondition(string dnsName, Func<HDInsightCluster, bool> evaluate, TimeSpan interval)
         {
+            if (evaluate.IsNull())
+            {
+                throw new ArgumentNullException("evaluate");
+            }
             while (true)
             {
                 var matchingContainer = this.ListContainer(dnsName).WaitForResult();

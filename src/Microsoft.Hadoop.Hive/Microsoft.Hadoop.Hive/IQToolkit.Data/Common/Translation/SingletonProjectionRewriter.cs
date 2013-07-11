@@ -107,6 +107,7 @@ namespace IQToolkit.Data.Common
             // can add singleton (1:0,1) join if no grouping/aggregates or distinct
             return !select.IsDistinct
                 && (select.GroupBy == null || select.GroupBy.Count == 0)
+                && (select.ClusterBy == null || select.ClusterBy.Count == 0)
                 && !AggregateChecker.HasAggregates(select);
         }
 

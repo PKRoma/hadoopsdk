@@ -134,6 +134,17 @@ namespace Microsoft.Hadoop.Hive
             return HiveMaterializer.Materialize<T>(resultTable);
         }
 
+        public async Task<IEnumerable<T>> ExecuteHiveQuery<T>(string query, IEnumerable<string> assemblies)
+        {
+            var queryResults = await ExecuteQuery(query, this.hiveHeaderParam, assemblies);
+
+            var results = await queryResults.ReadToEndAsync();
+
+            var resultTable = this.CreateHiveResultTable(results);
+
+            return HiveMaterializer.Materialize<T>(resultTable);
+        }
+
         public async Task<StreamReader> ExecuteQuery(string query)
         {
             return await this.ExecuteQuery(query, null);
@@ -152,6 +163,46 @@ namespace Microsoft.Hadoop.Hive
             return new StreamReader(results);
         }
 
+        public async Task<StreamReader> ExecuteQuery(string query, List<KeyValuePair<string, string>> queryParams, IEnumerable<string> assemblies)
+        {
+            var jobFolder = "/" + Guid.NewGuid();
+            var asvPath = baseDirectory + jobFolder;
+
+            UploadAssemblies(jobFolder, assemblies);
+
+            query = query.Replace("${jobFolder}", asvPath);
+            UploadScript(jobFolder, query);
+
+            var jobId = await this.QueueHiveScriptJob(asvPath, queryParams);
+            this.JobFolders.Add(jobFolder);
+
+            var results = await GetHiveJobResults(jobId, jobFolder);
+
+            return new StreamReader(results);
+        }
+
+
+
+        private async void UploadAssemblies(string jobFolder, IEnumerable<string> assemblies)
+        {
+            foreach (var file in assemblies)
+            {
+                var stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read);
+                await this.WebHdfsClient.CreateFile(stream, jobFolder + "/" + Path.GetFileName(file));
+            }
+        }
+
+        private async void UploadScript(string jobFolder, string query)
+        {
+            MemoryStream stream = new MemoryStream();
+            StreamWriter writer = new StreamWriter(stream);
+            writer.Write(query);
+            writer.Flush();
+            stream.Position = 0;
+
+            await this.WebHdfsClient.CreateFile(stream, jobFolder + "/HiveScript.hql");
+        }
+
         internal async Task<string> QueueHiveQueryJob(string query, string jobFolder, List<KeyValuePair<string, string>> queryParams)
         {
             query = query.Replace(Environment.NewLine, " "); //NEIN, this needs to be fixed in the query writer. 
@@ -164,6 +215,17 @@ namespace Microsoft.Hadoop.Hive
             return result["id"].ToString();
         }
 
+        internal async Task<string> QueueHiveScriptJob(string jobFolder, List<KeyValuePair<string, string>> queryParams)
+        {
+            //query = query.Replace(Environment.NewLine, " "); //NEIN, this needs to be fixed in the query writer. 
+
+            var response = await this.WebHCatHttpClient.CreateHiveJob(null, new [] { jobFolder + "/HiveScript.hql" }, queryParams, jobFolder, null);
+
+            var result = await response.Content.ReadAsAsync<JObject>();
+            response.EnsureSuccessStatusCode();
+
+            return result["id"].ToString();
+        }
         internal async Task<Stream> GetHiveJobResults(string jobId, string jobFolder)
         {
             var resultFileName = string.Format("{0}/stdout", jobFolder);

@@ -132,15 +132,20 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests
             IntegrationTestBase.CleanUpClusters();
         }
 
+        private IRunspace runspace;
+
         internal IRunspace GetPowerShellRunspace()
         {
-            var loc = typeof(GetAzureHDInsightClusterCmdlet).Assembly.Location;
-            var runspace = Help.SaveCreate(() => RunspaceAbstraction.Create());
-            runspace.NewPipeline()
-                    .AddCommand("Import-Module")
-                    .WithParameter("Name", loc)
-                    .Invoke();
-            return runspace;
+            if (this.runspace.IsNull())
+            {
+                var loc = typeof(GetAzureHDInsightClusterCmdlet).Assembly.Location;
+                this.runspace = Help.SaveCreate(() => RunspaceAbstraction.Create());
+                this.runspace.NewPipeline()
+                             .AddCommand("Import-Module")
+                             .WithParameter("Name", loc)
+                             .Invoke();
+            }
+            return this.runspace;
         }
 
         public void ApplyIndividualTestMockingOnly()
@@ -211,7 +216,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests
                 Name = this.GetRandomClusterName(),
                 UserName = TestCredentials.AzureUserName,
                 Password = GetRandomValidPassword(),
-                Location = "East US",
+                Location = "East US 2",
                 DefaultStorageAccountName = TestCredentials.DefaultStorageAccount.Name,
                 DefaultStorageAccountKey = TestCredentials.DefaultStorageAccount.Key,
                 DefaultStorageContainer =  TestCredentials.DefaultStorageAccount.Container,

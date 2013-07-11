@@ -18,7 +18,7 @@ namespace Microsoft.WindowsAzure.Management.Framework.DynamicXml.Writer
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Xml;
+    using Microsoft.WindowsAzure.Management.Framework.DynamicXml.Writer.Model;
 
     /// <summary>
     ///     Provides the current context tracking for Dynamic Xml building.
@@ -63,7 +63,7 @@ namespace Microsoft.WindowsAzure.Management.Framework.DynamicXml.Writer
         /// <summary>
         /// Gets the last Element Node created (ancestor of self).
         /// </summary>
-        public XmlElement CurrentAncestorElement
+        public DynaXmlElement CurrentAncestorElement
         {
             get { return this.stack.Peek().CurentAncestorElement; }
         }
@@ -71,15 +71,15 @@ namespace Microsoft.WindowsAzure.Management.Framework.DynamicXml.Writer
         /// <summary>
         /// Gets the current ancestor node.
         /// </summary>
-        public XmlNode CurrentAncestorNode
+        public DynaXmlNode CurrentAncestorNode
         {
-            get { return (XmlNode)this.CurrentAncestorElement ?? this.Document; }
+            get { return (DynaXmlNode)this.CurrentAncestorElement ?? this.Document; }
         }
 
         /// <summary>
         /// Gets or sets the last element created.
         /// </summary>
-        public XmlElement LastCreated
+        public DynaXmlElement LastCreated
         {
             get { return this.stack.Peek().LastCreated; }
             set { this.stack.Peek().LastCreated = value; }
@@ -102,7 +102,7 @@ namespace Microsoft.WindowsAzure.Management.Framework.DynamicXml.Writer
         /// <summary>
         /// Gets the XmlDocument.
         /// </summary>
-        public XmlDocument Document
+        public DynaXmlDocument Document
         {
             get { return this.stack.Peek().Document; }
         }
@@ -122,10 +122,9 @@ namespace Microsoft.WindowsAzure.Management.Framework.DynamicXml.Writer
         /// <param name="element">
         ///     The XmlELement representing the current state.
         /// </param>
-        public void PushElement(XmlElement element)
+        public void PushElement(DynaXmlElement element)
         {
-            this.CurrentAncestorNode.AppendChild(element);
-//            this.Push(element, DynaXmlBuilderState.ElementBuilder);
+            this.CurrentAncestorNode.Items.Add(element);
             this.Push(element, DynaXmlBuilderState.ElementListBuilder);
         }
 
@@ -158,7 +157,7 @@ namespace Microsoft.WindowsAzure.Management.Framework.DynamicXml.Writer
         /// <param name="state">
         ///     The new state.
         /// </param>
-        internal void Push(XmlElement newAncestor, DynaXmlBuilderState state)
+        internal void Push(DynaXmlElement newAncestor, DynaXmlBuilderState state)
         {
             this.stack.Push(new DynaXmlContextState(this.Document,
                                                     newAncestor, 
@@ -187,7 +186,7 @@ namespace Microsoft.WindowsAzure.Management.Framework.DynamicXml.Writer
         /// <param name="state">
         ///     The new state.
         /// </param>
-        internal void Push(XmlDocument document, DynaXmlBuilderState state)
+        internal void Push(DynaXmlDocument document, DynaXmlBuilderState state)
         {
             this.stack.Push(new DynaXmlContextState(document,
                                                     null,

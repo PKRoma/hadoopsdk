@@ -44,7 +44,7 @@
         {
             IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
             var client = new SubscriptionRegistrationClient(credentials);
-            Assert.IsTrue(await client.ValidateSubscriptionLocation("East US"));
+            Assert.IsTrue(await client.ValidateSubscriptionLocation("East US 2"));
         }
 
         [TestMethod]
@@ -55,7 +55,7 @@
         {
             IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
             var client = ServiceLocator.Instance.Locate<ISubscriptionRegistrationClientFactory>().Create(credentials);
-            Assert.IsTrue(await client.ValidateSubscriptionLocation("East US"));
+            Assert.IsTrue(await client.ValidateSubscriptionLocation("East US 2"));
             Assert.IsFalse(await client.ValidateSubscriptionLocation("No Where"));
         }
 
@@ -134,7 +134,7 @@
             var client = ServiceLocator.Instance.Locate<ISubscriptionRegistrationClientFactory>().Create(credentials);
             try
             {
-                await client.UnregisterSubscriptionLocation("East US");
+                await client.UnregisterSubscriptionLocation("East US 2");
                 Assert.Fail("Expected exception.");
             }
             catch (InvalidOperationException e)
@@ -142,7 +142,7 @@
                 Assert.AreEqual(e.Message, "Cannot unregister a subscription location if it contains clusters");
             }
 
-            Assert.IsTrue(await client.ValidateSubscriptionLocation("East US"));
+            Assert.IsTrue(await client.ValidateSubscriptionLocation("East US 2"));
         }
 
         [TestMethod]

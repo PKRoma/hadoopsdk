@@ -244,8 +244,9 @@ namespace IQToolkit.Data.Common
             }
 
             string commandText = this.linguist.Format(projection.Select);
+            var files = this.linguist.ExtractFileReferences(projection.Select);
             ReadOnlyCollection<NamedValueExpression> namedValues = NamedValueGatherer.Gather(projection.Select);
-            QueryCommand command = new QueryCommand(commandText, namedValues.Select(v => new QueryParameter(v.Name, v.Type, v.QueryType)));
+            QueryCommand command = new QueryCommand(commandText, namedValues.Select(v => new QueryParameter(v.Name, v.Type, v.QueryType)), files);
             Expression[] values = namedValues.Select(v => Expression.Convert(this.Visit(v.Value), typeof(object))).ToArray();
 
             return this.ExecuteProjection(projection, okayToDefer, command, values);
@@ -257,7 +258,7 @@ namespace IQToolkit.Data.Common
 
             var saveScope = this.scope;
             ParameterExpression reader = Expression.Parameter(typeof(FieldReader), "r" + nReaders++);
-            this.scope = new Scope(this.scope, reader, projection.Select.Alias, projection.Select.Columns);
+            this.scope = new Scope(this.scope, reader, projection.Select.Alias, projection.Select.Map == null ? projection.Select.Columns : projection.Select.Map.OutputColumns);
             LambdaExpression projector = Expression.Lambda(this.Visit(projection.Projector), reader);
             this.scope = saveScope;
 
@@ -304,8 +305,9 @@ namespace IQToolkit.Data.Common
             Expression operation = this.Parameterize(batch.Operation.Body);
 
             string commandText = this.linguist.Format(operation);
+            var files = this.linguist.ExtractFileReferences(operation);
             var namedValues = NamedValueGatherer.Gather(operation);
-            QueryCommand command = new QueryCommand(commandText, namedValues.Select(v => new QueryParameter(v.Name, v.Type, v.QueryType)));
+            QueryCommand command = new QueryCommand(commandText, namedValues.Select(v => new QueryParameter(v.Name, v.Type, v.QueryType)), files);
             Expression[] values = namedValues.Select(v => Expression.Convert(this.Visit(v.Value), typeof(object))).ToArray();
 
             Expression paramSets = Expression.Call(typeof(Enumerable), "Select", new Type[] { batch.Operation.Parameters[1].Type, typeof(object[]) },
@@ -325,7 +327,7 @@ namespace IQToolkit.Data.Common
                 this.scope = saveScope;
 
                 var entity = EntityFinder.Find(projection.Projector);
-                command = new QueryCommand(command.CommandText, command.Parameters);
+                command = new QueryCommand(command.CommandText, command.Parameters, command.Files);
 
                 plan = Expression.Call(this.executor, "ExecuteBatch", new Type[] { projector.Body.Type },
                     Expression.Constant(command),
@@ -486,8 +488,9 @@ namespace IQToolkit.Data.Common
             var expression = this.Parameterize(command);
 
             string commandText = this.linguist.Format(expression);
+            var files = this.linguist.ExtractFileReferences(expression);
             ReadOnlyCollection<NamedValueExpression> namedValues = NamedValueGatherer.Gather(expression);
-            QueryCommand qc = new QueryCommand(commandText, namedValues.Select(v => new QueryParameter(v.Name, v.Type, v.QueryType)));
+            QueryCommand qc = new QueryCommand(commandText, namedValues.Select(v => new QueryParameter(v.Name, v.Type, v.QueryType)), files);
             Expression[] values = namedValues.Select(v => Expression.Convert(this.Visit(v.Value), typeof(object))).ToArray();
 
             ProjectionExpression projection = ProjectionFinder.FindProjection(expression);

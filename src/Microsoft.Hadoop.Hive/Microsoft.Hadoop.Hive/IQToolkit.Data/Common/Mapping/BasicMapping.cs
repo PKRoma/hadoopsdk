@@ -230,7 +230,9 @@ namespace IQToolkit.Data.Common
             Type type = entity.EntityType;
             HashSet<MemberInfo> members = new HashSet<MemberInfo>(type.GetFields().Cast<MemberInfo>().Where(m => this.IsMapped(entity, m)));
             members.UnionWith(type.GetProperties().Cast<MemberInfo>().Where(m => this.IsMapped(entity, m)));
-            return members.OrderBy(m => m.Name);
+            // Maxim: Removing ordering of fields as position based streaming interface is sensitive to field position changes.
+            //return members.OrderBy(m => m.Name);
+            return members;
         }
 
         public override object CloneEntity(MappingEntity entity, object instance)

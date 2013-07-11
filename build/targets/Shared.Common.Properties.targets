@@ -10,7 +10,7 @@
    <!-- Set the Official Build Properties -->
    <PropertyGroup Condition="'$(OfficialBuild)' == 'true'">
       <SignAssembly>true</SignAssembly>
-      <DelaySign>true</DelaySign>
+      <DelaySign Condition="'$(SampleProject)' != 'true'">true</DelaySign>
       <SourceAnalysisTreatErrorsAsWarnings>false</SourceAnalysisTreatErrorsAsWarnings>
       <StyleCopTreatErrorsAsWarnings>false</StyleCopTreatErrorsAsWarnings>
       <CodeAnalysisTreatWarningsAsErrors>true</CodeAnalysisTreatWarningsAsErrors>
@@ -96,11 +96,13 @@
 
 	<!-- Set the project for delay signing -->
 	<PropertyGroup Condition="'$(SignAssembly)' == 'true'">
-		<DelaySign Condition="'$(DelaySign)' == ''">true</DelaySign>
+		<DelaySign Condition="'$(DelaySign)' == '' and '$(SampleProject)' != 'true'">true</DelaySign>
+		<DelaySign Condition="'$(DelaySign)' == '' and '$(SampleProject)' == 'true'">false</DelaySign>
 
 		<SignKeyPath>$(BuildFilesPath)</SignKeyPath>
 		<SignKeyPath Condition="'$(BuildToolsPath)' != ''">$(BuildToolsPath)\CodeSigning</SignKeyPath>
-		<AssemblyOriginatorKeyFile>$(SignKeyPath)\PublicKey.snk</AssemblyOriginatorKeyFile>
+		<AssemblyOriginatorKeyFile Condition="'$(SampleProject)' != 'true'">$(SignKeyPath)\PublicKey.snk</AssemblyOriginatorKeyFile>
+		<AssemblyOriginatorKeyFile Condition="'$(SampleProject)' == 'true'">$(BuildFilesPath)\FakeSign.snk</AssemblyOriginatorKeyFile>
 		<DefineConstants>$(DefineConstants);SIGN</DefineConstants>
 	</PropertyGroup>
 </Project>

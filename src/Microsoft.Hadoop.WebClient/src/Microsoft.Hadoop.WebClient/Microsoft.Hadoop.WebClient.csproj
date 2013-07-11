@@ -67,6 +67,7 @@
     <Compile Include="AmbariClient\AmbariUrlBuilder.cs" />
     <Compile Include="AmbariClient\Contracts\ClusterInfo.cs" />
     <Compile Include="AmbariClient\Contracts\HostComponentMetric.cs" />
+    <Compile Include="Common\Base64Codec.cs" />
     <Compile Include="Common\HttpClientTools.cs" />
     <Compile Include="Common\Resource.cs" />
     <Compile Include="Common\HttpClientExtension.cs" />

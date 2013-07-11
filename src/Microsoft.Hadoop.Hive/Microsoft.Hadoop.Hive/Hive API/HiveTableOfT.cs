@@ -34,6 +34,7 @@ namespace Microsoft.Hadoop.Hive
     using System.Reflection;
     using System.Collections;
     using IQToolkit;
+    using System.Collections.ObjectModel;
 
     [DebuggerDisplay("QueryText = {QueryString, nq}")]
     public class HiveTable<TElement> : HiveTable, IQueryable<TElement>
@@ -80,6 +81,11 @@ namespace Microsoft.Hadoop.Hive
             {
                 return this.QueryProvider.GetQueryText(this.IntenralExpression);
             }
+        }
+
+        public string GetQueryText(out ReadOnlyCollection<string> files)
+        {
+            return this.QueryProvider.GetQueryText(this.IntenralExpression, out files);
         }
 
         public IEnumerator<TElement> GetEnumerator()

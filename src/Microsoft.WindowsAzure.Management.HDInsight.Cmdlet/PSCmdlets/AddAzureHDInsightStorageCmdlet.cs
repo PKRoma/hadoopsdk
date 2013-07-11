@@ -47,6 +47,7 @@
                 this.command.Config.DefaultStorageAccount = value.DefaultStorageAccount;
                 this.command.Config.HiveMetastore = value.HiveMetastore ?? this.command.Config.HiveMetastore;
                 this.command.Config.OozieMetastore = value.OozieMetastore ?? this.command.Config.OozieMetastore;
+                this.command.Config.AdditionalStorageAccounts.AddRange(value.AdditionalStorageAccounts);
             }
         }
 

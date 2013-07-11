@@ -17,34 +17,45 @@ namespace Microsoft.WindowsAzure.Management.Framework.WebRequest
 {
     using System.Net;
     using System.Net.Http;
+    using System.Net.Http.Headers;
 
-    internal class HttpResponseMessageAbstraction : DisposableObject, IHttpResponseMessageAbstraction
+    /// <summary>
+    /// Represents a response from an Http request.
+    /// </summary>
+    internal class HttpResponseMessageAbstraction : IHttpResponseMessageAbstraction
     {
-        internal HttpResponseMessage ResponseMessage { get; private set; }
-
-        private string content;
-
-        internal HttpResponseMessageAbstraction(HttpResponseMessage responseMessage)
+        /// <summary>
+        /// Initializes a new instance of the HttpResponseMessageAbstraction class.
+        /// </summary>
+        /// <param name="statusCode">
+        /// The HttpStatusCode.
+        /// </param>
+        /// <param name="headers">
+        /// The headers returned.
+        /// </param>
+        /// <param name="content">
+        /// The content returned.
+        /// </param>
+        internal HttpResponseMessageAbstraction(HttpStatusCode statusCode, IHttpResponseHeadersAbstraction headers, string content)
         {
-            this.ResponseMessage = responseMessage;
+            this.StatusCode = statusCode;
+            this.Headers = headers;
+            this.Content = content;
         }
 
-        public HttpStatusCode StatusCode
-        {
-            get { return this.ResponseMessage.StatusCode; }
-            set { this.ResponseMessage.StatusCode = value; }
-        }
+        /// <summary>
+        /// Gets the status code of the request.
+        /// </summary>
+        public HttpStatusCode StatusCode { get; private set; }
 
-        public string Content
-        {
-            get
-            {
-                if (this.ResponseMessage.Content.IsNotNull())
-                {
-                    this.content = this.ResponseMessage.Content.ReadAsStringAsync().WaitForResult();
-                }
-                return this.content;
-            }
-        }
+        /// <summary>
+        /// Gets the Response Headers for the response.
+        /// </summary>
+        public IHttpResponseHeadersAbstraction Headers { get; private set; }
+
+        /// <summary>
+        /// Gets the content of the request.
+        /// </summary>
+        public string Content { get; private set; }
     }
 }

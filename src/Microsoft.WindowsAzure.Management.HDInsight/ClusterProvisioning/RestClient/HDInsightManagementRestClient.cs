@@ -31,10 +31,12 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestCl
     internal class HDInsightManagementRestClient : DisposableObject, IHDInsightManagementRestClient
     {
         private readonly IConnectionCredentials credentials;
+        private readonly ICloudServiceNameResolver resolver;
 
         internal HDInsightManagementRestClient(IConnectionCredentials credentials)
         {
             this.credentials = credentials;
+            this.resolver = ServiceLocator.Instance.Locate<ICloudServiceNameResolver>();
         }
         
         // Method = "GET", UriTemplate = "{subscriptionId}/cloudservices"
@@ -52,15 +54,13 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestCl
                 client.Method = HttpMethod.Get;
                     
                 // Sends, validates and parses the response
-                using (var httpResponse = await client.SendAsync())
+                var httpResponse = await client.SendAsync();
+                if (httpResponse.StatusCode != HttpStatusCode.OK)
                 {
-                    if (httpResponse.StatusCode != HttpStatusCode.OK)
-                    {
-                        throw new HDInsightRestClientException(httpResponse.StatusCode,
-                                                                httpResponse.Content);
-                    }
-                    return httpResponse.Content;
+                    throw new HDInsightRestClientException(httpResponse.StatusCode,
+                                                            httpResponse.Content);
                 }
+                return httpResponse.Content;
             }
         }
 
@@ -70,9 +70,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestCl
             // Creates an HTTP client
             using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(this.credentials.Certificate))
             {
-                string regionCloudServicename = GetCloudServiceName(this.credentials.SubscriptionId,
-                                                                    this.credentials.DeploymentNamespace,
-                                                                    location);
+                string regionCloudServicename = this.resolver.GetCloudServiceName(this.credentials.SubscriptionId,
+                                                                                  this.credentials.DeploymentNamespace,
+                                                                                  location);
 
                 string relativeUri = string.Format(CultureInfo.InvariantCulture,
                                                     "{0}/cloudservices/{1}/resources/{2}/{3}/{4}",
@@ -90,13 +90,11 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestCl
                 client.RequestHeaders.Add(HDInsightRestHardcodes.Accept);
                 client.Content = clusterPayload;
 
-                using (var httpResponse = await client.SendAsync())
+                var httpResponse = await client.SendAsync();
+                if (httpResponse.StatusCode != HttpStatusCode.Accepted)
                 {
-                    if (httpResponse.StatusCode != HttpStatusCode.Accepted)
-                    {
-                        throw new HDInsightRestClientException(httpResponse.StatusCode,
-                                                                httpResponse.Content);
-                    }
+                    throw new HDInsightRestClientException(httpResponse.StatusCode,
+                                                            httpResponse.Content);
                 }
             }
         }
@@ -118,9 +116,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestCl
             {
                 Guid subscriptionId = this.credentials.SubscriptionId;
                 string cloudServiceName = this.credentials.DeploymentNamespace;
-                string regionCloudServicename = GetCloudServiceName(subscriptionId,
-                                                                    cloudServiceName,
-                                                                    location);
+                string regionCloudServicename = this.resolver.GetCloudServiceName(subscriptionId,
+                                                                                  cloudServiceName,
+                                                                                  location);
                 string relativeUri = string.Format(CultureInfo.InvariantCulture,
                                                     "{0}/cloudservices/{1}/resources/{2}/{3}/{4}",
                                                     subscriptionId,
@@ -135,60 +133,13 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestCl
                 client.RequestHeaders.Add(HDInsightRestHardcodes.XMsVersion);
                 client.RequestHeaders.Add(HDInsightRestHardcodes.Accept);
 
-                using (var httpResponse = await client.SendAsync())
+                var httpResponse = await client.SendAsync();
+                if (httpResponse.StatusCode != HttpStatusCode.Accepted)
                 {
-                    if (httpResponse.StatusCode != HttpStatusCode.Accepted)
-                    {
-                        throw new HDInsightRestClientException(httpResponse.StatusCode,
-                                                                httpResponse.Content);
-                    }
+                    throw new HDInsightRestClientException(httpResponse.StatusCode,
+                                                            httpResponse.Content);
                 }
             }
-        }
-
-        // TODO: REMOVE THIS AND HAVE A LOOKUP ON AZURE LOGIC
-        internal static string GetCloudServiceName(Guid subscriptionId, string extensionPrefix, string region)
-        {
-            string hashedSubId = string.Empty;
-
-            using (SHA256 sha256 = SHA256.Create())
-            {
-                hashedSubId = Base32NoPaddingEncode(sha256.ComputeHash(Encoding.UTF8.GetBytes(subscriptionId.ToString())));
-            }
-
-            return string.Format(CultureInfo.InvariantCulture,
-                                 "{0}{1}-{2}",
-                                 extensionPrefix,
-                                 hashedSubId,
-                                 region.Replace(' ', '-'));
-        }
-
-        // TODO: REMOVE THIS AND HAVE A LOOKUP ON AZURE LOGIC
-        private static string Base32NoPaddingEncode(byte[] data)
-        {
-            const string Base32StandardAlphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
-
-            var result = new StringBuilder(Math.Max((int)Math.Ceiling(data.Length * 8 / 5.0), 1));
-
-            var emptyBuffer = new byte[] { 0, 0, 0, 0, 0, 0, 0, 0 };
-            var workingBuffer = new byte[8];
-
-            // Process input 5 bytes at a time
-            for (int i = 0; i < data.Length; i += 5)
-            {
-                int bytes = Math.Min(data.Length - i, 5);
-                Array.Copy(emptyBuffer, workingBuffer, emptyBuffer.Length);
-                Array.Copy(data, i, workingBuffer, workingBuffer.Length - (bytes + 1), bytes);
-                Array.Reverse(workingBuffer);
-                ulong val = BitConverter.ToUInt64(workingBuffer, 0);
-
-                for (int bitOffset = ((bytes + 1) * 8) - 5; bitOffset > 3; bitOffset -= 5)
-                {
-                    result.Append(Base32StandardAlphabet[(int)((val >> bitOffset) & 0x1f)]);
-                }
-            }
-
-            return result.ToString();
         }
     }
 }

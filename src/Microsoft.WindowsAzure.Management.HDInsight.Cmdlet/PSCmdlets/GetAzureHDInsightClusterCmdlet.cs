@@ -12,7 +12,7 @@
     /// Cmdlet that lists all the clusters registered in the HDInsight service.
     /// </summary>
     [Cmdlet(VerbsCommon.Get, AzureHdInsightPowerShellHardCodes.AzureHDInsightCluster)]
-    public class GetAzureHDInsightClusterCmdlet : AzureHDInsightCmdlet
+    public class GetAzureHDInsightClusterCmdlet : AzureHDInsightCmdlet, IGetAzureHDInsightClusterBase
     {
         private IGetAzureHDInsightClusterCommand getCommand;
 
@@ -56,6 +56,26 @@
         {
             get { return this.getCommand.Certificate; }
             set { this.getCommand.Certificate = value; }
+        }
+
+        /// <inheritdoc />
+        [Parameter(Position = 3, Mandatory = false,
+                   HelpMessage = "The Endpoint to use when connecting to Azure.",
+                   ParameterSetName = AzureHdInsightPowerShellHardCodes.ParameterSetClusterByNameWithSpecificSubscriptionCredentails)]
+        public Uri EndPoint
+        {
+            get { return this.getCommand.EndPoint; }
+            set { this.getCommand.EndPoint = value; }
+        }
+
+        /// <inheritdoc />
+        [Parameter(Position = 4, Mandatory = false,
+                   HelpMessage = "The CloudServiceName to use when managing the HDInsight cluster.",
+                   ParameterSetName = AzureHdInsightPowerShellHardCodes.ParameterSetClusterByNameWithSpecificSubscriptionCredentails)]
+        public string CloudServiceName
+        {
+            get { return this.getCommand.CloudServiceName; }
+            set { this.getCommand.CloudServiceName = value; }
         }
 
         /// <summary>

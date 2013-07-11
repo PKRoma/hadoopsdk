@@ -27,5 +27,19 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ConnectionCredential
            var environmentNamespace = IntegrationTestBase.TestCredentials.AlternativeEnvironment.Namespace;
            return new ConnectionCredentials(endPoint, environmentNamespace, subscriptionId, certificate);
         }
+
+        public IConnectionCredentials Create(Guid subscriptionId, X509Certificate2 certificate, Uri endpoint)
+        {
+            var endPoint = new Uri(IntegrationTestBase.TestCredentials.AlternativeEnvironment.Endpoint);
+            var environmentNamespace = IntegrationTestBase.TestCredentials.AlternativeEnvironment.Namespace;
+            return new ConnectionCredentials(endPoint, environmentNamespace, subscriptionId, certificate);
+        }
+
+        public IConnectionCredentials Create(Guid subscriptionId, X509Certificate2 certificate, Uri endpoint, string cloudServiceName)
+        {
+            var endPoint = new Uri(IntegrationTestBase.TestCredentials.AlternativeEnvironment.Endpoint);
+            var environmentNamespace = IntegrationTestBase.TestCredentials.AlternativeEnvironment.Namespace;
+            return new ConnectionCredentials(endPoint, environmentNamespace, subscriptionId, certificate);
+        }
     }
 }

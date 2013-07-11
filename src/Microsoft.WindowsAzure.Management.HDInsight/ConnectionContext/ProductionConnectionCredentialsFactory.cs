@@ -28,5 +28,15 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ConnectionContext
         {
             return new ConnectionCredentials(new Uri(EndPoint), Namespace, subscriptionId, certificate);
         }
+
+        public IConnectionCredentials Create(Guid subscriptionId, X509Certificate2 certificate, Uri endpoint)
+        {
+            return new ConnectionCredentials(endpoint, Namespace, subscriptionId, certificate);
+        }
+
+        public IConnectionCredentials Create(Guid subscriptionId, X509Certificate2 certificate, Uri endpoint, string cloudServiceName)
+        {
+            return new ConnectionCredentials(endpoint, cloudServiceName, subscriptionId, certificate);
+        }
     }
 }

@@ -66,7 +66,12 @@ namespace Microsoft.WindowsAzure.Management.Framework.WebRequest
             this.client.Timeout = this.Timeout;
 
             var result = await this.client.SendAsync(requestMessage);
-            return new HttpResponseMessageAbstraction(result);
+            string content = null;
+            if (result.Content.IsNotNull())
+            {
+                content = result.Content.ReadAsStringAsync().WaitForResult();
+            }
+            return new HttpResponseMessageAbstraction(result.StatusCode, new HttpResponseHeadersAbstraction(result.Headers), content);
         }
 
         public static IHttpClientAbstraction Create(X509Certificate2 cert)

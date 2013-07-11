@@ -57,8 +57,9 @@ namespace IQToolkit.Data.Common
 
                 bool hasOrderBy = select.OrderBy != null && select.OrderBy.Count > 0;
                 bool hasGroupBy = select.GroupBy != null && select.GroupBy.Count > 0;
+                bool hasClusterBy = select.ClusterBy != null && select.ClusterBy.Count > 0;
                 bool canHaveOrderBy = saveIsOuterMostSelect || select.Take != null || select.Skip != null;
-                bool canReceiveOrderings = canHaveOrderBy && !hasGroupBy && !select.IsDistinct && !AggregateChecker.HasAggregates(select);
+                bool canReceiveOrderings = canHaveOrderBy && !hasGroupBy && !hasClusterBy && !select.IsDistinct && !AggregateChecker.HasAggregates(select);
 
                 if (hasOrderBy)
                 {
@@ -79,7 +80,7 @@ namespace IQToolkit.Data.Common
                 {
                     orderings = select.OrderBy;
                 }
-                bool canPassOnOrderings = !saveIsOuterMostSelect && !hasGroupBy && !select.IsDistinct;
+                bool canPassOnOrderings = !saveIsOuterMostSelect && !hasGroupBy && !hasClusterBy && !select.IsDistinct;
                 ReadOnlyCollection<ColumnDeclaration> columns = select.Columns;
                 if (this.gatheredOrderings != null)
                 {
@@ -99,7 +100,7 @@ namespace IQToolkit.Data.Common
                 }
                 if (orderings != select.OrderBy || columns != select.Columns || select.IsReverse)
                 {
-                    select = new SelectExpression(select.Alias, columns, select.From, select.Where, orderings, select.GroupBy, select.IsDistinct, select.Skip, select.Take, false);
+                    select = new SelectExpression(select.Alias, columns, select.From, select.Where, orderings, select.GroupBy, select.ClusterBy, select.IsDistinct, select.Map, select.Skip, select.Take, false);
                 }
                 return select;
             }

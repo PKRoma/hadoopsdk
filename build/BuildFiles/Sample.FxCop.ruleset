@@ -44,4 +44,5 @@
 	  <!-- CA2202 - Microsoft.Usage: Do not dispose of objects multiple times -->
 	  <!-- Turning off this rule because it is broken and serves no useful purpose -->
 	  <Rule Id="CA2202" Action="None" />
+   </Rules>
 </RuleSet>

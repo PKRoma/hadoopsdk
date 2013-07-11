@@ -7,6 +7,7 @@
     using System.Linq;
     using System.Text;
     using System.Xml;
+    using Microsoft.WindowsAzure.Management.Framework.DynamicXml.Writer.Model;
 
     /// <summary>
     /// Used to build an Xml Document dynamically.
@@ -15,10 +16,10 @@
     {
         private const string Xmlns = "http://www.w3.org/2000/xmlns/";
         private bool includeHeader;
-        private XmlDocument document;
+        private DynaXmlDocument document;
         private DynaXmlBuilderContext context;
         private Formatting xmlFormatting;
-        private List<XmlAttribute> rootNodeNamespaceDefinitions = new List<XmlAttribute>();
+        private List<DynaXmlAttribute> rootNodeNamespaceDefinitions = new List<DynaXmlAttribute>();
         private readonly Dictionary<string, DynaXmlBuilderContext> setPoints = new Dictionary<string, DynaXmlBuilderContext>();
 
         /// <summary>
@@ -32,7 +33,7 @@
         /// <summary>
         /// Gets the current ancestor XmlNode for the builder.
         /// </summary>
-        private XmlElement CurrentAncestorElement
+        private DynaXmlElement CurrentAncestorElement
         {
             get { return this.context.CurrentAncestorElement; }
         }
@@ -40,7 +41,7 @@
         /// <summary>
         /// Gets the current ancestor as an XmlNode.
         /// </summary>
-        private XmlNode CurrentAncestorNode
+        private DynaXmlNode CurrentAncestorNode
         {
             get { return this.context.CurrentAncestorNode; }
         }
@@ -48,7 +49,7 @@
         /// <summary>
         /// Sets the last element that was created.
         /// </summary>
-        private XmlElement LastCreated
+        private DynaXmlElement LastCreated
         {
             // get { return this.context.LastCreated; }
             set { this.context.LastCreated = value; }
@@ -74,7 +75,7 @@
         /// <param name="xmlFormatting">
         /// The XmlFormatting style to use when writing the document.
         /// </param>
-        internal DynaXmlBuilder(XmlDocument document, bool includeHeader, Formatting xmlFormatting)
+        internal DynaXmlBuilder(DynaXmlDocument document, bool includeHeader, Formatting xmlFormatting)
         {
             this.xmlFormatting = xmlFormatting;
             this.includeHeader = includeHeader;
@@ -99,7 +100,7 @@
         /// </returns>
         public static dynamic Create(bool includeHeader, Formatting xmlFormatting)
         {
-            var document = new XmlDocument();
+            var document = new DynaXmlDocument();
             return new DynaXmlBuilder(document, includeHeader, xmlFormatting);
         }
 
@@ -124,26 +125,33 @@
         /// <returns>
         /// The XmlElement that was created.
         /// </returns>
-        private XmlElement CreateElement(string name)
+        private DynaXmlElement CreateElement(string name)
         {
-            XmlElement element = null;
+            DynaXmlElement element = null;
             var currentAlias = this.CurrentNamespaceContext.CurrentAlias;
             if (currentAlias.IsNotNullOrEmpty())
             {
-                element = this.document.CreateElement(currentAlias,
-                                                      name,
-                                                      this.CurrentNamespaceContext.AliasTable[currentAlias]);
+                element = new DynaXmlElement()
+                {
+                    Prefix = currentAlias,
+                    LocalName = name,
+                    XmlNamespace = this.CurrentNamespaceContext.AliasTable[currentAlias]
+                };
                 // We've used the "CurrentAlias" so remove it as it's a (use once state);
                 this.CurrentNamespaceContext.CurrentAlias = string.Empty;
                 this.CurrentNamespaceContext.ApplyCurrentToAttributes = false;
             }
             else if (this.CurrentNamespaceContext.DefaultNamespace.IsNullOrEmpty())
             {
-                element = this.document.CreateElement(name);
+                element = new DynaXmlElement() { LocalName = name };
             }
             else
             {
-                element = this.document.CreateElement(name, this.CurrentNamespaceContext.DefaultNamespace);
+                element = new DynaXmlElement() { LocalName = name, XmlNamespace = this.CurrentNamespaceContext.DefaultNamespace };
+            }
+            if (this.CurrentAncestorElement.IsNull())
+            {
+                element.Items.AddRange(this.rootNodeNamespaceDefinitions);
             }
             return element;
         }
@@ -212,11 +220,11 @@
             // First check to make sure the namespace has not already been defined
             // on this element.  It's okay if it's in the current context, but it 
             // cant be on the AncestorElement.
-            ICollection<XmlAttribute> currentAttributes;
+            ICollection<DynaXmlAttribute> currentAttributes;
             if (this.CurrentAncestorElement.IsNotNull())
             {
-                currentAttributes = new List<XmlAttribute>();
-                foreach (XmlAttribute attrib in this.CurrentAncestorElement.Attributes)
+                currentAttributes = new List<DynaXmlAttribute>();
+                foreach (DynaXmlAttribute attrib in this.CurrentAncestorElement.Attributes)
                 {
                     currentAttributes.Add(attrib);
                 }
@@ -226,10 +234,10 @@
                 currentAttributes = this.rootNodeNamespaceDefinitions;
             }
 
-            XmlAttribute attribute = (from a in currentAttributes
-                                     where a.Name == name &&
-                                           a.NamespaceURI == Xmlns
-                                    select a).FirstOrDefault();
+            DynaXmlAttribute attribute = (from a in currentAttributes
+                                         where a.LocalName == name &&
+                                               a.XmlNamespace == Xmlns
+                                        select a).FirstOrDefault();
             if (attribute.IsNotNull())
             {
                 attribute.Value = xmlNamespace;
@@ -239,7 +247,7 @@
                 attribute = this.CreateNamespace(name, xmlNamespace);
                 if (this.CurrentAncestorElement.IsNotNull())
                 {
-                    this.CurrentAncestorElement.Attributes.Append(attribute);
+                    this.CurrentAncestorElement.Items.Add(attribute);
                 }
                 else
                 {
@@ -267,7 +275,7 @@
         {
             // Determine if we are at the root level and if we are trying to 
             // create more than one node.
-            if (this.CurrentAncestorNode == this.document && this.document.ChildNodes.Count != 0)
+            if (this.CurrentAncestorNode == this.document && this.document.Items.Count != 0)
             {
                 throw new InvalidOperationException("An Xml Document may not have more than one root element.");
             }
@@ -277,7 +285,7 @@
                 this.State == DynaXmlBuilderState.LiteralElementBuilder)
             {
                 var element = this.CreateElement(name);
-                this.CurrentAncestorNode.AppendChild(element);
+                this.CurrentAncestorNode.Items.Add(element);
                 // update the last created in case a new list is needed under this element.
                 this.LastCreated = element;
             }
@@ -293,6 +301,19 @@
                 this.context.Pop();
             }
             return true;
+        }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            using (var memStream = new MemoryStream())
+            using (var reader = new StreamReader(memStream))
+            {
+                this.Save(memStream);
+                memStream.Flush();
+                memStream.Position = 0;
+                return reader.ReadToEnd();
+            }
         }
 
         /// <summary>
@@ -332,7 +353,64 @@
             using (var streamWriter = new StreamWriter(temp))
             using (var xmlWriter = XmlTextWriter.Create(streamWriter, settings))
             {
-                this.document.Save(xmlWriter);
+                var stack = new Stack<KeyValuePair<int, DynaXmlNode>>();
+                stack.Push(new KeyValuePair<int, DynaXmlNode>(0, this.document.Items.ElementAt(0)));
+                int lastDepth = 0;
+                while (stack.Count > 0)
+                {
+                    var node = stack.Pop();
+                    var depth = node.Key;
+                    while (depth < lastDepth && depth != 0)
+                    {
+                        xmlWriter.WriteEndElement();
+                        lastDepth--;
+                    }
+                    lastDepth = depth;
+                    switch (node.Value.NodeType)
+                    {
+                        case DynaXmlNodeType.Text:
+                            xmlWriter.WriteString(node.Value.Value);
+                            break;
+                        case DynaXmlNodeType.CData:
+                            xmlWriter.WriteCData(node.Value.Value);
+                            break;
+                        case DynaXmlNodeType.Element:
+                            var attributes = (from n in node.Value.Items
+                                              where n.NodeType == DynaXmlNodeType.Attribute
+                                              select n).ToList();
+                            var others = (from n in node.Value.Items
+                                         where n.NodeType != DynaXmlNodeType.Attribute
+                                        select n).Reverse().ToList();
+                            xmlWriter.WriteStartElement(node.Value.Prefix, node.Value.LocalName, node.Value.XmlNamespace);
+                            foreach (var attribute in attributes)
+                            {
+                                xmlWriter.WriteAttributeString(attribute.Prefix, 
+                                                               attribute.LocalName, 
+                                                               attribute.XmlNamespace, 
+                                                               attribute.Value);
+                            }
+                            bool hasOthers = false;
+                            foreach (var other in others)
+                            {
+                                hasOthers = true;
+                                stack.Push(new KeyValuePair<int, DynaXmlNode>(depth + 1, other));
+                            }
+                            if (!hasOthers)
+                            {
+                                xmlWriter.WriteEndElement();
+                            }
+                            break;
+                    }
+                }
+                while (lastDepth > 0)
+                {
+                    lastDepth--;
+                    xmlWriter.WriteEndElement();
+                }
+                xmlWriter.Flush();
+                streamWriter.Flush();
+                stream.Flush();
+                //this.document.Save(xmlWriter);
                 // Copy the content into the actual stream supplied.
                 temp.Position = 0;
                 temp.CopyTo(stream);
@@ -351,19 +429,22 @@
         /// <returns>
         /// The new attribute.
         /// </returns>
-        private XmlAttribute CreateAttribute(string name, string value)
+        private DynaXmlAttribute CreateAttribute(string name, string value)
         {
-            XmlAttribute retval;
+            DynaXmlAttribute retval;
             var currentAlias = this.CurrentNamespaceContext.CurrentAlias;
             if (!this.CurrentNamespaceContext.ApplyCurrentToAttributes)
             {
-                retval = this.document.CreateAttribute(name);
+                retval = new DynaXmlAttribute() { LocalName = name };
             }
             else
             {
-                retval = this.document.CreateAttribute(currentAlias,
-                                                       name,
-                                                       this.CurrentNamespaceContext.AliasTable[currentAlias]);
+                retval = new DynaXmlAttribute()
+                {
+                    Prefix = currentAlias,
+                    LocalName = name,
+                    XmlNamespace = this.CurrentNamespaceContext.AliasTable[currentAlias]
+                };
                 // We've used the current alias so remove it as it is a (use once state)
                 this.CurrentNamespaceContext.CurrentAlias = string.Empty;
                 this.CurrentNamespaceContext.ApplyCurrentToAttributes = false;
@@ -378,9 +459,14 @@
         /// <param name="prefix">The prefix for the namespace.</param>
         /// <param name="xmlNamespace">The namespace.</param>
         /// <returns>A new XmlAttribute representing the namespace.</returns>
-        private XmlAttribute CreateNamespace(string prefix, string xmlNamespace)
+        private DynaXmlAttribute CreateNamespace(string prefix, string xmlNamespace)
         {
-            XmlAttribute namespaceDefinition = this.document.CreateAttribute("xmlns", prefix, Xmlns);
+            DynaXmlAttribute namespaceDefinition = new DynaXmlAttribute()
+            {
+                Prefix = "xmlns",
+                LocalName = prefix,
+                XmlNamespace = Xmlns
+            };
             this.CurrentNamespaceContext.AliasTable.Add(prefix, xmlNamespace);
             namespaceDefinition.Value = xmlNamespace;
             return namespaceDefinition;
@@ -573,6 +659,12 @@
                 return true;
             }
 
+            // Creates a Text block with the content supplied.
+            if (binder.Name == "text" && !this.IsLiteratState)
+            {
+                return this.TextInvokeMember(arg0);
+            }
+
             // Creates a CDATA block with the content supplied.
             if (binder.Name == "cdata" && !this.IsLiteratState)
             {
@@ -620,14 +712,15 @@
         {
             // Determine if we are at the root level and if we are trying to 
             // create more than one node.
-            if (this.CurrentAncestorNode == this.document && this.document.ChildNodes.Count != 0)
+            if (this.CurrentAncestorNode == this.document && this.document.Items.Count != 0)
             {
                 throw new InvalidOperationException("An Xml Document may not have more than one root element.");
             }
 
-            XmlElement element = this.CreateElement(name);
-            element.InnerText = value ?? string.Empty;
-            this.CurrentAncestorNode.AppendChild(element);
+            DynaXmlElement element = this.CreateElement(name);
+            DynaXmlText text = new DynaXmlText() { Value = value };
+            element.Items.Add(text);
+            this.CurrentAncestorNode.Items.Add(element);
             if (this.State == DynaXmlBuilderState.LiteralElementBuilder)
             {
                 this.context.Pop();
@@ -651,16 +744,13 @@
         {
             // Determine if we are at the root level and if we are trying to 
             // create more than one node.
-            if (this.CurrentAncestorNode == this.document && this.document.ChildNodes.Count != 0)
+            if (this.CurrentAncestorNode == this.document && this.document.Items.Count != 0)
             {
                 throw new InvalidOperationException("Attributes can not be added before a root element is defined.");
             }
 
-            XmlNode element = this.CurrentAncestorElement;
-            if (element.Attributes != null)
-            {
-                element.Attributes.Append(this.CreateAttribute(name, value));
-            }
+            DynaXmlElement element = this.CurrentAncestorElement;
+            element.Items.Add(this.CreateAttribute(name, value));
             // If we are NOT in a AttributeListBuild, we pop the state
             // if we are in a list attribute build, we do not.
             if (this.State != DynaXmlBuilderState.AttributeListBuilder)
@@ -683,15 +773,37 @@
         {
             // Determine if we are at the root level and if we are trying to 
             // create more than one node.
-            if (this.CurrentAncestorNode == this.document && this.document.ChildNodes.Count != 0)
+            if (this.CurrentAncestorNode == this.document && this.document.Items.Count != 0)
             {
                 throw new InvalidOperationException("CDATA nodes can not be part of the root xml structure.");
             }
 
-            XmlCDataSection cdata = this.document.CreateCDataSection(content);
-            this.CurrentAncestorNode.AppendChild(cdata);
+            DynaXmlCData cdata = new DynaXmlCData() { Value = content };
+            this.CurrentAncestorNode.Items.Add(cdata);
             return true;
         }
 
+        /// <summary>
+        /// Creates a Text block with the text supplied.
+        /// </summary>
+        /// <param name="content">
+        /// The content to place in the CDATA block.
+        /// </param>
+        /// <returns>
+        /// Always true.
+        /// </returns>
+        private bool TextInvokeMember(string content)
+        {
+            // Determine if we are at the root level and if we are trying to 
+            // create more than one node.
+            if (this.CurrentAncestorNode == this.document && this.document.Items.Count != 0)
+            {
+                throw new InvalidOperationException("Text nodes can not be part of the root xml structure.");
+            }
+
+            DynaXmlText text = new DynaXmlText() { Value = content };
+            this.CurrentAncestorNode.Items.Add(text);
+            return true;
+        }
     }
 }

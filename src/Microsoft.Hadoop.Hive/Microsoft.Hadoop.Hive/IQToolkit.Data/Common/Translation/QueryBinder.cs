@@ -16,10 +16,12 @@
 
 
 
+using Microsoft.Hadoop.Hive;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -39,7 +41,7 @@ namespace IQToolkit.Data.Common
         Expression root;
         IEntityTable batchUpd;
 
-        private QueryBinder(QueryMapper mapper, Expression root)
+        protected QueryBinder(QueryMapper mapper, Expression root)
         {
             this.mapper = mapper;
             this.language = mapper.Translator.Linguist.Language;
@@ -76,9 +78,30 @@ namespace IQToolkit.Data.Common
             return ColumnProjector.ProjectColumns(this.language, expression, null, newAlias, existingAliases);
         }
 
+        private ProjectedColumns ProjectColumns(Expression expression, IEnumerable<ColumnDeclaration> existingColumns, TableAlias newAlias, params TableAlias[] existingAliases)
+        {
+            return ColumnProjector.ProjectColumns(this.language, expression, existingColumns, newAlias, existingAliases);
+        }
+
         protected override Expression VisitMethodCall(MethodCallExpression m)
         {
-            if (m.Method.DeclaringType == typeof(Queryable) || m.Method.DeclaringType == typeof(Enumerable))
+            if (m.Method.DeclaringType == typeof(HiveExtensionMethods))
+            {
+                switch (m.Method.Name)
+                {
+                    case "Map":
+                        return this.BindMap(m.Type, m.Arguments[0], GetLambda(m.Arguments[1]));
+                    case "MapMany":
+                        return this.BindMapMany(m.Type, m.Arguments[0], GetLambda(m.Arguments[1]));
+                    case "ClusterBy":
+                        return this.BindClusterBy(m.Arguments[0], GetLambda(m.Arguments[1]));
+                    case "Reduce":
+                        return this.BindReduce(m.Type, m.Arguments[0], GetLambda(m.Arguments[1]));
+                    case "ReduceMany":
+                        return this.BindReduceMany(m.Type, m.Arguments[0], GetLambda(m.Arguments[1]));
+                }
+            }
+            else if (m.Method.DeclaringType == typeof(Queryable) || m.Method.DeclaringType == typeof(Enumerable))
             {
                 switch (m.Method.Name)
                 {
@@ -361,6 +384,140 @@ namespace IQToolkit.Data.Common
                 );
         }
 
+        private Expression BindMap(Type resultType, Expression source, LambdaExpression lambda)
+        {
+            ProjectionExpression projection = this.VisitSequence(source);
+            this.map[lambda.Parameters[0]] = projection.Projector;
+
+            var exe_path = System.Reflection.Assembly.GetEntryAssembly().Location.Replace('\\', '/');
+            var driver_path = Path.GetDirectoryName(exe_path).Replace('\\', '/') + "/HiveDriver.exe";
+            var method = ((MethodCallExpression)lambda.Body).Method;
+            var classname = method.DeclaringType.FullName;
+            var methodname = method.Name;
+
+            var alias = this.GetNextAlias();
+            ProjectedColumns pc = this.ProjectColumns(projection.Projector, alias, projection.Select.Alias);
+
+            var newSelect = new SelectExpression(alias, pc.Columns, projection.Select, null, null, null, null, false, null, null, null, false);
+
+            var outputType = TypeHelper.GetElementType(resultType);
+            MappingEntity entity = this.mapper.Mapping.GetEntity(outputType);
+            var newProjector = this.mapper.GetEntityExpression(projection.Select, entity);
+            this.map[Expression.Parameter(outputType)] = newProjector;
+            ProjectedColumns newpc = this.ProjectColumns(newProjector, alias, projection.Select.Alias);
+            var map = new MapExpression(alias, newpc.Columns, "MAP", driver_path, exe_path, classname, methodname);
+
+            newSelect = UpdateSelect(newSelect, projection.Select, null, null, null, null, null, null, false, map, false, newSelect.Columns);
+
+            return new ProjectionExpression(
+                newSelect,
+                newpc.Projector
+                );
+        }
+
+        private Expression BindMapMany(Type resultType, Expression source, LambdaExpression lambda)
+        {
+            ProjectionExpression projection = this.VisitSequence(source);
+            this.map[lambda.Parameters[0]] = projection.Projector;
+
+            var exe_path = System.Reflection.Assembly.GetEntryAssembly().Location.Replace('\\', '/');
+            var driver_path = Path.GetDirectoryName(exe_path).Replace('\\', '/') + "/HiveDriver.exe";
+            var method = ((MethodCallExpression)lambda.Body).Method;
+            var classname = method.DeclaringType.FullName;
+            var methodname = method.Name;
+
+            var alias = this.GetNextAlias();
+            ProjectedColumns pc = this.ProjectColumns(projection.Projector, alias, projection.Select.Alias);
+
+            var newSelect = new SelectExpression(alias, pc.Columns, projection.Select, null, null, null, null, false, null, null, null, false);
+
+            var outputType = TypeHelper.GetElementType(resultType);
+            MappingEntity entity = this.mapper.Mapping.GetEntity(outputType);
+            var newProjector = this.mapper.GetEntityExpression(projection.Select, entity);
+            this.map[Expression.Parameter(outputType)] = newProjector;
+            ProjectedColumns newpc = this.ProjectColumns(newProjector, alias, alias, projection.Select.Alias);
+            var map = new MapExpression(alias, newpc.Columns, "MAPMANY", driver_path, exe_path, classname, methodname);
+
+            newSelect = UpdateSelect(newSelect, projection.Select, null, null, null, null, null, null, false, map, false, newSelect.Columns);
+
+            return new ProjectionExpression(
+                newSelect,
+                newpc.Projector
+                );
+        }
+
+        private Expression BindReduce(Type resultType, Expression source, LambdaExpression lambda)
+        {
+            ProjectionExpression projection = this.VisitSequence(source);
+            this.map[lambda.Parameters[0]] = projection.Projector;
+
+            var inputType = TypeHelper.GetElementType(lambda.Parameters[0].Type.GetGenericArguments()[1]);
+            MappingEntity inputEntity = this.mapper.Mapping.GetEntity(inputType);
+            var inputProjector = this.mapper.GetEntityExpression(projection.Select, inputEntity);
+            this.map[Expression.Parameter(inputType)] = inputProjector;
+
+            var exe_path = System.Reflection.Assembly.GetEntryAssembly().Location.Replace('\\', '/');
+            var driver_path = Path.GetDirectoryName(exe_path).Replace('\\', '/') + "/HiveDriver.exe";
+            var method = ((MethodCallExpression)lambda.Body).Method;
+            var classname = method.DeclaringType.FullName;
+            var methodname = method.Name;
+
+            var alias = this.GetNextAlias();
+            ProjectedColumns pc = this.ProjectColumns(inputProjector, alias, projection.Select.Alias);
+
+            var newSelect = new SelectExpression(alias, pc.Columns, projection.Select, null, null, null, null, false, null, null, null, false);
+
+            var outputType = TypeHelper.GetElementType(resultType);
+            MappingEntity entity = this.mapper.Mapping.GetEntity(outputType);
+            var newProjector = this.mapper.GetEntityExpression(projection.Select, entity);
+            this.map[Expression.Parameter(outputType)] = newProjector;
+            ProjectedColumns newpc = this.ProjectColumns(newProjector, alias, alias, projection.Select.Alias);
+            var map = new MapExpression(alias, newpc.Columns, "REDUCE", driver_path, exe_path, classname, methodname);
+
+            newSelect = UpdateSelect(newSelect, projection.Select, null, null, null, null, null, null, false, map, false, newSelect.Columns);
+
+            return new ProjectionExpression(
+                newSelect,
+                newpc.Projector
+                );
+        }
+
+        private Expression BindReduceMany(Type resultType, Expression source, LambdaExpression lambda)
+        {
+            ProjectionExpression projection = this.VisitSequence(source);
+            this.map[lambda.Parameters[0]] = projection.Projector;
+
+            var inputType = TypeHelper.GetElementType(lambda.Parameters[0].Type.GetGenericArguments()[1]);
+            MappingEntity inputEntity = this.mapper.Mapping.GetEntity(inputType);
+            var inputProjector = this.mapper.GetEntityExpression(projection.Select, inputEntity);
+            this.map[Expression.Parameter(inputType)] = inputProjector;
+
+            var exe_path = System.Reflection.Assembly.GetEntryAssembly().Location.Replace('\\', '/');
+            var driver_path = Path.GetDirectoryName(exe_path).Replace('\\', '/') + "/HiveDriver.exe";
+            var method = ((MethodCallExpression)lambda.Body).Method;
+            var classname = method.DeclaringType.FullName;
+            var methodname = method.Name;
+
+            var alias = this.GetNextAlias();
+            ProjectedColumns pc = this.ProjectColumns(inputProjector, alias, projection.Select.Alias);
+
+            var newSelect = new SelectExpression(alias, pc.Columns, projection.Select, null, null, null, null, false, null, null, null, false);
+
+            var outputType = TypeHelper.GetElementType(resultType);
+            MappingEntity entity = this.mapper.Mapping.GetEntity(outputType);
+            var newProjector = this.mapper.GetEntityExpression(projection.Select, entity);
+            this.map[Expression.Parameter(outputType)] = newProjector;
+            ProjectedColumns newpc = this.ProjectColumns(newProjector, alias, alias, projection.Select.Alias);
+            var map = new MapExpression(alias, newpc.Columns, "REDUCEMANY", driver_path, exe_path, classname, methodname);
+
+            newSelect = UpdateSelect(newSelect, projection.Select, null, null, null, null, null, null, false, map, false, newSelect.Columns);
+
+            return new ProjectionExpression(
+                newSelect,
+                newpc.Projector
+                );
+        }
+
         private Expression BindReverse(Expression source)
         {
             ProjectionExpression projection = this.VisitSequence(source);
@@ -519,7 +676,7 @@ namespace IQToolkit.Data.Common
             var alias = this.GetNextAlias();
             ProjectedColumns pc = this.ProjectColumns(projection.Projector, alias, projection.Select.Alias);
             return new ProjectionExpression(
-                new SelectExpression(alias, pc.Columns, projection.Select, null, orderings.AsReadOnly(), null),
+                new SelectExpression(alias, pc.Columns, projection.Select, null, orderings.AsReadOnly(), null, null),
                 pc.Projector
                 );
         }
@@ -621,11 +778,86 @@ namespace IQToolkit.Data.Common
             }
 
             return new ProjectionExpression(
-                new SelectExpression(alias, pc.Columns, projection.Select, null, null, groupExprs),
+                new SelectExpression(alias, pc.Columns, projection.Select, null, null, groupExprs, null),
                 pc.Projector
                 );
         }
 
+        protected virtual Expression BindClusterBy(Expression source, LambdaExpression keySelector)
+        {
+            ProjectionExpression projection = this.VisitSequence(source);
+
+            this.map[keySelector.Parameters[0]] = projection.Projector;
+            Expression keyExpr = this.Visit(keySelector.Body);
+
+            Expression elemExpr = projection.Projector;
+
+            // Use ProjectColumns to get group-by expressions from key expression
+            ProjectedColumns keyProjection = this.ProjectColumns(keyExpr, projection.Select.Alias, projection.Select.Alias);
+            var groupExprs = keyProjection.Columns.Select(c => c.Expression).ToArray();
+
+            // make duplicate of source query as basis of element subquery by visiting the source again
+            ProjectionExpression subqueryBasis = this.VisitSequence(source);
+
+            // recompute key columns for group expressions relative to subquery (need these for doing the correlation predicate)
+            this.map[keySelector.Parameters[0]] = subqueryBasis.Projector;
+            Expression subqueryKey = this.Visit(keySelector.Body);
+
+            // use same projection trick to get group-by expressions based on subquery
+            ProjectedColumns subqueryKeyPC = this.ProjectColumns(subqueryKey, subqueryBasis.Select.Alias, subqueryBasis.Select.Alias);
+            var subqueryGroupExprs = subqueryKeyPC.Columns.Select(c => c.Expression).ToArray();
+            Expression subqueryCorrelation = this.BuildPredicateWithNullsEqual(subqueryGroupExprs, groupExprs);
+
+            // compute element based on duplicated subquery
+            Expression subqueryElemExpr = subqueryBasis.Projector;
+
+            // build subquery that projects the desired element
+            var elementAlias = this.GetNextAlias();
+            ProjectedColumns elementPC = this.ProjectColumns(subqueryElemExpr, elementAlias, subqueryBasis.Select.Alias);
+            ProjectionExpression elementSubquery =
+                new ProjectionExpression(
+                    new SelectExpression(elementAlias, elementPC.Columns, subqueryBasis.Select, subqueryCorrelation),
+                    elementPC.Projector
+                    );
+
+            var alias = this.GetNextAlias();
+
+            // make it possible to tie aggregates back to this group-by
+            // Comment: Probably isn't needed for Reduce
+            GroupByInfo info = new GroupByInfo(alias, elemExpr);
+            this.groupByMap.Add(elementSubquery, info);
+
+            Expression resultExpr;
+            // result must be IGrouping<K,E>
+            resultExpr =
+                Expression.New(
+                    typeof(Grouping<,>).MakeGenericType(keyExpr.Type, subqueryElemExpr.Type).GetConstructors()[0],
+                    new Expression[] { keyExpr, elementSubquery }
+                    );
+
+            resultExpr = Expression.Convert(resultExpr, typeof(IGrouping<,>).MakeGenericType(keyExpr.Type, subqueryElemExpr.Type));
+
+            var outputType = TypeHelper.GetElementType(subqueryElemExpr.Type);
+            MappingEntity entity = this.mapper.Mapping.GetEntity(outputType);
+            var newProjector = this.mapper.GetEntityExpression(projection.Select, entity);
+            this.map[Expression.Parameter(outputType)] = newProjector;
+            ProjectedColumns newpc = this.ProjectColumns(newProjector, alias, projection.Select.Alias);
+
+            ProjectedColumns pc = this.ProjectColumns(resultExpr, newpc.Columns, alias, projection.Select.Alias);
+
+            // make it possible to tie aggregates back to this group-by
+            NewExpression newResult = this.GetNewExpression(pc.Projector);
+            if (newResult != null && newResult.Type.IsGenericType && newResult.Type.GetGenericTypeDefinition() == typeof(Grouping<,>))
+            {
+                Expression projectedElementSubquery = newResult.Arguments[1];
+                //this.groupByMap.Add(projectedElementSubquery, info);
+            }
+
+            return new ProjectionExpression(
+                new SelectExpression(alias, pc.Columns, projection.Select, null, null, null, groupExprs),
+                pc.Projector
+                );
+        }
         private NewExpression GetNewExpression(Expression expression)
         {
             // ignore converions 
@@ -759,7 +991,7 @@ namespace IQToolkit.Data.Common
             var alias = this.GetNextAlias();
             ProjectedColumns pc = this.ProjectColumns(projection.Projector, alias, projection.Select.Alias);
             return new ProjectionExpression(
-                new SelectExpression(alias, pc.Columns, projection.Select, null, null, null, true, null, null, false),
+                new SelectExpression(alias, pc.Columns, projection.Select, null, null, null, null, true, select.Map, null, null, false),
                 pc.Projector
                 );
         }
@@ -772,7 +1004,7 @@ namespace IQToolkit.Data.Common
             var alias = this.GetNextAlias();
             ProjectedColumns pc = this.ProjectColumns(projection.Projector, alias, projection.Select.Alias);
             return new ProjectionExpression(
-                new SelectExpression(alias, pc.Columns, projection.Select, null, null, null, false, null, take, false),
+                new SelectExpression(alias, pc.Columns, projection.Select, null, null, null, null, false, null, null, take, false),
                 pc.Projector
                 );
         }
@@ -785,7 +1017,7 @@ namespace IQToolkit.Data.Common
             var alias = this.GetNextAlias();
             ProjectedColumns pc = this.ProjectColumns(projection.Projector, alias, projection.Select.Alias);
             return new ProjectionExpression(
-                new SelectExpression(alias, pc.Columns, projection.Select, null, null, null, false, skip, null, false),
+                new SelectExpression(alias, pc.Columns, projection.Select, null, null, null, null, false, null, skip, null, false),
                 pc.Projector
                 );
         }
@@ -827,7 +1059,7 @@ namespace IQToolkit.Data.Common
                 var alias = this.GetNextAlias();
                 ProjectedColumns pc = this.ProjectColumns(projection.Projector, alias, projection.Select.Alias);
                 projection = new ProjectionExpression(
-                    new SelectExpression(alias, pc.Columns, projection.Select, where, null, null, false, null, take, isLast),
+                    new SelectExpression(alias, pc.Columns, projection.Select, where, null, null, null, false, projection.Select.Map, null, take, isLast),
                     pc.Projector
                     );
             }

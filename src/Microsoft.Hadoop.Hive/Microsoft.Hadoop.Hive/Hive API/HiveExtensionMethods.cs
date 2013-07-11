@@ -15,7 +15,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -38,9 +41,31 @@ namespace Microsoft.Hadoop.Hive
             HiveConnection hiveConnection = provider.HiveConnection;
 
             // TODO - should throw here if table exists already
-            string querystring = "Create Table IF NOT EXISTS " + tableName + " AS " + table.QueryString;
+            ReadOnlyCollection<string> files = null;
+            var query = table.GetQueryText(out files);
+            var createQuery = "";
+            bool queryStart = true;
+            foreach (var line in query.Split('\n'))
+            {
+                if (queryStart)
+                {
+                    if (line.StartsWith("ADD"))
+                    {
+                        createQuery += line + "\n";
+                    }
+                    else
+                    {
+                        createQuery += "Create Table IF NOT EXISTS " + tableName + " AS " + line + "\n";
+                        queryStart = false;
+                    }
+                }
+                else
+                {
+                    createQuery += line + "\n";
+                }
+            }
 
-            var queryTask =  hiveConnection.ExecuteHiveQuery<T>(querystring);
+            var queryTask =  hiveConnection.ExecuteHiveQuery<T>(createQuery, files);
             queryTask.Wait();
 
             return hiveConnection.GetTable<T>(tableName);
@@ -68,5 +93,99 @@ namespace Microsoft.Hadoop.Hive
 
             await table.ExecuteQuery();
         }
+
+        /// <summary>
+        /// Maps each element of a sequence into a new form.
+        /// </summary>
+        /// <typeparam name="TSource"></typeparam>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="lambda">A mapping function to apply to each element.</param>
+        /// <returns></returns>
+        public static IQueryable<TResult> Map<TSource, TResult>(this IQueryable<TSource> source, 
+                                                                              Func<TSource, TResult> lambda)
+        {
+            var method = typeof(HiveExtensionMethods).GetMethod("Map");
+            var param_expr = new ParameterExpression[] { Expression.Parameter(typeof(TSource)) };
+            var call_expr = Expression.Call(lambda.Method, param_expr);
+            var lambda_expr = Expression.Lambda(call_expr, param_expr);
+
+            return source.Provider.CreateQuery<TResult>(
+                        Expression.Call(method.MakeGenericMethod(new Type[] { typeof(TSource), typeof(TResult) }), source.Expression, lambda_expr));
+        }
+
+        /// <summary>
+        /// Maps each element of a sequence to an IEnumerable<T> and combines resulting sequences into one sequence.
+        /// </summary>
+        /// <typeparam name="TSource"></typeparam>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="lambda">A mapping function to apply to each element.</param>
+        /// <returns></returns>
+        public static IQueryable<TResult> MapMany<TSource, TResult>(this IQueryable<TSource> source,
+                                                                              Func<TSource, IEnumerable<TResult>> lambda)
+        {
+            var method = typeof(HiveExtensionMethods).GetMethod("MapMany");
+            var param_expr = new ParameterExpression[] { Expression.Parameter(typeof(TSource)) };
+            var call_expr = Expression.Call(lambda.Method, param_expr);
+            var lambda_expr = Expression.Lambda(call_expr, param_expr);
+
+            return source.Provider.CreateQuery<TResult>(
+                        Expression.Call(method.MakeGenericMethod(new Type[] { typeof(TSource), typeof(TResult) }), source.Expression, lambda_expr));
+        }
+
+        public static IQueryable<IGrouping<TKey, TSource>> ClusterBy<TSource, TKey>(this IQueryable<TSource> source, 
+                                                                                        Expression<Func<TSource, TKey>> keySelector)
+        {
+            var method = typeof(HiveExtensionMethods).GetMethod("ClusterBy");
+            return source.Provider.CreateQuery<IGrouping<TKey, TSource>>(
+                        Expression.Call(method.MakeGenericMethod(new Type[] { typeof(TSource), typeof(TKey) }), source.Expression, keySelector));
+        }
+
+        /// <summary>
+        /// Reduces group of elements into a single output item.
+        /// </summary>
+        /// <typeparam name="TSource"></typeparam>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="lambda">A mapping function to apply to each group of elements.</param>
+        /// <returns></returns>
+        public static IQueryable<TResult> Reduce<TSource, TResult>(this IQueryable<TSource> source,
+                                                                              Func<TSource, TResult> lambda)
+        {
+            var method = typeof(HiveExtensionMethods).GetMethod("Reduce");
+            var param_expr = new ParameterExpression[] { Expression.Parameter(typeof(TSource)) };
+            var call_expr = Expression.Call(lambda.Method, param_expr);
+            var lambda_expr = Expression.Lambda(call_expr, param_expr);
+
+            return source.Provider.CreateQuery<TResult>(
+                        Expression.Call(method.MakeGenericMethod(new Type[] { typeof(TSource), typeof(TResult) }), source.Expression, lambda_expr));
+        }
+
+        /// <summary>
+        /// Reduces group of elements into an output IEnumerable<T> and combines resulting sequences into one sequence.
+        /// </summary>
+        /// <typeparam name="TSource"></typeparam>
+        /// <typeparam name="TResult"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="lambda">A mapping function to apply to each group of elements.</param>
+        /// <returns></returns>
+        public static IQueryable<TResult> ReduceMany<TSource, TResult>(this IQueryable<TSource> source,
+                                                                              Func<TSource, IEnumerable<TResult>> lambda)
+        {
+            var method = typeof(HiveExtensionMethods).GetMethod("ReduceMany");
+            var param_expr = new ParameterExpression[] { Expression.Parameter(typeof(TSource)) };
+            var call_expr = Expression.Call(lambda.Method, param_expr);
+            var lambda_expr = Expression.Lambda(call_expr, param_expr);
+
+            return source.Provider.CreateQuery<TResult>(
+                        Expression.Call(method.MakeGenericMethod(new Type[] { typeof(TSource), typeof(TResult) }), source.Expression, lambda_expr));
+        }
+    }
+
+    public class StringPair
+    {
+        public string Item1 { get; set; }
+        public string Item2 { get; set; }
     }
 }

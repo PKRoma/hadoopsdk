@@ -82,8 +82,9 @@ namespace Microsoft.Hadoop.Hive
 
         public async Task<bool> ExecuteQuery(Expression expression)
         {
-            var queryText = this.GetQueryText(expression);
-            this.QueryResults = await this.HiveConnection.ExecuteQuery(queryText);
+            ReadOnlyCollection<string> files;
+            var queryText = this.GetQueryText(expression, out files);
+            this.QueryResults = await this.HiveConnection.ExecuteQuery(queryText, null, files);
             return true;
         }
 

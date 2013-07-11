@@ -22,7 +22,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Old
     internal class ASVAccountPayload : Payload
     {
         /// <summary>
-        ///     Gets or sets the Blob Container Accoun name where files are placed.
+        ///     Gets or sets the Blob Container Account name where files are placed.
         /// </summary>
         [DataMember]
         internal string AccountName { get; set; }

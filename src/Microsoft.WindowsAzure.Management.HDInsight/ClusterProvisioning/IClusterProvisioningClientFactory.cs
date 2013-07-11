@@ -28,17 +28,26 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning
         /// </summary>
         /// <param name="subscriptionId">Subscription to connect to.</param>
         /// <param name="certificate">Client certificate that has been enabled in the subscription.</param>
-        /// <returns>Client onbject that can be used to interact with HDInsight clusters.</returns>
+        /// <returns>Client object that can be used to interact with HDInsight clusters.</returns>
         IClusterProvisioningClient Create(Guid subscriptionId, X509Certificate2 certificate);
 
-        // TODO:
-        ///// <summary>
-        ///// Creates an instance of the HDInsight.Client class.
-        ///// </summary>
-        ///// <param name="subscriptionId">Subscription to connect to.</param>
-        ///// <param name="certificate">Client certificate that has been enabled in the subscription.</param>
-        ///// <param name="endpoint">Azure Endpoint.</param>
-        ///// <returns>Client onbject that can be used to interact with HDInsight clusters.</returns>
-        //IClusterProvisioningClient Create(Guid subscriptionId, X509Certificate2 certificate, Uri endpoint);
+        /// <summary>
+        /// Creates an instance of the HDInsight.Client class.
+        /// </summary>
+        /// <param name="subscriptionId">Subscription to connect to.</param>
+        /// <param name="certificate">Client certificate that has been enabled in the subscription.</param>
+        /// <param name="endpoint">Azure Endpoint.</param>
+        /// <returns>Client object that can be used to interact with HDInsight clusters.</returns>
+        IClusterProvisioningClient Create(Guid subscriptionId, X509Certificate2 certificate, Uri endpoint);
+
+        /// <summary>
+        /// Creates an instance of the HDInsight.Client class.
+        /// </summary>
+        /// <param name="subscriptionId">Subscription to connect to.</param>
+        /// <param name="certificate">Client certificate that has been enabled in the subscription.</param>
+        /// <param name="endpoint">Azure Endpoint.</param>
+        /// <param name="cloudServiceName">The cloud service name to use.</param>
+        /// <returns>Client object that can be used to interact with HDInsight clusters.</returns>
+        IClusterProvisioningClient Create(Guid subscriptionId, X509Certificate2 certificate, Uri endpoint, string cloudServiceName);
     }
 }

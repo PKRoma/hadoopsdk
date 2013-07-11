@@ -19,6 +19,16 @@
         X509Certificate2 Certificate { get; set; }
 
         /// <summary>
+        /// Gets or sets the EndPoint URI to use (if provided).
+        /// </summary>
+        Uri EndPoint { get; set; }
+
+        /// <summary>
+        /// Gets or sets the cloud service name to use (if provided).
+        /// </summary>
+        string CloudServiceName { get; set; }
+
+        /// <summary>
         /// Gets or sets the Name for the cluster to return.
         /// </summary>
         string Name { get; set; }

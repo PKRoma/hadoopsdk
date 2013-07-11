@@ -43,8 +43,8 @@
 
         public override void EndProcessing()
         {
-            var client = ServiceLocator.Instance.Locate<IClusterProvisioningClientFactory>().Create(this.SubscriptionId,
-                                                                                              this.Certificate);
+            var client = this.GetClient();
+
             var createClusterRequest = new HDInsightClusterCreationDetails();
             createClusterRequest.Name = this.Name;
             createClusterRequest.Location = this.Location;

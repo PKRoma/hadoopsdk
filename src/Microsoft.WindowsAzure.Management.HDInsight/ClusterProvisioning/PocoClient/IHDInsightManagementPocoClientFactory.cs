@@ -17,8 +17,22 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
 {
     using Microsoft.WindowsAzure.Management.HDInsight.ConnectionContext;
 
-    internal interface IHDInsightManagementPocoClientFactory
+    /// <summary>
+    /// A factory interface used to create new HDInsight management POCO clients.
+    /// </summary>
+    public interface IHDInsightManagementPocoClientFactory
     {
-        IHDInsightManagementPocoClient Create(IConnectionCredentials creds);
+        /// <summary>
+        /// Creates a new instance of the IHDInsightManagementPocoClient interface.
+        /// This interface can be used to manage an HDInsight cluster.
+        /// </summary>
+        /// <param name="credentials">
+        /// The credentials to use when creating the client.
+        /// </param>
+        /// <returns>
+        /// A new instance of the IHDInsightManagmentPocoClient interface to be used
+        /// to manage a cluster.
+        /// </returns>
+        IHDInsightManagementPocoClient Create(IConnectionCredentials credentials);
     }
 }

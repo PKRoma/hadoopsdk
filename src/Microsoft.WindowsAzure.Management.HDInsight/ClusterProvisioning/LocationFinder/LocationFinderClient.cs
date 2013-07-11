@@ -62,15 +62,13 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Locati
                 client.RequestHeaders.Add(HDInsightRestHardcodes.XMsVersion);
                 client.RequestHeaders.Add(HDInsightRestHardcodes.Accept);
 
-                using (var httpResponse = await client.SendAsync())
+                var httpResponse = await client.SendAsync();
+                if (httpResponse.StatusCode != HttpStatusCode.OK)
                 {
-                    if (httpResponse.StatusCode != HttpStatusCode.OK)
-                    {
-                        throw new HDInsightRestClientException(httpResponse.StatusCode, httpResponse.Content);
-                    }
-
-                    return ParseLocations(httpResponse.Content);
+                    throw new HDInsightRestClientException(httpResponse.StatusCode, httpResponse.Content);
                 }
+
+                return ParseLocations(httpResponse.Content);
             }
         }
 

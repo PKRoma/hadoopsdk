@@ -26,5 +26,17 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning
         {
             return new ClusterProvisioningClient(subscriptionId, certificate);
         }
+
+        /// <inheritdoc />
+        public IClusterProvisioningClient Create(Guid subscriptionId, X509Certificate2 certificate, Uri endpoint)
+        {
+            return new ClusterProvisioningClient(subscriptionId, certificate, endpoint);
+        }
+
+        /// <inheritdoc />
+        public IClusterProvisioningClient Create(Guid subscriptionId, X509Certificate2 certificate, Uri endpoint, string cloudServiceName)
+        {
+            return new ClusterProvisioningClient(subscriptionId, certificate, endpoint, cloudServiceName);
+        }
     }
 }

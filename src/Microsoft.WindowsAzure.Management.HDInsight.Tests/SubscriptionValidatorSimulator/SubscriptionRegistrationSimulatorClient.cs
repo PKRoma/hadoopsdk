@@ -41,7 +41,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.RestSimulator
                 if (subcriptions == null)
                 {
                     subcriptions = new Dictionary<Guid, List<string>>();
-                    subcriptions.Add(IntegrationTestBase.GetValidCredentials().SubscriptionId, new List<string> { "East US" });
+                    subcriptions.Add(IntegrationTestBase.GetValidCredentials().SubscriptionId, new List<string> { "East US 2" });
                 }
             }
 
@@ -111,10 +111,10 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.RestSimulator
                 // The service doesn't fail if the location wasn't registered
                 if (!registeredLocations.Any(registeredLocation => string.Equals(registeredLocation, location)))
                 {
-                    string regionCloudServicename = HDInsightManagementRestClient.GetCloudServiceName(
-                        this.credentials.SubscriptionId,
-                        this.credentials.DeploymentNamespace,
-                        location);
+                    var resolver = ServiceLocator.Instance.Locate<ICloudServiceNameResolver>();
+                    string regionCloudServicename = resolver.GetCloudServiceName(this.credentials.SubscriptionId,
+                                                                                 this.credentials.DeploymentNamespace,
+                                                                                 location);
 
                     throw new HDInsightRestClientException(
                         HttpStatusCode.NotFound,

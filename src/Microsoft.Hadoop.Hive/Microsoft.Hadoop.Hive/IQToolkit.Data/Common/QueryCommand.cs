@@ -27,11 +27,13 @@ namespace IQToolkit.Data.Common
     {
         string commandText;
         ReadOnlyCollection<QueryParameter> parameters;
+        ReadOnlyCollection<string> files;
 
-        public QueryCommand(string commandText, IEnumerable<QueryParameter> parameters)
+        public QueryCommand(string commandText, IEnumerable<QueryParameter> parameters, IEnumerable<string> files)
         {
             this.commandText = commandText;
             this.parameters = parameters.ToReadOnly();
+            this.files = files.ToReadOnly();
         }
 
         public string CommandText
@@ -42,6 +44,11 @@ namespace IQToolkit.Data.Common
         public ReadOnlyCollection<QueryParameter> Parameters
         {
             get { return this.parameters; }
+        }
+        
+        public ReadOnlyCollection<string> Files
+        {
+            get { return this.files; }
         }
     }
 

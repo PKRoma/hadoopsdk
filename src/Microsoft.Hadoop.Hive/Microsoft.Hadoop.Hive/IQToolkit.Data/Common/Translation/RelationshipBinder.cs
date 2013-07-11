@@ -58,6 +58,7 @@ namespace IQToolkit.Data.Common
                 Expression where = this.Visit(select.Where);
                 ReadOnlyCollection<OrderExpression> orderBy = this.VisitOrderBy(select.OrderBy);
                 ReadOnlyCollection<Expression> groupBy = this.VisitExpressionList(select.GroupBy);
+                ReadOnlyCollection<Expression> clusterBy = this.VisitExpressionList(select.ClusterBy);
                 Expression skip = this.Visit(select.Skip);
                 Expression take = this.Visit(select.Take);
                 ReadOnlyCollection<ColumnDeclaration> columns = this.VisitColumnDeclarations(select.Columns);
@@ -65,12 +66,13 @@ namespace IQToolkit.Data.Common
                     || where != select.Where
                     || orderBy != select.OrderBy
                     || groupBy != select.GroupBy
+                    || clusterBy != select.ClusterBy
                     || take != select.Take
                     || skip != select.Skip
                     || columns != select.Columns
                     )
                 {
-                    return new SelectExpression(select.Alias, columns, this.currentFrom, where, orderBy, groupBy, select.IsDistinct, skip, take, select.IsReverse);
+                    return new SelectExpression(select.Alias, columns, this.currentFrom, where, orderBy, groupBy, clusterBy, select.IsDistinct, select.Map, skip, take, select.IsReverse);
                 }
                 return select;
             }

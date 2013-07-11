@@ -20,18 +20,79 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
     using System.Threading.Tasks;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data;
 
-    internal interface IHDInsightManagementPocoClient : IDisposable
+    /// <summary>
+    /// Provides an object oriented abstraction over the HDInsight management REST client.
+    /// </summary>
+    public interface IHDInsightManagementPocoClient : IDisposable
     {
+        /// <summary>
+        /// Lists the HDInsight containers for a subscription.
+        /// </summary>
+        /// <returns>
+        /// A task that can be used to retrieve a collection of HDInsight containers (clusters).
+        /// </returns>
         Task<Collection<HDInsightCluster>> ListContainers();
 
+        /// <summary>
+        /// Lists a single HDInsight container by name.
+        /// </summary>
+        /// <param name="dnsName">
+        /// The name of the HDInsight container.
+        /// </param>
+        /// <returns>
+        /// A task that can be used to retrieve the requested HDInsight container.
+        /// </returns>
         Task<HDInsightCluster> ListContainer(string dnsName);
 
+        /// <summary>
+        /// Creates a new HDInsight container (cluster).
+        /// </summary>
+        /// <param name="details">
+        /// A creation object with the details of how the container should be 
+        /// configured.
+        /// </param>
+        /// <returns>
+        /// A task that can be used to wait for the creation request to complete.
+        /// </returns>
         Task CreateContainer(HDInsightClusterCreationDetails details);
 
+        /// <summary>
+        /// Deletes an HDInsight container (cluster).
+        /// </summary>
+        /// <param name="dnsName">
+        /// The name of the cluster to delete.
+        /// </param>
+        /// <returns>
+        /// A task that can be used to wait for the delete request to complete.
+        /// </returns>
         Task DeleteContainer(string dnsName);
 
+        /// <summary>
+        /// Deletes an HDInsight container (cluster).
+        /// </summary>
+        /// <param name="dnsName">
+        /// The name of the cluster to delete.
+        /// </param>
+        /// <param name="location">
+        /// The location of the cluster to delete.
+        /// </param>
+        /// <returns>
+        /// A task that can be used to wait for the delete request to complete.
+        /// </returns>
         Task DeleteContainer(string dnsName, string location);
 
+        /// <summary>
+        /// Waits for a cluster to enter a specified condition.
+        /// </summary>
+        /// <param name="dnsName">
+        /// The name of the cluster.
+        /// </param>
+        /// <param name="evaluate">
+        /// A function that will evaluate the cluster and return true when the cluster is in the given state.
+        /// </param>
+        /// <param name="interval">
+        /// The amount of time to wait between requests.
+        /// </param>
         void WaitForClusterCondition(string dnsName, Func<HDInsightCluster, bool> evaluate, TimeSpan interval);
     }
 }

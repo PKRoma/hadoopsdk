@@ -41,6 +41,10 @@ namespace IQToolkit.Data.Common
         {
             this.selectsToRemove = new HashSet<SelectExpression>(selectsToRemove);
             this.map = this.selectsToRemove.ToDictionary(d => d.Alias, d => d.Columns.ToDictionary(d2 => d2.Name, d2 => d2.Expression));
+            foreach (var m in this.selectsToRemove.Where(item => item.Map != null))
+            {
+                this.map[m.Map.Alias] = m.Map.OutputColumns.ToDictionary(d2 => d2.Name, d2 => d2.Expression);
+            }
         }
 
         public static SelectExpression Remove(SelectExpression outerSelect, params SelectExpression[] selectsToRemove)

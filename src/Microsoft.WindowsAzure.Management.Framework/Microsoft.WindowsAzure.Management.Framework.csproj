@@ -44,11 +44,19 @@
   <ItemGroup>
     <Compile Include="CollectionExtensions.cs" />
     <Compile Include="DisposableObject.cs" />
+    <Compile Include="DynamicXml\Reader\DynaXmlNamespaceMapping.cs" />
+    <Compile Include="DynamicXml\Reader\DynaXmlNamespaceTable.cs" />
     <Compile Include="DynamicXml\Writer\DynaXmlBuilder.cs" />
     <Compile Include="DynamicXml\Writer\DynaXmlBuilderContext.cs" />
     <Compile Include="DynamicXml\Writer\DynaXmlBuilderState.cs" />
     <Compile Include="DynamicXml\Writer\DynaXmlContextState.cs" />
     <Compile Include="DynamicXml\Writer\DynaXmlNamespaceContext.cs" />
+    <Compile Include="DynamicXml\Writer\Model\DynaXmlAttribute.cs" />
+    <Compile Include="DynamicXml\Writer\Model\DynaXmlCData.cs" />
+    <Compile Include="DynamicXml\Writer\Model\DynaXmlDocument.cs" />
+    <Compile Include="DynamicXml\Writer\Model\DynaXmlText.cs" />
+    <Compile Include="DynamicXml\Writer\Model\DynaXmlElement.cs" />
+    <Compile Include="DynamicXml\Writer\Model\DynaXmlNode.cs" />
     <Compile Include="Help.cs" />
     <Compile Include="InterlockedBoolean.cs" />
     <Compile Include="InversionOfControl\IRegisteringService.cs" />
@@ -76,13 +84,14 @@
     <Compile Include="WebRequest\HttpClientAbstraction.cs" />
     <Compile Include="WebRequest\HttpClientAbstractionFactory.cs" />
     <Compile Include="WebRequest\HttpHardcodes.cs" />
+    <Compile Include="WebRequest\HttpResponseHeadersAbstraction.cs" />
     <Compile Include="WebRequest\HttpResponseMessageAbstraction.cs" />
     <Compile Include="WebRequest\IHttpClientAbstraction.cs" />
     <Compile Include="WebRequest\IHttpClientAbstractionFactory.cs" />
+    <Compile Include="WebRequest\IHttpResponseHeadersAbstraction.cs" />
     <Compile Include="WebRequest\IHttpResponseMessageAbstraction.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="DynamicXml\Reader\" />
     <Folder Include="Threading\" />
   </ItemGroup>
   <ItemGroup>

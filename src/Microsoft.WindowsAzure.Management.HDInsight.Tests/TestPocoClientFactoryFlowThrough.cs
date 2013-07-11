@@ -20,9 +20,9 @@
 
         public List<TestPocoClientFlowThrough> Clients { get; private set; }
 
-        public IHDInsightManagementPocoClient Create(IConnectionCredentials creds)
+        public IHDInsightManagementPocoClient Create(IConnectionCredentials credentials)
         {
-            var client = new TestPocoClientFlowThrough(underlying.Create(creds));
+            var client = new TestPocoClientFlowThrough(underlying.Create(credentials));
             this.Clients.Add(client);
             return client;
         }

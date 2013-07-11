@@ -127,11 +127,13 @@ namespace IQToolkit.Data.Common
                 return (IsSimpleProjection(select) || IsNameMapProjection(select))
                     && !select.IsDistinct
                     && !select.IsReverse
+                    && select.Map == null
                     && select.Take == null
                     && select.Skip == null
                     && select.Where == null
                     && (select.OrderBy == null || select.OrderBy.Count == 0)
-                    && (select.GroupBy == null || select.GroupBy.Count == 0);
+                    && (select.GroupBy == null || select.GroupBy.Count == 0)
+                    && (select.ClusterBy == null || select.ClusterBy.Count == 0);
             }
 
             protected override Expression VisitSelect(SelectExpression select)
@@ -198,18 +200,22 @@ namespace IQToolkit.Data.Common
                     }
                     var orderBy = select.OrderBy != null && select.OrderBy.Count > 0 ? select.OrderBy : fromSelect.OrderBy;
                     var groupBy = select.GroupBy != null && select.GroupBy.Count > 0 ? select.GroupBy : fromSelect.GroupBy;
+                    var clusterBy = select.ClusterBy != null && select.ClusterBy.Count > 0 ? select.ClusterBy : fromSelect.ClusterBy;
                     Expression skip = select.Skip != null ? select.Skip : fromSelect.Skip;
                     Expression take = select.Take != null ? select.Take : fromSelect.Take;
                     bool isDistinct = select.IsDistinct | fromSelect.IsDistinct;
+                    MapExpression map = select.Map != null ? select.Map : fromSelect.Map;
 
                     if (where != select.Where
                         || orderBy != select.OrderBy
                         || groupBy != select.GroupBy
+                        || clusterBy != select.ClusterBy
                         || isDistinct != select.IsDistinct
                         || skip != select.Skip
-                        || take != select.Take)
+                        || take != select.Take
+                        || map != select.Map)
                     {
-                        select = new SelectExpression(select.Alias, select.Columns, select.From, where, orderBy, groupBy, isDistinct, skip, take, select.IsReverse);
+                        select = new SelectExpression(select.Alias, select.Columns, select.From, where, orderBy, groupBy, clusterBy, isDistinct, map, skip, take, select.IsReverse);
                     }
                 }
 
@@ -247,36 +253,48 @@ namespace IQToolkit.Data.Common
                 bool selHasNameMapProjection = IsNameMapProjection(select);
                 bool selHasOrderBy = select.OrderBy != null && select.OrderBy.Count > 0;
                 bool selHasGroupBy = select.GroupBy != null && select.GroupBy.Count > 0;
+                bool selHasClusterBy = select.ClusterBy != null && select.ClusterBy.Count > 0;
                 bool selHasAggregates = AggregateChecker.HasAggregates(select);
                 bool selHasJoin = select.From is JoinExpression;
+                bool selHasMap = select.Map != null;
                 bool frmHasOrderBy = fromSelect.OrderBy != null && fromSelect.OrderBy.Count > 0;
                 bool frmHasGroupBy = fromSelect.GroupBy != null && fromSelect.GroupBy.Count > 0;
+                bool frmHasClusterBy = fromSelect.ClusterBy != null && fromSelect.ClusterBy.Count > 0;
                 bool frmHasAggregates = AggregateChecker.HasAggregates(fromSelect);
+                bool frmHasMap = fromSelect.Map != null;
                 // both cannot have orderby
                 if (selHasOrderBy && frmHasOrderBy)
                     return false;
                 // both cannot have groupby
                 if (selHasGroupBy && frmHasGroupBy)
                     return false;
+                // both cannot have clusterby
+                if (selHasClusterBy || frmHasClusterBy)
+                    return false;
                 // these are distinct operations 
                 if (select.IsReverse || fromSelect.IsReverse)
                     return false;
                 // cannot move forward order-by if outer has group-by
-                if (frmHasOrderBy && (selHasGroupBy || selHasAggregates || select.IsDistinct))
+                if (frmHasOrderBy && (selHasGroupBy || selHasClusterBy || selHasAggregates || select.IsDistinct))
                     return false;
                 // cannot move forward group-by if outer has where clause
                 if (frmHasGroupBy /*&& (select.Where != null)*/) // need to assert projection is the same in order to move group-by forward
                     return false;
+                // cannot move over cluster-by
+                if (frmHasClusterBy)
+                    return false;
                 // cannot move forward a take if outer has take or skip or distinct
-                if (fromSelect.Take != null && (select.Take != null || select.Skip != null || select.IsDistinct || selHasAggregates || selHasGroupBy || selHasJoin))
+                if (fromSelect.Take != null && (select.Take != null || select.Skip != null || select.IsDistinct || selHasAggregates || selHasGroupBy || selHasClusterBy || selHasJoin))
                     return false;
                 // cannot move forward a skip if outer has skip or distinct
-                if (fromSelect.Skip != null && (select.Skip != null || select.IsDistinct || selHasAggregates || selHasGroupBy || selHasJoin))
+                if (fromSelect.Skip != null && (select.Skip != null || select.IsDistinct || selHasAggregates || selHasGroupBy || selHasClusterBy || selHasJoin))
                     return false;
                 // cannot move forward a distinct if outer has take, skip, groupby or a different projection
-                if (fromSelect.IsDistinct && (select.Take != null || select.Skip != null || !selHasNameMapProjection || selHasGroupBy || selHasAggregates || (selHasOrderBy && !isTopLevel) || selHasJoin))
+                if (fromSelect.IsDistinct && (select.Take != null || select.Skip != null || !selHasNameMapProjection || selHasGroupBy || selHasClusterBy || selHasClusterBy || selHasAggregates || (selHasOrderBy && !isTopLevel) || selHasJoin))
                     return false;
-                if (frmHasAggregates && (select.Take != null || select.Skip != null || select.IsDistinct || selHasAggregates || selHasGroupBy || selHasJoin))
+                if (frmHasAggregates && (select.Take != null || select.Skip != null || select.IsDistinct || selHasAggregates || selHasGroupBy || selHasClusterBy || selHasJoin))
+                    return false;
+                if (frmHasMap && !selHasClusterBy)  // maps cannot be overwritten, but it's ok to merge ClusterBy into map query
                     return false;
                 return true;
             }

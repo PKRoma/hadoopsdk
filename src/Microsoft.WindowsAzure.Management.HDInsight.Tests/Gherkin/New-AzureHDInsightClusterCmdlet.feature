@@ -90,6 +90,16 @@ Scenario: I can use the "Cluster By Name (with Specific Subscription Credentials
 	  And   it is a required parameter
 	  And   it is specified as parameter 9
 	  And   it can not take its value from the pipeline
+      And there exists a "EndPoint" Cmdlet parameter
+	  And   it is of type "Uri"
+	  And   it is an optional parameter
+	  And   it is specified as parameter 10
+	  And   it can not take its value from the pipeline
+      And there exists a "CloudServiceName" Cmdlet parameter
+	  And   it is of type "String"
+	  And   it is an optional parameter
+	  And   it is specified as parameter 11
+	  And   it can not take its value from the pipeline
 	  And there are no additional parameters in the parameter set
 
 Scenario: I can use the "Cluster By Confg (with Specific Subscription Credentials)" parameter set
@@ -128,6 +138,16 @@ Scenario: I can use the "Cluster By Confg (with Specific Subscription Credential
 	  And   it is of type "String"
 	  And   it is a required parameter
 	  And   it is specified as parameter 6
+	  And   it can not take its value from the pipeline
+      And there exists a "EndPoint" Cmdlet parameter
+	  And   it is of type "Uri"
+	  And   it is an optional parameter
+	  And   it is specified as parameter 7
+	  And   it can not take its value from the pipeline
+      And there exists a "CloudServiceName" Cmdlet parameter
+	  And   it is of type "String"
+	  And   it is an optional parameter
+	  And   it is specified as parameter 8
 	  And   it can not take its value from the pipeline
 	  And there are no additional parameters in the parameter set
 

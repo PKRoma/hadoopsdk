@@ -38,5 +38,42 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ConnectionContext
         /// The connection credentials object.
         /// </returns>
         IConnectionCredentials Create(Guid subscriptionId, X509Certificate2 certificate);
+
+        /// <summary>
+        /// Creates the connection credentials object that provides connection credentials.
+        /// </summary>
+        /// <param name="subscriptionId">
+        /// The subscription.
+        /// </param>
+        /// <param name="certificate">
+        /// The certificate.
+        /// </param>
+        /// <param name="endpoint">
+        /// The endpoint for the connection.
+        /// </param>
+        /// <returns>
+        /// The connection credentials object.
+        /// </returns>
+        IConnectionCredentials Create(Guid subscriptionId, X509Certificate2 certificate, Uri endpoint);
+
+        /// <summary>
+        /// Creates the connection credentials object that provides connection credentials.
+        /// </summary>
+        /// <param name="subscriptionId">
+        /// The subscription.
+        /// </param>
+        /// <param name="certificate">
+        /// The certificate.
+        /// </param>
+        /// <param name="endpoint">
+        /// The endpoint for the connection.
+        /// </param>
+        /// <param name="cloudServiceName">
+        /// The cloud service name to use.
+        /// </param>
+        /// <returns>
+        /// The connection credentials object.
+        /// </returns>
+        IConnectionCredentials Create(Guid subscriptionId, X509Certificate2 certificate, Uri endpoint, string cloudServiceName);
     }
 }

@@ -24,6 +24,7 @@ namespace Microsoft.Hadoop.Hive
     using IQToolkit.Data.Common;
     using System.Linq.Expressions;
     using System.Collections.ObjectModel;
+    using System.IO;
 
     public class HiveFormatter : SqlFormatter
     {
@@ -40,6 +41,16 @@ namespace Microsoft.Hadoop.Hive
         public static string Format(Expression expression, QueryLanguage language)
         {
             HiveFormatter formatter = new HiveFormatter(language);
+
+            // Generate Add File directives first
+            foreach (var file in AddFileGatherer.Gather(expression))
+            {
+                formatter.Write("ADD FILE ");
+                formatter.Write("${jobFolder}/" + Path.GetFileName(file));
+                formatter.Write(";");
+                formatter.WriteLine(Indentation.Same);
+            };
+
             formatter.Visit(expression);
             return formatter.ToString();
         }
@@ -74,13 +85,13 @@ namespace Microsoft.Hadoop.Hive
                     }
                     ColumnExpression c = this.VisitValue(column.Expression) as ColumnExpression;
 
-                    // TODO - hack to get around aliasing issue for create table.
+                    // TODO - hack to get around aliasing issue for create table. Max: uncommented back below
 
-                    //if (!string.IsNullOrEmpty(column.Name) && (c == null || c.Name != column.Name))
-                    //{
-                    //    this.Write(" ");
-                    //    this.WriteAsColumnName(column.Name);
-                    //}
+                    if (!string.IsNullOrEmpty(column.Name) && (c == null || c.Name != column.Name))
+                    {
+                        this.Write(" ");
+                        this.WriteAsColumnName(column.Name);
+                    }
                 }
             }
         }
@@ -502,6 +513,11 @@ namespace Microsoft.Hadoop.Hive
                 return m;
             }
             return base.VisitMethodCall(m);
+        }
+
+        protected override Expression VisitInvocation(InvocationExpression iv)
+        {
+            return base.VisitInvocation(iv);
         }
 
         protected override NewExpression VisitNew(NewExpression nex)

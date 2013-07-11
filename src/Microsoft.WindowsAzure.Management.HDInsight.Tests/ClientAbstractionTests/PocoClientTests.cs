@@ -2,6 +2,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
 {
     using System;
     using System.Configuration;
+    using System.Diagnostics;
     using System.IO;
     using System.Linq;
     using System.Net;
@@ -64,7 +65,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
 
                 var result = await client.ListContainer(TestCredentials.DnsName);
                 Assert.IsNotNull(result);
-                Assert.AreEqual(result.Location, "East US");
+                Assert.AreEqual(result.Location, "East US 2");
                 Assert.AreEqual(result.UserName, "sa-po-svc");
             }
         }
@@ -488,7 +489,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
             using (var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(credentials))
             {
-                client.CreateContainer(cluster);
+                client.CreateContainer(cluster).Wait();
                 client.WaitForClusterCondition(
                     cluster.Name,
                     c => c != null && (this.CreatingStates.Contains(c.State) || c.Error != null),

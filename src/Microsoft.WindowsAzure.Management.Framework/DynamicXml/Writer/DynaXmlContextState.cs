@@ -15,7 +15,7 @@
 
 namespace Microsoft.WindowsAzure.Management.Framework.DynamicXml.Writer
 {
-    using System.Xml;
+    using Microsoft.WindowsAzure.Management.Framework.DynamicXml.Writer.Model;
 
     /// <summary>
     ///     Used to track a current context state within the builder system.
@@ -30,9 +30,9 @@ namespace Microsoft.WindowsAzure.Management.Framework.DynamicXml.Writer
         /// <param name="lastCreated">The last node that was created.</param>
         /// <param name="namespaceContext">The current namespace context.</param>
         /// <param name="state">The current state of the state machine.</param>
-        public DynaXmlContextState(XmlDocument document, 
-                                   XmlElement currentAncestor, 
-                                   XmlElement lastCreated, 
+        public DynaXmlContextState(DynaXmlDocument document, 
+                                   DynaXmlElement currentAncestor, 
+                                   DynaXmlElement lastCreated, 
                                    DynaXmlNamespaceContext namespaceContext,
                                    DynaXmlBuilderState state)
         {
@@ -46,12 +46,12 @@ namespace Microsoft.WindowsAzure.Management.Framework.DynamicXml.Writer
         /// <summary>
         /// Gets the XmlDocument current being worked on.
         /// </summary>
-        public XmlDocument Document { get; private set; }
+        public DynaXmlDocument Document { get; private set; }
 
         /// <summary>
         /// Gets the last XmlElement (ancestor of self) created.
         /// </summary>
-        public XmlElement CurentAncestorElement { get; private set; }
+        public DynaXmlElement CurentAncestorElement { get; private set; }
 
         /// <summary>
         /// Gets or sets the current namespace context.
@@ -61,7 +61,7 @@ namespace Microsoft.WindowsAzure.Management.Framework.DynamicXml.Writer
         /// <summary>
         /// Gets or sets the last element created (even if it isn't currently the ancestor).
         /// </summary>
-        public XmlElement LastCreated { get; set; }
+        public DynaXmlElement LastCreated { get; set; }
 
         /// <summary>
         /// Gets or sets the dynamic xml builder state (the type of things being built) represented by this state.

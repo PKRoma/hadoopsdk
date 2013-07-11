@@ -109,6 +109,7 @@
 	  
 	  <!-- CA1031 - Do not catch general exception types -->
 	  <!-- Tests often need to catch general exception types to determin their type -->
-		<Rule Id="CA1031" Action="None" />	  
+	  <Rule Id="CA1031" Action="None" />	  
+		
    </Rules>
 </RuleSet>

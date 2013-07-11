@@ -70,6 +70,8 @@
   </Choose>
   <ItemGroup>
     <Compile Include="ClientAbstractionTests\AsvValidatorClientTests.cs" />
+    <Compile Include="ClientAbstractionTests\JobPocoClientTests.cs" />
+    <Compile Include="ClientAbstractionTests\JobRestClientTests.cs" />
     <Compile Include="ClientAbstractionTests\LocationFinderClientTests.cs" />
     <Compile Include="ClientAbstractionTests\SubscriptionRegistrationTests.cs" />
     <Compile Include="ClientAbstractionTests\HttpClientTests.cs" />
@@ -83,6 +85,39 @@
     <Compile Include="CmdLetTests\GetCommandCmdletTests.cs" />
     <Compile Include="CmdletAbstractionTests\HDInsightGetCommandTests.cs" />
     <Compile Include="ConnectionCredentials\AlternativeEnvironmentConnectionCredentialsFactory.cs" />
+    <Compile Include="DynamicXml\DynaXmlNamespaceTableTests.cs" />
+    <Compile Include="Gherkin\DynaXml\DynaXmlNamespace.feature.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>DynaXmlNamespace.feature</DependentUpon>
+    </Compile>
+    <Compile Include="Gherkin\PayloadConverter\JobPayloadConverter_JobCreation.feature.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>JobPayloadConverter_JobCreation.feature</DependentUpon>
+    </Compile>
+    <Compile Include="Gherkin\PayloadConverter\JobPayloadConverter_JobDetails.feature.cs">
+      <DependentUpon>JobPayloadConverter_JobDetails.feature</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Gherkin\PayloadConverter\JobPayloadConverter_JobList.feature.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>JobPayloadConverter_JobList.feature</DependentUpon>
+    </Compile>
+    <Compile Include="ServerDataObjects\Common\Models\PassthroughErrorResponse.cs" />
+    <Compile Include="ServerDataObjects\Common\Models\PassthroughResponse.cs" />
+    <Compile Include="ServerDataObjects\JobPayloadServerConverter.cs" />
+    <Compile Include="ServerDataObjects\JobSubmission\JobSubmissionConstants.cs" />
+    <Compile Include="ServerDataObjects\JobSubmission\Models\ClientJobRequest.cs" />
+    <Compile Include="ServerDataObjects\JobSubmission\Models\HiveJobRequest.cs" />
+    <Compile Include="ServerDataObjects\JobSubmission\Models\JobDetails.cs" />
+    <Compile Include="ServerDataObjects\JobSubmission\Models\JobRequest.cs" />
+    <Compile Include="ServerDataObjects\JobSubmission\Models\JobStatusCode.cs" />
+    <Compile Include="ServerDataObjects\JobSubmission\Models\MapReduceJobRequest.cs" />
+    <Compile Include="StepDefinitions\DynaXmlSteps.cs" />
+    <Compile Include="StepDefinitions\PayloadConverterSteps.cs" />
     <Compile Include="SubscriptionValidatorSimulator\SubscriptionRegistrationSimulatorClient.cs" />
     <Compile Include="SubscriptionValidatorSimulator\SubscriptionRegistrationSimulatorClientFactory.cs" />
     <Compile Include="DynamicXml\DynaXmlBuilderTest.cs" />
@@ -127,6 +162,22 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Scenario\ClientScenarioTests.cs" />
     <Compile Include="Scenario\CmdletScenarioTests.cs" />
+    <None Include="Gherkin\DynaXml\DynaXmlNamespace.feature">
+      <Generator>SpecFlowSingleFileGenerator</Generator>
+      <LastGenOutput>DynaXmlNamespace.feature.cs</LastGenOutput>
+    </None>
+    <None Include="Gherkin\PayloadConverter\JobPayloadConverter_JobCreation.feature">
+      <Generator>SpecFlowSingleFileGenerator</Generator>
+      <LastGenOutput>JobPayloadConverter_JobCreation.feature.cs</LastGenOutput>
+    </None>
+    <None Include="Gherkin\PayloadConverter\JobPayloadConverter_JobDetails.feature">
+      <Generator>SpecFlowSingleFileGenerator</Generator>
+      <LastGenOutput>JobPayloadConverter_JobDetails.feature.cs</LastGenOutput>
+    </None>
+    <None Include="Gherkin\PayloadConverter\JobPayloadConverter_JobList.feature">
+      <Generator>SpecFlowSingleFileGenerator</Generator>
+      <LastGenOutput>JobPayloadConverter_JobList.feature.cs</LastGenOutput>
+    </None>
     <None Include="Scenario\ScenarioTests.cs" />
     <Compile Include="StepDefinitions\PowerShellCmdletSteps.cs" />
     <Compile Include="TestPocoClientFactoryFlowThrough.cs" />

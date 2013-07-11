@@ -31,6 +31,7 @@
         public const string ParameterSetDefaultStorageAccount = "Set Default Storage Account";
         public const string ParameterSetAddStorageAccount = "Add Storage Account";
         public const string ParameterSetClusterByNameWithSpecificSubscriptionCredentails = "Cluster By Name (with Specific Subscription Credentials)";
+        
         public const string ParameterSetClusterByConfigWithSpecificSubscriptionCredentails = "Cluster By Config (with Specific Subscription Credentials)";
         public const string ParameterSetConfigClusterSizeInNodesOnly = "Config ClusterSizeInNodes Only";
     }

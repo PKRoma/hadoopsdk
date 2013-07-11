@@ -351,5 +351,10 @@ namespace IQToolkit.Data.Common
         {
             return Parameterizer.Parameterize(this.language, expression);
         }
+
+        public virtual IEnumerable<string> ExtractFileReferences(Expression expression)
+        {
+            return null;
+        }
     }
 }

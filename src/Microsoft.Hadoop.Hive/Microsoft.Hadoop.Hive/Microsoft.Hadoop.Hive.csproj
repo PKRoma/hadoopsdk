@@ -51,6 +51,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ForceReferenceAttribute.cs" />
+    <Compile Include="Hive API\AddFileGatherer.cs" />
+    <Compile Include="Hive API\ClusterByFinder.cs" />
     <Compile Include="Hive API\HiveConnection.cs" />
     <Compile Include="Hive API\HiveExtensionMethods.cs" />
     <Compile Include="Hive API\HiveMaterializer.cs" />

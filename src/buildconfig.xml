@@ -15,7 +15,7 @@
 
    <Version>
       <Major>0</Major>
-      <Minor>8</Minor>
+      <Minor>9</Minor>
    </Version>
    <Prepare>
       <Zip folder="Cmdlet" name="Microsoft.WindowsAzure.Management.HDInsight.Cmdlets.zip" />

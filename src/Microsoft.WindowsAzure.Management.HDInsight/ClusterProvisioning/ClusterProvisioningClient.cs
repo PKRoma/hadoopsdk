@@ -34,6 +34,31 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning
             this.credentials = ServiceLocator.Instance.Locate<IConnectionCredentialsFactory>().Create(subscriptionId, certificate);
         }
 
+        /// <summary>
+        /// Initializes a new instance of the ClusterProvisioningClient class.
+        /// </summary>
+        /// <param name="subscriptionId">Subscription to connect to.</param>
+        /// <param name="certificate">Client certificate that has been enabled in the subscription.</param>
+        /// <param name="endPoint">The endpoint to use.</param>
+        public ClusterProvisioningClient(Guid subscriptionId, X509Certificate2 certificate, Uri endPoint)
+        {
+            this.PollingInterval = TimeSpan.FromSeconds(5);
+            this.credentials = ServiceLocator.Instance.Locate<IConnectionCredentialsFactory>().Create(subscriptionId, certificate, endPoint);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the ClusterProvisioningClient class.
+        /// </summary>
+        /// <param name="subscriptionId">Subscription to connect to.</param>
+        /// <param name="certificate">Client certificate that has been enabled in the subscription.</param>
+        /// <param name="endPoint">The endpoint to use.</param>
+        /// <param name="cloudServiceName">The cloudServiceName to use.</param>
+        public ClusterProvisioningClient(Guid subscriptionId, X509Certificate2 certificate, Uri endPoint, string cloudServiceName)
+        {
+            this.PollingInterval = TimeSpan.FromSeconds(5);
+            this.credentials = ServiceLocator.Instance.Locate<IConnectionCredentialsFactory>().Create(subscriptionId, certificate, endPoint, cloudServiceName);
+        }
+
         /// <inheritdoc />
         public async Task<Collection<string>> ListAvailableLocationsAsync()
         {

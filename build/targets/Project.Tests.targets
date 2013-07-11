@@ -19,6 +19,20 @@
     </ItemGroup>
   </Target>
 
+  <Target Name="WriteDeploymentDetailFile"
+          BeforeTargets="CreateManifestResourceNames"
+		  Inputs="$(MSBuildProjectFullPath)"
+		  Outputs="$(IntermediateOutputPath)\deploymentdetail.txt"
+          Condition="'$(TestProject)' == 'true'">
+    <WriteLinesToFile File="$(IntermediateOutputPath)\deploymentdetail.txt"
+                      Lines="$(MSBuildProjectDirectory)|$(OutputPath)"
+					  Overwrite="true"/>
+  </Target>
+		  
+	<ItemGroup>
+	  <EmbeddedResource Include="$(IntermediateOutputPath)\deploymentdetail.txt" />
+	</ItemGroup>
+
   <Target Name="PushTestResourceList"
           AfterTargets="CreateManifestResourceNames"
           Condition="'$(TestProject)' == 'true'"

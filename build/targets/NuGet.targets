@@ -22,18 +22,11 @@
         <PackageSource Include="https://www.myget.org/F/f05dce941ae4485090b04586209c8b08/" />
     </ItemGroup>
 
-    <PropertyGroup Condition=" '$(OS)' == 'Windows_NT'">
-        <!-- Windows specific commands -->
-        <NuGetToolsPath Condition="'$(NuGetToolsPath)' == ''">$([System.IO.Path]::Combine($(SolutionDir), ".nuget"))</NuGetToolsPath>
-        <PackagesConfig>$([System.IO.Path]::Combine($(ProjectDir), "packages.config"))</PackagesConfig>
-        <PackagesDir>$([System.IO.Path]::Combine($(SolutionDir), "packages"))</PackagesDir>
-    </PropertyGroup>
-    
-    <PropertyGroup Condition=" '$(OS)' != 'Windows_NT'">
+    <PropertyGroup>
         <!-- We need to launch nuget.exe with the mono command if we're not on windows -->
-        <NuGetToolsPath Condition="'$(NuGetToolsPath)' == '''">$(SolutionDir).nuget</NuGetToolsPath>
-        <PackagesConfig>packages.config</PackagesConfig>
-        <PackagesDir>$(SolutionDir)packages</PackagesDir>
+        <NuGetToolsPath Condition="'$(NuGetToolsPath)' == ''">$(SolutionDir).nuget</NuGetToolsPath>
+        <PackagesConfig>$(MSBuildProjectDirectory)\packages.config</PackagesConfig>
+        <PackagesDir>$(SolutionDir)\packages</PackagesDir>
     </PropertyGroup>
     
     <PropertyGroup>

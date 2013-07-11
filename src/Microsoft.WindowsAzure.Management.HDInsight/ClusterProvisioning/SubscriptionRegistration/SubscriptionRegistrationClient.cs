@@ -55,21 +55,19 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.AzureM
                 client.Method = HttpMethod.Put;
 
                 // Sends, validates and parses the response
-                using (var httpResponse = await client.SendAsync())
+                var httpResponse = await client.SendAsync();
+                if (httpResponse.StatusCode == HttpStatusCode.OK || httpResponse.StatusCode == HttpStatusCode.Accepted)
                 {
-                    if (httpResponse.StatusCode == HttpStatusCode.OK || httpResponse.StatusCode == HttpStatusCode.Accepted)
-                    {
-                        return;
-                    }
-
-                    // Returns conflict if it was already registered; adding a different if in case we want to log it eventually.
-                    if (httpResponse.StatusCode == HttpStatusCode.Conflict)
-                    {
-                        return;
-                    }
-
-                    throw new HDInsightRestClientException(httpResponse.StatusCode, httpResponse.Content);
+                    return;
                 }
+
+                // Returns conflict if it was already registered; adding a different if in case we want to log it eventually.
+                if (httpResponse.StatusCode == HttpStatusCode.Conflict)
+                {
+                    return;
+                }
+
+                throw new HDInsightRestClientException(httpResponse.StatusCode, httpResponse.Content);
             }
         }
         
@@ -116,7 +114,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.AzureM
         {
             using (var managementClient = ServiceLocator.Instance.Locate<IHDInsightManagementRestClientFactory>().Create(this.credentials))
             {
-                var payload = managementClient.ListCloudServices().WaitForResult();
+                var payload = await managementClient.ListCloudServices();
                 var clusters = PayloadConverter.DeserializeListContainersResult(payload, this.credentials.DeploymentNamespace);
                 if (clusters.Any(cluster => cluster.Location == location))
                 {
@@ -136,8 +134,10 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.AzureM
         // Method = "{method}", UriTemplate = "{subscriptionId}/cloudservices/{resourceProviderNamespace}"
         internal async Task<Tuple<HttpStatusCode, string>> ManageSubscriptionLocation(HttpMethod method, string location, string payload = null)
         {
-            string regionCloudServicename = HDInsightManagementRestClient.GetCloudServiceName(
-                this.credentials.SubscriptionId, this.credentials.DeploymentNamespace, location);
+            var resolver = ServiceLocator.Instance.Locate<ICloudServiceNameResolver>();
+            string regionCloudServicename = resolver.GetCloudServiceName(this.credentials.SubscriptionId, 
+                                                                         this.credentials.DeploymentNamespace, 
+                                                                         location);
 
             // Creates an HTTP client
             using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(this.credentials.Certificate))
@@ -152,10 +152,8 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.AzureM
                 client.Method = method;
 
                 // Sends, validates and parses the response
-                using (var httpResponse = await client.SendAsync())
-                {
-                    return new Tuple<HttpStatusCode, string>(httpResponse.StatusCode, httpResponse.Content);
-                }
+                var httpResponse = await client.SendAsync();
+                return new Tuple<HttpStatusCode, string>(httpResponse.StatusCode, httpResponse.Content);
             }
         }
     }

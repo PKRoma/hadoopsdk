@@ -217,5 +217,32 @@
             get { return this.createCommand.ClusterSizeInNodes; }
             set { this.createCommand.ClusterSizeInNodes = value; }
         }
+
+        /// <inheritdoc />
+        [Parameter(Position = 7, Mandatory = false,
+                   HelpMessage = "The Endpoint to use when connecting to Azure.",
+                   ParameterSetName = AzureHdInsightPowerShellHardCodes.ParameterSetClusterByConfigWithSpecificSubscriptionCredentails)]
+        [Parameter(Position = 10, Mandatory = false,
+                   HelpMessage = "The Endpoint to use when connecting to Azure.",
+                   ParameterSetName = AzureHdInsightPowerShellHardCodes.ParameterSetClusterByNameWithSpecificSubscriptionCredentails)]
+        public Uri EndPoint
+        {
+            get { return this.createCommand.EndPoint; }
+            set { this.createCommand.EndPoint = value; }
+        }
+
+        /// <inheritdoc />
+        [Parameter(Position = 8, Mandatory = false,
+                   HelpMessage = "The Endpoint to use when connecting to Azure.",
+                   ParameterSetName = AzureHdInsightPowerShellHardCodes.ParameterSetClusterByConfigWithSpecificSubscriptionCredentails)]
+        [Parameter(Position = 11, Mandatory = false,
+                   HelpMessage = "The Endpoint to use when connecting to Azure.",
+                   ParameterSetName = AzureHdInsightPowerShellHardCodes.ParameterSetClusterByNameWithSpecificSubscriptionCredentails)]
+        public string CloudServiceName
+        {
+            get { return this.createCommand.CloudServiceName; }
+            set { this.createCommand.CloudServiceName = value; }
+        }
+
     }
 }

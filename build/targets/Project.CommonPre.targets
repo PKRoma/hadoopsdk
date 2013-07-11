@@ -172,6 +172,7 @@
 	  <ProjectRuleSet>$(MSBuildProjectDirectory)\Project.FxCop.ruleset</ProjectRuleSet>
 	  
       <CodeAnalysisRuleDirectories>$(ProjectBuildToolsPath)\FxCop\SDLRules\$(VSVERSION)</CodeAnalysisRuleDirectories>
+      <!-- <CodeAnalysisRuleDirectories Condition="'$(VSVERSION)' == 'VS2012'">$(ProjectBuildToolsPath)\FxCop\PowerShellRules\$(VSVERSION)</CodeAnalysisRuleDirectories> -->
 	  <CodeAnalysisLogFile>$(LogPath)\FxCop\$(AssemblyName).CodeAnalysisLog.xml</CodeAnalysisLogFile>
    </PropertyGroup>
    
@@ -216,6 +217,10 @@ Code Analysis Rule Dirs: $(CodeAnalysisRuleDirectories)" />
       <WarningLevel>4</WarningLevel>
    </PropertyGroup>
 
+   <Import Condition="Exists('$(EnlistmentPath)\Project.Pre.targets')" Project="$(EnlistmentPath)\Project.Pre.targets" />
+   <Import Condition="Exists('$(SolutionDir)\Project.Pre.targets')" Project="$(SolutionDir)\Project.Pre.targets" />
+   <Import Condition="Exists('$(MSBuildProjectDirectory)\Project.Pre.targets')" Project="$(MSBuildProjectDirectory)\Project.Pre.targets" />
+   
 	<Target Name="WriteProjectTypeFile"
 	        AfterTargets="Build">
 		<MakeDir Condition="!Exists('$(ProjectTypeFilePath)')" Directories="$(ProjectTypeFilePath)" />

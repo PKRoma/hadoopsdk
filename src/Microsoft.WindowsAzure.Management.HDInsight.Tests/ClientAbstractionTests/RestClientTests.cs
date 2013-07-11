@@ -15,7 +15,9 @@
     using Microsoft.WindowsAzure.Management.HDInsight.ConnectionContext;
     using Microsoft.WindowsAzure.Management.HDInsight.InversionOfControl;
     using System.Net;
+    using Microsoft.WindowsAzure.Management.HDInsight.JobSubmission.Data;
     using Microsoft.WindowsAzure.Management.HDInsight.Tests.ConnectionCredentials;
+    using Microsoft.WindowsAzure.Management.HDInsight.Tests.ServerDataObjects;
     using Moq;
 
     [TestClass]
@@ -40,11 +42,12 @@
         public void InternalValidation_HDInsightManagementRestClient_GetCloudServiceName()
         {
             IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
-            var serviceName = HDInsightManagementRestClient.GetCloudServiceName(Guid.Empty, "hdInsight", "EastUS");
+            var resolver = ServiceLocator.Instance.Locate<ICloudServiceNameResolver>();
+            var serviceName = resolver.GetCloudServiceName(Guid.Empty, "hdInsight", "EastUS");
             Assert.AreEqual("hdInsightCK4TO7F6PZOJJ2FHBWOSHEUVEPIUV6UVI6JRGD4KHFM4POCJVSUA-EastUS", serviceName);
 
-            var serviceName1 = HDInsightManagementRestClient.GetCloudServiceName(credentials.SubscriptionId, credentials.DeploymentNamespace, "EastUS");
-            var serviceName2 = HDInsightManagementRestClient.GetCloudServiceName(credentials.SubscriptionId, credentials.DeploymentNamespace, "EastUS");
+            var serviceName1 = resolver.GetCloudServiceName(credentials.SubscriptionId, credentials.DeploymentNamespace, "EastUS");
+            var serviceName2 = resolver.GetCloudServiceName(credentials.SubscriptionId, credentials.DeploymentNamespace, "EastUS");
             Assert.AreEqual(serviceName1, serviceName2);
         }
 
@@ -105,6 +108,16 @@
         }
 
         [TestMethod]
+        public void ICanSerializeAndDeserialzeCreationResults()
+        {
+            HDInsightJobCreationResults expected = new HDInsightJobCreationResults() { HttpStatusCode = HttpStatusCode.Accepted, JobId = "job123" };
+            JobPayloadServerConverter ser = new JobPayloadServerConverter();
+            JobPayloadConverter deser = new JobPayloadConverter();
+            var payload = ser.SerializeJobCreationResults(expected);
+            var actual = deser.DeserializeJobCreationResults(payload);
+        }
+
+        [TestMethod]
         [TestCategory("Integration")]
         [TestCategory("CheckIn")]
         [TestCategory("RestClient")]
@@ -114,9 +127,9 @@
             IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
             var client = new HDInsightManagementRestClient(credentials);
             var dnsName = base.GetRandomClusterName();
-            var location = "East US";
+            var location = "East US 2";
             var subscriptionId = credentials.SubscriptionId;
-            
+
             var createPayload = String.Format(CreateContainerGenericRequest, dnsName, location, subscriptionId, Guid.NewGuid());
             var xmlReader = new XmlTextReader(new StringReader(createPayload));
             var resource = new Resource()

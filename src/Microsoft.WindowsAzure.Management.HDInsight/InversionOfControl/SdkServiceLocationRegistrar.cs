@@ -14,6 +14,8 @@
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoClient;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestClient;
     using Microsoft.WindowsAzure.Management.HDInsight.ConnectionContext;
+    using Microsoft.WindowsAzure.Management.HDInsight.JobSubmission.PocoClient;
+    using Microsoft.WindowsAzure.Management.HDInsight.JobSubmission.RestClient;
 
     /// <summary>
     /// Registers services with the IOC for use by this assembly.
@@ -28,8 +30,11 @@
                 throw new ArgumentNullException("manager");
             }
 
+            manager.RegisterType<ICloudServiceNameResolver, CloudServiceNameResolver>();
             manager.RegisterType<IHDInsightManagementRestClientFactory, HDInsightManagementRestClientFactory>();
             manager.RegisterType<IHDInsightManagementPocoClientFactory, HDInsightManagementPocoClientFactory>();
+            manager.RegisterType<IHDInsightJobSubmissionRestClientFactory, HDInsightJobSubmissionRestClientFactory>();
+            manager.RegisterType<IHDInsightJobSubmissionPocoClientFactory, HDInsightJobSubmissionPocoClientFactory>();
             manager.RegisterType<IClusterProvisioningClientFactory, ClusterProvisioningClientFactory>();
             manager.RegisterType<IAsvValidatorClientFactory, AsvValidatorValidatorClientFactory>();
             manager.RegisterType<IConnectionCredentialsFactory, ProductionConnectionCredentialsFactory>();

@@ -49,7 +49,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.RestSimulator
             {
                 ConnectionUrl = @"https://" + IntegrationTestBase.TestCredentials.DnsName + ".azurehdinsight.net",
                 CreatedDate = DateTime.UtcNow,
-                Location = "East US",
+                Location = "East US 2",
                 Error = null,
                 UserName = "sa-po-svc",
                 ClusterSizeInNodes = 4
@@ -194,10 +194,10 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.RestSimulator
             var registrationClient = ServiceLocator.Instance.Locate<ISubscriptionRegistrationClientFactory>().Create(this.credentials);
             if (!await registrationClient.ValidateSubscriptionLocation(location))
             {
-                string regionCloudServicename = HDInsightManagementRestClient.GetCloudServiceName(
-                    this.credentials.SubscriptionId, 
-                    this.credentials.DeploymentNamespace, 
-                    location);
+                var resolver = ServiceLocator.Instance.Locate<ICloudServiceNameResolver>();
+                string regionCloudServicename = resolver.GetCloudServiceName(this.credentials.SubscriptionId, 
+                                                                             this.credentials.DeploymentNamespace, 
+                                                                             location);
 
                 throw new HDInsightRestClientException(
                     HttpStatusCode.NotFound, 
@@ -224,7 +224,10 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.RestSimulator
                 var cluster = Clusters.FirstOrDefault(c => c.Name == dnsName && c.Location == location);
                 if (cluster == null)
                     throw new HDInsightRestClientException(HttpStatusCode.NotFound, "Cluster Not Found");
-
+                if (dnsName == IntegrationTestBase.TestCredentials.DnsName)
+                {
+                    throw new InvalidOperationException("The well known DNS name can not be deleted.");
+                }
                 PendingDeleteClusters.Add(cluster);
             }
             await Task.Delay(TimeSpan.FromMilliseconds(1));

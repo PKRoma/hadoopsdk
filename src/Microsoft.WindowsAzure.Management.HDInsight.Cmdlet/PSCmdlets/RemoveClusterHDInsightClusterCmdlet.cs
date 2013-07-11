@@ -68,6 +68,26 @@
             set { this.deleteCommand.Location = value; }
         }
 
+        /// <inheritdoc />
+        [Parameter(Position = 4, Mandatory = false,
+                   HelpMessage = "The Endpoint to use when connecting to Azure.",
+                   ParameterSetName = AzureHdInsightPowerShellHardCodes.ParameterSetClusterByNameWithSpecificSubscriptionCredentails)]
+        public Uri EndPoint
+        {
+            get { return this.deleteCommand.EndPoint; }
+            set { this.deleteCommand.EndPoint = value; }
+        }
+
+        /// <inheritdoc />
+        [Parameter(Position = 5, Mandatory = false,
+                   HelpMessage = "The CloudServiceName to use when managing the HDInsight cluster.",
+                   ParameterSetName = AzureHdInsightPowerShellHardCodes.ParameterSetClusterByNameWithSpecificSubscriptionCredentails)]
+        public string CloudServiceName
+        {
+            get { return this.deleteCommand.CloudServiceName; }
+            set { this.deleteCommand.CloudServiceName = value; }
+        }
+
         /// <summary>
         /// Finishes the execution of the cmdlet by listing the clusters.
         /// </summary>

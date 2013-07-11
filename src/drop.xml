@@ -91,7 +91,7 @@
     <To>Microsoft.Hadoop.MapReduce\content\net40\MRLib\Microsoft.Hadoop.Client.dll</To>
   </Copy>
   <Copy>
-    <From>Microsoft.Hadoop.CombineDriver\Microsoft.Hadoop.CombineDriver.exe</From>
+    <From>Microsoft.WindowsAzure.Management.Framework.Threading\Microsoft.WindowsAzure.Management.Framework.Threading.dll</From>
     <To>Microsoft.Hadoop.MapReduce\content\net40\MRLib\Microsoft.WindowsAzure.Management.Framework.Threading.dll</To>
   </Copy>
   <Copy>
@@ -137,5 +137,13 @@
   <Copy>
     <From>Microsoft.Hadoop.WebClient\Microsoft.WindowsAzure.Management.Framework.Threading.dll</From>
     <To>Microsoft.Hadoop.Hive\lib\net40\Microsoft.WindowsAzure.Management.Framework.Threading.dll</To>
+  </Copy>
+  <Copy>
+    <From>Microsoft.WindowsAzure.Management.Framework.Threading\Microsoft.WindowsAzure.Management.Framework.Threading.dll</From>
+    <To>Microsoft.Hadoop.Hive\content\net40\MRLib\Microsoft.WindowsAzure.Management.Framework.Threading.dll</To>
+  </Copy>
+  <Copy>
+    <From>HiveDriver\HiveDriver.exe</From>
+    <To>Microsoft.Hadoop.Hive\content\net40\MRLib\HiveDriver.exe</To>
   </Copy>
 </Drop>

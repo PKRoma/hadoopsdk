@@ -15,8 +15,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightCl
     {
         public override void EndProcessing()
         {
-            var client = ServiceLocator.Instance.Locate<IClusterProvisioningClientFactory>().Create(this.SubscriptionId,
-                                                                                              this.Certificate);
+            var client = this.GetClient();
 
             if (!string.IsNullOrWhiteSpace(this.Name))
             {

@@ -107,6 +107,14 @@ namespace Microsoft.Hadoop.Hive
                 // TODO - need to figure out if this needs to be parameterized
                 return expression;
             }
+
+            public override IEnumerable<string> ExtractFileReferences(Expression expression)
+            {
+                return AddFileGatherer.Gather(expression);
+            }
+
         }
+
     }
+
 }

@@ -46,6 +46,8 @@ namespace IQToolkit.Data.Common
                     return this.VisitColumn((ColumnExpression)exp);
                 case DbExpressionType.Select:
                     return this.VisitSelect((SelectExpression)exp);
+                case DbExpressionType.Map:
+                    return this.VisitMap((MapExpression)exp);
                 case DbExpressionType.Join:
                     return this.VisitJoin((JoinExpression)exp);
                 case DbExpressionType.OuterJoined:
@@ -115,24 +117,31 @@ namespace IQToolkit.Data.Common
             return column;
         }
 
+        protected virtual MapExpression VisitMap(MapExpression map)
+        {
+            return map;
+        }
+
         protected virtual Expression VisitSelect(SelectExpression select)
         {
             var from = this.VisitSource(select.From);
             var where = this.Visit(select.Where);
             var orderBy = this.VisitOrderBy(select.OrderBy);
             var groupBy = this.VisitExpressionList(select.GroupBy);
+            var clusterBy = this.VisitExpressionList(select.ClusterBy);
             var skip = this.Visit(select.Skip);
             var take = this.Visit(select.Take);
+            var map = this.VisitMap(select.Map);
             var columns = this.VisitColumnDeclarations(select.Columns);
-            return this.UpdateSelect(select, from, where, orderBy, groupBy, skip, take, select.IsDistinct, select.IsReverse, columns);
+            return this.UpdateSelect(select, from, where, orderBy, groupBy, clusterBy, skip, take, select.IsDistinct, map, select.IsReverse, columns);
         }
 
         protected SelectExpression UpdateSelect(
             SelectExpression select,             
-            Expression from, Expression where, 
-            IEnumerable<OrderExpression> orderBy, IEnumerable<Expression> groupBy,
+            Expression from, Expression where,
+            IEnumerable<OrderExpression> orderBy, IEnumerable<Expression> groupBy, IEnumerable<Expression> clusterBy,
             Expression skip, Expression take,
-            bool isDistinct, bool isReverse,
+            bool isDistinct, MapExpression map, bool isReverse,
             IEnumerable<ColumnDeclaration> columns
             )
         {
@@ -140,14 +149,16 @@ namespace IQToolkit.Data.Common
                 || where != select.Where
                 || orderBy != select.OrderBy
                 || groupBy != select.GroupBy
+                || clusterBy != select.ClusterBy
                 || take != select.Take
                 || skip != select.Skip
                 || isDistinct != select.IsDistinct
+                || map != select.Map
                 || columns != select.Columns
                 || isReverse != select.IsReverse
                 )
             {
-                return new SelectExpression(select.Alias, columns, from, where, orderBy, groupBy, isDistinct, skip, take, isReverse);
+                return new SelectExpression(select.Alias, columns, from, where, orderBy, groupBy, clusterBy, isDistinct, map, skip, take, isReverse);
             }
             return select;
         }

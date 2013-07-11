@@ -94,11 +94,11 @@
             IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
 
             // Makes sure we get region locations even if we unregister the location
-            DeleteClusters(credentials, "East US 2");
+            DeleteClusters(credentials, "North Europe");
             var registrationClient = new SubscriptionRegistrationClient(credentials);
-            if (await registrationClient.ValidateSubscriptionLocation("East US 2"))
+            if (await registrationClient.ValidateSubscriptionLocation("North Europe"))
             {
-                await registrationClient.UnregisterSubscriptionLocation("East US 2");
+                await registrationClient.UnregisterSubscriptionLocation("North Europe");
             }
 
             // Validate locations

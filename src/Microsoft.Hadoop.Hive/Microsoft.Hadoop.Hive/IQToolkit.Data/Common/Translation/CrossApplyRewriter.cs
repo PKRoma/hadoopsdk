@@ -66,7 +66,8 @@ namespace IQToolkit.Data.Common
                         && select.Take == null
                         && select.Skip == null
                         && !AggregateChecker.HasAggregates(select)
-                        && (select.GroupBy == null || select.GroupBy.Count == 0))
+                        && (select.GroupBy == null || select.GroupBy.Count == 0)
+                        && (select.ClusterBy == null || select.ClusterBy.Count == 0))
                     {
                         SelectExpression selectWithoutWhere = select.SetWhere(null);
                         HashSet<TableAlias> referencedAliases = ReferencedAliasGatherer.Gather(selectWithoutWhere);

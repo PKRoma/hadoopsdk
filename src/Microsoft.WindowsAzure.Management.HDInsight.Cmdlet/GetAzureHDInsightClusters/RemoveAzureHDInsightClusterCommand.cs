@@ -15,8 +15,7 @@
 
         public override void EndProcessing()
         {
-            var client = ServiceLocator.Instance.Locate<IClusterProvisioningClientFactory>().Create(this.SubscriptionId,
-                                                                                              this.Certificate);
+            var client = this.GetClient();
 
             if (!string.IsNullOrWhiteSpace(this.Location))
             {

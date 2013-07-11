@@ -261,6 +261,16 @@ namespace IQToolkit.Data
             return string.Join("\n\n", commands);
         }
 
+        public string GetQueryText(Expression expression, out ReadOnlyCollection<string> files)
+        {
+            Expression plan = this.GetExecutionPlan(expression);
+            var queryCommands = CommandGatherer.Gather(plan);
+            var commands = queryCommands.Select(c => c.CommandText).ToArray();
+            files = queryCommands.SelectMany(c => c.Files).ToReadOnly();
+            return string.Join("\n\n", commands);
+        }
+
+
         class CommandGatherer : DbExpressionVisitor
         {
             List<QueryCommand> commands = new List<QueryCommand>();
