@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
     using System.Linq;
     using System.Text;
@@ -21,6 +22,7 @@
         /// A task that represents the completion of the action.
         /// </returns>
         /// <exception cref="T:System.ArgumentNullException">The <paramref name="action"/> argument is null.</exception>
+        [DebuggerNonUserCode]
         public static Task Run(Action action)
         {
             return TaskEx.Run(action, CancellationToken.None);
@@ -34,6 +36,7 @@
         /// A task that represents the completion of the action.
         /// </returns>
         /// <exception cref="T:System.ArgumentNullException">The <paramref name="action"/> argument is null.</exception>
+        [DebuggerNonUserCode]
         public static Task Run(Action action, CancellationToken cancellationToken)
         {
             return Task.Factory.StartNew(action, cancellationToken, TaskCreationOptions.None, TaskScheduler.Default);
@@ -50,6 +53,7 @@
         /// A task that represents the completion of the action.
         /// </returns>
         /// <exception cref="T:System.ArgumentNullException">The <paramref name="function"/> argument is null.</exception>
+        [DebuggerNonUserCode]
         public static Task<TResult> Run<TResult>(Func<TResult> function)
         {
             return TaskEx.Run<TResult>(function, CancellationToken.None);
@@ -66,6 +70,7 @@
         /// A task that represents the completion of the action.
         /// </returns>
         /// <exception cref="T:System.ArgumentNullException">The <paramref name="function"/> argument is null.</exception>
+        [DebuggerNonUserCode]
         public static Task<TResult> Run<TResult>(Func<TResult> function, CancellationToken cancellationToken)
         {
             return Task.Factory.StartNew<TResult>(function, cancellationToken, TaskCreationOptions.None, TaskScheduler.Default);
@@ -79,6 +84,7 @@
         /// A task that represents the completion of the action.
         /// </returns>
         /// <exception cref="T:System.ArgumentNullException">The <paramref name="function"/> argument is null.</exception>
+        [DebuggerNonUserCode]
         public static Task Run(Func<Task> function)
         {
             return TaskEx.Run(function, CancellationToken.None);
@@ -92,6 +98,7 @@
         /// A task that represents the completion of the function.
         /// </returns>
         /// <exception cref="T:System.ArgumentNullException">The <paramref name="function"/> argument is null.</exception>
+        [DebuggerNonUserCode]
         public static Task Run(Func<Task> function, CancellationToken cancellationToken)
         {
             return TaskExtensions.Unwrap(TaskEx.Run<Task>(function, cancellationToken));
@@ -108,6 +115,7 @@
         /// A task that represents the completion of the action.
         /// </returns>
         /// <exception cref="T:System.ArgumentNullException">The <paramref name="function"/> argument is null.</exception>
+        [DebuggerNonUserCode]
         public static Task<TResult> Run<TResult>(Func<Task<TResult>> function)
         {
             return TaskEx.Run<TResult>(function, CancellationToken.None);
@@ -124,6 +132,7 @@
         /// A task that represents the completion of the action.
         /// </returns>
         /// <exception cref="T:System.ArgumentNullException">The <paramref name="function"/> argument is null.</exception>
+        [DebuggerNonUserCode]
         public static Task<TResult> Run<TResult>(Func<Task<TResult>> function, CancellationToken cancellationToken)
         {
             return TaskExtensions.Unwrap<TResult>(TaskEx.Run<Task<TResult>>(function, cancellationToken));

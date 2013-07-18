@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using System.Text;
 
@@ -10,6 +11,7 @@
         /// <summary>
         /// Gets a task scheduler.
         /// </summary>
+        [DebuggerNonUserCode]
         public static TaskScheduler TaskScheduler
         {
             get

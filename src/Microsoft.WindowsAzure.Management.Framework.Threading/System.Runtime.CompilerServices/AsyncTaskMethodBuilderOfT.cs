@@ -1,5 +1,6 @@
 ﻿namespace System.Runtime.CompilerServices
 {
+    using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
     using System.Threading.Tasks;
 
@@ -11,6 +12,7 @@
     /// </typeparam>
     [SuppressMessage("Microsoft.Performance", "CA1815:OverrideEqualsAndOperatorEqualsOnValueTypes",
         Justification = "Reference equality is correct in this case. [tgs]")]
+    [DebuggerNonUserCode]
     public struct AsyncTaskMethodBuilder<T>
     {
         /// <summary>
@@ -21,6 +23,7 @@
         /// <summary>
         /// Gets the task for this builder.
         /// </summary>
+        [DebuggerNonUserCode]
         public Task<T> Task
         {
             get
@@ -37,6 +40,7 @@
         /// </returns>
         [SuppressMessage("Microsoft.Design", "CA1000:DoNotDeclareStaticMembersOnGenericTypes",
             Justification = "Acceptable in this case in order to maintain the overall pattern. [tgs]")]
+        [DebuggerNonUserCode]
         public static AsyncTaskMethodBuilder<T> Create()
         {
             AsyncTaskMethodBuilder<T> builder;
@@ -54,6 +58,7 @@
         /// The state machine instance, passed by reference.
         /// </param>
         [SuppressMessage("Microsoft.Design", "CA1045:DoNotPassTypesByReference", Justification = "Per design of the framework. [tgs]")]
+        [DebuggerNonUserCode]
         public void Start<TStateMachine>(ref TStateMachine stateMachine) where TStateMachine : IAsyncStateMachine
         {
             stateMachine.MoveNext();
@@ -67,6 +72,7 @@
         /// </param>
         [SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "stateMachine",
             Justification = "Required to maintain the expected pattern. [tgs].")]
+        [DebuggerNonUserCode]
         public void SetStateMachine(IAsyncStateMachine stateMachine)
         {
             // Method is not implemented as it is not needed for our purpose.
@@ -89,6 +95,7 @@
         /// The state machine.
         /// </param>
         [SuppressMessage("Microsoft.Design", "CA1045:DoNotPassTypesByReference", Justification = "Per design of the framework. [tgs]")]
+        [DebuggerNonUserCode]
         public void AwaitOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine)
             where TAwaiter : INotifyCompletion
             where TStateMachine : IAsyncStateMachine
@@ -116,6 +123,7 @@
         /// The state machine.
         /// </param>
         [SuppressMessage("Microsoft.Design", "CA1045:DoNotPassTypesByReference", Justification = "Per design of the framework. [tgs]")]
+        [DebuggerNonUserCode]
         public void AwaitUnsafeOnCompleted<TAwaiter, TStateMachine>(ref TAwaiter awaiter, ref TStateMachine stateMachine)
             where TAwaiter : ICriticalNotifyCompletion
             where TStateMachine : IAsyncStateMachine
@@ -129,6 +137,7 @@
         /// <param name="result">
         /// The result to use to complete the task.
         /// </param>
+        [DebuggerNonUserCode]
         public void SetResult(T result)
         {
             this.tcs.SetResult(result);
@@ -140,6 +149,7 @@
         /// <param name="exception">
         /// The exception to bind to the task.
         /// </param>
+        [DebuggerNonUserCode]
         public void SetException(Exception exception)
         {
             this.tcs.SetException(exception);
