@@ -16,15 +16,16 @@
 namespace System.Threading.Tasks
 {
     using System;
+    using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
     using System.Runtime.CompilerServices;
-    using System.Threading;
 
     /// <summary>
     /// Provides an object that waits for the completion of an asynchronous task.
     /// </summary>
     [SuppressMessage("Microsoft.Performance", "CA1815:OverrideEqualsAndOperatorEqualsOnValueTypes",
         Justification = "Reference equality is correct in this case. [tgs]")]
+    [DebuggerNonUserCode]
     public struct TaskAwaiter : INotifyCompletion
     {
         private readonly Task task;
@@ -35,6 +36,7 @@ namespace System.Threading.Tasks
         /// <param name="task">
         /// The task.
         /// </param>
+        [DebuggerNonUserCode]
         public TaskAwaiter(Task task)
         {
             this.task = task;
@@ -43,6 +45,7 @@ namespace System.Threading.Tasks
         /// <summary>
         /// Gets a task scheduler.
         /// </summary>
+        [DebuggerNonUserCode]
         public static TaskScheduler TaskScheduler
         {
             get
@@ -54,6 +57,7 @@ namespace System.Threading.Tasks
         /// <summary>
         /// Gets a value indicating whether the asynchronous task has completed.
         /// </summary>
+        [DebuggerNonUserCode]
         public bool IsCompleted
         {
             get { return this.task.IsCompleted; }
@@ -65,6 +69,7 @@ namespace System.Threading.Tasks
         /// <param name="continuation">
         /// The action to perform when the wait operation completes.
         /// </param>
+        [DebuggerNonUserCode]
         public void OnCompleted(Action continuation)
         {
             this.task.ContinueWith(
@@ -75,6 +80,7 @@ namespace System.Threading.Tasks
         /// <summary>
         /// Ends the wait for the completion of the asynchronous task.
         /// </summary>
+        [DebuggerNonUserCode]
         public void GetResult()
         {
             try

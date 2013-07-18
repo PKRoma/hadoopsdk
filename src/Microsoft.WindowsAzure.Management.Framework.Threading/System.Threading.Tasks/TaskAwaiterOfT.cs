@@ -16,6 +16,7 @@
 namespace System.Threading.Tasks
 {
     using System;
+    using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
     using System.Runtime.CompilerServices;
 
@@ -27,6 +28,7 @@ namespace System.Threading.Tasks
     /// </typeparam>
     [SuppressMessage("Microsoft.Performance", "CA1815:OverrideEqualsAndOperatorEqualsOnValueTypes",
         Justification = "Reference equality is correct in this case. [tgs]")]
+    [DebuggerNonUserCode]
     public struct TaskAwaiter<T> : INotifyCompletion
     {
         private readonly Task<T> task;
@@ -37,6 +39,7 @@ namespace System.Threading.Tasks
         /// <param name="task">
         /// The task to await.
         /// </param>
+        [DebuggerNonUserCode]
         public TaskAwaiter(Task<T> task)
         {
             this.task = task;
@@ -45,6 +48,7 @@ namespace System.Threading.Tasks
         /// <summary>
         /// Gets a value indicating whether the asynchronous task has completed.
         /// </summary>
+        [DebuggerNonUserCode]
         public bool IsCompleted
         {
             get { return this.task.IsCompleted; }
@@ -56,6 +60,7 @@ namespace System.Threading.Tasks
         /// <param name="continuation">
         /// The action to perform when the wait operation completes.
         /// </param>
+        [DebuggerNonUserCode]
         public void OnCompleted(Action continuation)
         {
             this.task.ContinueWith(delegate { continuation(); }, TaskSchedularHelper.TaskScheduler);
@@ -67,6 +72,7 @@ namespace System.Threading.Tasks
         /// <returns>
         /// The result of the completed task.
         /// </returns>
+        [DebuggerNonUserCode]
         public T GetResult()
         {
             try

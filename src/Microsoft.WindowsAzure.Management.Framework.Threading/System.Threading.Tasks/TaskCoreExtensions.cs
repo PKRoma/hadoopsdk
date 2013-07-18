@@ -16,10 +16,12 @@
 namespace System.Threading.Tasks
 {
     using System.IO;
+    using System.Diagnostics;
 
     /// <summary>
     /// Provides core extension methods for task.
     /// </summary>
+    [DebuggerNonUserCode]
     public static class TaskCoreExtensions
     {
         /// <summary>
@@ -30,6 +32,7 @@ namespace System.Threading.Tasks
         /// <returns>
         /// A Task that represents the asynchronous operation.
         /// </returns>
+        [DebuggerNonUserCode]
         public static Task<string> ReadToEndAsync(this TextReader source)
         {
             if (source == null)
@@ -51,6 +54,7 @@ namespace System.Threading.Tasks
         /// <returns>
         /// An awaiter instance.
         /// </returns>
+        [DebuggerNonUserCode]
         public static TaskAwaiter GetAwaiter(this Task task)
         {
             return new TaskAwaiter(task);
@@ -68,6 +72,7 @@ namespace System.Threading.Tasks
         /// <returns>
         /// An awaiter instance.
         /// </returns>
+        [DebuggerNonUserCode]
         public static TaskAwaiter<T> GetAwaiter<T>(this Task<T> task)
         {
             return new TaskAwaiter<T>(task);
