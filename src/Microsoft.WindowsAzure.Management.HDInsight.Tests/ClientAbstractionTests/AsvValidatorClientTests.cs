@@ -42,10 +42,10 @@
         {
             var client = ServiceLocator.Instance.Locate<IAsvValidatorClientFactory>().Create();
 
-            await client.ValidateAccount(IntegrationTestBase.TestCredentials.DefaultStorageAccount.Name,
-                                         IntegrationTestBase.TestCredentials.DefaultStorageAccount.Key);
-            await client.ValidateAccount(IntegrationTestBase.TestCredentials.AdditionalStorageAccounts[0].Name,
-                                         IntegrationTestBase.TestCredentials.AdditionalStorageAccounts[0].Key);
+            await client.ValidateAccount(IntegrationTestBase.TestCredentials.Environments[0].DefaultStorageAccount.Name,
+                                         IntegrationTestBase.TestCredentials.Environments[0].DefaultStorageAccount.Key);
+            await client.ValidateAccount(IntegrationTestBase.TestCredentials.Environments[0].AdditionalStorageAccounts[0].Name,
+                                         IntegrationTestBase.TestCredentials.Environments[0].AdditionalStorageAccounts[0].Key);
         }
 
         [TestMethod]
@@ -56,9 +56,9 @@
         {
             var client = ServiceLocator.Instance.Locate<IAsvValidatorClientFactory>().Create();
 
-            await client.ValidateContainer(IntegrationTestBase.TestCredentials.DefaultStorageAccount.Name,
-                                           IntegrationTestBase.TestCredentials.DefaultStorageAccount.Key,
-                                           IntegrationTestBase.TestCredentials.DefaultStorageAccount.Container);
+            await client.ValidateContainer(IntegrationTestBase.TestCredentials.Environments[0].DefaultStorageAccount.Name,
+                                           IntegrationTestBase.TestCredentials.Environments[0].DefaultStorageAccount.Key,
+                                           IntegrationTestBase.TestCredentials.Environments[0].DefaultStorageAccount.Container);
         }
 
         [TestMethod]
@@ -108,7 +108,7 @@
             var restClient = factory.Create();
 
             // Call Validate container.
-            restClient.ValidateAccount(IntegrationTestBase.TestCredentials.DefaultStorageAccount.Name, IntegrationTestBase.TestCredentials.DefaultStorageAccount.Key).WaitForResult();
+            restClient.ValidateAccount(IntegrationTestBase.TestCredentials.Environments[0].DefaultStorageAccount.Name, IntegrationTestBase.TestCredentials.Environments[0].DefaultStorageAccount.Key).WaitForResult();
 
             // Wait for 2 seconds to ensure the dates are different.
             Thread.Sleep(2000);
@@ -120,7 +120,7 @@
             requestHeaders.Clear();
 
             // Call Validate container a second time.
-            restClient.ValidateAccount(IntegrationTestBase.TestCredentials.DefaultStorageAccount.Name, IntegrationTestBase.TestCredentials.DefaultStorageAccount.Key).WaitForResult();
+            restClient.ValidateAccount(IntegrationTestBase.TestCredentials.Environments[0].DefaultStorageAccount.Name, IntegrationTestBase.TestCredentials.Environments[0].DefaultStorageAccount.Key).WaitForResult();
 
             // Get the "x-ms-date" header.
             var secondCallDate = requestHeaders[HDInsightRestHardcodes.XMsDate];
@@ -176,7 +176,7 @@
             var restClient = factory.Create();
 
             // Call Validate container.
-            restClient.ValidateContainer(IntegrationTestBase.TestCredentials.DefaultStorageAccount.Name, IntegrationTestBase.TestCredentials.DefaultStorageAccount.Key, IntegrationTestBase.TestCredentials.DefaultStorageAccount.Container).WaitForResult();
+            restClient.ValidateContainer(IntegrationTestBase.TestCredentials.Environments[0].DefaultStorageAccount.Name, IntegrationTestBase.TestCredentials.Environments[0].DefaultStorageAccount.Key, IntegrationTestBase.TestCredentials.Environments[0].DefaultStorageAccount.Container).WaitForResult();
 
             // Wait for 2 seconds to ensure the dates are different.
             Thread.Sleep(2000);
@@ -188,7 +188,7 @@
             requestHeaders.Clear();
 
             // Call Validate container a second time.
-            restClient.ValidateContainer(IntegrationTestBase.TestCredentials.DefaultStorageAccount.Name, IntegrationTestBase.TestCredentials.DefaultStorageAccount.Key, IntegrationTestBase.TestCredentials.DefaultStorageAccount.Container).WaitForResult();
+            restClient.ValidateContainer(IntegrationTestBase.TestCredentials.Environments[0].DefaultStorageAccount.Name, IntegrationTestBase.TestCredentials.Environments[0].DefaultStorageAccount.Key, IntegrationTestBase.TestCredentials.Environments[0].DefaultStorageAccount.Container).WaitForResult();
 
             // Get the "x-ms-date" header.
             var secondCallDate = requestHeaders[HDInsightRestHardcodes.XMsDate];
@@ -205,8 +205,8 @@
         public async Task ICanPerformA_NegativeValidateAccount_PartialAccount_RestAsvClientAbstraction()
         {
             var client = ServiceLocator.Instance.Locate<IAsvValidatorClientFactory>().Create();
-            await client.ValidateAccount(IntegrationTestBase.TestCredentials.DefaultStorageAccount.Name.Split(new char[] { '.' })[0],
-                                         IntegrationTestBase.TestCredentials.DefaultStorageAccount.Key);
+            await client.ValidateAccount(IntegrationTestBase.TestCredentials.Environments[0].DefaultStorageAccount.Name.Split(new char[] { '.' })[0],
+                                         IntegrationTestBase.TestCredentials.Environments[0].DefaultStorageAccount.Key);
 
         }
 
@@ -218,8 +218,8 @@
         public async Task ICanPerformA_NegativeValidateAccount_WrongAccount_RestAsvClientAbstraction()
         {
             var client = ServiceLocator.Instance.Locate<IAsvValidatorClientFactory>().Create();
-            await client.ValidateAccount("invalid." + IntegrationTestBase.TestCredentials.DefaultStorageAccount.Name,
-                                         IntegrationTestBase.TestCredentials.DefaultStorageAccount.Key);
+            await client.ValidateAccount("invalid." + IntegrationTestBase.TestCredentials.Environments[0].DefaultStorageAccount.Name,
+                                         IntegrationTestBase.TestCredentials.Environments[0].DefaultStorageAccount.Key);
         }
 
         [TestMethod]
@@ -230,7 +230,7 @@
         public async Task ICanPerformA_NegativeValidateAccount_InvalidKey_RestAsvClientAbstraction()
         {
             var client = ServiceLocator.Instance.Locate<IAsvValidatorClientFactory>().Create();
-            await client.ValidateAccount(IntegrationTestBase.TestCredentials.DefaultStorageAccount.Name, "key");
+            await client.ValidateAccount(IntegrationTestBase.TestCredentials.Environments[0].DefaultStorageAccount.Name, "key");
         }
 
         [TestMethod]
@@ -241,8 +241,8 @@
         public async Task ICanPerformA_NegativeValidateAccount_WrongKey_RestAsvClientAbstraction()
         {
             var client = ServiceLocator.Instance.Locate<IAsvValidatorClientFactory>().Create();
-            await client.ValidateAccount(IntegrationTestBase.TestCredentials.DefaultStorageAccount.Name,
-                                         IntegrationTestBase.TestCredentials.AdditionalStorageAccounts[0].Key);
+            await client.ValidateAccount(IntegrationTestBase.TestCredentials.Environments[0].DefaultStorageAccount.Name,
+                                         IntegrationTestBase.TestCredentials.Environments[0].AdditionalStorageAccounts[0].Key);
 
         }
 
@@ -254,8 +254,8 @@
         public async Task ICanPerformA_NegativeValidateContainer_NonExistingContainer_RestAsvClientAbstraction()
         {
             var client = ServiceLocator.Instance.Locate<IAsvValidatorClientFactory>().Create();
-            await client.ValidateContainer(IntegrationTestBase.TestCredentials.DefaultStorageAccount.Name,
-                                           IntegrationTestBase.TestCredentials.DefaultStorageAccount.Key,
+            await client.ValidateContainer(IntegrationTestBase.TestCredentials.Environments[0].DefaultStorageAccount.Name,
+                                           IntegrationTestBase.TestCredentials.Environments[0].DefaultStorageAccount.Key,
                                            Guid.NewGuid().ToString("N").ToLowerInvariant());
 
         }

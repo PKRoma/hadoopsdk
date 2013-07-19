@@ -32,7 +32,7 @@ namespace LinqToHiveMapReduceSample
         {
             AzureTestCredentials creds = testManager.GetCredentials("default");
 
-            var db = new MyHiveDatabase(new Uri(creds.Cluster), creds.AzureUserName, creds.AzurePassword, creds.DefaultStorageAccount.Name, creds.DefaultStorageAccount.Key);
+            var db = new MyHiveDatabase(new Uri(creds.WellKnownCluster.Cluster), creds.AzureUserName, creds.AzurePassword, creds.Environments[0].DefaultStorageAccount.Name, creds.Environments[0].DefaultStorageAccount.Key);
 
             var condensed = db.KeyValueInput
                             .Where(c => c.K == "k1" || c.K == "k2" || c.K == "k3")

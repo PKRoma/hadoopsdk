@@ -34,7 +34,7 @@ namespace LinqToHiveMapReduceSample
             AzureTestCredentials creds = testManager.GetCredentials("default");
             LoadData(creds);
 
-            var db = new MyHiveDatabase(new Uri(creds.Cluster), creds.AzureUserName, creds.AzurePassword, creds.DefaultStorageAccount.Name, creds.DefaultStorageAccount.Key);
+            var db = new MyHiveDatabase(new Uri(creds.WellKnownCluster.Cluster), creds.AzureUserName, creds.AzurePassword, creds.Environments[0].DefaultStorageAccount.Name, creds.Environments[0].DefaultStorageAccount.Key);
 
             var hitsByIP = db.WebSiteLog
                                  .Where(item => item.RequestMethod != "s-ip") // filter out header
@@ -117,7 +117,7 @@ namespace LinqToHiveMapReduceSample
 
         static void LoadData(AzureTestCredentials creds)
         {
-            var hadoop = Hadoop.Connect(new Uri(creds.Cluster), creds.AzureUserName, creds.HadoopUserName, creds.AzurePassword, creds.DefaultStorageAccount.Name, creds.DefaultStorageAccount.Key, creds.DefaultStorageAccount.Container, true);
+            var hadoop = Hadoop.Connect(new Uri(creds.WellKnownCluster.Cluster), creds.AzureUserName, creds.HadoopUserName, creds.AzurePassword, creds.Environments[0].DefaultStorageAccount.Name, creds.Environments[0].DefaultStorageAccount.Key, creds.Environments[0].DefaultStorageAccount.Container, true);
             var dataFile = "/input/sample-20131313.log";
 
             using (WebClient webclient = new WebClient())
@@ -126,7 +126,7 @@ namespace LinqToHiveMapReduceSample
                 hadoop.StorageSystem.WriteAllText(dataFile, data1);
             }
 
-            var db = new HiveConnection(new Uri(creds.Cluster), creds.AzureUserName, creds.AzurePassword, creds.DefaultStorageAccount.Name, creds.DefaultStorageAccount.Key);
+            var db = new HiveConnection(new Uri(creds.WellKnownCluster.Cluster), creds.AzureUserName, creds.AzurePassword, creds.Environments[0].DefaultStorageAccount.Name, creds.Environments[0].DefaultStorageAccount.Key);
 
             db.GetTable<HiveRow>("WebSiteLog").Drop();
 

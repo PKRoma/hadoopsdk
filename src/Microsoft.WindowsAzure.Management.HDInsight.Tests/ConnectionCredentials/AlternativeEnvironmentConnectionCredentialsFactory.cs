@@ -18,28 +18,31 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ConnectionCredential
     using System;
     using System.Security.Cryptography.X509Certificates;
     using Microsoft.WindowsAzure.Management.HDInsight.ConnectionContext;
+    using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities;
 
     internal class AlternativeEnvironmentConnectionCredentialsFactory : IConnectionCredentialsFactory
     {
+        private AzureTestCredentials creds; 
+        public AlternativeEnvironmentConnectionCredentialsFactory()
+        {
+            creds = IntegrationTestBase.GetCredentailsForEnvironmentType(EnvironmentType.Current);
+        }
+
         public IConnectionCredentials Create(Guid subscriptionId, X509Certificate2 certificate)
         {
-           var endPoint = new Uri(IntegrationTestBase.TestCredentials.AlternativeEnvironment.Endpoint);
-           var environmentNamespace = IntegrationTestBase.TestCredentials.AlternativeEnvironment.Namespace;
-           return new ConnectionCredentials(endPoint, environmentNamespace, subscriptionId, certificate);
+           var endPoint = new Uri(creds.Endpoint);
+           var cert = new X509Certificate2(creds.Certificate);
+           return new ConnectionCredentials(endPoint, creds.CloudServiceName, creds.SubscriptionId, cert);
         }
 
         public IConnectionCredentials Create(Guid subscriptionId, X509Certificate2 certificate, Uri endpoint)
         {
-            var endPoint = new Uri(IntegrationTestBase.TestCredentials.AlternativeEnvironment.Endpoint);
-            var environmentNamespace = IntegrationTestBase.TestCredentials.AlternativeEnvironment.Namespace;
-            return new ConnectionCredentials(endPoint, environmentNamespace, subscriptionId, certificate);
+            return this.Create(subscriptionId, certificate);
         }
 
         public IConnectionCredentials Create(Guid subscriptionId, X509Certificate2 certificate, Uri endpoint, string cloudServiceName)
         {
-            var endPoint = new Uri(IntegrationTestBase.TestCredentials.AlternativeEnvironment.Endpoint);
-            var environmentNamespace = IntegrationTestBase.TestCredentials.AlternativeEnvironment.Namespace;
-            return new ConnectionCredentials(endPoint, environmentNamespace, subscriptionId, certificate);
+            return this.Create(subscriptionId, certificate);
         }
     }
 }

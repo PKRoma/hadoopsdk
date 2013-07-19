@@ -36,7 +36,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.CmdletAbstractionTes
             client.Certificate = creds.Certificate;
             client.EndProcessing();
             var containers = from container in client.Output
-                             where container.Name.Equals(TestCredentials.DnsName)
+                             where container.Name.Equals(TestCredentials.WellKnownCluster.DnsName)
                              select container;
             Assert.AreEqual(1, containers.Count());
 

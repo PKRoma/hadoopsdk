@@ -16,6 +16,7 @@
     using Microsoft.WindowsAzure.Management.HDInsight.InversionOfControl;
     using System.Net;
     using Microsoft.WindowsAzure.Management.HDInsight.JobSubmission.Data;
+    using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities;
     using Microsoft.WindowsAzure.Management.HDInsight.Tests.ConnectionCredentials;
     using Microsoft.WindowsAzure.Management.HDInsight.Tests.ServerDataObjects;
     using Moq;
@@ -92,7 +93,7 @@
         {
             IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
             var client = ServiceLocator.Instance.Locate<IHDInsightManagementRestClientFactory>().Create(credentials);
-            Assert.IsTrue(this.ContainsContainer(TestCredentials.DnsName, await client.ListCloudServices()));
+            Assert.IsTrue(this.ContainsContainer(TestCredentials.WellKnownCluster.DnsName, await client.ListCloudServices()));
         }
 
         [TestMethod]
@@ -159,11 +160,13 @@
         [Timeout(5 * 60 * 1000)] // ms
         public async Task ICanPerformA_CreateDeleteContainers_Using_RestClient_ManualEnvironment()
         {
-            if (IntegrationTestBase.TestCredentials.AlternativeEnvironment == null)
+            var creds = IntegrationTestBase.GetCredentailsForEnvironmentType(EnvironmentType.Current);
+
+            if (creds == null)
                 Assert.Inconclusive("Alternative Azure Endpoint wasn't set up");
             
             IConnectionCredentials credentials = new AlternativeEnvironmentConnectionCredentialsFactory().Create(
-                IntegrationTestBase.TestCredentials.AlternativeEnvironment.SubscriptionId,
+                creds.SubscriptionId,
                 IntegrationTestBase.GetValidCredentials().Certificate);
             
             var client = new HDInsightManagementRestClient(credentials);

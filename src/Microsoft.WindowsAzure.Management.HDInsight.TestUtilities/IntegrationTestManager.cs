@@ -41,56 +41,64 @@
             return creds;
         }
 
+        public IEnumerable<AzureTestCredentials> GetAllCredentials()
+        {
+            return this.credentialSets.Values;
+        }
+
         public void MakeFile(string filePath)
         {
             var def = new AzureTestCredentials();
             def.CredentialsName = "example";
             def.Certificate = @"C:\File\Path\To\Certificate\Uploaded\To\Azure\File.cer";
             def.InvalidCertificate = @"C:\File\Path\To\Certificate\NOTUploaded\To\Azure\File.cer";
-            def.Cluster = "https://[dnsname].azurehdinsight.net:563";
-            def.DnsName = "dnsname";
+            def.WellKnownCluster = new KnownCluster()
+            {
+                Cluster = "https://[dnsname].azurehdinsight.net:563",
+                DnsName = "dnsname"
+            };
             def.AzureUserName = "azureUserName";
             def.AzurePassword = "azurePassword";
             def.HadoopUserName = "hadoopUserName";
-            def.DefaultStorageAccount = new StorageAccountCredentials();
-            def.DefaultStorageAccount.Name = "blogStorageAccount";
-            def.DefaultStorageAccount.Key = "blobStorageKey";
-            def.DefaultStorageAccount.Container = "blogStorageContainer";
-            def.AdditionalStorageAccounts = new StorageAccountCredentials[1];
-            def.AdditionalStorageAccounts[0] = def.DefaultStorageAccount;
-            def.HiveStores = new MetastoreCredentials[2];
-            def.HiveStores[0] = new MetastoreCredentials()
+
+            def.Environments = new CreationDetails[1];
+            var env = new CreationDetails();
+            env.Location = "North Europe";
+            def.EnvironmentType = EnvironmentType.Production;
+            def.Endpoint = "http://foo.url -- {this is only used for non production environments}";
+            def.CloudServiceName = "hdinsight -- {this is only used for non production environments}";
+
+            env.DefaultStorageAccount = new StorageAccountCredentials();
+            env.DefaultStorageAccount.Name = "blogStorageAccount";
+            env.DefaultStorageAccount.Key = "blobStorageKey";
+            env.DefaultStorageAccount.Container = "blogStorageContainer";
+            env.AdditionalStorageAccounts = new StorageAccountCredentials[1];
+            env.AdditionalStorageAccounts[0] = env.DefaultStorageAccount;
+            env.HiveStores = new MetastoreCredentials[2];
+            env.HiveStores[0] = new MetastoreCredentials()
             {
                 SqlServer = "SqlServerLocation",
                 Database = "DatabaseName",
                 Description = "HiveStore1",
-                UserName = "userName",
-                Password = "password"
             };
-            def.HiveStores[1] = new MetastoreCredentials()
+            env.HiveStores[1] = new MetastoreCredentials()
             {
                 SqlServer = "SqlServerLocation",
                 Database = "DatabaseName",
                 Description = "HiveStore2",
-                UserName = "userName",
-                Password = "password"
             };
-            def.OozieStores = new MetastoreCredentials[2];
-            def.OozieStores[0] = new MetastoreCredentials()
+            env.OozieStores = new MetastoreCredentials[2];
+            env.OozieStores[0] = new MetastoreCredentials()
             {
                 SqlServer = "SqlServerLocation",
                 Database = "DatabaseName",
                 Description = "OozieStore1",
-                UserName = "userName",
-                Password = "password"
             };
-            def.OozieStores[1] = new MetastoreCredentials()
+            env.OozieStores[1] = new MetastoreCredentials()
             {
                 SqlServer = "SqlServerLocation",
                 Database = "DatabaseName",
                 Description = "OozieStore2",
-                UserName = "userName",
-                Password = "password"
             };
             List<AzureTestCredentials> data = new List<AzureTestCredentials>();
             data.Add(def);

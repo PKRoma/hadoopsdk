@@ -45,13 +45,13 @@ namespace Microsoft.Hadoop.MapReduce.Test
                 Assert.Inconclusive("No entry was found in the credential config file for the specified test configuration.");
             }
 
-            string cluster = creds.Cluster;
+            string cluster = creds.WellKnownCluster.Cluster;
             string userName = creds.AzureUserName;
             string password = creds.AzurePassword;
-            string container = creds.DefaultStorageAccount.Container;
+            string container = creds.Environments[0].DefaultStorageAccount.Container;
             string hadoopUser = creds.HadoopUserName;
-            string blobstorageaccountname = creds.DefaultStorageAccount.Name;
-            string blobstorageaccountkey = creds.DefaultStorageAccount.Key;
+            string blobstorageaccountname = creds.Environments[0].DefaultStorageAccount.Name;
+            string blobstorageaccountkey = creds.Environments[0].DefaultStorageAccount.Key;
 
             var blobAdapter = new BlobStorageAdapter(blobstorageaccountname, blobstorageaccountkey, container, true);
             HdfsFile.InternalHdfsFile = WebHdfsFile.Create(hadoopUser, new WebHDFSClient(hadoopUser, blobAdapter));
