@@ -71,7 +71,7 @@
         public string CloudServiceName { get; set; }
 
         public KnownCluster WellKnownCluster { get; set; }
-        public EnvironmentType Type { get; set; }
+        public EnvironmentType EnvironmentType { get; set; }
 
         [SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays",
             Justification = "Needed for serialization to work correctly. [tgs]")]

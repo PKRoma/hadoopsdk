@@ -72,7 +72,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests
             };
             retval.Endpoint = orig.Endpoint;
             env.Location = origEnv.Location;
-            retval.Type = orig.Type;
+            retval.EnvironmentType = orig.EnvironmentType;
             List<StorageAccountCredentials> storageAccounts = new List<StorageAccountCredentials>();
             foreach (var storageAccountCredentials in origEnv.AdditionalStorageAccounts)
             {
@@ -130,10 +130,10 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests
 
         public static AzureTestCredentials GetCredentailsForEnvironmentType(EnvironmentType type)
         {
-            var environments = testManager.GetAllCredentails().ToArray();
+            var environments = testManager.GetAllCredentials().ToArray();
             for (int i = 0; i < environments.Length; i++)
             {
-                if (environments[i].Type == type)
+                if (environments[i].EnvironmentType == type)
                 {
                     return environments[i];
                 }

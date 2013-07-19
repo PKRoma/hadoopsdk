@@ -41,7 +41,7 @@
             return creds;
         }
 
-        public IEnumerable<AzureTestCredentials> GetAllCredentails()
+        public IEnumerable<AzureTestCredentials> GetAllCredentials()
         {
             return this.credentialSets.Values;
         }
@@ -64,7 +64,7 @@
             def.Environments = new CreationDetails[1];
             var env = new CreationDetails();
             env.Location = "North Europe";
-            def.Type = EnvironmentType.Production;
+            def.EnvironmentType = EnvironmentType.Production;
             def.Endpoint = "http://foo.url -- {this is only used for non production environments}";
             def.CloudServiceName = "hdinsight -- {this is only used for non production environments}";
 
