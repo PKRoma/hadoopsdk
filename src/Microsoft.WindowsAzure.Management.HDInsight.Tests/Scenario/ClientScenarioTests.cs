@@ -25,6 +25,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
     using Microsoft.WindowsAzure.Management.HDInsight.ConnectionContext;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Microsoft.WindowsAzure.Management.HDInsight.InversionOfControl;
+    using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities;
     using Microsoft.WindowsAzure.Management.HDInsight.Tests.ConnectionCredentials;
 
     [TestClass]
@@ -179,10 +180,13 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
             runManager.Override<IConnectionCredentialsFactory>(new AlternativeEnvironmentConnectionCredentialsFactory());
 
             // Creates the client
-            if (IntegrationTestBase.TestCredentials.AlternativeEnvironment == null)
+            var creds = IntegrationTestBase.GetCredentailsForEnvironmentType(EnvironmentType.Current);
+
+            if (creds == null)
                 Assert.Inconclusive("Alternative Azure Endpoint wasn't set up");
+            
             var client = new ClusterProvisioningClient(
-                IntegrationTestBase.TestCredentials.AlternativeEnvironment.SubscriptionId,
+                creds.SubscriptionId,
                 IntegrationTestBase.GetValidCredentials().Certificate);
             client.PollingInterval = TimeSpan.FromSeconds(1);
 
@@ -211,10 +215,10 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
         public void InvalidCreateDeleteContainer_FailsOnSdk()
         {            
             var clusterRequest = base.GetRandomCluster();
-            clusterRequest.HiveMetastore = new HDInsightMetastore(TestCredentials.HiveStores[0].SqlServer,
-                                                           TestCredentials.HiveStores[0].Database,
-                                                           TestCredentials.HiveStores[0].UserName,
-                                                           TestCredentials.HiveStores[0].Password);
+            clusterRequest.HiveMetastore = new HDInsightMetastore(TestCredentials.Environments[0].HiveStores[0].SqlServer,
+                                                           TestCredentials.Environments[0].HiveStores[0].Database,
+                                                           TestCredentials.AzureUserName,
+                                                           TestCredentials.AzurePassword);
             IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
             var client = new ClusterProvisioningClient(credentials.SubscriptionId, credentials.Certificate);
             client.PollingInterval = TimeSpan.FromMilliseconds(100);
@@ -259,7 +263,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
         public void InvalidCreateDeleteContainer_FailsOnServer()
         {
             var clusterRequest = base.GetRandomCluster();
-            clusterRequest.AdditionalStorageAccounts.Add(new StorageAccountConfiguration("invalid", TestCredentials.AdditionalStorageAccounts[0].Key));
+            clusterRequest.AdditionalStorageAccounts.Add(new StorageAccountConfiguration("invalid", TestCredentials.Environments[0].AdditionalStorageAccounts[0].Key));
 
             IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
             var client = new ClusterProvisioningClient(credentials.SubscriptionId, credentials.Certificate);
@@ -296,15 +300,16 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
         {
             // ClusterName
             var cluster = base.GetRandomCluster();
-            cluster.AdditionalStorageAccounts.Add(new StorageAccountConfiguration(TestCredentials.AdditionalStorageAccounts[0].Name, TestCredentials.AdditionalStorageAccounts[0].Key));
-            cluster.OozieMetastore = new HDInsightMetastore(TestCredentials.OozieStores[0].SqlServer,
-                                                            TestCredentials.OozieStores[0].Database,
-                                                            TestCredentials.OozieStores[0].UserName,
-                                                            TestCredentials.OozieStores[0].Password);
-            cluster.HiveMetastore = new HDInsightMetastore(TestCredentials.HiveStores[0].SqlServer,
-                                                           TestCredentials.HiveStores[0].Database,
-                                                           TestCredentials.HiveStores[0].UserName,
-                                                           TestCredentials.HiveStores[0].Password);
+            cluster.AdditionalStorageAccounts.Add(new StorageAccountConfiguration(TestCredentials.Environments[0].AdditionalStorageAccounts[0].Name,
+                                                                                  TestCredentials.Environments[0].AdditionalStorageAccounts[0].Key));
+            cluster.OozieMetastore = new HDInsightMetastore(TestCredentials.Environments[0].OozieStores[0].SqlServer,
+                                                            TestCredentials.Environments[0].OozieStores[0].Database,
+                                                            TestCredentials.AzureUserName,
+                                                            TestCredentials.AzurePassword);
+            cluster.HiveMetastore = new HDInsightMetastore(TestCredentials.Environments[0].HiveStores[0].SqlServer,
+                                                           TestCredentials.Environments[0].HiveStores[0].Database,
+                                                           TestCredentials.AzureUserName,
+                                                           TestCredentials.AzurePassword);
 
             this.TestClusterEndToEnd(cluster, getClusters, getCluster, createCluster, deleteCluster);
         }

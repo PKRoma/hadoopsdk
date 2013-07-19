@@ -59,11 +59,11 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             {
                 var containers =
                     from container in await client.ListContainers()
-                    where container.Name.Equals(TestCredentials.DnsName)
+                    where container.Name.Equals(TestCredentials.WellKnownCluster.DnsName)
                     select container;
                 Assert.AreEqual(1, containers.Count());
 
-                var result = await client.ListContainer(TestCredentials.DnsName);
+                var result = await client.ListContainer(TestCredentials.WellKnownCluster.DnsName);
                 Assert.IsNotNull(result);
                 Assert.AreEqual(result.Location, "East US 2");
                 Assert.AreEqual(result.UserName, "sa-po-svc");
@@ -170,7 +170,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
             await ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>()
                                    .Create(credentials)
-                                   .DeleteContainer(TestCredentials.DnsName, "Nowhere");
+                                   .DeleteContainer(TestCredentials.WellKnownCluster.DnsName, "Nowhere");
         }
 
         [TestMethod]
@@ -194,7 +194,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         public async Task ICanNotPerformA_DeleteContainer_WithAnInvalidCertificate_PocoClientAbstraction()
         {
             var creds = GetInvalidCertificateCredentails();
-            var clusterName = TestCredentials.DnsName;
+            var clusterName = TestCredentials.WellKnownCluster.DnsName;
             try
             {
                 using (var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(creds))
@@ -230,7 +230,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         public async Task ICanNotPerformA_GetContainer_WithAnInvalidCertificate_PocoClientAbstraction()
         {
             var creds = GetInvalidCertificateCredentails();
-            var clusterName = TestCredentials.DnsName;
+            var clusterName = TestCredentials.WellKnownCluster.DnsName;
             try
             {
                 using (var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(creds))
@@ -302,7 +302,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         public async Task ICanNotPerformA_DeleteContainer_WithAnInvalidSubscriptionId_PocoClientAbstraction()
         {
             var creds = GetInvalidSubscriptionIdCredentails();
-            var clusterName = TestCredentials.DnsName;
+            var clusterName = TestCredentials.WellKnownCluster.DnsName;
             try
             {
                 using (var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(creds))
@@ -338,7 +338,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         public async Task ICanNotPerformA_GetContainer_WithAnInvalidSubscriptionId_PocoClientAbstraction()
         {
             var creds = GetInvalidSubscriptionIdCredentails();
-            var clusterName = TestCredentials.DnsName;
+            var clusterName = TestCredentials.WellKnownCluster.DnsName;
             try
             {
                 using (var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(creds))
@@ -469,16 +469,16 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         public void ICanPerformA_AdvancedCreateDeleteContainers_Using_PocoClient()
         {
             var cluster = base.GetRandomCluster();
-            cluster.AdditionalStorageAccounts.Add(new StorageAccountConfiguration(TestCredentials.AdditionalStorageAccounts[0].Name,
-                                                                TestCredentials.AdditionalStorageAccounts[0].Key));
-            cluster.OozieMetastore = new HDInsightMetastore(TestCredentials.OozieStores[0].SqlServer,
-                                                            TestCredentials.OozieStores[0].Database,
-                                                            TestCredentials.OozieStores[0].UserName,
-                                                            TestCredentials.OozieStores[0].Password);
-            cluster.HiveMetastore = new HDInsightMetastore(TestCredentials.HiveStores[0].SqlServer,
-                                                           TestCredentials.HiveStores[0].Database,
-                                                           TestCredentials.HiveStores[0].UserName,
-                                                           TestCredentials.HiveStores[0].Password);
+            cluster.AdditionalStorageAccounts.Add(new StorageAccountConfiguration(TestCredentials.Environments[0].AdditionalStorageAccounts[0].Name,
+                                                                TestCredentials.Environments[0].AdditionalStorageAccounts[0].Key));
+            cluster.OozieMetastore = new HDInsightMetastore(TestCredentials.Environments[0].OozieStores[0].SqlServer,
+                                                            TestCredentials.Environments[0].OozieStores[0].Database,
+                                                            TestCredentials.AzureUserName,
+                                                            TestCredentials.AzurePassword);
+            cluster.HiveMetastore = new HDInsightMetastore(TestCredentials.Environments[0].HiveStores[0].SqlServer,
+                                                           TestCredentials.Environments[0].HiveStores[0].Database,
+                                                           TestCredentials.AzureUserName,
+                                                           TestCredentials.AzurePassword);
             cluster.Location = cluster.Location.ToUpperInvariant();
 
             ValidateCreateClusterSucceeds(cluster);
@@ -725,7 +725,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         {
             IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
             var cluster = base.GetRandomCluster();
-            cluster.AdditionalStorageAccounts.Add(new StorageAccountConfiguration(IntegrationTestBase.TestCredentials.AdditionalStorageAccounts[0].Name, IntegrationTestBase.TestCredentials.DefaultStorageAccount.Key));
+            cluster.AdditionalStorageAccounts.Add(new StorageAccountConfiguration(IntegrationTestBase.TestCredentials.Environments[0].AdditionalStorageAccounts[0].Name, IntegrationTestBase.TestCredentials.Environments[0].DefaultStorageAccount.Key));
             await ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(credentials).CreateContainer(cluster);
         }
 
@@ -751,7 +751,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         {
             IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
             var cluster = base.GetRandomCluster();
-            cluster.Name = TestCredentials.DnsName;
+            cluster.Name = TestCredentials.WellKnownCluster.DnsName;
             await ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(credentials).CreateContainer(cluster);
         }
 
@@ -795,13 +795,13 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         public async Task NegativeTest_InvalidMetastore_Using_PocoClient()
         {
             var cluster = base.GetRandomCluster();
-            cluster.OozieMetastore = new HDInsightMetastore(TestCredentials.OozieStores[0].SqlServer,
-                                                            TestCredentials.OozieStores[0].Database,
-                                                            TestCredentials.OozieStores[0].UserName,
-                                                            TestCredentials.OozieStores[0].Password);
-            cluster.HiveMetastore = new HDInsightMetastore(TestCredentials.HiveStores[0].SqlServer,
-                                                            TestCredentials.HiveStores[0].Database,
-                                                            TestCredentials.HiveStores[0].UserName,
+            cluster.OozieMetastore = new HDInsightMetastore(TestCredentials.Environments[0].OozieStores[0].SqlServer,
+                                                            TestCredentials.Environments[0].OozieStores[0].Database,
+                                                            TestCredentials.AzureUserName,
+                                                            TestCredentials.AzurePassword);
+            cluster.HiveMetastore = new HDInsightMetastore(TestCredentials.Environments[0].HiveStores[0].SqlServer,
+                                                            TestCredentials.Environments[0].HiveStores[0].Database,
+                                                            TestCredentials.AzureUserName,
                                                             "NOT-THE-REAL-PASSWORD");
 
             await ValidateCreateClusterFailsWithError(cluster);
@@ -814,10 +814,10 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         public async Task NegativeTest_OnlyOneMetastore_Using_PocoClient()
         {
             var cluster = base.GetRandomCluster();
-            cluster.OozieMetastore = new HDInsightMetastore(TestCredentials.OozieStores[0].SqlServer,
-                                                            TestCredentials.OozieStores[0].Database,
-                                                            TestCredentials.OozieStores[0].UserName,
-                                                            TestCredentials.OozieStores[0].Password);
+            cluster.OozieMetastore = new HDInsightMetastore(TestCredentials.Environments[0].OozieStores[0].SqlServer,
+                                                            TestCredentials.Environments[0].OozieStores[0].Database,
+                                                            TestCredentials.AzureUserName,
+                                                            TestCredentials.AzurePassword);
 
             await ValidateCreateClusterFailsWithError(cluster);
         }

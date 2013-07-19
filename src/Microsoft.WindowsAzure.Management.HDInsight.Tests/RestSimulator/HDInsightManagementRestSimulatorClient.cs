@@ -45,9 +45,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.RestSimulator
         private static readonly Collection<HDInsightCluster> PendingDeleteClusters = new Collection<HDInsightCluster>();
         private static readonly Collection<HDInsightCluster> Clusters = new Collection<HDInsightCluster>()
         {
-            new HDInsightCluster(IntegrationTestBase.TestCredentials.DnsName, ClusterState.Running.ToString())
+            new HDInsightCluster(IntegrationTestBase.TestCredentials.WellKnownCluster.DnsName, ClusterState.Running.ToString())
             {
-                ConnectionUrl = @"https://" + IntegrationTestBase.TestCredentials.DnsName + ".azurehdinsight.net",
+                ConnectionUrl = @"https://" + IntegrationTestBase.TestCredentials.WellKnownCluster.DnsName + ".azurehdinsight.net",
                 CreatedDate = DateTime.UtcNow,
                 Location = "East US 2",
                 Error = null,
@@ -224,7 +224,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.RestSimulator
                 var cluster = Clusters.FirstOrDefault(c => c.Name == dnsName && c.Location == location);
                 if (cluster == null)
                     throw new HDInsightRestClientException(HttpStatusCode.NotFound, "Cluster Not Found");
-                if (dnsName == IntegrationTestBase.TestCredentials.DnsName)
+                if (dnsName == IntegrationTestBase.TestCredentials.WellKnownCluster.DnsName)
                 {
                     throw new InvalidOperationException("The well known DNS name can not be deleted.");
                 }

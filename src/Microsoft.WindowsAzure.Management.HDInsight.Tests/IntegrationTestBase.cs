@@ -45,6 +45,102 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests
             return testManager.GetCredentials(name);
         }
 
+        private static AzureTestCredentials CloneForEnvironment(AzureTestCredentials orig, int index)
+        {
+            AzureTestCredentials retval = new AzureTestCredentials();
+            retval.AzurePassword = orig.AzurePassword;
+            retval.AzureUserName = orig.AzureUserName;
+            retval.Certificate = orig.Certificate;
+            retval.CredentialsName = orig.CredentialsName;
+            retval.HadoopUserName = orig.HadoopUserName;
+            retval.InvalidCertificate = orig.InvalidCertificate;
+            retval.SubscriptionId = orig.SubscriptionId;
+            retval.WellKnownCluster = new KnownCluster()
+            {
+                Cluster = orig.WellKnownCluster.Cluster,
+                DnsName = orig.WellKnownCluster.DnsName
+            };
+            retval.Environments = new CreationDetails[0];
+            var env = retval.Environments[0] = new CreationDetails();
+            var origEnv = orig.Environments[index];
+            retval.CloudServiceName = orig.CloudServiceName;
+            env.DefaultStorageAccount = new StorageAccountCredentials()
+            {
+                Container = origEnv.DefaultStorageAccount.Container,
+                Key = origEnv.DefaultStorageAccount.Key,
+                Name = origEnv.DefaultStorageAccount.Name
+            };
+            retval.Endpoint = orig.Endpoint;
+            env.Location = origEnv.Location;
+            retval.Type = orig.Type;
+            List<StorageAccountCredentials> storageAccounts = new List<StorageAccountCredentials>();
+            foreach (var storageAccountCredentials in origEnv.AdditionalStorageAccounts)
+            {
+                var account = new StorageAccountCredentials()
+                {
+                    Container = storageAccountCredentials.Container,
+                    Key = storageAccountCredentials.Key,
+                    Name = storageAccountCredentials.Name
+                };
+                storageAccounts.Add(account);
+            }
+            env.AdditionalStorageAccounts = storageAccounts.ToArray();
+            List<MetastoreCredentials> stores = new List<MetastoreCredentials>();
+            foreach (var metastoreCredentials in origEnv.HiveStores)
+            {
+                var metaStore = new MetastoreCredentials()
+                {
+                    Database = metastoreCredentials.Database,
+                    Description = metastoreCredentials.Description,
+                    SqlServer = metastoreCredentials.SqlServer
+                };
+            }
+            env.HiveStores = stores.ToArray();
+            stores.Clear();
+            foreach (var metastoreCredentials in origEnv.OozieStores)
+            {
+                var metaStore = new MetastoreCredentials()
+                {
+                    Database = metastoreCredentials.Database,
+                    Description = metastoreCredentials.Description,
+                    SqlServer = metastoreCredentials.SqlServer
+                };
+            }
+            env.OozieStores = stores.ToArray();
+            return retval;
+        }
+
+        public static AzureTestCredentials GetCredentailsForLocation(string name, string location)
+        {
+            var namedCreds = GetCredentials(name);
+            for (int i = 0; i < namedCreds.Environments.Length; i++)
+            {
+                if (namedCreds.Environments[i].Location == location)
+                {
+                    return CloneForEnvironment(namedCreds, i);
+                }
+            }
+            return null;
+        }
+
+        public static AzureTestCredentials GetCredentailsForLocation(string location)
+        {
+            return GetCredentailsForLocation(TestCredentailsNames.Default, location);
+        }
+
+        public static AzureTestCredentials GetCredentailsForEnvironmentType(EnvironmentType type)
+        {
+            var environments = testManager.GetAllCredentails().ToArray();
+            for (int i = 0; i < environments.Length; i++)
+            {
+                if (environments[i].Type == type)
+                {
+                    return environments[i];
+                }
+            }
+            return null;
+        }
+
         protected static string ClusterPrefix;
         private static IConnectionCredentials validCredentials;
         private static IConnectionCredentials invalidSubscriptionId;
@@ -63,7 +159,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests
             this.ResetIndividualMocks();
         }
 
-        public static class TestRunNames
+        public static class TestCredentailsNames
         {
             public const string Default = "default";
         }
@@ -74,7 +170,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests
             var runManager = ServiceLocator.Instance.Locate<IIocServiceLocationTestRunManager>();
             runManager.MockingLevel = IocTestMockingLevel.ApplyTestRunMockingOnly;
             var factory = ServiceLocator.Instance.Locate<IClusterProvisioningClientFactory>();
-            var creds = GetCredentials(TestRunNames.Default);
+            var creds = GetCredentials(TestCredentailsNames.Default);
             var client = factory.Create(creds.SubscriptionId, new X509Certificate2(creds.Certificate));
             var clusters = client.ListClusters().ToList();
             var simClusters = clusters.Where(c => c.Name.StartsWith(ClusterPrefix, StringComparison.OrdinalIgnoreCase));
@@ -217,9 +313,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests
                 UserName = TestCredentials.AzureUserName,
                 Password = GetRandomValidPassword(),
                 Location = "East US 2",
-                DefaultStorageAccountName = TestCredentials.DefaultStorageAccount.Name,
-                DefaultStorageAccountKey = TestCredentials.DefaultStorageAccount.Key,
-                DefaultStorageContainer =  TestCredentials.DefaultStorageAccount.Container,
+                DefaultStorageAccountName = TestCredentials.Environments[0].DefaultStorageAccount.Name,
+                DefaultStorageAccountKey = TestCredentials.Environments[0].DefaultStorageAccount.Key,
+                DefaultStorageContainer = TestCredentials.Environments[0].DefaultStorageAccount.Container,
                 ClusterSizeInNodes = 3
             };
         }

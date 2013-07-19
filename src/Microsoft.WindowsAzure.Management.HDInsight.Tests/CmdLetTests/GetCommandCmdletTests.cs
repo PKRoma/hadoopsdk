@@ -42,7 +42,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.CmdLetTests
                                       .WithParameter(CmdletHardCodes.Certificate, creds.Certificate)
                                       .Invoke();
                 Assert.AreEqual(1, results.Results.Count);
-                Assert.AreEqual(TestCredentials.DnsName, ((AzureHDInsightCluster)results.Results.ElementAt(0).ImmediateBaseObject).Name);
+                Assert.AreEqual(TestCredentials.WellKnownCluster.DnsName, ((AzureHDInsightCluster)results.Results.ElementAt(0).ImmediateBaseObject).Name);
             }
         }
 
@@ -59,10 +59,10 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.CmdLetTests
                                       .AddCommand(CmdletHardCodes.GetAzureHDInsightCluster)
                                       .WithParameter(CmdletHardCodes.SubscriptionId, creds.SubscriptionId)
                                       .WithParameter(CmdletHardCodes.Certificate, creds.Certificate)
-                                      .WithParameter(CmdletHardCodes.Name, TestCredentials.DnsName)
+                                      .WithParameter(CmdletHardCodes.Name, TestCredentials.WellKnownCluster.DnsName)
                                       .Invoke();
                 Assert.AreEqual(1, results.Results.Count);
-                Assert.AreEqual(TestCredentials.DnsName, ((AzureHDInsightCluster)results.Results.ElementAt(0).ImmediateBaseObject).Name);
+                Assert.AreEqual(TestCredentials.WellKnownCluster.DnsName, ((AzureHDInsightCluster)results.Results.ElementAt(0).ImmediateBaseObject).Name);
             }
         }
     }
