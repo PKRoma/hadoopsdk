@@ -84,6 +84,8 @@ namespace Microsoft.Hadoop.Hive
 
                 expression = base.Translate(expression);
 
+                expression = RenameTopClauseColumns(expression);
+
                 // convert skip/take info into RowNumber pattern
                 expression = SkipToRowNumberRewriter.Rewrite(this.Language, expression);
 
@@ -113,6 +115,32 @@ namespace Microsoft.Hadoop.Hive
                 return AddFileGatherer.Gather(expression);
             }
 
+            public Expression RenameTopClauseColumns(Expression expression)
+            {
+                var select = ((ProjectionExpression)expression).Select;
+
+                var outputType = TypeHelper.GetElementType(expression.Type);
+                MappingEntity entity = this.Translator.Mapper.Mapping.GetEntity(outputType);
+                var newProjector = this.Translator.Mapper.GetEntityExpression(select, entity);
+                ProjectedColumns pc = ColumnProjector.ProjectColumns(this.Language, newProjector, null, select.Alias, select.Alias);
+                
+                var newColumns = new List<ColumnDeclaration>();
+                for (int i =0; i < pc.Columns.Count; i++)
+                {
+                    var col = select.Columns.FirstOrDefault(item => item.Name.Contains(pc.Columns[i].Name));
+                    if (col == null)
+                    {
+                        col = select.Columns[i];
+                    }
+                    newColumns.Add(new ColumnDeclaration(pc.Columns[i].Name, col.Expression, select.Columns[i].QueryType));
+                }
+
+                return new ProjectionExpression(
+                    new SelectExpression(select.Alias, newColumns, select.From, select.Where, select.OrderBy, select.GroupBy,
+                                         select.ClusterBy, select.IsDistinct, select.Map, select.Skip, select.Take, select.IsReverse),
+                    newProjector
+                    );
+            }
         }
 
     }

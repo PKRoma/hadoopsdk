@@ -27,16 +27,16 @@ namespace Test
     {
         static void Main(string[] args)
         {
-            var db = new MyHiveDatabase(new Uri("http://localhost:50111"), "UserName", "Password", "AzureStorageAccount", "AzureStorageKey");
+            var db = new MyHiveDatabase(new Uri("https://HDICluster.azurehdinsight.net:563"), "UserName", "ClusterPassword", "StorageAccount.blob.core.windows.net", "StorageKey");
 
             var q = from x in
                         (from a in db.Actors
-                         select new { a.ActorId, foo = a.AwardsCount})
+                         select new { a.ActorId, foo = a.AwardsCount })
                     group x by x.ActorId into g
                     select new { ActorId = g.Key, bar = g.Average(z => z.foo) };
 
+            q.ExecuteQuery().Wait();
             var results1 = q.ToList();
-
 
             var projectionQuery = from aw in db.Awards
                                   join t in db.Titles
@@ -52,6 +52,7 @@ namespace Test
                          group x by x.MovieId into g
                          select new { MovieId = g.Key, Count = g.Count() };
 
+            query2.ExecuteQuery().Wait();
             var results2 = query2.ToList();
 
             newTable.Drop();
@@ -69,6 +70,7 @@ namespace Test
                          group x by x.Name into g
                          select new { Name = g.Key, Sum = g.Sum(p => p.AwardsCount) };
 
+            query4.ExecuteQuery().Wait();
             var results4 = query4.ToList();
 
             newTable2.Drop();
