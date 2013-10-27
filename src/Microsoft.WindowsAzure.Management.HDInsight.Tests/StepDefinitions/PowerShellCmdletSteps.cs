@@ -1,4 +1,18 @@
-﻿using System;
+﻿// Copyright (c) Microsoft Corporation
+// All rights reserved.
+// 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at http://www.apache.org/licenses/LICENSE-2.0
+// 
+// THIS CODE IS PROVIDED *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
+// WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
+// MERCHANTABLITY OR NON-INFRINGEMENT.
+// 
+// See the Apache Version 2.0 License for specific language governing
+// permissions and limitations under the License.
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,7 +23,8 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.StepDefinitions
     using System.Management.Automation;
     using System.Reflection;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Microsoft.WindowsAzure.Management.Framework;
+    using Microsoft.WindowsAzure.Management.HDInsight;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
 
     [Binding]
     public class PowerShellCmdletSteps
@@ -55,7 +70,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.StepDefinitions
         private Dictionary<string, CmdletHouse> LocateCmdlets()
         {
             Dictionary<string, CmdletHouse> cmdlets;
-            if (!ScenarioContext.Current.TryGetValue(CmdTestingHardCodes.Cmdlets, out cmdlets))
+            if (!ScenarioContext.Current.TryGetValue(CmdTestingConstants.Cmdlets, out cmdlets))
             {
                 cmdlets = new Dictionary<string, CmdletHouse>();
                 foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
@@ -111,12 +126,12 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.StepDefinitions
                         }
                     }
                 }
-                ScenarioContext.Current.Add(CmdTestingHardCodes.Cmdlets, cmdlets);
+                ScenarioContext.Current.Add(CmdTestingConstants.Cmdlets, cmdlets);
             }
             return cmdlets;
         }
 
-        private static class CmdTestingHardCodes
+        private static class CmdTestingConstants
         {
             public const string Cmdlets = "Cmdlets";
             public const string TestingCmdlet = "TestingCmdlet";
@@ -139,7 +154,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.StepDefinitions
         {
             var cmdlets = this.LocateCmdlets();
             Assert.IsTrue(cmdlets.ContainsKey(cmdletName), "The requested Cmdlet '{0}' was not found", cmdletName);
-            ScenarioContext.Current[CmdTestingHardCodes.TestingCmdlet] = this.LocateCmdlets()[cmdletName];
+            ScenarioContext.Current[CmdTestingConstants.TestingCmdlet] = this.LocateCmdlets()[cmdletName];
         }
 
         [When(@"I am using the ""(.*)"" parameter set")]
@@ -274,9 +289,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.StepDefinitions
         public void ThenThereAreNoAdditionalParametersInTheParameterSet()
         {
             var parameterSet = this.GetTestingParameterSet();
-            Assert.IsTrue(ScenarioContext.Current.ContainsKey(CmdTestingHardCodes.TestedParameters),
+            Assert.IsTrue(ScenarioContext.Current.ContainsKey(CmdTestingConstants.TestedParameters),
                           "No parameters appear to have been tested.  Did you forget to test the existence of at least one parameter.");
-            var tested = ScenarioContext.Current[CmdTestingHardCodes.TestedParameters].As<IEnumerable<string>>();
+            var tested = ScenarioContext.Current[CmdTestingConstants.TestedParameters].As<IEnumerable<string>>();
 
             var q = (from l in parameterSet.Select(h => h.FullName)
                      join r in tested
@@ -295,9 +310,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.StepDefinitions
         public void ThenThereExistsNoFurtherParameterSets()
         {
             var cmdlet = this.GetTestingCmdlet();
-            Assert.IsTrue(ScenarioContext.Current.ContainsKey(CmdTestingHardCodes.TestedParameterSet),
+            Assert.IsTrue(ScenarioContext.Current.ContainsKey(CmdTestingConstants.TestedParameterSet),
                           "No parameter sets appear to have been tested.  Did you forget to test the existence of at least one parameter set.");
-            var tested = ScenarioContext.Current[CmdTestingHardCodes.TestedParameterSet].As<IEnumerable<string>>();
+            var tested = ScenarioContext.Current[CmdTestingConstants.TestedParameterSet].As<IEnumerable<string>>();
             
             var q = (from l in cmdlet.ParameterSets.Keys
                      join r in tested
@@ -314,9 +329,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.StepDefinitions
 
         private CmdletHouse GetTestingCmdlet()
         {
-            Assert.IsTrue(ScenarioContext.Current.ContainsKey(CmdTestingHardCodes.TestingCmdlet),
+            Assert.IsTrue(ScenarioContext.Current.ContainsKey(CmdTestingConstants.TestingCmdlet),
                           "There is no Cmdlet currently being tested.  Did you forget to specify that you were using a Cmdlet?");
-            var testingCmdlet = ScenarioContext.Current[CmdTestingHardCodes.TestingCmdlet].As<CmdletHouse>();
+            var testingCmdlet = ScenarioContext.Current[CmdTestingConstants.TestingCmdlet].As<CmdletHouse>();
             return testingCmdlet;
         }
 
@@ -331,13 +346,13 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.StepDefinitions
         private void SetTestingParameterSet(string parameterSetName)
         {
             var parameterSet = this.FindParameterSet(parameterSetName);
-            ScenarioContext.Current[CmdTestingHardCodes.TestingParameterSet] = parameterSet;
+            ScenarioContext.Current[CmdTestingConstants.TestingParameterSet] = parameterSet;
             ICollection<string> testedParameterSets;
-            if (!ScenarioContext.Current.TryGetValue(CmdTestingHardCodes.TestedParameterSet,
+            if (!ScenarioContext.Current.TryGetValue(CmdTestingConstants.TestedParameterSet,
                                                      out testedParameterSets))
             {
                 testedParameterSets = new List<string>();
-                ScenarioContext.Current.Add(CmdTestingHardCodes.TestedParameterSet,
+                ScenarioContext.Current.Add(CmdTestingConstants.TestedParameterSet,
                                             testedParameterSets);
             }
             testedParameterSets.Add(parameterSetName);
@@ -350,13 +365,13 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.StepDefinitions
             Assert.IsNotNull(testingParameter,
                              "The specified parameter '{0}' was not found.", 
                              parameterName);
-            ScenarioContext.Current[CmdTestingHardCodes.TestingParameter] = testingParameter;
+            ScenarioContext.Current[CmdTestingConstants.TestingParameter] = testingParameter;
             ICollection<string> testedParameters;
-            if (!ScenarioContext.Current.TryGetValue(CmdTestingHardCodes.TestedParameters,
+            if (!ScenarioContext.Current.TryGetValue(CmdTestingConstants.TestedParameters,
                                                      out testedParameters))
             {
                 testedParameters = new List<string>();
-                ScenarioContext.Current.Add(CmdTestingHardCodes.TestedParameters,
+                ScenarioContext.Current.Add(CmdTestingConstants.TestedParameters,
                                             testedParameters);
             }
             testedParameters.Add(parameterName);
@@ -364,9 +379,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.StepDefinitions
 
         private IEnumerable<ParameterHouse> GetTestingParameterSet()
         {
-            Assert.IsTrue(ScenarioContext.Current.ContainsKey(CmdTestingHardCodes.TestingParameterSet),
+            Assert.IsTrue(ScenarioContext.Current.ContainsKey(CmdTestingConstants.TestingParameterSet),
                           "There is no ParameterSet being tested.  Did you forget to specify that you were using a parameter set?");
-            var testingParameterSet = ScenarioContext.Current[CmdTestingHardCodes.TestingParameterSet].As<IEnumerable<ParameterHouse>>();
+            var testingParameterSet = ScenarioContext.Current[CmdTestingConstants.TestingParameterSet].As<IEnumerable<ParameterHouse>>();
             return testingParameterSet;
         }
             
@@ -378,9 +393,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.StepDefinitions
 
         private ParameterHouse GetTestingParameter()
         {
-            Assert.IsTrue(ScenarioContext.Current.ContainsKey(CmdTestingHardCodes.TestingParameter),
+            Assert.IsTrue(ScenarioContext.Current.ContainsKey(CmdTestingConstants.TestingParameter),
                           "There is no Parameter being tested.  Did you forget to specify that you were using a parameter?");
-            var parameter = ScenarioContext.Current[CmdTestingHardCodes.TestingParameter].As<ParameterHouse>();
+            var parameter = ScenarioContext.Current[CmdTestingConstants.TestingParameter].As<ParameterHouse>();
             return parameter;
         }
 

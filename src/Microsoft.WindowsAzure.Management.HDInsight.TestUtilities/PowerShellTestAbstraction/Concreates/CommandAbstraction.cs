@@ -12,7 +12,6 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
-
 namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.PowerShellTestAbstraction.Concreates
 {
     using System.Management.Automation.Runspaces;
@@ -22,7 +21,8 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.PowerShellTe
     {
         protected Command Command { get; private set; }
 
-        internal CommandAbstraction(Command command, Pipeline pipeline, Runspace runsapce) : base(pipeline, runsapce)
+        internal CommandAbstraction(Command command, Pipeline pipeline, Runspace runsapce)
+            : base(pipeline, runsapce)
         {
             this.Command = command;
         }

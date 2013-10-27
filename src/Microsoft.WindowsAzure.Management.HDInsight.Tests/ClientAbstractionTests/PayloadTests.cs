@@ -12,33 +12,33 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
-
 namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTests
 {
-    using System.Collections.Generic;
     using System;
+    using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.Globalization;
     using System.Linq;
+    using System.Xml.Linq;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using System.Collections.ObjectModel;
-    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data;
-    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Old;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning;
+    using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities;
+    using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.ServerDataObjects;
+    using Microsoft.WindowsAzure.Management.HDInsight.Tests.ServerDataObjects.Rdfe;
 
     [TestClass]
     public class PayloadTests : IntegrationTestBase
     {
         [TestInitialize]
-        public void Initialize()
+        public override void Initialize()
         {
-            this.ApplyFullMocking();
-            this.ResetIndividualMocks();
+            base.Initialize();
         }
 
         [TestCleanup]
-        public void TestCleanup()
+        public override void TestCleanup()
         {
-            this.ApplyFullMocking();
-            this.ResetIndividualMocks();
+            base.TestCleanup();
         }
 
         [TestMethod]
@@ -62,18 +62,55 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
                 new OutputItem { Key = "uri", Value = new Uri("https://some/long/uri/").AbsoluteUri },
             };
 
+            XElement resourceElement = ServerSerializer.SerializeResource(res);
+
             // Validates nonexisting properties
-            Assert.AreEqual(false, PayloadConverter.ExtractResourceOutputValue<bool>(res, "nonexist"));
-            Assert.AreEqual(DateTime.MinValue, PayloadConverter.ExtractResourceOutputValue<DateTime>(res, "nonexist"));
-            Assert.AreEqual(null, PayloadConverter.ExtractResourceOutputValue<string>(res, "nonexist"));
-            Assert.AreEqual(0, PayloadConverter.ExtractResourceOutputValue<int>(res, "nonexist"));
+            var payloadConverter = new PayloadConverter();
+            Assert.AreEqual(DateTime.MinValue, payloadConverter.ExtractClusterPropertyDateTimeValue(resourceElement, Enumerable.Empty<KeyValuePair<string, string>>(), "nonexist"));
+            Assert.AreEqual(null, payloadConverter.ExtractResourceOutputStringValue(resourceElement, "nonexist"));
+            Assert.AreEqual(0, payloadConverter.ExtractClusterPropertyIntValue(resourceElement, Enumerable.Empty<KeyValuePair<string, string>>(), "nonexist"));
 
             // Validates existing properties
-            Assert.AreEqual(true, PayloadConverter.ExtractResourceOutputValue<bool>(res, "boolean"));
-            Assert.AreEqual(time1, PayloadConverter.ExtractResourceOutputValue<DateTime>(res, "time1"));
-            Assert.AreEqual(time2, PayloadConverter.ExtractResourceOutputValue<DateTime>(res, "time2"));
-            Assert.AreEqual("value", PayloadConverter.ExtractResourceOutputValue<string>(res, "string"));
-            Assert.AreEqual(7, PayloadConverter.ExtractResourceOutputValue<int>(res, "number"));
+            Assert.AreEqual(time1, payloadConverter.ExtractClusterPropertyDateTimeValue(resourceElement, Enumerable.Empty<KeyValuePair<string, string>>(), "time1"));
+            Assert.AreEqual(time2, payloadConverter.ExtractClusterPropertyDateTimeValue(resourceElement, Enumerable.Empty<KeyValuePair<string, string>>(), "time2"));
+            Assert.AreEqual("value", payloadConverter.ExtractResourceOutputStringValue(resourceElement, "string"));
+            Assert.AreEqual(7, payloadConverter.ExtractClusterPropertyIntValue(resourceElement, Enumerable.Empty<KeyValuePair<string, string>>(), "number"));
+        }
+
+        [TestMethod]
+        [TestCategory("Integration")]
+        [TestCategory("CheckIn")]
+        [TestCategory("Payload")]
+        public void InternalValidation_PayloadConverter_ExtractIntrinsicSettingsValue()
+        {
+            // During serialization\deserialization it loses ms precission. Therefore using ms-less times 
+            DateTime time1 = TruncateMiliseconds(DateTime.UtcNow), time2 = TruncateMiliseconds(DateTime.Now);
+
+            // Creates a response
+            var res = new Resource();
+            res.OutputItems = new OutputItemList();
+            var intrinsicSettings = new List<KeyValuePair<string, string>>()
+            {
+                new KeyValuePair<string,string>("boolean", "true"),
+                new KeyValuePair<string,string>("time1", time1.ToString(CultureInfo.InvariantCulture)),
+                new KeyValuePair<string,string>("time2", time2.ToString(CultureInfo.InvariantCulture)),
+                new KeyValuePair<string,string>("string", "value"),
+                new KeyValuePair<string,string>("number", "7")
+            };
+
+            XElement resourceElement = ServerSerializer.SerializeResource(res, intrinsicSettings);
+
+            // Validates nonexisting properties
+            var payloadConverter = new PayloadConverter();
+            Assert.AreEqual(DateTime.MinValue, payloadConverter.ExtractClusterPropertyDateTimeValue(resourceElement, intrinsicSettings, "nonexist"));
+            Assert.AreEqual(null, payloadConverter.GetClusterProperty(resourceElement, intrinsicSettings, "nonexist"));
+            Assert.AreEqual(0, payloadConverter.ExtractClusterPropertyIntValue(resourceElement, intrinsicSettings, "nonexist"));
+
+            // Validates existing properties
+            Assert.AreEqual(time1, payloadConverter.ExtractClusterPropertyDateTimeValue(resourceElement, intrinsicSettings, "time1"));
+            Assert.AreEqual(time2, payloadConverter.ExtractClusterPropertyDateTimeValue(resourceElement, intrinsicSettings, "time2"));
+            Assert.AreEqual("value", payloadConverter.GetClusterProperty(resourceElement, intrinsicSettings, "string"));
+            Assert.AreEqual(7, payloadConverter.ExtractClusterPropertyIntValue(resourceElement, intrinsicSettings, "number"));
         }
 
         private static DateTime TruncateMiliseconds(DateTime time)
@@ -87,66 +124,98 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         [TestCategory("Payload")]
         public void InternalValidation_PayloadConverter_SerializationListContainersResult()
         {
+            var storageAccount = new WabStorageAccountConfiguration(Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString());
             // Creates two random containers
-            var container1 = new HDInsightCluster(base.GetRandomClusterName(), "Running")
+            var container1 = new ClusterDetails(base.GetRandomClusterName(), "Running")
             {
                 CreatedDate = DateTime.Now,
                 ConnectionUrl = @"https://some/long/uri/",
-                UserName = "someuser",
+                HttpUserName = "someuser",
                 Location = "East US",
                 ClusterSizeInNodes = 20,
+                Version = IntegrationTestBase.TestCredentials.WellKnownCluster.Version
             };
-            var container2 = new HDInsightCluster(base.GetRandomClusterName(), "ClusterStorageProvisioned")
+            container1.DefaultStorageAccount = storageAccount;
+            container1.AdditionalStorageAccounts = new List<WabStorageAccountConfiguration>() 
+            { 
+                new WabStorageAccountConfiguration(Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString()),
+                new WabStorageAccountConfiguration(Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString()) 
+            };
+            var container2 = new ClusterDetails(base.GetRandomClusterName(), "ClusterStorageProvisioned")
             {
                 CreatedDate = DateTime.Now,
                 ConnectionUrl = @"https://some/long/uri/",
-                UserName = "someuser2",
+                HttpUserName = "someuser2",
                 Location = "West US",
                 ClusterSizeInNodes = 10,
-                Error = new ClusterErrorStatus(10, "error", "create")
+                Error = new ClusterErrorStatus(10, "error", "create"),
+                Version = IntegrationTestBase.TestCredentials.WellKnownCluster.Version
             };
-            var originalContainers = new Collection<HDInsightCluster> { container1, container2 };
+
+            var originalContainers = new Collection<ClusterDetails> { container1, container2 };
 
             // Roundtrip serialize\deserialize
-            var payload = PayloadConverter.SerializeListContainersResult(originalContainers, "namespace");
-            var finalContainers = PayloadConverter.DeserializeListContainersResult(payload, "namespace");
+            Guid subscriptionId = new Guid();
+            var payload = ServerSerializer.SerializeListContainersResult(originalContainers, "namespace");
+            var finalContainers = new PayloadConverter().DeserializeListContainersResult(payload, "namespace", subscriptionId);
 
             // Compares the lists
             Assert.AreEqual(originalContainers.Count, finalContainers.Count);
-            Assert.IsTrue(originalContainers.All(c1 => finalContainers.Count(c2 => Equals(c1, c2)) == 1));
+            foreach (var expectedCluster in originalContainers)
+            {
+                var deserializedCluster = finalContainers.FirstOrDefault(cluster => cluster.Name == expectedCluster.Name);
+                Assert.IsNotNull(deserializedCluster);
+                Assert.AreEqual(deserializedCluster.SubscriptionId, subscriptionId);
+                Assert.IsTrue(Equals(expectedCluster, deserializedCluster), "Failed to deserialize cluster pigJobCreateParameters {0}", expectedCluster.Name);
+            }
         }
 
-        private static bool Equals(HDInsightCluster cluster1, HDInsightCluster cluster2)
+        private static bool Equals(ClusterDetails expectedCluster, ClusterDetails deserializedCluster)
         {
-            if (cluster1 == null && cluster2 == null)
+            if (expectedCluster == null && deserializedCluster == null)
             {
                 return true;
             }
-            if (cluster1 == null || cluster2 == null)
+            if (expectedCluster == null || deserializedCluster == null)
             {
                 return false;
             }
 
             var comparisonTuples = new List<Tuple<object, object>>
             {
-                new Tuple<object, object>(cluster1.Name, cluster2.Name),
-                new Tuple<object, object>(cluster1.State, cluster2.State),
-                new Tuple<object, object>(cluster1.StateString, cluster2.StateString),
-                new Tuple<object, object>(TruncateMiliseconds(cluster1.CreatedDate), TruncateMiliseconds(cluster2.CreatedDate)),
-                new Tuple<object, object>(cluster1.Location, cluster2.Location),
-                new Tuple<object, object>(cluster1.UserName, cluster2.UserName),
-                new Tuple<object, object>(cluster1.ConnectionUrl, cluster2.ConnectionUrl),
-                new Tuple<object, object>(cluster1.ClusterSizeInNodes, cluster2.ClusterSizeInNodes),
+                new Tuple<object, object>(expectedCluster.Name, deserializedCluster.Name),
+                new Tuple<object, object>(expectedCluster.State, deserializedCluster.State),
+                new Tuple<object, object>(expectedCluster.StateString, deserializedCluster.StateString),
+                new Tuple<object, object>(TruncateMiliseconds(expectedCluster.CreatedDate), TruncateMiliseconds(deserializedCluster.CreatedDate)),
+                new Tuple<object, object>(expectedCluster.Location, deserializedCluster.Location),
+                new Tuple<object, object>(expectedCluster.HttpUserName, deserializedCluster.HttpUserName),
+                new Tuple<object, object>(expectedCluster.ConnectionUrl, deserializedCluster.ConnectionUrl),
+                new Tuple<object, object>(expectedCluster.ClusterSizeInNodes, deserializedCluster.ClusterSizeInNodes),
             };
-            if (cluster1.Error == null && cluster2.Error != null)
+            if (expectedCluster.Error == null && deserializedCluster.Error != null)
                 return false;
-            if (cluster1.Error != null && cluster2.Error == null)
+            if (expectedCluster.Error != null && deserializedCluster.Error == null)
                 return false;
-            if (cluster1.Error != null && cluster2.Error != null)
+            if (expectedCluster.Error != null && deserializedCluster.Error != null)
             {
-                comparisonTuples.Add(new Tuple<object, object>(cluster1.Error.HttpCode, cluster2.Error.HttpCode));
-                comparisonTuples.Add(new Tuple<object, object>(cluster1.Error.Message, cluster2.Error.Message));
-                comparisonTuples.Add(new Tuple<object, object>(cluster1.Error.OperationType, cluster2.Error.OperationType));
+                comparisonTuples.Add(new Tuple<object, object>(expectedCluster.Error.HttpCode, deserializedCluster.Error.HttpCode));
+                comparisonTuples.Add(new Tuple<object, object>(expectedCluster.Error.Message, deserializedCluster.Error.Message));
+                comparisonTuples.Add(new Tuple<object, object>(expectedCluster.Error.OperationType, deserializedCluster.Error.OperationType));
+            }
+
+            if (expectedCluster.DefaultStorageAccount != null)
+            {
+                Assert.IsNotNull(deserializedCluster.DefaultStorageAccount, "DefaultStorageAccount");
+                Assert.AreEqual(expectedCluster.DefaultStorageAccount.Key, deserializedCluster.DefaultStorageAccount.Key, "Key");
+                Assert.AreEqual(expectedCluster.DefaultStorageAccount.Container, deserializedCluster.DefaultStorageAccount.Container, "Container");
+            }
+
+            foreach (var storageAccount in expectedCluster.AdditionalStorageAccounts)
+            {
+                var deserializedStorageAccount = deserializedCluster.AdditionalStorageAccounts.FirstOrDefault(acc => acc.Name == storageAccount.Name);
+                Assert.IsNotNull(deserializedStorageAccount, storageAccount.Name);
+                Assert.AreEqual(storageAccount.Key, deserializedStorageAccount.Key, "Key");
+                Assert.AreEqual(storageAccount.Container, deserializedStorageAccount.Container, "Container");
             }
 
             return CompareTuples(comparisonTuples);
@@ -158,7 +227,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         [TestCategory("Payload")]
         public void InternalValidation_PayloadConverter_SerializationCreateRequest()
         {
-            var cluster1 = new HDInsightClusterCreationDetails
+            var cluster1 = new ClusterCreateParameters
             {
                 UserName = Guid.NewGuid().ToString("N"),
                 Password = Guid.NewGuid().ToString("N"),
@@ -167,16 +236,45 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
                 DefaultStorageContainer = Guid.NewGuid().ToString("N"),
                 Name = base.GetRandomClusterName(),
                 Location = "East US",
+                Version = IntegrationTestBase.TestCredentials.WellKnownCluster.Version,
                 ClusterSizeInNodes = new Random().Next()
             };
-            cluster1.AdditionalStorageAccounts.Add(new StorageAccountConfiguration(Guid.NewGuid().ToString("N"),
+            cluster1.AdditionalStorageAccounts.Add(new WabStorageAccountConfiguration(Guid.NewGuid().ToString("N"),
                                                                  Guid.NewGuid().ToString("N")));
-            cluster1.AdditionalStorageAccounts.Add(new StorageAccountConfiguration(Guid.NewGuid().ToString("N"),
+            cluster1.AdditionalStorageAccounts.Add(new WabStorageAccountConfiguration(Guid.NewGuid().ToString("N"),
                                                                  Guid.NewGuid().ToString("N")));
 
-            string payload = PayloadConverter.SerializeClusterCreateRequest(cluster1, Guid.NewGuid());
-            var cluster2 = PayloadConverter.DeserializeClusterCreateRequest(payload);
+            string payload = new PayloadConverter().SerializeClusterCreateRequest(cluster1);
+            var cluster2 = ServerSerializer.DeserializeClusterCreateRequest(payload);
             Assert.IsTrue(Equals(cluster1, cluster2));
+        }
+
+        [TestMethod]
+        [TestCategory("Integration")]
+        [TestCategory("CheckIn")]
+        [TestCategory("Payload")]
+        public void InternalValidation_PayloadConverter_SerializationCreateRequest_MayContracts()
+        {
+            var cluster1 = new ClusterCreateParameters
+            {
+                Name = "bcarlson",
+                ClusterSizeInNodes = 1,
+                UserName = "bcarlson",
+                Version = "default",
+                Password = "SuperPass1!",
+                Location = "East US"
+            };
+
+            cluster1.DefaultStorageAccountName = "hdicurrenteastus.blob.core.windows.net";
+            cluster1.DefaultStorageContainer = "newcontainer";
+            cluster1.DefaultStorageAccountKey = "jKe7cqoU0a9OmDFlwi3DHZLf7JoKwGOU2pV1iZdBKifxwQuDOKwZFyXMJrPSLtGgDV9b7pVKSGz6lbBWcfX2lA==";
+
+            var metaStore = new Metastore("lbl44y45cd.bigbean.windowsazure.mscds.com", "newmaytestdb", "bcarlson", "SuperPass1!");
+            cluster1.HiveMetastore = cluster1.OozieMetastore = metaStore;
+
+            string payload = new PayloadConverter().SerializeClusterCreateRequest(cluster1);
+            var resource = ServerSerializer.DeserializeClusterCreateRequestIntoResource(payload);
+            Assert.AreEqual(resource.SchemaVersion, "2.0");
         }
 
         [TestMethod]
@@ -185,10 +283,11 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         [TestCategory("Payload")]
         public void InternalValidation_PayloadConverter_SerializationCreateRequestWithMetastore()
         {
-            var cluster1 = new HDInsightClusterCreationDetails
+            var expected = new ClusterCreateParameters
             {
                 UserName = Guid.NewGuid().ToString("N"),
                 Password = Guid.NewGuid().ToString("N"),
+                Version = IntegrationTestBase.TestCredentials.WellKnownCluster.Version,
                 DefaultStorageAccountKey = Guid.NewGuid().ToString("N"),
                 DefaultStorageAccountName = Guid.NewGuid().ToString("N"),
                 DefaultStorageContainer = Guid.NewGuid().ToString("N"),
@@ -196,97 +295,374 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
                 Location = "East US",
                 ClusterSizeInNodes = new Random().Next()
             };
-            cluster1.AdditionalStorageAccounts.Add(new StorageAccountConfiguration(Guid.NewGuid().ToString("N"),
+            expected.AdditionalStorageAccounts.Add(new WabStorageAccountConfiguration(Guid.NewGuid().ToString("N"),
                                                                  Guid.NewGuid().ToString("N")));
-            cluster1.AdditionalStorageAccounts.Add(new StorageAccountConfiguration(Guid.NewGuid().ToString("N"),
+            expected.AdditionalStorageAccounts.Add(new WabStorageAccountConfiguration(Guid.NewGuid().ToString("N"),
                                                                  Guid.NewGuid().ToString("N")));
-            cluster1.OozieMetastore = new HDInsightMetastore(Guid.NewGuid().ToString("N"),
+            expected.OozieMetastore = new Metastore(Guid.NewGuid().ToString("N"),
                                                              Guid.NewGuid().ToString("N"),
                                                              Guid.NewGuid().ToString("N"),
                                                              Guid.NewGuid().ToString("N"));
-            cluster1.HiveMetastore = new HDInsightMetastore(Guid.NewGuid().ToString("N"),
+            expected.HiveMetastore = new Metastore(Guid.NewGuid().ToString("N"),
                                                             Guid.NewGuid().ToString("N"),
                                                             Guid.NewGuid().ToString("N"),
                                                             Guid.NewGuid().ToString("N"));
 
-            string payload = PayloadConverter.SerializeClusterCreateRequest(cluster1, Guid.NewGuid());
-            var cluster2 = PayloadConverter.DeserializeClusterCreateRequest(payload);
-            Assert.IsTrue(Equals(cluster1, cluster2));
+            string payload = new PayloadConverter().SerializeClusterCreateRequest(expected);
+            var actual = ServerSerializer.DeserializeClusterCreateRequest(payload);
+            Assert.IsTrue(Equals(expected, actual));
         }
 
-        private static bool Equals(HDInsightClusterCreationDetails req1, HDInsightClusterCreationDetails req2)
+        [TestMethod]
+        [TestCategory("Integration")]
+        [TestCategory("CheckIn")]
+        [TestCategory("Payload")]
+        public void InternalValidation_PayloadConverter_ConvertStringToVersion_Case1()
         {
-            if (req1 == null && req2 == null)
+            Version version = new Version(1, 5);
+            Assert.AreEqual(version, new PayloadConverter().ConvertStringToVersion("1.5"));
+        }
+
+        [TestMethod]
+        [TestCategory("Integration")]
+        [TestCategory("CheckIn")]
+        [TestCategory("Payload")]
+        public void InternalValidation_PayloadConverter_ConvertStringToVersion_Case2()
+        {
+            Version version = new Version(1, 6, 0, 0);
+            Assert.AreEqual(version, new PayloadConverter().ConvertStringToVersion("1.6.0.0.LargeSKU"));
+        }
+
+        [TestMethod]
+        [TestCategory("Integration")]
+        [TestCategory("CheckIn")]
+        [TestCategory("Payload")]
+        public void InternalValidation_PayloadConverter_ConvertStringToVersion_Case3()
+        {
+            Version version = new Version();
+            Assert.AreEqual(version, new PayloadConverter().ConvertStringToVersion(""));
+        }
+
+        [TestMethod]
+        [TestCategory("Integration")]
+        [TestCategory("CheckIn")]
+        [TestCategory("Payload")]
+        public void InternalValidation_PayloadConverter_SerializationCreateRequestWithCoreConfiguration()
+        {
+            var expected = new ClusterCreateParameters
+            {
+                UserName = Guid.NewGuid().ToString("N"),
+                Password = Guid.NewGuid().ToString("N"),
+                Version = IntegrationTestBase.TestCredentials.WellKnownCluster.Version,
+                DefaultStorageAccountKey = Guid.NewGuid().ToString("N"),
+                DefaultStorageAccountName = Guid.NewGuid().ToString("N"),
+                DefaultStorageContainer = Guid.NewGuid().ToString("N"),
+                Name = base.GetRandomClusterName(),
+                Location = "East US",
+                ClusterSizeInNodes = new Random().Next()
+            };
+
+            expected.CoreConfiguration.Add(new KeyValuePair<string, string>("my setting 1", "my value 1"));
+            expected.CoreConfiguration.Add(new KeyValuePair<string, string>("my setting 2", "my value 2"));
+
+            string payload = new PayloadConverter().SerializeClusterCreateRequest(expected);
+            var actual = ServerSerializer.DeserializeClusterCreateRequest(payload);
+            Assert.IsTrue(Equals(expected, actual));
+        }
+
+        [TestMethod]
+        [TestCategory("Integration")]
+        [TestCategory("CheckIn")]
+        [TestCategory("Payload")]
+        public void InternalValidation_PayloadConverter_SerializationCreateRequestWithOozieConfiguration()
+        {
+            var expected = new ClusterCreateParameters
+            {
+                UserName = Guid.NewGuid().ToString("N"),
+                Password = Guid.NewGuid().ToString("N"),
+                Version = IntegrationTestBase.TestCredentials.WellKnownCluster.Version,
+                DefaultStorageAccountKey = Guid.NewGuid().ToString("N"),
+                DefaultStorageAccountName = Guid.NewGuid().ToString("N"),
+                DefaultStorageContainer = Guid.NewGuid().ToString("N"),
+                Name = base.GetRandomClusterName(),
+                Location = "East US",
+                ClusterSizeInNodes = new Random().Next()
+            };
+
+            expected.OozieConfiguration.ConfigurationCollection.Add(new KeyValuePair<string, string>("my setting 1", "my value 1"));
+            expected.OozieConfiguration.ConfigurationCollection.Add(new KeyValuePair<string, string>("my setting 2", "my value 2"));
+
+            string payload = new PayloadConverter().SerializeClusterCreateRequest(expected);
+            var actual = ServerSerializer.DeserializeClusterCreateRequest(payload);
+            Assert.IsTrue(Equals(expected, actual));
+        }
+
+        [TestMethod]
+        [TestCategory("Integration")]
+        [TestCategory("CheckIn")]
+        [TestCategory("Payload")]
+        public void InternalValidation_PayloadConverter_SerializationCreateRequestWithOozieLibraries()
+        {
+            var expected = new ClusterCreateParameters
+            {
+                UserName = Guid.NewGuid().ToString("N"),
+                Password = Guid.NewGuid().ToString("N"),
+                Version = IntegrationTestBase.TestCredentials.WellKnownCluster.Version,
+                DefaultStorageAccountKey = Guid.NewGuid().ToString("N"),
+                DefaultStorageAccountName = Guid.NewGuid().ToString("N"),
+                DefaultStorageContainer = Guid.NewGuid().ToString("N"),
+                Name = base.GetRandomClusterName(),
+                Location = "East US",
+                ClusterSizeInNodes = new Random().Next()
+            };
+
+            expected.OozieConfiguration.AdditionalSharedLibraries = new WabStorageAccountConfiguration(
+                Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString());
+            expected.OozieConfiguration.AdditionalActionExecutorLibraries = new WabStorageAccountConfiguration(
+                Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString());
+
+            expected.OozieConfiguration.ConfigurationCollection.Add(new KeyValuePair<string, string>("my setting 1", "my value 1"));
+            expected.OozieConfiguration.ConfigurationCollection.Add(new KeyValuePair<string, string>("my setting 2", "my value 2"));
+
+            string payload = new PayloadConverter().SerializeClusterCreateRequest(expected);
+            var actual = ServerSerializer.DeserializeClusterCreateRequest(payload);
+            Assert.IsTrue(Equals(expected, actual));
+        }
+
+        [TestMethod]
+        [TestCategory("Integration")]
+        [TestCategory("CheckIn")]
+        [TestCategory("Payload")]
+        public void InternalValidation_PayloadConverter_SerializationCreateRequestWithHiveConfiguration()
+        {
+            var expected = new ClusterCreateParameters
+            {
+                UserName = Guid.NewGuid().ToString("N"),
+                Password = Guid.NewGuid().ToString("N"),
+                Version = IntegrationTestBase.TestCredentials.WellKnownCluster.Version,
+                DefaultStorageAccountKey = Guid.NewGuid().ToString("N"),
+                DefaultStorageAccountName = Guid.NewGuid().ToString("N"),
+                DefaultStorageContainer = Guid.NewGuid().ToString("N"),
+                Name = base.GetRandomClusterName(),
+                Location = "East US",
+                ClusterSizeInNodes = new Random().Next()
+            };
+
+            expected.HiveConfiguration.ConfigurationCollection.Add(new KeyValuePair<string, string>("my setting 1", "my value 1"));
+            expected.HiveConfiguration.ConfigurationCollection.Add(new KeyValuePair<string, string>("my setting 2", "my value 2"));
+
+            string payload = new PayloadConverter().SerializeClusterCreateRequest(expected);
+            var actual = ServerSerializer.DeserializeClusterCreateRequest(payload);
+            Assert.IsTrue(Equals(expected, actual));
+        }
+        [TestMethod]
+        [TestCategory("Integration")]
+        [TestCategory("CheckIn")]
+        [TestCategory("Payload")]
+        public void InternalValidation_PayloadConverter_SerializationCreateRequestWithHiveConfiguration_Resources()
+        {
+            var expected = new ClusterCreateParameters
+            {
+                UserName = Guid.NewGuid().ToString("N"),
+                Password = Guid.NewGuid().ToString("N"),
+                Version = IntegrationTestBase.TestCredentials.WellKnownCluster.Version,
+                DefaultStorageAccountKey = Guid.NewGuid().ToString("N"),
+                DefaultStorageAccountName = Guid.NewGuid().ToString("N"),
+                DefaultStorageContainer = Guid.NewGuid().ToString("N"),
+                Name = base.GetRandomClusterName(),
+                Location = "East US",
+                ClusterSizeInNodes = new Random().Next()
+            };
+
+            expected.HiveConfiguration.ConfigurationCollection.Add(new KeyValuePair<string, string>("my setting 1", "my value 1"));
+            expected.HiveConfiguration.ConfigurationCollection.Add(new KeyValuePair<string, string>("my setting 2", "my value 2"));
+            expected.HiveConfiguration.AdditionalLibraries = new WabStorageAccountConfiguration(
+                Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString());
+
+            string payload = new PayloadConverter().SerializeClusterCreateRequest(expected);
+            var actual = ServerSerializer.DeserializeClusterCreateRequest(payload);
+            Assert.IsTrue(Equals(expected, actual));
+        }
+
+        [TestMethod]
+        [TestCategory("Integration")]
+        [TestCategory("CheckIn")]
+        [TestCategory("Payload")]
+        public void InternalValidation_PayloadConverter_SerializationCreateRequestWithMapReduceConfiguration()
+        {
+            var expected = new ClusterCreateParameters
+            {
+                UserName = Guid.NewGuid().ToString("N"),
+                Password = Guid.NewGuid().ToString("N"),
+                Version = IntegrationTestBase.TestCredentials.WellKnownCluster.Version,
+                DefaultStorageAccountKey = Guid.NewGuid().ToString("N"),
+                DefaultStorageAccountName = Guid.NewGuid().ToString("N"),
+                DefaultStorageContainer = Guid.NewGuid().ToString("N"),
+                Name = base.GetRandomClusterName(),
+                Location = "East US",
+                ClusterSizeInNodes = new Random().Next()
+            };
+
+            expected.MapReduceConfiguration.ConfigurationCollection.Add(new KeyValuePair<string, string>("my setting 1", "my value 1"));
+            expected.MapReduceConfiguration.ConfigurationCollection.Add(new KeyValuePair<string, string>("my setting 2", "my value 2"));
+
+            string payload = new PayloadConverter().SerializeClusterCreateRequest(expected);
+            var actual = ServerSerializer.DeserializeClusterCreateRequest(payload);
+            Assert.IsTrue(Equals(expected, actual));
+        }
+
+        [TestMethod]
+        [TestCategory("Integration")]
+        [TestCategory("CheckIn")]
+        [TestCategory("Payload")]
+        public void InternalValidation_PayloadConverter_SerializationCreateRequestWithHdfsConfiguration()
+        {
+            var expected = new ClusterCreateParameters
+            {
+                UserName = Guid.NewGuid().ToString("N"),
+                Password = Guid.NewGuid().ToString("N"),
+                Version = IntegrationTestBase.TestCredentials.WellKnownCluster.Version,
+                DefaultStorageAccountKey = Guid.NewGuid().ToString("N"),
+                DefaultStorageAccountName = Guid.NewGuid().ToString("N"),
+                DefaultStorageContainer = Guid.NewGuid().ToString("N"),
+                Name = base.GetRandomClusterName(),
+                Location = "East US",
+                ClusterSizeInNodes = new Random().Next()
+            };
+
+            expected.HdfsConfiguration.Add(new KeyValuePair<string, string>("my setting 1", "my value 1"));
+            expected.HdfsConfiguration.Add(new KeyValuePair<string, string>("my setting 2", "my value 2"));
+
+            string payload = new PayloadConverter().SerializeClusterCreateRequest(expected);
+            var actual = ServerSerializer.DeserializeClusterCreateRequest(payload);
+            Assert.IsTrue(Equals(expected, actual));
+        }
+
+        private static bool Equals(ClusterCreateParameters expected, ClusterCreateParameters actual)
+        {
+            if (expected == null && actual == null)
             {
                 return true;
             }
-            if (req1 == null || req2 == null)
+            if (expected == null || actual == null)
             {
                 return false;
             }
 
             // Compares the properties and fails if there is a mismatch
+            int headNodeCount = 1;
             var comparisonTuples = new List<Tuple<object, object>>
             {
-                new Tuple<object, object>(req1.UserName, req2.UserName),
-                new Tuple<object, object>(req1.Password, req2.Password),
-                new Tuple<object, object>(req1.DefaultStorageAccountKey, req2.DefaultStorageAccountKey),
-                new Tuple<object, object>(req1.DefaultStorageAccountName, req2.DefaultStorageAccountName),
-                new Tuple<object, object>(req1.DefaultStorageContainer, req2.DefaultStorageContainer),
-                new Tuple<object, object>(req1.Name, req2.Name),
-                new Tuple<object, object>(req1.Location, req2.Location),
-                new Tuple<object, object>(req1.ClusterSizeInNodes, req2.ClusterSizeInNodes),
-                new Tuple<object, object>(req1.AdditionalStorageAccounts.Count, req2.AdditionalStorageAccounts.Count),
+                new Tuple<object, object>(expected.UserName, actual.UserName),
+                new Tuple<object, object>(expected.Password, actual.Password),
+                new Tuple<object, object>(expected.Version, actual.Version),
+                new Tuple<object, object>(expected.DefaultStorageAccountKey, actual.DefaultStorageAccountKey),
+                new Tuple<object, object>(expected.DefaultStorageAccountName, actual.DefaultStorageAccountName),
+                new Tuple<object, object>(expected.DefaultStorageContainer, actual.DefaultStorageContainer),
+                new Tuple<object, object>(expected.Name, actual.Name),
+                new Tuple<object, object>(expected.Location, actual.Location),
+                new Tuple<object, object>(expected.ClusterSizeInNodes + headNodeCount, actual.ClusterSizeInNodes ),
+                new Tuple<object, object>(expected.AdditionalStorageAccounts.Count, actual.AdditionalStorageAccounts.Count),
             };
-            if (req1.OozieMetastore != null)
+            if (expected.OozieMetastore != null)
             {
-                if (req2.OozieMetastore == null)
-                {
-                    return false;
-                }
-                comparisonTuples.Add(new Tuple<object, object>(req1.OozieMetastore.Server, req2.OozieMetastore.Server));
-                comparisonTuples.Add(new Tuple<object, object>(req1.OozieMetastore.Database, req2.OozieMetastore.Database));
-                comparisonTuples.Add(new Tuple<object, object>(req1.OozieMetastore.User, req2.OozieMetastore.User));
-                comparisonTuples.Add(new Tuple<object, object>(req1.OozieMetastore.Password, req2.OozieMetastore.Password));
+                Assert.IsNotNull(actual.OozieMetastore, "OozieMetaStore");
+
+                comparisonTuples.Add(new Tuple<object, object>(expected.OozieMetastore.Server, actual.OozieMetastore.Server));
+                comparisonTuples.Add(new Tuple<object, object>(expected.OozieMetastore.Database, actual.OozieMetastore.Database));
+                comparisonTuples.Add(new Tuple<object, object>(expected.OozieMetastore.User, actual.OozieMetastore.User));
+                comparisonTuples.Add(new Tuple<object, object>(expected.OozieMetastore.Password, actual.OozieMetastore.Password));
             }
-            if (req1.HiveMetastore != null)
+            if (expected.HiveMetastore != null)
             {
-                if (req2.HiveMetastore == null)
-                {
-                    return false;
-                }
-                comparisonTuples.Add(new Tuple<object, object>(req1.HiveMetastore.Server, req2.HiveMetastore.Server));
-                comparisonTuples.Add(new Tuple<object, object>(req1.HiveMetastore.Database, req2.HiveMetastore.Database));
-                comparisonTuples.Add(new Tuple<object, object>(req1.HiveMetastore.User, req2.HiveMetastore.User));
-                comparisonTuples.Add(new Tuple<object, object>(req1.HiveMetastore.Password, req2.HiveMetastore.Password));
+                Assert.IsNotNull(actual.HiveMetastore, "HiveMetastore");
+                comparisonTuples.Add(new Tuple<object, object>(expected.HiveMetastore.Server, actual.HiveMetastore.Server));
+                comparisonTuples.Add(new Tuple<object, object>(expected.HiveMetastore.Database, actual.HiveMetastore.Database));
+                comparisonTuples.Add(new Tuple<object, object>(expected.HiveMetastore.User, actual.HiveMetastore.User));
+                comparisonTuples.Add(new Tuple<object, object>(expected.HiveMetastore.Password, actual.HiveMetastore.Password));
             }
             if (!CompareTuples(comparisonTuples))
             {
                 return false;
             }
 
-            // Compares the AdditionalStorageAccounts and fails if there is a mismatch
-            if (req1.AdditionalStorageAccounts.Any(asv1 => req2.AdditionalStorageAccounts.Count(asv2 => asv1.Name == asv2.Name && asv1.Key == asv2.Key) != 1))
+            foreach (var storageAccount in expected.AdditionalStorageAccounts)
             {
-                return false;
+                var storageAccountUnderTest = actual.AdditionalStorageAccounts.FirstOrDefault(storage => storage.Name == storageAccount.Name);
+                Assert.IsNotNull(storageAccountUnderTest, "Storage account '{0}' was not found.", storageAccount.Name);
+                Assert.AreEqual(storageAccountUnderTest.Key, storageAccountUnderTest.Key);
             }
+
+            if (expected.OozieConfiguration.AdditionalSharedLibraries != null)
+            {
+                Assert.IsNotNull(actual.OozieConfiguration.AdditionalSharedLibraries);
+                Assert.AreEqual(actual.OozieConfiguration.AdditionalSharedLibraries.Container, actual.OozieConfiguration.AdditionalSharedLibraries.Container);
+                Assert.AreEqual(actual.OozieConfiguration.AdditionalSharedLibraries.Name, actual.OozieConfiguration.AdditionalSharedLibraries.Name);
+                Assert.AreEqual(actual.OozieConfiguration.AdditionalSharedLibraries.Key, actual.OozieConfiguration.AdditionalSharedLibraries.Key);
+            }
+
+            if (expected.OozieConfiguration.AdditionalActionExecutorLibraries != null)
+            {
+                Assert.IsNotNull(actual.OozieConfiguration.AdditionalActionExecutorLibraries);
+                Assert.AreEqual(actual.OozieConfiguration.AdditionalActionExecutorLibraries.Container, actual.OozieConfiguration.AdditionalActionExecutorLibraries.Container);
+                Assert.AreEqual(actual.OozieConfiguration.AdditionalActionExecutorLibraries.Name, actual.OozieConfiguration.AdditionalActionExecutorLibraries.Name);
+                Assert.AreEqual(actual.OozieConfiguration.AdditionalActionExecutorLibraries.Key, actual.OozieConfiguration.AdditionalActionExecutorLibraries.Key);
+            }
+
+            AssertConfiguration(expected.CoreConfiguration, actual.CoreConfiguration);
+            AssertConfiguration(expected.OozieConfiguration.ConfigurationCollection, actual.OozieConfiguration.ConfigurationCollection);
+            AssertConfiguration(expected.HiveConfiguration, actual.HiveConfiguration);
+            AssertConfiguration(expected.MapReduceConfiguration.ConfigurationCollection, actual.MapReduceConfiguration.ConfigurationCollection);
+            AssertConfiguration(expected.HdfsConfiguration, actual.HdfsConfiguration);
+
             return true;
+        }
+
+        private static void AssertConfiguration(HiveConfiguration expected, HiveConfiguration actual)
+        {
+            if (expected.AdditionalLibraries != null)
+            {
+                Assert.IsNotNull(actual.AdditionalLibraries);
+                Assert.AreEqual(expected.AdditionalLibraries.Container, actual.AdditionalLibraries.Container);
+                Assert.AreEqual(expected.AdditionalLibraries.Key, actual.AdditionalLibraries.Key);
+                Assert.AreEqual(expected.AdditionalLibraries.Name, actual.AdditionalLibraries.Name);
+            }
+
+            AssertConfiguration(expected.ConfigurationCollection, actual.ConfigurationCollection);
+        }
+
+        private static void AssertConfiguration(IEnumerable<KeyValuePair<string, string>> expected, ConfigValuesCollection actual)
+        {
+            foreach (var configProperty in expected)
+            {
+                var propertyUnderTest = actual.FirstOrDefault(storage => storage.Key == configProperty.Key);
+                Assert.IsNotNull(propertyUnderTest, "Oozie Configuration '{0}' was not found.", configProperty.Key);
+                Assert.AreEqual(configProperty.Value, propertyUnderTest.Value);
+            }
         }
 
         private static bool CompareTuples(IEnumerable<Tuple<object, object>> tuples)
         {
             if (tuples.Any(tuple => tuple.Item1 == null && tuple.Item2 != null))
             {
-                return false;
+                Assert.AreEqual(
+                    tuples.First(tuple => tuple.Item1 == null && tuple.Item2 != null).Item1,
+                    tuples.First(tuple => tuple.Item1 == null && tuple.Item2 != null).Item2);
             }
             if (tuples.Any(tuple => tuple.Item1 != null && tuple.Item2 == null))
             {
-                return false;
+                Assert.AreEqual(
+                    tuples.First(tuple => tuple.Item1 != null && tuple.Item2 == null).Item1,
+                    tuples.First(tuple => tuple.Item1 != null && tuple.Item2 == null).Item2);
             }
 
             tuples = tuples.Where(tuple => tuple.Item1 != null);
-            return tuples.All(tuple => tuple.Item1.Equals(tuple.Item2));
-        }
+            foreach (var nonNullTuple in tuples)
+            {
+                Assert.AreEqual(nonNullTuple.Item1, nonNullTuple.Item2);
+            }
 
+            return true;
+        }
     }
 }

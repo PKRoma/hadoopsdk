@@ -12,16 +12,16 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
-
 namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission.RestClient
 {
-    using Microsoft.WindowsAzure.Management.HDInsight.ConnectionContext;
+    using System.Threading;
+    using Microsoft.WindowsAzure.Management.HDInsight;
 
     internal class HDInsightJobSubmissionRestClientFactory : IHDInsightJobSubmissionRestClientFactory
     {
-        public IHDInsightJobSubmissionRestClient Create(IConnectionCredentials credentials)
+        public IHDInsightJobSubmissionRestClient Create(IHDInsightCertificateCredential credentials, IAbstractionContext context)
         {
-            return new HDInsightJobSubmissionRestClient(credentials);
+            return new HDInsightJobSubmissionRestClient(credentials, context);
         }
     }
 }

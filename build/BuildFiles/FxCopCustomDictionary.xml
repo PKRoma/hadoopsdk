@@ -50,7 +50,8 @@
 		<Word>Dest</Word>
 
 		<!-- Hadoop Specific -->
-        <Word>Hadoop</Word>
+	        <Word>Hadoop</Word>
+	        <Word>Sqoop</Word>
 		<Word>Hdfs</Word>
 
 		<!-- OneSdk Specific -->

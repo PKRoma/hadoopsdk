@@ -1,4 +1,18 @@
-﻿namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission.Data
+﻿// Copyright (c) Microsoft Corporation
+// All rights reserved.
+// 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at http://www.apache.org/licenses/LICENSE-2.0
+// 
+// THIS CODE IS PROVIDED *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
+// WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
+// MERCHANTABLITY OR NON-INFRINGEMENT.
+// 
+// See the Apache Version 2.0 License for specific language governing
+// permissions and limitations under the License.
+namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission.Data
 {
     using System;
     using System.Collections.Generic;
@@ -10,27 +24,30 @@
     using System.Text;
     using System.Threading.Tasks;
     using System.Xml;
-    using Microsoft.WindowsAzure.Management.Framework;
-    using Microsoft.WindowsAzure.Management.Framework.DynamicXml.Reader;
-    using Microsoft.WindowsAzure.Management.Framework.DynamicXml.Writer;
+    using Microsoft.Hadoop.Client;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Microsoft.WindowsAzure.Management.HDInsight;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.DynamicXml.Reader;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.DynamicXml.Writer;
 
     /// <summary>
-    /// Converts job payloads to and from objects as needed by the SDK.
+    /// Converts jobDetails payloads to and from objects as needed by the SDK.
     /// </summary>
-    public class JobPayloadConverter
+    internal class JobPayloadConverter
     {
         /// <summary>
-        /// Deserializes a job creation result object from a payload string.
+        /// Deserializes a jobDetails creation result object from a payload string.
         /// </summary>
         /// <param name="payload">
         /// The payload.
         /// </param>
         /// <returns>
-        /// A HDInsightJobCreationResults object representing the payload.
+        /// A JobCreationResults object representing the payload.
         /// </returns>
-        public HDInsightJobCreationResults DeserializeJobCreationResults(string payload)
+        public JobCreationResults DeserializeJobCreationResults(string payload)
         {
-            HDInsightJobCreationResults results = new HDInsightJobCreationResults();
+            JobCreationResults results = new JobCreationResults();
             results.ErrorCode = string.Empty;
             results.HttpStatusCode = HttpStatusCode.Accepted;
             XmlDocumentConverter documentConverter = new XmlDocumentConverter();
@@ -60,18 +77,18 @@
         }
 
         /// <summary>
-        /// Deserailzies a payload into a HDInsightJobList.
+        /// Deserailzies a payload into a JobList.
         /// </summary>
         /// <param name="payload">
         /// The payload.
         /// </param>
         /// <returns>
-        /// An HDInsightJobList representing the payload.
+        /// An JobList representing the payload.
         /// </returns>
-        public HDInsightJobList DeserializeJobList(string payload)
+        public JobList DeserializeJobList(string payload)
         {
-            var jobs = new List<string>();
-            HDInsightJobList results = new HDInsightJobList();
+            var jobs = new List<JobDetails>();
+            JobList results = new JobList();
             XmlDocumentConverter documentConverter = new XmlDocumentConverter();
             var document = documentConverter.GetXmlDocument(payload);
             DynaXmlNamespaceTable nameTable = new DynaXmlNamespaceTable(document);
@@ -82,7 +99,7 @@
                 var nodes = document.SelectNodes(query, nameTable.NamespaceManager);
                 foreach (XmlNode node in nodes)
                 {
-                    jobs.Add(node.InnerText);
+                    jobs.Add(new JobDetails() { JobId = node.InnerText });
                 }
             }
             results.ErrorCode = string.Empty;
@@ -105,38 +122,48 @@
                     }
                 }
             }
-            results.JobIds.AddRange(jobs);
+            results.Jobs.AddRange(jobs);
             return results;
         }
 
         /// <summary>
-        /// Serializes a job creation object into a payload that can be sent to the server by a rest client.
+        /// Serializes a jobDetails creation object into a payload that can be sent to the server by a rest client.
         /// </summary>
         /// <param name="job">
-        /// The job creation details to send to the server.
+        /// The jobDetails creation details to send to the server.
         /// </param>
         /// <returns>
         /// A string that represents the payload.
         /// </returns>
+        [SuppressMessage("Microsoft.Maintainability", "CA1505:AvoidUnmaintainableCode",
+            Justification = "This is a result of dynaXml and interface flowing, which makes the code easer to maintain not harder. [tgs]")]
         [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity",
             Justification = "This is a result of dynaXml and interface flowing, which makes the code easer to maintain not harder. [tgs]")]
-        public string SerializeJobCreationDetails(HDInsightJobCreationDetails job)
+        public string SerializeJobCreationDetails(JobCreateParameters job)
         {
             if (job.IsNull())
             {
                 throw new ArgumentNullException("job");
             }
-            if (job.JobName.IsNullOrEmpty())
+
+            if (job.StatusFolder.IsNullOrEmpty())
             {
-                throw new ArgumentException("A job name is required when submitting a job.", "job");
+                job.StatusFolder = "(ignore)";
             }
-            if (job.OutputStorageLocation.IsNullOrEmpty())
-            {
-                job.OutputStorageLocation = "(ignore)";
-            }
-            var asHiveJob = job as HDInsightHiveJobCreationDetails;
-            var asMapReduceJob = job as HDInsightMapReduceJobCreationDetails;
+            var asHiveJob = job as HiveJobCreateParameters;
+            var asMapReduceJob = job as MapReduceJobCreateParameters;
             var jobType = asHiveJob.IsNotNull() ? "Hive" : "MapReduce";
+
+            if (asHiveJob.IsNull() && asMapReduceJob.IsNull())
+            {
+                throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "Unsupported job type :{0}", job.GetType().FullName));
+            }
+
+            var jobName = asHiveJob == null ? asMapReduceJob.JobName : asHiveJob.JobName;
+            if (jobName.IsNullOrEmpty())
+            {
+                throw new ArgumentException("A jobDetails name is required when submitting a jobDetails.", "job");
+            }
 
             dynamic dynaXml = DynaXmlBuilder.Create();
             dynaXml.b
@@ -148,9 +175,9 @@
                      .b
                      .End();
 
-            if (asMapReduceJob.IsNotNull() && asMapReduceJob.ApplicationName.IsNotNullOrEmpty())
+            if (asMapReduceJob.IsNotNull() && asMapReduceJob.ClassName.IsNotNullOrEmpty())
             {
-                dynaXml.ApplicationName(asMapReduceJob.ApplicationName);
+                dynaXml.ApplicationName(asMapReduceJob.ClassName);
             }
             else
             {
@@ -172,9 +199,9 @@
                 dynaXml.JarFile.End();
             }
 
-            dynaXml.JobName(job.JobName)
+            dynaXml.JobName(jobName)
                    .JobType(jobType.ToString())
-                   .OutputStorageLocation(job.OutputStorageLocation)
+                   .OutputStorageLocation(job.StatusFolder)
                    .Parameters
                    .b
                      .sp("parameters")
@@ -195,6 +222,24 @@
             {
                 dynaXml.rp("query")
                        .text(asHiveJob.Query);
+
+                if (asHiveJob.Defines.IsNotNull())
+                {
+                    foreach (var parameter in asHiveJob.Defines)
+                    {
+                        dynaXml.rp("parameters")
+                               .JobRequestParameter
+                               .b
+                                 .Key(parameter.Key)
+                                 .Value
+                                 .b
+                                   .at.xmlns.i.type("s:string")
+                                   .text(parameter.Value)
+                                 .d
+                               .d
+                               .End();
+                    }
+                }
             }
             if (asMapReduceJob.IsNotNull() && asMapReduceJob.Arguments.IsNotNull())
             {
@@ -202,36 +247,38 @@
                 {
                     dynaXml.rp("arguments").xmlns.a.@string(argument);
                 }
-            }
-            if (job.Parameters.IsNotNull())
-            {
-                foreach (var parameter in job.Parameters)
+
+                if (asMapReduceJob.Defines.IsNotNull())
                 {
-                    dynaXml.rp("parameters")
-                           .JobRequestParameter
-                           .b
-                             .Key(parameter.Key)
-                             .Value
-                             .b
-                               .at.xmlns.i.type("s:string")
-                               .text(parameter.Value)
-                             .d
-                           .d
-                           .End();
+                    foreach (var parameter in asMapReduceJob.Defines)
+                    {
+                        dynaXml.rp("parameters")
+                               .JobRequestParameter
+                               .b
+                                 .Key(parameter.Key)
+                                 .Value
+                                 .b
+                                   .at.xmlns.i.type("s:string")
+                                   .text(parameter.Value)
+                                 .d
+                               .d
+                               .End();
+                    }
                 }
             }
-            if (job.Resources.IsNotNull())
+
+            if (job.Files.IsNotNull())
             {
-                foreach (var resource in job.Resources)
+                foreach (var resource in job.Files)
                 {
                     dynaXml.rp("resources")
                            .JobRequestParameter
                            .b
-                             .Key(resource.Key)
+                             .Key(resource)
                              .Value
                              .b
                                .at.xmlns.i.type("s:string")
-                               .text(resource.Value)
+                               .text(resource)
                              .d
                            .d
                            .End();
@@ -241,20 +288,20 @@
         }
 
         /// <summary>
-        /// Desterilizes the job details payload data.
+        /// Desterilizes the jobDetails details payload data.
         /// </summary>
         /// <param name="payload">
         /// The payload data returned from a server.
         /// </param>
         /// <param name="jobId">
-        /// The jobId for the job requested.
+        /// The jobId for the jobDetails requested.
         /// </param>
         /// <returns>
-        /// A new HDInsightJob object representing the job.
+        /// A new JobDetails object representing the jobDetails.
         /// </returns>
-        public HDInsightJob DeserializeJobDetails(string payload, string jobId)
+        public JobDetails DeserializeJobDetails(string payload, string jobId)
         {
-            HDInsightJob retval = new HDInsightJob();
+            JobDetails retval = new JobDetails();
             XmlDocumentConverter documentConverter = new XmlDocumentConverter();
             var document = documentConverter.GetXmlDocument(payload);
             DynaXmlNamespaceTable nameTable = new DynaXmlNamespaceTable(document);
@@ -296,7 +343,9 @@
                                 retval.Query = element.InnerText;
                                 break;
                             case "StatusCode":
-                                retval.StatusCode = element.InnerText;
+                                var statusCode = JobStatusCode.Unknown;
+                                Assert.IsTrue(Enum.TryParse(element.InnerText, true, out statusCode));
+                                retval.StatusCode = statusCode;
                                 break;
                             case "SubmissionTime":
                                 var submissionTime = element.InnerText;

@@ -12,27 +12,32 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
-
 namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.AzureManagementClient
 {
     using System;
     using System.Linq;
     using System.Net;
     using System.Net.Http;
+    using System.Threading;
     using System.Threading.Tasks;
-    using Microsoft.WindowsAzure.Management.Framework;
-    using Microsoft.WindowsAzure.Management.Framework.InversionOfControl;
-    using Microsoft.WindowsAzure.Management.Framework.WebRequest;
-    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data;
+    using Microsoft.Hadoop.Client;
+    using Microsoft.Hadoop.Client.HadoopJobSubmissionRestCleint;
+    using Microsoft.Hadoop.Client.WebHCatRest;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.ClusterManager;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestClient;
-    using Microsoft.WindowsAzure.Management.HDInsight.ConnectionContext;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
+    using Microsoft.WindowsAzure.Management.HDInsight;
 
     internal class SubscriptionRegistrationClient : ISubscriptionRegistrationClient
     {
-        private readonly IConnectionCredentials credentials;
+        private readonly IHDInsightCertificateCredential credentials;
+        private readonly HDInsight.IAbstractionContext context;
 
-        internal SubscriptionRegistrationClient(IConnectionCredentials credentials)
+        internal SubscriptionRegistrationClient(IHDInsightCertificateCredential credentials, HDInsight.IAbstractionContext context)
         {
+            this.context = context;
             this.credentials = credentials;
         }
 
@@ -40,7 +45,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.AzureM
         public async Task RegisterSubscription()
         {
             // Creates an HTTP client
-            using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(this.credentials.Certificate))
+            using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(this.credentials.Certificate, this.context))
             {
                 // Creates the request
                 string relativeUri = string.Format(
@@ -49,8 +54,8 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.AzureM
                     this.credentials.DeploymentNamespace,
                     "register");
                 client.RequestUri = new Uri(this.credentials.Endpoint, new Uri(relativeUri, UriKind.Relative));
-                client.RequestHeaders.Add(HDInsightRestHardcodes.XMsVersion);
-                client.RequestHeaders.Add(HDInsightRestHardcodes.Accept);
+                client.RequestHeaders.Add(HDInsightRestConstants.XMsVersion);
+                client.RequestHeaders.Add(HDInsightRestConstants.Accept);
                 client.Content = string.Empty;
                 client.Method = HttpMethod.Put;
 
@@ -67,10 +72,10 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.AzureM
                     return;
                 }
 
-                throw new HDInsightRestClientException(httpResponse.StatusCode, httpResponse.Content);
+                throw new HttpLayerException(httpResponse.StatusCode, httpResponse.Content);
             }
         }
-        
+
         public async Task<bool> ValidateSubscriptionLocation(string location)
         {
             var ret = await this.ManageSubscriptionLocation(HttpMethod.Get, location);
@@ -83,10 +88,10 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.AzureM
                 return false;
             }
 
-            throw new HDInsightRestClientException(ret.Item1, ret.Item2);
+            throw new HttpLayerException(ret.Item1, ret.Item2);
         }
 
-        private const string RegisterSubscriptionPayload = 
+        private const string RegisterSubscriptionPayload =
 "<CloudService xmlns=\"http://schemas.microsoft.com/windowsazure\">" +
     "<Label>HdInsight CloudService</Label>" +
     "<Description>HdInsight clusters for subscription {0}</Description>" +
@@ -106,20 +111,19 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.AzureM
             // if the request went through despite error
             if (!await this.ValidateSubscriptionLocation(location))
             {
-                throw new HDInsightRestClientException(ret.Item1, ret.Item2);
+                throw new HttpLayerException(ret.Item1, ret.Item2);
             }
         }
 
         public async Task UnregisterSubscriptionLocation(string location)
         {
-            using (var managementClient = ServiceLocator.Instance.Locate<IHDInsightManagementRestClientFactory>().Create(this.credentials))
+            var managementClient = ServiceLocator.Instance.Locate<IHDInsightManagementRestClientFactory>().Create(this.credentials, this.context);
+            var overrideHandlers = ServiceLocator.Instance.Locate<IHDInsightClusterOverrideManager>().GetHandlers(this.credentials, this.context);
+            var payload = await managementClient.ListCloudServices();
+            var clusters = overrideHandlers.PayloadConverter.DeserializeListContainersResult(payload.Content, this.credentials.DeploymentNamespace, this.credentials.SubscriptionId);
+            if (clusters.Any(cluster => cluster.Location == location))
             {
-                var payload = await managementClient.ListCloudServices();
-                var clusters = PayloadConverter.DeserializeListContainersResult(payload, this.credentials.DeploymentNamespace);
-                if (clusters.Any(cluster => cluster.Location == location))
-                {
-                    throw new InvalidOperationException("Cannot unregister a subscription location if it contains clusters");
-                }
+                throw new InvalidOperationException("Cannot unregister a subscription location if it contains clusters");
             }
 
             var ret = await this.ManageSubscriptionLocation(HttpMethod.Delete, location);
@@ -128,26 +132,26 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.AzureM
                 return;
             }
 
-            throw new HDInsightRestClientException(ret.Item1, ret.Item2);
+            throw new HttpLayerException(ret.Item1, ret.Item2);
         }
 
         // Method = "{method}", UriTemplate = "{subscriptionId}/cloudservices/{resourceProviderNamespace}"
         internal async Task<Tuple<HttpStatusCode, string>> ManageSubscriptionLocation(HttpMethod method, string location, string payload = null)
         {
             var resolver = ServiceLocator.Instance.Locate<ICloudServiceNameResolver>();
-            string regionCloudServicename = resolver.GetCloudServiceName(this.credentials.SubscriptionId, 
-                                                                         this.credentials.DeploymentNamespace, 
+            string regionCloudServicename = resolver.GetCloudServiceName(this.credentials.SubscriptionId,
+                                                                         this.credentials.DeploymentNamespace,
                                                                          location);
 
             // Creates an HTTP client
-            using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(this.credentials.Certificate))
+            using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(this.credentials.Certificate, this.context))
             {
                 // Creates the request
                 string relativeUri = string.Format("{0}/cloudservices/{1}", this.credentials.SubscriptionId, regionCloudServicename);
                 client.RequestUri = new Uri(this.credentials.Endpoint, new Uri(relativeUri, UriKind.Relative));
 
-                client.RequestHeaders.Add(HDInsightRestHardcodes.XMsVersion);
-                client.RequestHeaders.Add(HDInsightRestHardcodes.Accept);
+                client.RequestHeaders.Add(HDInsightRestConstants.XMsVersion);
+                client.RequestHeaders.Add(HDInsightRestConstants.Accept);
                 client.Content = payload;
                 client.Method = method;
 

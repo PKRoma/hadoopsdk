@@ -12,17 +12,17 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
-
 namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.PowerShellTestAbstraction.Concreates
 {
     using System.Diagnostics.CodeAnalysis;
     using System.Management.Automation.Runspaces;
-    using Microsoft.WindowsAzure.Management.Framework;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
     using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.PowerShellTestAbstraction.Interfaces;
+    using Fx = Microsoft.WindowsAzure.Management.HDInsight.Framework;
 
     [SuppressMessage("Microsoft.Design", "CA1063:ImplementIDisposableCorrectly",
         Justification = "Anything derived from Disposable Object is correct. [tgs]")]
-    public class RunspaceAbstraction : DisposableObject, IRunspace
+    public class RunspaceAbstraction : Disposable.DisposableObject, IRunspace
     {
         protected Runspace Runspace { get; private set; }
 
@@ -33,14 +33,14 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.PowerShellTe
 
         public static IRunspace Create()
         {
-            var runspace = Help.SaveCreate(() => RunspaceFactory.CreateRunspace());
+            var runspace = Help.SafeCreate(() => RunspaceFactory.CreateRunspace());
             runspace.Open();
             return new RunspaceAbstraction(runspace);
         }
 
         public IPipeline NewPipeline()
         {
-            return Help.SaveCreate(() => new PipelineAbstraction(this.Runspace.CreatePipeline(), this.Runspace));
+            return Help.SafeCreate(() => new PipelineAbstraction(this.Runspace.CreatePipeline(), this.Runspace));
         }
     }
 }

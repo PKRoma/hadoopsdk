@@ -12,25 +12,14 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
-
 namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission.PocoClient
 {
-    using Microsoft.WindowsAzure.Management.HDInsight.ConnectionContext;
+    using Microsoft.Hadoop.Client.HadoopJobSubmissionPocoClient;
 
     /// <summary>
-    /// The service used to create new instances of the HDInsightJobSubmissionPocoClient.
+    /// The service used to create new instances of the HDInsightRdfeJobSubmissionPocoClient.
     /// </summary>
-    public interface IHDInsightJobSubmissionPocoClientFactory
+    internal interface IHDInsightJobSubmissionPocoClientFactory : IHadoopJobSubmissionPocoClientFactory
     {
-        /// <summary>
-        /// Creates a new instance of an IHDInsightJobSubmissionPocoClient implementation.
-        /// </summary>
-        /// <param name="credentials">
-        /// The credentials to use when creating the instance.
-        /// </param>
-        /// <returns>
-        /// A new instance of an IHDInsightJobSubmissionPocoClient implementation.
-        /// </returns>
-        IHDInsightJobSubmissionPocoClient Create(IConnectionCredentials credentials);
     }
 }

@@ -52,15 +52,10 @@ Scenario: I can use the "Add Metastore" parameter set
 	  And   it is a required parameter
 	  And   it is specified as parameter 2
 	  And   it can not take its value from the pipeline 
-	  And there exists a "UserName" Cmdlet parameter
-	  And   it is of type "String"
+	  And there exists a "Credential" Cmdlet parameter
+	  And   it is of type "PSCredential"
 	  And   it is a required parameter
 	  And   it is specified as parameter 3
-	  And   it can not take its value from the pipeline 
-	  And there exists a "Password" Cmdlet parameter
-	  And   it is of type "String"
-	  And   it is a required parameter
-	  And   it is specified as parameter 4
 	  And   it can not take its value from the pipeline 
 	  And there exists a "MetastoreType" Cmdlet parameter
 	  And   it is of type "AzureHDInsightMetastoreType"

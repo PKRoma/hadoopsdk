@@ -1,4 +1,18 @@
-﻿namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTests
+﻿// Copyright (c) Microsoft Corporation
+// All rights reserved.
+// 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at http://www.apache.org/licenses/LICENSE-2.0
+// 
+// THIS CODE IS PROVIDED *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
+// WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
+// MERCHANTABLITY OR NON-INFRINGEMENT.
+// 
+// See the Apache Version 2.0 License for specific language governing
+// permissions and limitations under the License.
+namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTests
 {
     using System;
     using System.Collections.Generic;
@@ -8,32 +22,35 @@
     using System.Threading;
     using System.Threading.Tasks;
     using System.Xml;
+    using Microsoft.Hadoop.Client;
+    using Microsoft.Hadoop.Client.HadoopJobSubmissionRestCleint;
+    using Microsoft.Hadoop.Client.WebHCatRest;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Microsoft.WindowsAzure.Management.Framework.InversionOfControl;
-    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Old;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestClient;
-    using Microsoft.WindowsAzure.Management.HDInsight.ConnectionContext;
+    
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
     using Microsoft.WindowsAzure.Management.HDInsight.InversionOfControl;
     using System.Net;
     using Microsoft.WindowsAzure.Management.HDInsight.JobSubmission.Data;
     using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities;
+    using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.ServerDataObjects;
     using Microsoft.WindowsAzure.Management.HDInsight.Tests.ConnectionCredentials;
-    using Microsoft.WindowsAzure.Management.HDInsight.Tests.ServerDataObjects;
+    using Microsoft.WindowsAzure.Management.HDInsight.Tests.ServerDataObjects.Rdfe;
     using Moq;
 
     [TestClass]
     public class RestClientTests : IntegrationTestBase
     {
         [TestInitialize]
-        public void Initialize()
+        public override void Initialize()
         {
-            this.IndividualTestSetup();
+            base.Initialize();
         }
 
         [TestCleanup]
-        public void TestCleanup()
+        public override void TestCleanup()
         {
-            this.IndividualTestCleanup();
+            base.TestCleanup();
         }
 
         [TestMethod]
@@ -42,7 +59,7 @@
         [TestCategory("RestClient")]
         public void InternalValidation_HDInsightManagementRestClient_GetCloudServiceName()
         {
-            IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
+            IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
             var resolver = ServiceLocator.Instance.Locate<ICloudServiceNameResolver>();
             var serviceName = resolver.GetCloudServiceName(Guid.Empty, "hdInsight", "EastUS");
             Assert.AreEqual("hdInsightCK4TO7F6PZOJJ2FHBWOSHEUVEPIUV6UVI6JRGD4KHFM4POCJVSUA-EastUS", serviceName);
@@ -56,16 +73,16 @@
         [TestCategory("Integration")]
         [TestCategory("CheckIn")]
         [TestCategory("RestClient")]
-        public void InternalValidation_HDInsightRestClientException()
+        public void InternalValidation_HadoopRestClientException()
         {
             //TODO: Test serailize\deserialize
 
             // Validates that the exception is properly created and all the fields match what's expected
             try
             {
-                throw new HDInsightRestClientException(HttpStatusCode.Ambiguous, "Hello world");
+                throw new HttpLayerException(HttpStatusCode.Ambiguous, "Hello world");
             }
-            catch (HDInsightRestClientException exception)
+            catch (HttpLayerException exception)
             {
                 Assert.AreEqual("Hello world", exception.RequestContent);
                 Assert.AreEqual(HttpStatusCode.Ambiguous, exception.RequestStatusCode);
@@ -76,7 +93,7 @@
         [TestMethod]
         [TestCategory("Integration")]
         [TestCategory("Scenario")]
-        [TestCategory("CheckIn")]
+        [TestCategory("Nightly")]
         [TestCategory("RestClient")]
         [TestCategory("Production")]
         public async Task ICanPerformA_ListCloudServices_Using_AzureProduction()
@@ -91,15 +108,16 @@
         [TestCategory("RestClient")]
         public async Task ICanPerformA_ListCloudServices_Using_RestClientAbstraction()
         {
-            IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
-            var client = ServiceLocator.Instance.Locate<IHDInsightManagementRestClientFactory>().Create(credentials);
-            Assert.IsTrue(this.ContainsContainer(TestCredentials.WellKnownCluster.DnsName, await client.ListCloudServices()));
+            IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
+            var client = ServiceLocator.Instance.Locate<IHDInsightManagementRestClientFactory>().Create(credentials, GetAbstractionContext());
+            var result = await client.ListCloudServices();
+            Assert.IsTrue(this.ContainsContainer(TestCredentials.WellKnownCluster.DnsName, result.Content));
         }
 
         [TestMethod]
         [TestCategory("Integration")]
         [TestCategory("Scenario")]
-        [TestCategory("CheckIn")]
+        [TestCategory("Nightly")]
         [TestCategory("RestClient")]
         [TestCategory("Production")]
         public async Task ICanPerformA_CreateDeleteContainers_Using_RestClient_AzureProduction()
@@ -111,7 +129,7 @@
         [TestMethod]
         public void ICanSerializeAndDeserialzeCreationResults()
         {
-            HDInsightJobCreationResults expected = new HDInsightJobCreationResults() { HttpStatusCode = HttpStatusCode.Accepted, JobId = "job123" };
+            JobCreationResults expected = new JobCreationResults() { HttpStatusCode = HttpStatusCode.Accepted, JobId = "job123" };
             JobPayloadServerConverter ser = new JobPayloadServerConverter();
             JobPayloadConverter deser = new JobPayloadConverter();
             var payload = ser.SerializeJobCreationResults(expected);
@@ -120,13 +138,13 @@
 
         [TestMethod]
         [TestCategory("Integration")]
-        [TestCategory("CheckIn")]
+        [TestCategory("Nightly")]
         [TestCategory("RestClient")]
         [Timeout(5*60*1000)] // ms
         public async Task ICanPerformA_CreateDeleteContainers_Using_RestClient()
         {
-            IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
-            var client = new HDInsightManagementRestClient(credentials);
+            IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
+            var client = new HDInsightManagementRestClient(credentials, GetAbstractionContext());
             var dnsName = base.GetRandomClusterName();
             var location = "East US 2";
             var subscriptionId = credentials.SubscriptionId;
@@ -137,18 +155,24 @@
             {
                 IntrinsicSettings = new[] { new XmlDocument().ReadNode(xmlReader) }
             };
+            var result = await client.ListCloudServices();
 
-            Assert.IsTrue(!this.ContainsContainer(dnsName, await client.ListCloudServices()));
+            Assert.IsTrue(!this.ContainsContainer(dnsName, result.Content));
 
             await client.CreateContainer(dnsName, location, resource.SerializeToXml());
-            while (!this.ContainsContainer(dnsName, await client.ListCloudServices()))
+            result = await client.ListCloudServices();
+            while (!this.ContainsContainer(dnsName, result.Content))
             {
+                result = await client.ListCloudServices();
                 Thread.Sleep(TimeSpan.FromMilliseconds(100));
             }
 
             await client.DeleteContainer(dnsName, location);
-            while (this.ContainsContainer(dnsName, await client.ListCloudServices()))
+            bool containsContiner = true;
+            while (containsContiner)
             {
+                result = await client.ListCloudServices();
+                containsContiner = this.ContainsContainer(dnsName, result.Content);
                 Thread.Sleep(TimeSpan.FromMilliseconds(100));
             }
         }
@@ -157,19 +181,23 @@
         [TestCategory("Integration")]
         [TestCategory("Manual")]
         [TestCategory("RestClient")]
+        // TODO, this should be killed and replaced with a poco version... It seems like the test is broken.
         [Timeout(5 * 60 * 1000)] // ms
         public async Task ICanPerformA_CreateDeleteContainers_Using_RestClient_ManualEnvironment()
         {
-            var creds = IntegrationTestBase.GetCredentailsForEnvironmentType(EnvironmentType.Current);
+            var creds = IntegrationTestBase.GetCredentialsForEnvironmentType(EnvironmentType.Current);
 
             if (creds == null)
                 Assert.Inconclusive("Alternative Azure Endpoint wasn't set up");
+
+            var tempCredentials = new HDInsightCertificateCredential()
+            {
+                SubscriptionId = creds.SubscriptionId,
+                Certificate = IntegrationTestBase.GetValidCredentials().Certificate
+            };
+            IHDInsightCertificateCredential credentials = new AlternativeEnvironmentIHDInsightSubscriptionCertificateCredentialsFactory().Create(tempCredentials);
             
-            IConnectionCredentials credentials = new AlternativeEnvironmentConnectionCredentialsFactory().Create(
-                creds.SubscriptionId,
-                IntegrationTestBase.GetValidCredentials().Certificate);
-            
-            var client = new HDInsightManagementRestClient(credentials);
+            var client = new HDInsightManagementRestClient(credentials, GetAbstractionContext());
             var dnsName = base.GetRandomClusterName();
             var location = "East US";
             var subscriptionId = credentials.SubscriptionId;
@@ -180,19 +208,27 @@
             {
                 IntrinsicSettings = new[] { new XmlDocument().ReadNode(xmlReader) }
             };
+            var result = await client.ListCloudServices();
 
-            Assert.IsTrue(!this.ContainsContainer(dnsName, await client.ListCloudServices()));
+            Assert.IsTrue(!this.ContainsContainer(dnsName, result.Content));
 
             await client.CreateContainer(dnsName, location, resource.SerializeToXml());
-            while (!this.ContainsContainer(dnsName, await client.ListCloudServices()))
+            result = await client.ListCloudServices();
+            bool containsContiner = false;
+            while (!containsContiner)
             {
-                Thread.Sleep(TimeSpan.FromSeconds(100));
+                result = await client.ListCloudServices();
+                containsContiner = this.ContainsContainer(dnsName, result.Content);
+                await Task.Delay(100);
             }
 
             await client.DeleteContainer(dnsName, location);
-            while (this.ContainsContainer(dnsName, await client.ListCloudServices()))
+            containsContiner = true;
+            while (containsContiner)
             {
-                Thread.Sleep(TimeSpan.FromSeconds(100));
+                result = await client.ListCloudServices();
+                containsContiner = this.ContainsContainer(dnsName, result.Content);
+                await Task.Delay(100);
             }
         }
         

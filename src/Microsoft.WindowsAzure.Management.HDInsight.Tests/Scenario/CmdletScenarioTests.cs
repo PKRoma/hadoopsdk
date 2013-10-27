@@ -12,26 +12,24 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
-
 namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
 {
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities;
 
     [TestClass]
     public partial class CmdletScenarioTests : IntegrationTestBase
     {
         [TestInitialize]
-        public void Initialize()
+        public override void Initialize()
         {
-            this.ApplyFullMocking();
-            this.ResetIndividualMocks();
+            base.Initialize();
         }
 
         [TestCleanup]
-        public void TestCleanup()
+        public override void TestCleanup()
         {
-            this.ApplyFullMocking();
-            this.ResetIndividualMocks();
+            base.TestCleanup();
         }
     }
 }

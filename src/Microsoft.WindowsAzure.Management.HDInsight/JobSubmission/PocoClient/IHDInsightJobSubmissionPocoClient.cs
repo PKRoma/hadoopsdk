@@ -12,84 +12,20 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
-
 namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission.PocoClient
 {
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
-    using Microsoft.WindowsAzure.Management.Framework;
-    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data;
+    using Microsoft.Hadoop.Client;
+    using Microsoft.Hadoop.Client.HadoopJobSubmissionPocoClient;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning;
     using Microsoft.WindowsAzure.Management.HDInsight.JobSubmission.Data;
 
     /// <summary>
-    /// Provides POCO (Plan old C# object) representation of the HDInsight job submission rest call.
+    /// Provides POCO (Plan old C# object) representation of the HDInsight jobDetails submission rest call.
     /// </summary>
-    public interface IHDInsightJobSubmissionPocoClient 
+    internal interface IHDInsightJobSubmissionPocoClient : IHadoopJobSubmissionPocoClient
     {
-        /// <summary>
-        /// Creates a new hive job on the cluster.
-        /// </summary>
-        /// <param name="dnsName">
-        /// The name of the cluster.
-        /// </param>
-        /// <param name="location">
-        /// The location of the cluster.
-        /// </param>
-        /// <param name="details">
-        /// The details of the job to create on the cluster.
-        /// </param>
-        /// <returns>
-        /// A task representing the cluster creation.
-        /// </returns>
-        Task<HDInsightJobCreationResults> CreateHiveJob(string dnsName, string location, HDInsightHiveJobCreationDetails details);
-
-        /// <summary>
-        /// Creates a new map reduce job on the cluster.
-        /// </summary>
-        /// <param name="dnsName">
-        /// The name of the cluster.
-        /// </param>
-        /// <param name="location">
-        /// The location of the cluster.
-        /// </param>
-        /// <param name="details">
-        /// The details of the job to create on the cluster.
-        /// </param>
-        /// <returns>
-        /// A task representing the cluster creation.
-        /// </returns>
-        Task<HDInsightJobCreationResults> CreateMapReduceJob(string dnsName, string location, HDInsightMapReduceJobCreationDetails details);
-
-        /// <summary>
-        /// Lists the jobs in the clusters job history.
-        /// </summary>
-        /// <param name="dnsName">
-        /// The name of the cluster.
-        /// </param>
-        /// <param name="location">
-        /// The location of the cluster.
-        /// </param>
-        /// <returns>
-        /// A task that will return the HDInsightJobList containing the jobs.
-        /// </returns>
-        Task<HDInsightJobList> ListJobs(string dnsName, string location);
-
-        /// <summary>
-        /// Gets the details associated with a job.
-        /// </summary>
-        /// <param name="dnsName">
-        /// The dnsName for the cluster.
-        /// </param>
-        /// <param name="location">
-        /// The location of the cluster.
-        /// </param>
-        /// <param name="jobId">
-        /// The jobId to retrieve.
-        /// </param>
-        /// <returns>
-        /// A task that can be used to retrieve the job details.
-        /// </returns>
-        Task<HDInsightJob> GetJobDetail(string dnsName, string location, string jobId);
     }
 }

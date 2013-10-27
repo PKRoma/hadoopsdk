@@ -12,14 +12,28 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
-
 namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.LocationFinder
 {
+    using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Threading.Tasks;
 
+    /// <summary>
+    /// Interface to allow a user to retrieve tha available locations for a subscription id.
+    /// </summary>
     internal interface ILocationFinderClient
     {
+        /// <summary>
+        /// Lists the available locations for a subscription id.
+        /// </summary>
+        /// <returns>Available locations for a subscription id.</returns>
         Task<Collection<string>> ListAvailableLocations();
+
+        /// <summary>
+        /// Parses the available locations for a subscription id.
+        /// </summary>
+        /// <param name="capabilities">Key value pair containing location capabilities for a subscription id.</param>
+        /// <returns>Available locations for a subscription id.</returns>
+        Collection<string> ListAvailableLocations(IEnumerable<KeyValuePair<string, string>> capabilities);
     }
 }

@@ -1,15 +1,15 @@
 ﻿@CheckIn
-Feature: New-AzureHDInsightConfig Cmdlet
+Feature: New-AzureHDInsightClusterConfig Cmdlet
 		 In order to manage my HDInsight clusters on my Azure subscription
 		 As an IT professional
 		  I want to be able to create clusters with complex configurations.
 
 Background: I have setup the Cmdlets
   	  Given I have installed the AzureHDInsight Cmdlets
-        And I am using the "New-AzureHDInsightConfig" PowerShell Cmdlet
+        And I am using the "New-AzureHDInsightClusterConfig" PowerShell Cmdlet
 
 Scenario: There Exists a Get-AzureHDInsightCluster PowerShell Cmdlet
-	 Then There exists a "New-AzureHDInsightConfig" PowerShell Cmdlet
+	 Then There exists a "New-AzureHDInsightClusterConfig" PowerShell Cmdlet
 
 Scenario: There is only 1 ParameterSet specified for the Get-AzureHDInsightCluster PowerShell Cmdlet
 	 Then there exists a "Config ClusterSizeInNodes Only" parameter set

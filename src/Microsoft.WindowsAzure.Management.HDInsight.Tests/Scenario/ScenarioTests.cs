@@ -22,10 +22,12 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
     using Microsoft.WindowsAzure.Management.Framework;
     using Microsoft.WindowsAzure.Management.Framework.InversionOfControl;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestClient;
-    using Microsoft.WindowsAzure.Management.HDInsight.ConnectionContext;
+    
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Client;
-    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities;
+    using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulator;
     using Microsoft.WindowsAzure.Management.HDInsight.Tests.ConnectionCredentials;
     using Microsoft.WindowsAzure.Management.HDInsight.Tests.RestSimulator;
 
@@ -33,17 +35,15 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
     public class SyncClientScenarioTests : IntegrationTestBase
     {
         [TestInitialize]
-        public void Initialize()
+        public override void Initialize()
         {
-            this.ApplyFullMocking();
-            this.ResetIndividualMocks();
+            base.Initialize();
         }
 
         [TestCleanup]
-        public void TestCleanup()
+        public override void TestCleanup()
         {
-            this.ApplyFullMocking();
-            this.ResetIndividualMocks();
+            base.TestCleanup();
         }
         
         [TestMethod]
@@ -75,7 +75,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
         public void CreateDeleteContainer_SyncClientWithTimeouts()
         {
             // Creates the client
-            IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
+            IHDInsightCertificateConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
             var client = new HDInsightSyncClient(credentials.SubscriptionId, credentials.Certificate);
             client.PollingInterval = TimeSpan.FromMilliseconds(100);
             TestValidAdvancedCluster(
@@ -92,7 +92,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
         public void CreateDeleteContainer_SyncClient()
         {
             // Creates the client
-            IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
+            IHDInsightCertificateConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
             var client = new HDInsightSyncClient(credentials.SubscriptionId, credentials.Certificate);
             client.PollingInterval = TimeSpan.FromMilliseconds(100);
             TestValidAdvancedCluster(
@@ -109,7 +109,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
         public void CreateDeleteContainer_AsyncClient()
         {
             // Creates the client
-            IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
+            IHDInsightCertificateConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
             var client = new ClusterProvisioningClient(credentials.SubscriptionId, credentials.Certificate);
             client.PollingInterval = TimeSpan.FromMilliseconds(100);
 
@@ -127,7 +127,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
         public void CreateDeleteContainer_BasicClusterAsyncClient()
         {
             // Creates the client
-            IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
+            IHDInsightCertificateConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
             var client = new ClusterProvisioningClient(credentials.SubscriptionId, credentials.Certificate);
             client.PollingInterval = TimeSpan.FromMilliseconds(100);
 
@@ -150,7 +150,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
             this.ApplyIndividualTestMockingOnly();
 
             // Sets the simulator
-            var runManager = ServiceLocator.Instance.Locate<IIocServiceLocationIndividualTestManager>();
+            var runManager = ServiceLocator.Instance.Locate<IServiceLocationIndividualTestManager>();
             runManager.Override<IConnectionCredentialsFactory>(new AlternativeEnvironmentConnectionCredentialsFactory());
 
             // Creates the client
@@ -192,7 +192,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
                                                            TestCredentials.HiveStores[0].Database,
                                                            TestCredentials.HiveStores[0].Username,
                                                            TestCredentials.HiveStores[0].Password);
-            IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
+            IHDInsightCertificateConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
             var client = new ClusterProvisioningClient(credentials.SubscriptionId, credentials.Certificate);
             client.PollingInterval = TimeSpan.FromMilliseconds(100);
 
@@ -225,7 +225,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
             var clusterRequest = base.GetRandomCluster();
             clusterRequest.AsvAccounts.Add(new AsvAccountConfiguration("invalid", TestCredentials.AdditionalStorageAccounts[0].Key));
 
-            IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
+            IHDInsightCertificateConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
             var client = new HDInsightSyncClient(credentials.SubscriptionId, credentials.Certificate);
             client.PollingInterval = TimeSpan.FromMilliseconds(100);
 

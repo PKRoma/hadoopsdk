@@ -20,7 +20,7 @@ Scenario: I can create a map reduce job with no values specified
 Scenario: I can create a job with basic values
     Given I have a map reduce job request object
       And I set the job name as "job1"
-	  And I set the application name as "pi"
+	  And I set the class name as "pi"
 	  And I set the Jar file as "pi.jar"
 	 When I serialize the object
 	 Then the value of the serialized output should be equivalent with the original
@@ -28,7 +28,7 @@ Scenario: I can create a job with basic values
 Scenario: I can create a request without a OutputStorageLocation
     Given I have a map reduce job request object
 	  And I set the job name as "<jobName>"
-	  And I set the application name as "<applicationName>"
+	  And I set the class name as "<className>"
 	  And I set the Jar file as "pi.jar"
 	  And I add the following argument "16"
 	  And I add the following argument "10000"
@@ -44,7 +44,7 @@ Scenario: I can create a request without a OutputStorageLocation
 Scenario: I can create a complicated map reduce job with multiple values
     Given I have a map reduce job request object
 	  And I set the job name as "<jobName>"
-	  And I set the application name as "<applicationName>"
+	  And I set the class name as "<className>"
 	  And I set the Jar file as "pi.jar"
 	  And I add the following argument "16"
 	  And I add the following argument "10000"

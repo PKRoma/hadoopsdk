@@ -12,8 +12,7 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
-
-namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data
+namespace Microsoft.WindowsAzure.Management.HDInsight
 {
     /// <summary>
     /// Possible states of an HDInsight cluster.
@@ -21,53 +20,58 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data
     public enum ClusterState
     {
         /// <summary>
-        /// Cluster Creation has been registered by the service.
+        /// The DNS name has been successfully validated and a Azure HostedService has been created.
+        /// </summary>
+        ReadyForDeployment,
+
+        /// <summary>
+        /// A create container was received but a HostService DNS name has not been created yet.
         /// </summary>
         Accepted,
 
         /// <summary>
-        /// Storage Account has been configured for provisioning.
+        /// The cluster storage is provisioned.
         /// </summary>
         ClusterStorageProvisioned,
 
         /// <summary>
-        /// Configuring the VM nodes.
+        /// The Azure compute fabric is provisioning VM's prior to HDInsight installation.
         /// </summary>
         AzureVMConfiguration,
 
         /// <summary>
-        /// Cluster is in intalling HDInsight on all nodes.
+        /// VM provisioning is complete and the HDInsight components are installing.
         /// </summary>
         HDInsightConfiguration,
 
         /// <summary>
-        /// Cluster is available for use with 90% of the nodes ready.
+        /// Greater than 90% of the nodes are operational.
         /// </summary>
         Operational,
 
         /// <summary>
-        /// Cluster is available for use with all of the nodes ready.
+        /// 100% of the nodes are running.
         /// </summary>
         Running,
 
         /// <summary>
-        /// Cluster is being deleted.
+        /// Deployment and or Container Delete request queued.
+        /// </summary>
+        DeletePending,
+
+        /// <summary>
+        /// Deployment or Container is being deleted.
         /// </summary>
         Deleting,
 
         /// <summary>
-        /// Cluster has been deleted.
+        /// Container is in error state.
         /// </summary>
-        DeleteQueued,
+        Error,
 
         /// <summary>
-        /// Cluster is in an Unkown state or parsing failed (mismatch between SDK and Service). 
+        /// Container is in unkown state.
         /// </summary>
-        Unknown,
-
-        /// <summary>
-        /// Cluster is in a failed state.
-        /// </summary>
-        Error
+        Unknown
     }
 }

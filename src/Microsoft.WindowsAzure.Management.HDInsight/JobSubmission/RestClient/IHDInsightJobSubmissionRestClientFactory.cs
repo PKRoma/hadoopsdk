@@ -12,26 +12,26 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
-
 namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission.RestClient
 {
-    using Microsoft.WindowsAzure.Management.HDInsight.ConnectionContext;
+    using Microsoft.WindowsAzure.Management.HDInsight;
 
     /// <summary>
     /// The IHDInsightJobSubmissionRestClient factory interface used to create new
     /// HDInsightJobSubmissionRestClient objects.
     /// </summary>
-    public interface IHDInsightJobSubmissionRestClientFactory
+    internal interface IHDInsightJobSubmissionRestClientFactory
     {
         /// <summary>
         /// Creates a new instance of an IHDInsightJobSubmissionRestClient class.
         /// </summary>
         /// <param name="credentials">
-        /// The connection credentials to use when creating the object.
+        ///     The connection credentials to use when creating the object.
         /// </param>
+        /// <param name="context">A context containing cancellation token and logger.</param>
         /// <returns>
         /// A new IHDInsightJobSubmissionRestClient class.
         /// </returns>
-        IHDInsightJobSubmissionRestClient Create(IConnectionCredentials credentials);
+        IHDInsightJobSubmissionRestClient Create(IHDInsightCertificateCredential credentials, IAbstractionContext context);
     }
 }

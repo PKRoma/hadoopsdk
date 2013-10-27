@@ -12,13 +12,12 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
-
-namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data
+namespace Microsoft.WindowsAzure.Management.HDInsight
 {
     /// <summary>
     /// Class that wraps an error status of an HDInsight Cluster.
     /// </summary>
-    public class ClusterErrorStatus
+    public sealed class ClusterErrorStatus
     {
         /// <summary>
         /// Gets the error code of the error status.

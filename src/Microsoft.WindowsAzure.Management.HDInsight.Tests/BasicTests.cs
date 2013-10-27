@@ -12,28 +12,25 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
-
 namespace Microsoft.WindowsAzure.Management.HDInsight.Tests
 {
     using System;
-    using ConnectionContext;
+    using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities;
     using VisualStudio.TestTools.UnitTesting;
 
     [TestClass]
     public class BasicUnitTests : IntegrationTestBase
     {
         [TestInitialize]
-        public void Initialize()
+        public override void Initialize()
         {
-            this.ApplyFullMocking();
-            this.ResetIndividualMocks();
+            base.Initialize();
         }
 
         [TestCleanup]
-        public void TestCleanup()
+        public override void TestCleanup()
         {
-            this.ApplyFullMocking();
-            this.ResetIndividualMocks();
+            base.TestCleanup();
         }
 
         [TestMethod]
@@ -49,7 +46,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests
         [TestCategory("Integration")]
         public void ICanGetCertificateInformation()
         {
-            IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
+            IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
             Assert.IsNotNull(credentials.Endpoint);
             Assert.AreNotEqual(Guid.Empty,
                                credentials.SubscriptionId);

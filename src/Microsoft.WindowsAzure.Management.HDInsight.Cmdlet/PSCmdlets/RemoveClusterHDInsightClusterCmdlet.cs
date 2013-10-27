@@ -1,91 +1,120 @@
-﻿namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
+﻿// Copyright (c) Microsoft Corporation
+// All rights reserved.
+// 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at http://www.apache.org/licenses/LICENSE-2.0
+// 
+// THIS CODE IS PROVIDED *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
+// WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
+// MERCHANTABLITY OR NON-INFRINGEMENT.
+// 
+// See the Apache Version 2.0 License for specific language governing
+// permissions and limitations under the License.
+namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
 {
     using System;
+    using System.ComponentModel;
     using System.Management.Automation;
+    using System.Reflection;
     using System.Security.Cryptography.X509Certificates;
-    using Microsoft.WindowsAzure.Management.Framework.InversionOfControl;
+    using System.Threading.Tasks;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.BaseCommandInterfaces;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandInterfaces;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Logging;
+    using Microsoft.WindowsAzure.Management.HDInsight;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
     using Microsoft.WindowsAzure.Management.HDInsight.InversionOfControl;
+    using Microsoft.WindowsAzure.Management.HDInsight.Logging;
 
     /// <summary>
     /// Cmdlet that deletes a cluster from the HDInsight service.
     /// </summary>
-    [Cmdlet(VerbsCommon.Remove, AzureHdInsightPowerShellHardCodes.AzureHDInsightCluster)]
+    [Cmdlet(VerbsCommon.Remove, AzureHdInsightPowerShellConstants.AzureHDInsightCluster)]
     public class RemoveClusterHDInsightClusterCmdlet : AzureHDInsightCmdlet, IRemoveAzureHDInsightClusterBase
     {
-        private IRemoveAzureHDInsightClusterCommand deleteCommand;
+        private IRemoveAzureHDInsightClusterCommand command;
 
         /// <summary>
         /// Initializes a new instance of the RemoveClusterHDInsightClusterCmdlet class.
         /// </summary>
         public RemoveClusterHDInsightClusterCmdlet()
         {
-            this.deleteCommand = ServiceLocator.Instance.Locate<IAzureHDInsightCommandFactory>().CreateDelete();
+            this.command = ServiceLocator.Instance.Locate<IAzureHDInsightCommandFactory>().CreateDelete();
+        }
+
+        /// <inheritdoc />
+        protected override void StopProcessing()
+        {
+            this.command.Cancel();
         }
 
         /// <inheritdoc />
         [Parameter(Position = 0, Mandatory = true,
                    HelpMessage = "The name of the cluster to remove.",
                    ValueFromPipeline = true,
-                   ParameterSetName = AzureHdInsightPowerShellHardCodes.ParameterSetClusterByNameWithSpecificSubscriptionCredentails)]
-        [Alias(AzureHdInsightPowerShellHardCodes.AliasClusterName, AzureHdInsightPowerShellHardCodes.AliasDnsName)]
+                   ParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetClusterByNameWithSpecificSubscriptionCredentials)]
+        [Alias(AzureHdInsightPowerShellConstants.AliasClusterName, AzureHdInsightPowerShellConstants.AliasDnsName)]
         public string Name
         {
-            get { return this.deleteCommand.Name; }
-            set { this.deleteCommand.Name = value; }
+            get { return this.command.Name; }
+            set { this.command.Name = value; }
         }
 
         /// <inheritdoc />
-        [Parameter(Position = 1, Mandatory = true, 
+        [Parameter(Position = 1, Mandatory = true,
                    HelpMessage = "The subscription id for the Azure subscription.",
-                   ParameterSetName = AzureHdInsightPowerShellHardCodes.ParameterSetClusterByNameWithSpecificSubscriptionCredentails)]
-        [Alias(AzureHdInsightPowerShellHardCodes.AliasSub, AzureHdInsightPowerShellHardCodes.AliasSubscription)]
-        public Guid SubscriptionId
+                   ParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetClusterByNameWithSpecificSubscriptionCredentials)]
+        [Alias(AzureHdInsightPowerShellConstants.AliasSub)]
+        public string Subscription
         {
-            get { return this.deleteCommand.SubscriptionId; }
-            set { this.deleteCommand.SubscriptionId = value; }
+            get { return this.command.Subscription; }
+            set { this.command.Subscription = value; }
         }
 
         /// <inheritdoc />
-        [Parameter(Position = 2, Mandatory = true,
+        [Parameter(Position = 2, Mandatory = false,
                    HelpMessage = "The management certificate used to manage the Azure subscription.",
-                   ParameterSetName = AzureHdInsightPowerShellHardCodes.ParameterSetClusterByNameWithSpecificSubscriptionCredentails)]
-        [Alias(AzureHdInsightPowerShellHardCodes.AliasCert)]
+                   ParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetClusterByNameWithSpecificSubscriptionCredentials)]
+        [Alias(AzureHdInsightPowerShellConstants.AliasCert)]
         public X509Certificate2 Certificate
         {
-            get { return this.deleteCommand.Certificate; }
-            set { this.deleteCommand.Certificate = value; }
+            get { return this.command.Certificate; }
+            set { this.command.Certificate = value; }
         }
 
         /// <inheritdoc />
         [Parameter(Position = 3, Mandatory = false,
                    HelpMessage = "The azure location where the new cluster should be created.",
-                   ParameterSetName = AzureHdInsightPowerShellHardCodes.ParameterSetClusterByNameWithSpecificSubscriptionCredentails)]
-        [Alias(AzureHdInsightPowerShellHardCodes.AliasLoc)]
+                   ParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetClusterByNameWithSpecificSubscriptionCredentials)]
+        [Alias(AzureHdInsightPowerShellConstants.AliasLoc)]
         public string Location
         {
-            get { return this.deleteCommand.Location; }
-            set { this.deleteCommand.Location = value; }
+            get { return this.command.Location; }
+            set { this.command.Location = value; }
         }
 
         /// <inheritdoc />
         [Parameter(Position = 4, Mandatory = false,
                    HelpMessage = "The Endpoint to use when connecting to Azure.",
-                   ParameterSetName = AzureHdInsightPowerShellHardCodes.ParameterSetClusterByNameWithSpecificSubscriptionCredentails)]
+                   ParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetClusterByNameWithSpecificSubscriptionCredentials)]
         public Uri EndPoint
         {
-            get { return this.deleteCommand.EndPoint; }
-            set { this.deleteCommand.EndPoint = value; }
+            get { return this.command.EndPoint; }
+            set { this.command.EndPoint = value; }
         }
 
         /// <inheritdoc />
         [Parameter(Position = 5, Mandatory = false,
                    HelpMessage = "The CloudServiceName to use when managing the HDInsight cluster.",
-                   ParameterSetName = AzureHdInsightPowerShellHardCodes.ParameterSetClusterByNameWithSpecificSubscriptionCredentails)]
+                   ParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetClusterByNameWithSpecificSubscriptionCredentials)]
         public string CloudServiceName
         {
-            get { return this.deleteCommand.CloudServiceName; }
-            set { this.deleteCommand.CloudServiceName = value; }
+            get { return this.command.CloudServiceName; }
+            set { this.command.CloudServiceName = value; }
         }
 
         /// <summary>
@@ -93,7 +122,37 @@
         /// </summary>
         protected override void EndProcessing()
         {
-            this.deleteCommand.EndProcessing();
+            try
+            {
+                this.command.Logger = this.Logger;
+                var task = this.command.EndProcessing();
+                var token = this.command.CancellationToken;
+                while (!task.IsCompleted)
+                {
+                    this.WriteDebugLog();
+                    task.Wait(1000, token);
+                }
+                if (task.IsFaulted)
+                {
+                    throw new AggregateException(task.Exception);
+                }
+                this.WriteDebugLog();
+            }
+            catch (Exception ex)
+            {
+                var type = ex.GetType();
+                this.Logger.Log(Severity.Error, Verbosity.Normal, this.FormatException(ex));
+                this.WriteDebugLog();
+                if (type == typeof(AggregateException) || type == typeof(TargetInvocationException) || type == typeof(TaskCanceledException))
+                {
+                    ex.Rethrow();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            this.WriteDebugLog();
         }
     }
 }

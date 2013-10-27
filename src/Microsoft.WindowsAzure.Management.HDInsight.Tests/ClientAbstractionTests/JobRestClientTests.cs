@@ -1,4 +1,18 @@
-﻿namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTests
+﻿// Copyright (c) Microsoft Corporation
+// All rights reserved.
+// 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at http://www.apache.org/licenses/LICENSE-2.0
+// 
+// THIS CODE IS PROVIDED *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
+// WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
+// MERCHANTABLITY OR NON-INFRINGEMENT.
+// 
+// See the Apache Version 2.0 License for specific language governing
+// permissions and limitations under the License.
+namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTests
 {
     using System;
     using System.Collections.Generic;
@@ -6,26 +20,29 @@
     using System.Linq;
     using System.Security.Cryptography.X509Certificates;
     using System.Text;
+    using System.Threading;
     using System.Threading.Tasks;
+    using Microsoft.Hadoop.Client;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Microsoft.WindowsAzure.Management.Framework.DynamicXml.Writer;
-    using Microsoft.WindowsAzure.Management.Framework.InversionOfControl;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.DynamicXml.Writer;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
     using Microsoft.WindowsAzure.Management.HDInsight.JobSubmission.RestClient;
-    using Microsoft.WindowsAzure.Management.HDInsight.ConnectionContext;
+    using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities;
+
 
     [TestClass]
     public class JobRestClientTests : IntegrationTestBase
     {
         [TestInitialize]
-        public void Initialize()
+        public override void Initialize()
         {
-            this.IndividualTestSetup();
+            base.Initialize();
         }
 
         [TestCleanup]
-        public void TestCleanup()
+        public override void TestCleanup()
         {
-            this.IndividualTestCleanup();
+            base.TestCleanup();
         }
 
         [TestMethod]
@@ -40,8 +57,8 @@
             // string cloudNamespace = @"hdinsight";
             var creds = GetCredentials("hadoop");
             var x509 = new X509Certificate2(creds.Certificate);
-            var conCreds = new ConnectionCredentials(new Uri(endPoint), cloudNamespace, creds.SubscriptionId, x509);
-            var client = ServiceLocator.Instance.Locate<IHDInsightJobSubmissionRestClientFactory>().Create(conCreds);
+            var conCreds = new HDInsightCertificateCredential(creds.SubscriptionId, x509, new Uri(endPoint), cloudNamespace);
+            var client = ServiceLocator.Instance.Locate<IHDInsightJobSubmissionRestClientFactory>().Create(conCreds, GetAbstractionContext());
             var result = await client.ListJobs("wfoley-tortuga-07", "East US");
             Assert.IsNotNull(result);
         }
@@ -59,8 +76,8 @@
             var creds = GetCredentials("hadoop");
             var id = "job_201306130113_0009";
             var x509 = new X509Certificate2(creds.Certificate);
-            var conCreds = new ConnectionCredentials(new Uri(endPoint), cloudNamespace, creds.SubscriptionId, x509);
-            var client = ServiceLocator.Instance.Locate<IHDInsightJobSubmissionRestClientFactory>().Create(conCreds);
+            var conCreds = new HDInsightCertificateCredential(creds.SubscriptionId, x509, new Uri(endPoint), cloudNamespace);
+            var client = ServiceLocator.Instance.Locate<IHDInsightJobSubmissionRestClientFactory>().Create(conCreds, GetAbstractionContext());
             var result = await client.GetJobDetail("wfoley-tortuga-07", "East US", id);
             Assert.IsNotNull(result);
         }
@@ -84,7 +101,7 @@
                         .xmlns.a.@string(16)
                         .xmlns.a.@string(10000)
                      .d
-                     .JarFile("asv://jarfiles@wfoleyeastus.blob.core.windows.net/hadoop-examples.jar")
+                     .JarFile(Constants.WabsProtocolSchemeName + "jarfiles@wfoleyeastus.blob.core.windows.net/hadoop-examples.jar")
                      .JobName("TestJob")
                      .JobType("MapReduce")
                      .OutputStorageLocation("wfoleyeastus")
@@ -118,8 +135,8 @@
             //cloudNamespace = "hdinsight-current";
             //endPoint = @"https://umapi.rdfetest.dnsdemo4.com:8443/";
 
-            var conCreds = new ConnectionCredentials(new Uri(endPoint), cloudNamespace, subId, x509);
-            var client = ServiceLocator.Instance.Locate<IHDInsightJobSubmissionRestClientFactory>().Create(conCreds);
+            var conCreds = new HDInsightCertificateCredential(subId, x509, new Uri(endPoint), cloudNamespace);
+            var client = ServiceLocator.Instance.Locate<IHDInsightJobSubmissionRestClientFactory>().Create(conCreds, GetAbstractionContext());
             var result = await client.CreateJob(dnsName, "East US", payLoad);
             Assert.IsNotNull(result);
         }

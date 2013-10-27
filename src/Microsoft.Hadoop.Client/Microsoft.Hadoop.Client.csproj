@@ -31,20 +31,98 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.WindowsAzure.Storage, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>externals\Microsoft.WindowsAzure.Storage.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BasicAuthCredential.cs" />
+    <Compile Include="ClientLayer\Client.cs" />
+    <Compile Include="ClientLayer\HadoopClientFactoryManager.cs" />
+    <Compile Include="ClientLayer\IHadoopAbstractionContext.cs" />
+    <Compile Include="ClientLayer\IHadoopClientFactory.cs" />
+    <Compile Include="ClientLayer\IHadoopClientFactoryManager.cs" />
+    <Compile Include="ClientLayer\IRemoteHadoopClientFactory.cs" />
+    <Compile Include="ClientLayer\RemoteHadoopClientFactory.cs" />
+    <Compile Include="SqoopJobCreateParameters.cs" />
+    <Compile Include="HadoopJobSubmissionRestCleint\HttpLayerException.cs" />
+    <Compile Include="HiveJobCreateParameters.cs" />
+    <Compile Include="IJobSubmissionClientBase.cs" />
+    <Compile Include="IHadoopClientExtensions.cs" />
+    <Compile Include="Data\PayloadParsingExtensions.cs" />
+    <Compile Include="JobCreateHttpResponse.cs" />
+    <Compile Include="JobCreateParameters.cs" />
+    <Compile Include="JobCreationResults.cs" />
+    <Compile Include="JobDetails.cs" />
+    <Compile Include="JobDetailsBase.cs" />
+    <Compile Include="JobList.cs" />
+    <Compile Include="JobSubmissionClientFactory.cs" />
+    <Compile Include="Data\PayloadConverter.cs" />
+    <Compile Include="Data\PayloadConverterBase.cs" />
+    <Compile Include="HadoopJobSubmissionPocoClient\RemoteHadoop\IRemoteHadoopJobSubmissionPocoClientFactory.cs" />
+    <Compile Include="ClientLayer\RemoteHadoopClient.cs" />
+    <Compile Include="IJobSubmissionClientCredential.cs" />
+    <Compile Include="HadoopJobSubmissionPocoClient\IHadoopJobSubmissionPocoClient.cs" />
+    <Compile Include="HadoopJobSubmissionPocoClient\IHadoopJobSubmissionPocoClientFactory.cs" />
+    <None Include="HadoopJobSubmissionPocoClient\LocalHadoop\LocalHadoopJobSubmissionPocoClient.cs" />
+    <None Include="HadoopJobSubmissionPocoClient\LocalHadoop\LocalHadoopJobSubmissionPocoClientFactory.cs" />
+    <Compile Include="HadoopJobSubmissionPocoClient\RemoteHadoop\RemoteHadoopJobSubmissionPocoClient.cs" />
+    <Compile Include="HadoopJobSubmissionPocoClient\RemoteHadoop\RemoteHadoopJobSubmissionPocoClientFactory.cs" />
+    <Compile Include="HardCodes.cs" />
+    <Compile Include="JobStatusCode.cs" />
+    <Compile Include="MapReduceJobCreateParameters.cs" />
+    <Compile Include="PigJobCreateParameters.cs" />
+    <Compile Include="Storage\IStorageAbstraction.cs" />
+    <Compile Include="Storage\IWabStorageAbstractionFactory.cs" />
+    <Compile Include="Storage\WabStorageAbstraction.cs" />
+    <Compile Include="Storage\WabStorageAbstractionFactory.cs" />
+    <Compile Include="StreamingMapReduceJobCreateParameters.cs" />
+    <Compile Include="WaitJobStatusEventArgs.cs" />
+    <Compile Include="WindowsAzureStorageAccountCredentials.cs" />
+    <Compile Include="WebHCatResources\WebHCatHardCodes.cs" />
+    <None Include="HadoopJobSubmissionRestCleint\Local\HadoopLocalJobSubmissionRestClientFactory.cs" />
+    <Compile Include="HadoopJobSubmissionRestCleint\Remote\HadoopRemoteJobSubmissionRestClient.cs" />
+    <Compile Include="HadoopJobSubmissionRestCleint\IHadoopJobSubmissionRestClientFactory.cs" />
+    <None Include="HadoopJobSubmissionRestCleint\Local\IHadoopLocalJobSubmissionRestClientFactory.cs" />
+    <Compile Include="HadoopJobSubmissionRestCleint\Remote\HadoopRemoteJobSubmissionRestClientFactory.cs" />
+    <Compile Include="HadoopJobSubmissionRestCleint\Remote\HadoopRemoteRestHardCodes.cs" />
+    <Compile Include="HadoopJobSubmissionRestCleint\Remote\IHadoopRemoteJobSubmissionRestClientFactory.cs" />
+    <Compile Include="IJobSubmissionAsyncClient.cs" />
+    <Compile Include="IJobSubmissionClient.cs" />
+    <Compile Include="IJobSubmissionSyncClient.cs" />
+    <Compile Include="InversionOfControl\HadoopJobSubmissionRegistrar.cs" />
+    <Compile Include="LocalHadoopConnectionCredentials.cs" />
+    <None Include="HadoopJobSubmissionRestCleint\Local\HadoopLocalJobSubmissionRestClient.cs" />
+    <Compile Include="HadoopJobSubmissionRestCleint\IHadoopJobSubmissionRestClient.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\AssemblyInternalsVisibleTo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="JobSubmission\" />
+    <Folder Include="ClientImplementation\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Microsoft.WindowsAzure.Management.HDInsight.Framework.Core\Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.csproj">
+      <Project>{55787775-8b25-436f-b9b9-c2b60ef80b20}</Project>
+      <Name>Microsoft.WindowsAzure.Management.HDInsight.Framework.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Microsoft.HDInsight.Threading\Microsoft.HDInsight.Threading.csproj">
+      <Project>{dbffc131-e089-4173-9b9e-6826fe596faf}</Project>
+      <Name>Microsoft.HDInsight.Threading</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Microsoft.WindowsAzure.Management.HDinsight.Framework\Microsoft.WindowsAzure.Management.HDInsight.Framework.csproj">
+      <Project>{DB09F70B-FD28-4CC8-86B3-883D71CA9A02}</Project>
+      <Name>Microsoft.WindowsAzure.Management.HDInsight.Framework</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Microsoft.Hadoop.Client.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="..\..\build\targets\Project.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

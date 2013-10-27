@@ -23,6 +23,10 @@
 	</PropertyGroup>
 	
 	<PropertyGroup>
+      <DefineConstants Condition="'$(SignAssembly)' == 'true'">$(DefineConstants);SIGNED</DefineConstants>
+	</PropertyGroup>
+	
+	<PropertyGroup>
 		<!-- This is the root of the source repository enlistment -->
 	    <EnlistmentPath>$(MSBuildThisFileDirectory)..\..</EnlistmentPath>
 		<!-- The IDE does not propertly set SolutionDir, this ensures it is set to the parent directory -->
@@ -76,12 +80,12 @@
 		<RootLogPath>$(RootPath)\Logs</RootLogPath>
 		<LogPath>$(RootLogPath)\Unsigned\$(ConfigurationType)</LogPath>
 		<LogPath Condition="'$(SignAssembly)' == 'true'">$(RootLogPath)\Signed\$(ConfigurationType)</LogPath>
-		
+
 		<!-- The Orgnaized Directory are where files are droped after full build, it should look like you want the files on the client -->
 		<RootOrganizedPath>$(RootPath)\Organized</RootOrganizedPath>
 		<OrganizedPath>$(RootOrganizedPath)\Unsigned\$(ConfigurationType)</OrganizedPath>
 		<OrganizedPath Condition="'$(SignAssembly)' == 'true'">$(RootOrganizedPath)\Signed\$(ConfigurationType)</OrganizedPath>
-		
+
 		<!-- The Prepared Path are where pre-install steups are preformed (such as creating an IntegrationPack or an SCVMMAddIn -->
 		<RootPreparedPath>$(RootPath)\Prepared</RootPreparedPath>
 		<PreparedPath>$(RootPreparedPath)\Unsigned\$(ConfigurationType)</PreparedPath>

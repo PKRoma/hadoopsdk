@@ -12,133 +12,184 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
-
 namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestClient
 {
     using System;
-    using System.Globalization;
     using System.Net;
     using System.Net.Http;
-    using System.Security.Cryptography;
-    using System.Text;
     using System.Threading.Tasks;
-    using Microsoft.WindowsAzure.Management.Framework.InversionOfControl;
-    using Microsoft.WindowsAzure.Management.Framework.WebRequest;
-    using Microsoft.WindowsAzure.Management.HDInsight.ConnectionContext;
-    using Microsoft.WindowsAzure.Management.Framework;
-    using Microsoft.WindowsAzure.Management.HDInsight.InversionOfControl;
+    using Microsoft.Hadoop.Client;
+    using Microsoft.Hadoop.Client.WebHCatRest;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.ClusterManager;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoClient;
+    using Microsoft.WindowsAzure.Management.HDInsight;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
 
-    internal class HDInsightManagementRestClient : DisposableObject, IHDInsightManagementRestClient
+    internal class HDInsightManagementRestClient : IHDInsightManagementRestClient
     {
-        private readonly IConnectionCredentials credentials;
-        private readonly ICloudServiceNameResolver resolver;
+        private readonly IHDInsightCertificateCredential credentials;
+        private readonly HDInsight.IAbstractionContext context;
+        private const string HelpLinkForException = @"http://go.microsoft.com/fwlink/?LinkID=324137";
 
-        internal HDInsightManagementRestClient(IConnectionCredentials credentials)
+        public IHDInsightCertificateCredential Credentials
         {
-            this.credentials = credentials;
-            this.resolver = ServiceLocator.Instance.Locate<ICloudServiceNameResolver>();
+            get { return this.credentials; }
         }
-        
-        // Method = "GET", UriTemplate = "{subscriptionId}/cloudservices"
-        public async Task<string> ListCloudServices()
+
+        internal HDInsightManagementRestClient(IHDInsightCertificateCredential credentials, HDInsight.IAbstractionContext context)
         {
+            this.context = context;
+            this.credentials = credentials;
+        }
+
+        // Method = "GET", UriTemplate = "{subscriptionId}/cloudservices"
+        public async Task<IHttpResponseMessageAbstraction> ListCloudServices()
+        {
+            var overrideHandlers = ServiceLocator.Instance.Locate<IHDInsightClusterOverrideManager>().GetHandlers(this.credentials, this.context);
+            var uriBuilder = overrideHandlers.UriBuilder;
             // Creates an HTTP client
-            using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(this.credentials.Certificate))
+            using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(this.credentials.Certificate, this.context))
             {
-                // Creates the request
-                string relativeUri = string.Format("{0}/cloudservices",
-                                                    this.credentials.SubscriptionId);
-                client.RequestUri = new Uri(this.credentials.Endpoint, new Uri(relativeUri, UriKind.Relative));
-                client.RequestHeaders.Add(HDInsightRestHardcodes.XMsVersion);
-                client.RequestHeaders.Add(HDInsightRestHardcodes.Accept);
+                client.RequestUri = uriBuilder.GetListCloudServicesUri();
+                client.RequestHeaders.Add(HDInsightRestConstants.XMsVersion);
+                client.RequestHeaders.Add(HDInsightRestConstants.Accept);
                 client.Method = HttpMethod.Get;
-                    
+
                 // Sends, validates and parses the response
                 var httpResponse = await client.SendAsync();
                 if (httpResponse.StatusCode != HttpStatusCode.OK)
                 {
-                    throw new HDInsightRestClientException(httpResponse.StatusCode,
-                                                            httpResponse.Content);
+                    throw new HttpLayerException(httpResponse.StatusCode,
+                                                            httpResponse.Content)
+                    {
+                        HelpLink = HelpLinkForException
+                    };
                 }
-                return httpResponse.Content;
+                return httpResponse;
             }
         }
 
         // Method = "PUT", UriTemplate = "{subscriptionId}/cloudservices/{cloudServiceName}/resources/{resourceProviderNamespace}/{resourceType}/{resourceName}"
-        public async Task CreateResource(string resourceId, string resourceType, string location, string clusterPayload)
+        public async Task<IHttpResponseMessageAbstraction> CreateResource(string resourceId, string resourceType, string location, string clusterPayload)
         {
+            var overrideHandlers = ServiceLocator.Instance.Locate<IHDInsightClusterOverrideManager>().GetHandlers(this.credentials, this.context);
+            var uriBuilder = overrideHandlers.UriBuilder;
             // Creates an HTTP client
-            using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(this.credentials.Certificate))
+            using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(this.credentials.Certificate, this.context))
             {
-                string regionCloudServicename = this.resolver.GetCloudServiceName(this.credentials.SubscriptionId,
-                                                                                  this.credentials.DeploymentNamespace,
-                                                                                  location);
-
-                string relativeUri = string.Format(CultureInfo.InvariantCulture,
-                                                    "{0}/cloudservices/{1}/resources/{2}/{3}/{4}",
-                                                    this.credentials.SubscriptionId,
-                                                    regionCloudServicename,
-                                                    this.credentials.DeploymentNamespace,
-                                                    resourceType,
-                                                    resourceId);
-
-                client.RequestUri = new Uri(this.credentials.Endpoint,
-                                            new Uri(relativeUri,
-                                                    UriKind.Relative));
+                client.RequestUri = uriBuilder.GetCreateResourceUri(resourceId, resourceType, location);
                 client.Method = HttpMethod.Put;
-                client.RequestHeaders.Add(HDInsightRestHardcodes.XMsVersion);
-                client.RequestHeaders.Add(HDInsightRestHardcodes.Accept);
+                client.RequestHeaders.Add(HDInsightRestConstants.XMsVersion);
+                client.RequestHeaders.Add(HDInsightRestConstants.SchemaVersion2);
+                client.RequestHeaders.Add(HDInsightRestConstants.Accept);
                 client.Content = clusterPayload;
 
                 var httpResponse = await client.SendAsync();
                 if (httpResponse.StatusCode != HttpStatusCode.Accepted)
                 {
-                    throw new HDInsightRestClientException(httpResponse.StatusCode,
-                                                            httpResponse.Content);
+                    throw new HttpLayerException(httpResponse.StatusCode,
+                                                            httpResponse.Content)
+                    {
+                        HelpLink = HelpLinkForException
+                    };
                 }
+                return httpResponse;
             }
         }
 
         // Method = "PUT", UriTemplate = "{subscriptionId}/cloudservices/{cloudServiceName}/resources/{resourceProviderNamespace}/{resourceType}/{resourceName}"
-        public async Task CreateContainer(string dnsName, string location, string clusterPayload)
+        public async Task<IHttpResponseMessageAbstraction> CreateContainer(string dnsName, string location, string clusterPayload)
         {
-            await this.CreateResource(dnsName,
-                                      "containers",
-                                      location,
-                                      clusterPayload);
+            return await this.CreateResource(dnsName,
+                                             "containers",
+                                             location,
+                                             clusterPayload);
         }
 
         // Method = "DELETE", UriTemplate = "{subscriptionId}/cloudservices/{cloudServiceName}/resources/{resourceProviderNamespace}/{resourceType}/{resourceName}"
-        public async Task DeleteContainer(string dnsName, string location)
+        public async Task<IHttpResponseMessageAbstraction> DeleteContainer(string dnsName, string location)
         {
+            var overrideHandlers = ServiceLocator.Instance.Locate<IHDInsightClusterOverrideManager>().GetHandlers(this.credentials, this.context);
+            var uriBuilder = overrideHandlers.UriBuilder;
             // Creates an HTTP client
-            using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(this.credentials.Certificate))
+            using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(this.credentials.Certificate, this.context))
             {
-                Guid subscriptionId = this.credentials.SubscriptionId;
-                string cloudServiceName = this.credentials.DeploymentNamespace;
-                string regionCloudServicename = this.resolver.GetCloudServiceName(subscriptionId,
-                                                                                  cloudServiceName,
-                                                                                  location);
-                string relativeUri = string.Format(CultureInfo.InvariantCulture,
-                                                    "{0}/cloudservices/{1}/resources/{2}/{3}/{4}",
-                                                    subscriptionId,
-                                                    regionCloudServicename,
-                                                    this.credentials.DeploymentNamespace,
-                                                    "containers",
-                                                    dnsName);
-                client.RequestUri = new Uri(this.credentials.Endpoint,
-                                            new Uri(relativeUri, UriKind.Relative));
+                client.RequestUri = uriBuilder.GetDeleteContainerUri(dnsName, location);
 
                 client.Method = HttpMethod.Delete;
-                client.RequestHeaders.Add(HDInsightRestHardcodes.XMsVersion);
-                client.RequestHeaders.Add(HDInsightRestHardcodes.Accept);
+                client.RequestHeaders.Add(HDInsightRestConstants.XMsVersion);
+                client.RequestHeaders.Add(HDInsightRestConstants.Accept);
 
                 var httpResponse = await client.SendAsync();
                 if (httpResponse.StatusCode != HttpStatusCode.Accepted)
                 {
-                    throw new HDInsightRestClientException(httpResponse.StatusCode,
-                                                            httpResponse.Content);
+                    throw new HttpLayerException(httpResponse.StatusCode,
+                                                            httpResponse.Content)
+                    {
+                        HelpLink = HelpLinkForException
+                    };
                 }
+                return httpResponse;
+            }
+        }
+
+        // Method = "POST", UriTemplate = "{subscriptionId}/cloudservices/{cloudServiceName}/resources/hdinsight/~/containers/{containerName}/services/http"
+        public async Task<IHttpResponseMessageAbstraction> EnableDisableUserChangeRequest(string dnsName, string location, UserChangeRequestUserType requestType, string payload)
+        {
+            var manager = ServiceLocator.Instance.Locate<IUserChangeRequestManager>();
+            var handler = manager.LocateUserChangeRequestHandler(this.credentials.GetType(), requestType);
+            // Creates an HTTP client
+            if (handler.IsNull())
+            {
+                throw new NotSupportedException("Request to submit a UserChangeRequest that is not supported by this client");
+            }
+            using (IHttpClientAbstraction client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(this.credentials.Certificate, this.context))
+            {
+                var hadoopContext = new HDInsightSubscriptionAbstractionContext(this.credentials, this.context);
+                client.RequestUri = handler.Item1(hadoopContext, dnsName, location);
+                client.Method = HttpMethod.Post;
+                client.RequestHeaders.Add(HDInsightRestConstants.XMsVersion);
+                client.RequestHeaders.Add(HDInsightRestConstants.SchemaVersion2);
+                client.RequestHeaders.Add(HDInsightRestConstants.Accept);
+                client.Content = payload;
+
+                IHttpResponseMessageAbstraction httpResponse = await client.SendAsync();
+                if (httpResponse.StatusCode != HttpStatusCode.Accepted)
+                {
+                    throw new HttpLayerException(httpResponse.StatusCode, httpResponse.Content)
+                    {
+                        HelpLink = HelpLinkForException
+                    };
+                }
+                return httpResponse;
+            }
+        }
+
+        public async Task<IHttpResponseMessageAbstraction> GetOperationStatus(string dnsName, string location, Guid operationId)
+        {
+            var overrideHandlers = ServiceLocator.Instance.Locate<IHDInsightClusterOverrideManager>().GetHandlers(this.credentials, this.context);
+            var uriBuilder = overrideHandlers.UriBuilder;
+            // Creates an HTTP client
+            using (IHttpClientAbstraction client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(this.credentials.Certificate, this.context))
+            {
+                client.RequestUri = uriBuilder.GetOperationStatusUri(dnsName, location, this.credentials.DeploymentNamespace, operationId);
+                client.Method = HttpMethod.Get;
+                client.RequestHeaders.Add(HDInsightRestConstants.XMsVersion);
+                client.RequestHeaders.Add(HDInsightRestConstants.SchemaVersion2);
+
+                IHttpResponseMessageAbstraction httpResponse = await client.SendAsync();
+                if (httpResponse.StatusCode != HttpStatusCode.Accepted)
+                {
+                    throw new HttpLayerException(httpResponse.StatusCode, httpResponse.Content)
+                    {
+                        HelpLink = HelpLinkForException
+                    };
+                }
+
+                return httpResponse;
             }
         }
     }

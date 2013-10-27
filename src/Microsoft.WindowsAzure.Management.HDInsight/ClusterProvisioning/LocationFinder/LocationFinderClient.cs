@@ -12,94 +12,56 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
-
 namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.LocationFinder
 {
     using System;
+    using System.Collections.Generic;
     using System.Collections.ObjectModel;
-    using System.Globalization;
-    using System.IO;
     using System.Linq;
-    using System.Net;
-    using System.Net.Http;
-    using System.Security.Cryptography;
-    using System.Text;
     using System.Threading.Tasks;
-    using System.Xml.Linq;
-    using Microsoft.WindowsAzure.Management.Framework.InversionOfControl;
-    using Microsoft.WindowsAzure.Management.Framework.WebRequest;
-    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.LocationFinder;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestClient;
-    using Microsoft.WindowsAzure.Management.HDInsight.ConnectionContext;
-    using Microsoft.WindowsAzure.Management.Framework;
-    using Microsoft.WindowsAzure.Management.HDInsight.InversionOfControl;
+    using Microsoft.WindowsAzure.Management.HDInsight;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
 
     internal class LocationFinderClient : ILocationFinderClient
     {
-        private readonly IConnectionCredentials credentials;
+        private const string RegionPrefix = "CAPABILITY_REGION_";
+        private readonly IHDInsightCertificateCredential credentials;
+        private readonly IAbstractionContext context;
 
-        internal LocationFinderClient(IConnectionCredentials credentials)
+        internal LocationFinderClient(IHDInsightCertificateCredential credentials, IAbstractionContext context)
         {
+            this.context = context;
             this.credentials = credentials;
         }
-        
-        // Method = "GET", UriTemplate = "UriTemplate = "{subscriptionId}/resourceproviders/{resourceProviderNamespace}/Properties?resourceType={resourceType}"
+
         public async Task<Collection<string>> ListAvailableLocations()
         {
             // Creates an HTTP client
-            using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(this.credentials.Certificate))
-            {
-                Guid subscriptionId = this.credentials.SubscriptionId;
-                string cloudServiceName = this.credentials.DeploymentNamespace;
-                string relativeUri = string.Format(CultureInfo.InvariantCulture,
-                                                    "{0}/resourceproviders/{1}/Properties?resourceType={2}",
-                                                    subscriptionId,
-                                                    this.credentials.DeploymentNamespace,
-                                                    "containers");
-                client.RequestUri = new Uri(this.credentials.Endpoint, new Uri(relativeUri, UriKind.Relative));
+            var client = ServiceLocator.Instance.Locate<IRdfeServiceRestClientFactory>().Create(this.credentials, this.context);
 
-                client.Method = HttpMethod.Get;
-                client.RequestHeaders.Add(HDInsightRestHardcodes.XMsVersion);
-                client.RequestHeaders.Add(HDInsightRestHardcodes.Accept);
-
-                var httpResponse = await client.SendAsync();
-                if (httpResponse.StatusCode != HttpStatusCode.OK)
-                {
-                    throw new HDInsightRestClientException(httpResponse.StatusCode, httpResponse.Content);
-                }
-
-                return ParseLocations(httpResponse.Content);
-            }
+            var capabilities = await client.GetResourceProviderProperties();
+            return this.ListAvailableLocations(capabilities);
         }
 
-        internal static Collection<string> ParseLocations(string payload)
+        public Collection<string> ListAvailableLocations(IEnumerable<KeyValuePair<string, string>> capabilities)
         {
-            // Open the XML.
-            XDocument xdoc = XDocument.Parse(payload);
-            XNamespace ns = "http://schemas.microsoft.com/windowsazure";
-            if (xdoc.Root == null)
+            if (capabilities.IsNull())
             {
-                return new Collection<string>();
+                throw new ArgumentNullException("capabilities");
             }
 
-            // Loops through the ResourceProviderProperty elements and extract the values for elements with "CAPABILITY_REGION" keys
-            var result = new Collection<string>();
-            foreach (var element in xdoc.Root.Elements(ns + "ResourceProviderProperty"))
-            {
-                var key = element.Elements(ns + "Key").FirstOrDefault();
-                var value = element.Elements(ns + "Value").FirstOrDefault();
-                if (key == null || key.Value == null || value == null || value.Value == null)
-                {
-                    continue;
-                }
+            return ParseLocations(capabilities);
+        }
 
-                if (key.Value.StartsWith("CAPABILITY_REGION", StringComparison.OrdinalIgnoreCase))
-                {
-                    result.Add(value.Value);
-                }
-            }
+        internal static Collection<string> ParseLocations(IEnumerable<KeyValuePair<string, string>> capabilities)
+        {
+            var supportedLocations = from capability in capabilities
+                                     where capability.Key.StartsWith(RegionPrefix, StringComparison.OrdinalIgnoreCase)
+                                     select capability.Value;
 
-            return result;
+            return new Collection<string>(supportedLocations.ToList());
         }
     }
 }

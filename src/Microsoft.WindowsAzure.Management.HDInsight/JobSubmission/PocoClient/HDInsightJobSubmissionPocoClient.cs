@@ -12,79 +12,82 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
-
 namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission.PocoClient
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
     using System.Threading.Tasks;
-    using System.Xml;
-    using Microsoft.WindowsAzure.Management.Framework;
-    using Microsoft.WindowsAzure.Management.Framework.InversionOfControl;
-    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data;
-    using Microsoft.WindowsAzure.Management.HDInsight.ConnectionContext;
-    using Microsoft.WindowsAzure.Management.HDInsight.JobSubmission.Data;
-    using Microsoft.WindowsAzure.Management.HDInsight.JobSubmission.RestClient;
+    using Microsoft.Hadoop.Client;
+    using Microsoft.Hadoop.Client.HadoopJobSubmissionPocoClient.RemoteHadoop;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
+    using Microsoft.WindowsAzure.Management.HDInsight;
 
     /// <summary>
     /// The PocoClient for submitting jobs to an HDInsight server.
     /// </summary>
-    public class HDInsightJobSubmissionPocoClient : IHDInsightJobSubmissionPocoClient
+    internal class HDInsightJobSubmissionPocoClient : IHDInsightJobSubmissionPocoClient
     {
-        private readonly IConnectionCredentials credentials;
+        private readonly BasicAuthCredential remoteCreds;
+        private IAbstractionContext context;
 
-        internal HDInsightJobSubmissionPocoClient(IConnectionCredentials credentials)
+        internal HDInsightJobSubmissionPocoClient(BasicAuthCredential credentials, IAbstractionContext context)
         {
-            this.credentials = credentials;
+            this.remoteCreds = credentials;
+            this.context = context;
         }
 
         /// <inheritdoc />
-        public async Task<HDInsightJobCreationResults> CreateHiveJob(string dnsName, string location, HDInsightHiveJobCreationDetails details)
+        public async Task<JobCreationResults> SubmitHiveJob(HiveJobCreateParameters details)
         {
-            JobPayloadConverter converter = new JobPayloadConverter();
-            using (var client = ServiceLocator.Instance.Locate<IHDInsightJobSubmissionRestClientFactory>().Create(this.credentials))
-            {
-                var payload = converter.SerializeJobCreationDetails(details);
-                var result = await client.CreateJob(dnsName, location, payload);
-                return converter.DeserializeJobCreationResults(result);
-            }
+            var remoteClient = ServiceLocator.Instance.Locate<IRemoteHadoopJobSubmissionPocoClientFactory>().Create(this.remoteCreds, this.context);
+            return await remoteClient.SubmitHiveJob(details);
         }
 
         /// <inheritdoc />
-        public async Task<HDInsightJobCreationResults> CreateMapReduceJob(string dnsName, string location, HDInsightMapReduceJobCreationDetails details)
+        public async Task<JobCreationResults> SubmitMapReduceJob(MapReduceJobCreateParameters details)
         {
-            JobPayloadConverter converter = new JobPayloadConverter();
-            using (var client = ServiceLocator.Instance.Locate<IHDInsightJobSubmissionRestClientFactory>().Create(this.credentials))
-            {
-                var payload = converter.SerializeJobCreationDetails(details);
-                var result = await client.CreateJob(dnsName, location, payload);
-                return converter.DeserializeJobCreationResults(result);
-            }
+            var remoteClient = ServiceLocator.Instance.Locate<IRemoteHadoopJobSubmissionPocoClientFactory>().Create(this.remoteCreds, this.context);
+            return await remoteClient.SubmitMapReduceJob(details);
         }
 
         /// <inheritdoc />
-        public async Task<HDInsightJobList> ListJobs(string dnsName, string location)
+        public async Task<JobList> ListJobs()
         {
-            List<string> jobIds = new List<string>();
-            JobPayloadConverter converter = new JobPayloadConverter();
-            using (var client = ServiceLocator.Instance.Locate<IHDInsightJobSubmissionRestClientFactory>().Create(this.credentials))
-            {
-                var result = await client.ListJobs(dnsName, location);
-                return converter.DeserializeJobList(result);
-            }
+            var remoteClient = ServiceLocator.Instance.Locate<IRemoteHadoopJobSubmissionPocoClientFactory>().Create(this.remoteCreds, this.context);
+            return await remoteClient.ListJobs();
         }
 
         /// <inheritdoc />
-        public async Task<HDInsightJob> GetJobDetail(string dnsName, string location, string jobId)
+        public async Task<JobDetails> GetJob(string jobId)
         {
-            JobPayloadConverter converter = new JobPayloadConverter();
-            using (var client = ServiceLocator.Instance.Locate<IHDInsightJobSubmissionRestClientFactory>().Create(this.credentials))
-            {
-                var result = await client.GetJobDetail(dnsName, location, jobId);
-                var retval = converter.DeserializeJobDetails(result, jobId);
-                return retval;
-            }
+            var remoteClient = ServiceLocator.Instance.Locate<IRemoteHadoopJobSubmissionPocoClientFactory>().Create(this.remoteCreds, this.context);
+            return await remoteClient.GetJob(jobId);
+        }
+
+        /// <inheritdoc />
+        public async Task<JobCreationResults> SubmitPigJob(PigJobCreateParameters pigJobCreateParameters)
+        {
+            var remoteClient = ServiceLocator.Instance.Locate<IRemoteHadoopJobSubmissionPocoClientFactory>().Create(this.remoteCreds, this.context);
+            return await remoteClient.SubmitPigJob(pigJobCreateParameters);
+        }
+
+        /// <inheritdoc />
+        public async Task<JobCreationResults> SubmitSqoopJob(SqoopJobCreateParameters sqoopJobCreateParameters)
+        {
+            var remoteClient = ServiceLocator.Instance.Locate<IRemoteHadoopJobSubmissionPocoClientFactory>().Create(this.remoteCreds, this.context);
+            return await remoteClient.SubmitSqoopJob(sqoopJobCreateParameters);
+        }
+
+        /// <inheritdoc />
+        public async Task<JobCreationResults> SubmitStreamingJob(StreamingMapReduceJobCreateParameters pigJobCreateParameters)
+        {
+            var remoteClient = ServiceLocator.Instance.Locate<IRemoteHadoopJobSubmissionPocoClientFactory>().Create(this.remoteCreds, this.context);
+            return await remoteClient.SubmitStreamingJob(pigJobCreateParameters);
+        }
+
+        /// <inheritdoc />
+        public async Task<JobDetails> StopJob(string jobId)
+        {
+            var remoteClient = ServiceLocator.Instance.Locate<IRemoteHadoopJobSubmissionPocoClientFactory>().Create(this.remoteCreds, this.context);
+            return await remoteClient.StopJob(jobId);
         }
     }
 }

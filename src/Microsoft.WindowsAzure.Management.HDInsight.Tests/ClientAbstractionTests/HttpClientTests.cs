@@ -1,42 +1,54 @@
-﻿namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTests
+﻿// Copyright (c) Microsoft Corporation
+// All rights reserved.
+// 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at http://www.apache.org/licenses/LICENSE-2.0
+// 
+// THIS CODE IS PROVIDED *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
+// WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
+// MERCHANTABLITY OR NON-INFRINGEMENT.
+// 
+// See the Apache Version 2.0 License for specific language governing
+// permissions and limitations under the License.
+namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTests
 {
     using System;
     using System.Net;
     using System.Net.Http;
     using System.Net.Http.Headers;
+    using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Microsoft.WindowsAzure.Management.Framework;
-    using Microsoft.WindowsAzure.Management.Framework.InversionOfControl;
-    using Microsoft.WindowsAzure.Management.Framework.WebRequest;
-    using Microsoft.WindowsAzure.Management.HDInsight.ConnectionContext;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
+    using Microsoft.WindowsAzure.Management.HDInsight;
     using Microsoft.WindowsAzure.Management.HDInsight.InversionOfControl;
+    using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities;
 
     [TestClass]
     public class HttpClientTests : IntegrationTestBase
     {
         [TestInitialize]
-        public void Initialize()
+        public override void Initialize()
         {
-            this.ApplyFullMocking();
-            this.ResetIndividualMocks();
+            base.Initialize();
         }
 
         [TestCleanup]
-        public void TestCleanup()
+        public override void TestCleanup()
         {
-            this.ApplyFullMocking();
-            this.ResetIndividualMocks();
+            base.TestCleanup();
         }
 
         [TestMethod]
-        [TestCategory("CheckIn")]
         [TestCategory("Integration")]
         [TestCategory(TestRunMode.Nightly)]
         public async Task ICanPerformA_Get_Using_HttpClientAbstraction()
         {
             //         Given I want to use an X509 Cert for authentication
-            IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
+            IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
             //           And I have an Http Client
             using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(credentials.Certificate))
             {
@@ -65,7 +77,7 @@
         public async Task ICanPerformA_Put_Using_HttpClientAbstraction()
         {
             //         Given I want to use an X509 Cert for authentication
-            IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
+            IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
             //           And I have an Http Client
             using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(credentials.Certificate))
             {
@@ -99,7 +111,7 @@
         public async Task ICanPerformA_Post_Using_HttpClientAbstraction()
         {
             //         Given I want to use an X509 Cert for authentication
-            IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
+            IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
             //           And I have an Http Client
             using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(credentials.Certificate))
             {
@@ -127,13 +139,12 @@
         }
 
         [TestMethod]
-        [TestCategory("CheckIn")]
         [TestCategory("Integration")]
         [TestCategory(TestRunMode.Nightly)]
         public async Task ICanPerformA_Delete_Using_HttpClientAbstraction()
         {
             //         Given I want to use an X509 Cert for authentication
-            IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
+            IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
             //           And I have an Http Client
             using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(credentials.Certificate))
             {
@@ -164,7 +175,7 @@
         public async Task ICanPerformA_MultipleRequests_Using_HttpClientAbstraction()
         {
             //         Given I want to use an X509 Cert for authentication
-            IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
+            IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
             //           And I have an Http Client
             using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(credentials.Certificate))
             {
@@ -185,7 +196,7 @@
         public async Task ICanPerformA_GetWithCert_Using_HttpClientAbstraction()
         {
             //         Given I want to use an X509 Cert for authentication
-            IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
+            IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
             //           And I have an Http Client
             using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(credentials.Certificate))
             {
@@ -216,28 +227,74 @@
         [TestCategory("Integration")]
         [TestCategory("HttpClient")]
         [TestCategory(TestRunMode.Nightly)]
-        [ExpectedException(typeof(TaskCanceledException))]
         public async Task ICanHandleA_ClientTimeout_Using_HttpClientAbstraction()
         {
-            //         Given I want to use an X509 Cert for authentication
-            IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
-            //           And I have an Http Client
-            using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(credentials.Certificate))
+            try
             {
-                //       And I set the uri for a http that will take 30 sec to complete
-                client.RequestUri = new Uri("http://httpbin.org/delay/30000");
-                client.RequestHeaders.Add("x-ms-version", "2012-08-01");
-                client.RequestHeaders.Add("accept", "application/xml");
+                //         Given I want to use an X509 Cert for authentication
+                IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
+                //           And I have an Http Client
+                using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(credentials.Certificate))
+                {
+                    //       And I set the uri for a http that will take 30 sec to complete
+                    client.RequestUri = new Uri("http://httpbin.org/delay/30000");
+                    client.RequestHeaders.Add("x-ms-version", "2012-08-01");
+                    client.RequestHeaders.Add("accept", "application/xml");
 
-                //       And I set the client timeout to a value << 30 sec
-                client.Timeout = TimeSpan.FromMilliseconds(1);
+                    //       And I set the client timeout to a value << 30 sec
+                    client.Timeout = TimeSpan.FromMilliseconds(1);
 
-                //      The call Client.SendAsync to trigger exception
-                var responseTask = client.SendAsync();
-                var response = await responseTask;
-                Console.WriteLine(response.Content);
-                Console.WriteLine(response.ToString());
-                Console.WriteLine(response.StatusCode);
+                    //      The call Client.SendAsync to trigger exception
+                    var responseTask = client.SendAsync();
+                    var response = await responseTask;
+                    Console.WriteLine(response.Content);
+                    Console.WriteLine(response.ToString());
+                    Console.WriteLine(response.StatusCode);
+                }
+            }
+            catch (TimeoutException ex)
+            {
+                Assert.IsTrue(ex.Message.Contains("operation timed out"));
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("Integration")]
+        [TestCategory("HttpClient")]
+        [TestCategory(TestRunMode.Nightly)]
+        public async Task ICanHandleA_CancellationToken_Using_HttpClientAbstraction()
+        {
+            //         Given I want to use an X509 Cert for authentication
+            IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
+            //           And I have a CancelationToken
+            var token = new CancellationToken(true);
+            //           And I know when we started the request.
+            var start = DateTime.Now;
+            //           And I have an Http Client
+            try
+            {
+                using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(credentials.Certificate, new AbstractionContext(token)))
+                {
+                    //       And I set the uri for a http that will take 30 sec to complete
+                    client.RequestUri = new Uri("http://httpbin.org/delay/30000");
+                    client.RequestHeaders.Add("x-ms-version", "2012-08-01");
+                    client.RequestHeaders.Add("accept", "application/xml");
+
+                    //       And I set the client timeout to a value << 30 sec
+                    client.Timeout = TimeSpan.FromSeconds(32);
+
+                    //      The call Client.SendAsync to trigger exception
+                    var responseTask = client.SendAsync();
+                    var response = await responseTask;
+                    Console.WriteLine(response.Content);
+                    Console.WriteLine(response.ToString());
+                    Console.WriteLine(response.StatusCode);
+                }
+            }
+            catch (OperationCanceledException ex)
+            {
+                Assert.IsTrue(DateTime.Now - start < TimeSpan.FromSeconds(30));
+                Assert.IsTrue(ex.Message.Contains("operation was canceled at the users request"));
             }
         }
 
@@ -248,7 +305,7 @@
         public async Task ICanHandleA_ErrorStatus_Using_HttpClientAbstraction()
         {
             //         Given I want to use an X509 Cert for authentication
-            IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
+            IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
             //           And I have an Http Client
             using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(credentials.Certificate))
             {
@@ -278,7 +335,7 @@
         public async Task ICanHandleA_AuthenticationError_Using_HttpClientAbstraction()
         {
             //         Given I want to use an X509 Cert for authentication
-            IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
+            IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
             //           And I have an Http Client
             using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(credentials.Certificate))
             {
@@ -304,6 +361,39 @@
                 //   And the content should contain the error
                 Assert.AreNotEqual(string.Empty, response.Content);
             }
+        }
+
+        [TestMethod]
+        [TestCategory("CheckIn")]
+        public void CanPrettyPrintXmlContent()
+        {
+            var unindentedContent = "<root><key>phani</key><value></value></root>";
+            var expectedIndentedContnet =
+                "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<root>\r\n  <key>phani</key>\r\n  <value>\r\n  </value>\r\n</root>";
+            string indentedContent;
+            Assert.IsTrue(HttpClientAbstraction.TryPrettyPrintXml(unindentedContent, out indentedContent));
+            Assert.AreEqual(expectedIndentedContnet, indentedContent);
+        }
+
+        [TestMethod]
+        [TestCategory("CheckIn")]
+        public void CannotPrettyPrintEmptyXmlContent()
+        {
+            var unindentedContent = string.Empty;
+            var expectedIndentedContnet = string.Empty;
+            string indentedContent;
+            Assert.IsFalse(HttpClientAbstraction.TryPrettyPrintXml(unindentedContent, out indentedContent));
+            Assert.AreEqual(expectedIndentedContnet, indentedContent);
+        }
+
+        [TestMethod]
+        [TestCategory("CheckIn")]
+        public void CannotPrettyPrintInvalidXmlContent()
+        {
+            var invalidXmlContent = "<root>PhaniRaj";
+            string indentedContent;
+            Assert.IsFalse(HttpClientAbstraction.TryPrettyPrintXml(invalidXmlContent, out indentedContent));
+            Assert.AreEqual(invalidXmlContent, indentedContent);
         }
     }
 }

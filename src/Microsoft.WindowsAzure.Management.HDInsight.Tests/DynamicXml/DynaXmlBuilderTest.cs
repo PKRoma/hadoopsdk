@@ -12,18 +12,30 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
-
 namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.DynamicXml
 {
     using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using System.Xml;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Microsoft.WindowsAzure.Management.Framework.DynamicXml.Writer;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.DynamicXml.Writer;
+    using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities;
 
     [TestClass]
-    public class DynaXmlBuilderTest
+    public class DynaXmlBuilderTest : IntegrationTestBase
     {
+        [TestInitialize]
+        public override void Initialize()
+        {
+            base.Initialize();
+        }
+
+        [TestCleanup]
+        public override void TestCleanup()
+        {
+            base.TestCleanup();
+        }
+
         [TestMethod]
         [TestCategory("DynaXmlBuilder")]
         [TestCategory("CheckIn")]

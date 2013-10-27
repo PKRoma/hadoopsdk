@@ -12,177 +12,317 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
-
-namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data
+namespace Microsoft.WindowsAzure.Management.HDInsight
 {
     using System;
+    using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.IO;
     using System.Linq;
+    using System.Net;
     using System.Runtime.Serialization;
     using System.Text;
     using System.Xml;
-    using Microsoft.WindowsAzure.Management.Framework.DynamicXml.Writer;
-    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Old;
+    using System.Xml.Linq;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.VersionFinder;
+    using Microsoft.WindowsAzure.Management.HDInsight;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.DynamicXml.Reader;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.DynamicXml.Writer;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.Json;
 
-    internal static class PayloadConverter
+    /// <summary>
+    /// Converts data from objects into payloads.
+    /// </summary>
+    [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "This complexity is needed to handle all the types in the submit payload.")]
+    internal class PayloadConverter : IPayloadConverter
     {
-        internal static Collection<HDInsightCluster> DeserializeListContainersResult(string payload, string deploymentNamespace)
-        {
-            var data = from svc in DeserializeFromXml<CloudServiceList>(payload)
-                       from res in svc.Resources
-                       where (res.ResourceProviderNamespace != null && res.ResourceProviderNamespace == deploymentNamespace) && (res.Type != null && res.Type == "containers")
-                       select ListClusterContainerResult_FromInternal(res, svc);
+        private const string WindowsAzureNamespace = "http://schemas.microsoft.com/windowsazure";
+        private static readonly XName CloudServicesElementName = XName.Get("CloudServices", WindowsAzureNamespace);
+        private static readonly XName CloudServiceElementName = XName.Get("CloudService", WindowsAzureNamespace);
+        private static readonly XName GeoRegionElementName = XName.Get("GeoRegion", WindowsAzureNamespace);
+        private static readonly XName ResourceElementName = XName.Get("Resource", WindowsAzureNamespace);
+        private static readonly XName ResourceProviderNamespaceElementName = XName.Get("ResourceProviderNamespace", WindowsAzureNamespace);
+        private static readonly XName TypeElementName = XName.Get("Type", WindowsAzureNamespace);
+        private static readonly XName IntrinsicSettingItemElementName = XName.Get("IntrinsicSettings", WindowsAzureNamespace);
+        private static readonly XName NameElementName = XName.Get("Name", WindowsAzureNamespace);
+        private static readonly XName SubStateElementName = XName.Get("SubState", WindowsAzureNamespace);
+        private static readonly XName OutputItemElementName = XName.Get("OutputItem", WindowsAzureNamespace);
+        private static readonly XName KeyElementName = XName.Get("Key", WindowsAzureNamespace);
+        private static readonly XName ValueElementName = XName.Get("Value", WindowsAzureNamespace);
+        private static readonly XName OperationStatusElementName = XName.Get("OperationStatus", WindowsAzureNamespace);
+        private static readonly XName ErrorElementName = XName.Get("Error", WindowsAzureNamespace);
+        private static readonly XName HttpCodeElementName = XName.Get("HttpCode", WindowsAzureNamespace);
+        private static readonly XName MessageElementName = XName.Get("Message", WindowsAzureNamespace);
+        private const string ClusterUserName = "ClusterUsername";
+        private const string NodesCount = "NodesCount";
+        private const string ConnectionUrl = "ConnectionURL";
+        private const string CreatedDate = "CreatedDate";
+        private const string VersionName = "Version";
+        private const string HttpUserName = "Http_Username";
+        private const string RdpUserName = "RDP_Username";
+        private const string HttpPassword = "Http_Password";
+        private const string BlobContainersElementName = "BlobContainers";
+        private const string Create = "Create";
+        private const string SchemaVersion20 = "2.0";
 
-            return new Collection<HDInsightCluster>(data.ToList());
+        /// <summary>
+        /// Provides the namespace for the May2013 contracts.
+        /// </summary>
+        public const string May2013 = "http://schemas.microsoft.com/hdinsight/2013/05/management";
+
+        /// <summary>
+        /// Provides the namespace for the System contracts.
+        /// </summary>
+        public const string System = "http://schemas.datacontract.org/2004/07/System";
+
+        internal static string SerializeConnectivityRequest(UserChangeRequestOperationType type, string username, string password, DateTimeOffset experation)
+        {
+            Help.DoNothing(experation);
+            if (username.IsNull())
+            {
+                username = string.Empty;
+            }
+            if (password.IsNull())
+            {
+                password = string.Empty;
+            }
+            dynamic dynaXml = DynaXmlBuilder.Create(false, Formatting.None);
+
+            dynaXml.xmlns(May2013)
+                   .HttpUserChangeRequest
+                   .b
+                     .Operation(type.ToString())
+                     .Username(username)
+                     .Password(password)
+                   .d
+                   .End();
+
+            return dynaXml.ToString();
         }
 
-        internal static string SerializeListContainersResult(Collection<HDInsightCluster> containers, string deploymentNamespace)
+        /// <inheritdoc />
+        public PayloadResponse<UserChangeRequestStatus> DeserializeConnectivityStatus(string payload)
         {
-            var serviceList = new CloudServiceList();
-            foreach (var containerGroup in containers.GroupBy(container => container.Location))
+            XmlDocument doc = new XmlDocument();
+            using (var stream = payload.ToUtf8Stream())
+            using (var reader = XmlReader.Create(stream))
             {
-                serviceList.Add(new CloudService()
+                doc.Load(reader);
+            }
+            var manager = new DynaXmlNamespaceTable(doc);
+            PayloadResponse<UserChangeRequestStatus> result = new PayloadResponse<UserChangeRequestStatus>();
+            var node = doc.SelectSingleNode("/def:PassthroughResponse/def:Data", manager.NamespaceManager);
+            if (node.IsNotNull())
+            {
+                result.Data = new UserChangeRequestStatus();
+                var data = node;
+                node = data.SelectSingleNode("def:State", manager.NamespaceManager);
+                UserChangeRequestOperationStatus status;
+                if (node.IsNull() || !UserChangeRequestOperationStatus.TryParse(node.InnerText, out status))
                 {
-                    GeoRegion = containerGroup.Key,
-                    Resources = new ResourceList(from container in containerGroup
-                                                 select ListClusterContainerResult_ToInternal(container, deploymentNamespace))
-                });
-            }
+                    throw new SerializationException("Unable to deserialize the server response.");
+                }
+                result.Data.State = status;
 
-            return serviceList.SerializeToXml();
+                node = data.SelectSingleNode("def:UserType", manager.NamespaceManager);
+                UserChangeRequestUserType userType;
+                if (node.IsNull() || !UserChangeRequestUserType.TryParse(node.InnerText, out userType))
+                {
+                    throw new SerializationException("Unable to deserialize the server response.");
+                }
+                result.Data.UserType = userType;
+
+                node = data.SelectSingleNode("def:OperationType", manager.NamespaceManager);
+                UserChangeRequestOperationType operationType;
+                if (node.IsNull() || !UserChangeRequestOperationType.TryParse(node.InnerText, out operationType))
+                {
+                    throw new SerializationException("Unable to deserialize the server response.");
+                }
+                result.Data.OperationType = operationType;
+
+                node = data.SelectSingleNode("def:RequestIssueDate", manager.NamespaceManager);
+                DateTime requestTime;
+                if (node.IsNull() || !DateTime.TryParse(node.InnerText, out requestTime))
+                {
+                    throw new SerializationException("Unable to deserialize the server response.");
+                }
+                result.Data.RequestIssueDate = requestTime.ToUniversalTime();
+
+                node = data.SelectSingleNode("def:Error", manager.NamespaceManager);
+                result.Data.ErrorDetails = this.GetErrorDetails(node, manager.NamespaceManager);
+
+            }
+            node = doc.SelectSingleNode("/def:PassthroughResponse/def:Error", manager.NamespaceManager);
+            result.ErrorDetails = this.GetErrorDetails(node, manager.NamespaceManager);
+
+            return result;
         }
 
-        internal static HDInsightClusterCreationDetails DeserializeClusterCreateRequest(string payload)
+        private PayloadErrorDetails GetErrorDetails(XmlNode root, XmlNamespaceManager manager)
         {
-            var resource = DeserializeFromXml<Resource>(payload);
-            var createPayload = DeserializeFromXml<ClusterContainerPayload>(resource.IntrinsicSettings[0].OuterXml);
-            return CreateClusterRequest_FromInternal(createPayload);
+            PayloadErrorDetails details = null;
+            if (root.HasChildNodes)
+            {
+                details = new PayloadErrorDetails();
+                HttpStatusCode statusCode;
+                var node = root.SelectSingleNode("def:StatusCode", manager);
+                if (node.IsNull() || !HttpStatusCode.TryParse(node.InnerText, out statusCode))
+                {
+                    throw new SerializationException("Unable to parse the Status Code of the Error Details.");
+                }
+                details.StatusCode = statusCode;
+                node = root.SelectSingleNode("def:ErrorId", manager);
+                if (node.IsNull())
+                {
+                    throw new SerializationException("Unable to parse the error id of the Error response component.");
+                }
+                details.ErrorId = node.InnerText;
+                node = root.SelectSingleNode("def:ErrorMessage", manager);
+                if (node.IsNull())
+                {
+                    throw new SerializationException("Unable to parse the error message of the Error response component.");
+                }
+                details.ErrorMessage = node.InnerText;
+            }
+            return details;
         }
 
-        internal static string SerializeClusterCreateRequest(HDInsightClusterCreationDetails cluster, Guid subscriptionId)
+        /// <summary>
+        /// Deserializes a Connectivity Response.
+        /// </summary>
+        /// <param name="payload">The payload.</param>
+        /// <returns>
+        /// A PayloadResponse object with the operation id for the data.
+        /// </returns>
+        public PayloadResponse<Guid> DeserializeConnectivityResponse(string payload)
         {
-            return CreateClusterRequest_ToInternal(cluster, subscriptionId);
+            XmlDocument doc = new XmlDocument();
+            using (var stream = payload.ToUtf8Stream())
+            using (var reader = XmlReader.Create(stream))
+            {
+                doc.Load(reader);
+            }
+            var manager = new DynaXmlNamespaceTable(doc);
+            PayloadResponse<Guid> result = new PayloadResponse<Guid>();
+            var node = doc.SelectSingleNode("/def:PassthroughResponse/def:Data", manager.NamespaceManager);
+            if (node.IsNotNull() && node.InnerText.IsNotNullOrEmpty())
+            {
+                var text = node.InnerText;
+                Guid guid;
+                if (!Guid.TryParse(text, out guid))
+                {
+                    throw new SerializationException("Unable to deserialize the server response.");
+                }
+                result.Data = guid;
+            }
+            node = doc.SelectSingleNode("/def:PassthroughResponse/def:Error", manager.NamespaceManager);
+            result.ErrorDetails = this.GetErrorDetails(node, manager.NamespaceManager);
+            return result;
         }
 
-        internal static T ExtractResourceOutputValue<T>(Resource res, string name)
+        /// <inheritdoc />
+        public Collection<ClusterDetails> DeserializeListContainersResult(string payload, string deploymentNamespace, Guid subscriptionId)
         {
-            if (res.OutputItems == null)
-            {
-                return default(T);
-            }
+            var data = this.DeserializeHDInsightClusterList(payload, deploymentNamespace, subscriptionId);
 
-            var value = res.OutputItems.FirstOrDefault(e => e.Key.Equals(name));
-            if (value == null)
-            {
-                return default(T);
-            }
-
-            return (T)Convert.ChangeType(value.Value, typeof(T), CultureInfo.InvariantCulture);
+            return new Collection<ClusterDetails>(data.ToList());
         }
 
-        private static HDInsightClusterCreationDetails CreateClusterRequest_FromInternal(ClusterContainerPayload payloadObject)
+        /// <inheritdoc />
+        public string SerializeClusterCreateRequest(ClusterCreateParameters cluster)
         {
-            var cluster = new HDInsightClusterCreationDetails
-            {
-                Location = payloadObject.AzureStorageLocation,
-                Name = payloadObject.DnsName
-            };
-
-            cluster.UserName = payloadObject.Deployment.ClusterUsername;
-            cluster.Password = payloadObject.Deployment.ClusterPassword;
-            cluster.DefaultStorageAccountName = payloadObject.Deployment.ASVAccounts[0].AccountName;
-            cluster.DefaultStorageAccountKey = payloadObject.Deployment.ASVAccounts[0].SecretKey;
-            cluster.DefaultStorageContainer = payloadObject.Deployment.ASVAccounts[0].BlobContainerName;
-            foreach (var asv in payloadObject.Deployment.ASVAccounts.Skip(1))
-            {
-                cluster.AdditionalStorageAccounts.Add(new StorageAccountConfiguration(asv.AccountName, asv.SecretKey));
-            }
-
-            var oozieMetaStore = payloadObject.Deployment.SqlMetaStores.FirstOrDefault(
-                metastore => metastore.Type == SqlAzureMetaStorePayload.SqlMetastoreType.OozieMetastore);
-            if (oozieMetaStore != null)
-            {
-                cluster.OozieMetastore = new HDInsightMetastore(oozieMetaStore.AzureServerName,
-                                                                oozieMetaStore.DatabaseName,
-                                                                oozieMetaStore.Username,
-                                                                oozieMetaStore.Password);
-            }
-
-            var hiveMetaStore = payloadObject.Deployment.SqlMetaStores.FirstOrDefault(
-                metastore => metastore.Type == SqlAzureMetaStorePayload.SqlMetastoreType.HiveMetastore);
-            if (hiveMetaStore != null)
-            {
-                cluster.HiveMetastore = new HDInsightMetastore(hiveMetaStore.AzureServerName,
-                                                               hiveMetaStore.DatabaseName,
-                                                               hiveMetaStore.Username,
-                                                               hiveMetaStore.Password);
-            }
-
-            var workernodes = from nodes in payloadObject.Deployment.NodeSizes
-                              where nodes.RoleType == ClusterNodeType.DataNode
-                              select nodes;
-            cluster.ClusterSizeInNodes = workernodes.First().Count;
-            return cluster;
+            return this.CreateClusterRequest_ToInternal(cluster);
         }
 
         [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity",
             Justification = "This is a result of interface flowing and not a true measure of complexity.")]
-        private static string CreateClusterRequest_ToInternal(HDInsightClusterCreationDetails cluster, Guid subscriptionId)
+        private string CreateClusterRequest_ToInternal(ClusterCreateParameters cluster)
         {
             dynamic dynaXml = DynaXmlBuilder.Create(false, Formatting.None);
 
             dynaXml.xmlns("http://schemas.microsoft.com/windowsazure")
                    .Resource
                    .b
+                     .SchemaVersion(SchemaVersion20)
                      .IntrinsicSettings
                      .b
-                       .xmlns("http://schemas.datacontract.org/2004/07/Microsoft.ClusterServices.DataAccess.Context")
+                       .xmlns(May2013)
                        .ClusterContainer
                        .b
-                         .AzureStorageLocation(cluster.Location)
                          .Deployment
                          .b
-                           .ASVAccounts
+                         .AdditionalStorageAccounts
+                         .b
+                         .d
+                         .ClusterPassword(cluster.Password)
+                         .ClusterUsername(cluster.UserName)
+                         .Roles
                            .b
-                             .ASVAccount
-                             .b
-                               .AccountName(cluster.DefaultStorageAccountName)
-                               .BlobContainerName(cluster.DefaultStorageContainer)
-                               .SecretKey(cluster.DefaultStorageAccountKey)
-                             .d
-                             .sp("asv")
-                           .d
-                           .ClusterPassword(cluster.Password)
-                           .ClusterUsername(cluster.UserName)
-                           .NodeSizes
-                           .b
-                             .ClusterNodeSize
+                             .ClusterRole
                              .b
                                .Count(1)
-                               .RoleType(ClusterNodeType.HeadNode)
+                               .RoleType(ClusterRoleType.HeadNode)
                                .VMSize(NodeVMSize.ExtraLarge)
                              .d
-                             .ClusterNodeSize
+                             .ClusterRole
                              .b
                                .Count(cluster.ClusterSizeInNodes)
-                               .RoleType(ClusterNodeType.DataNode)
+                               .RoleType(ClusterRoleType.DataNode)
                                .VMSize(NodeVMSize.Large)
                              .d
                            .d
-                           .SqlMetaStores
-                           .b
-                             .xmlns("http://schemas.datacontract.org/2004/07/Microsoft.ClusterServices.DataAccess")
-                             .sp("metastore")
-                           .d
-                           .Version(ClusterDeploymentPayload.DEFAULTVERSION)
+                         .Version(cluster.Version)
                          .d
-                         .DeploymentAction(AzureClusterDeploymentAction.Create)
-                         .DnsName(cluster.Name)
-                         .IncarnationID(Guid.NewGuid())
-                         .SubscriptionId(subscriptionId)
+                         .DeploymentAction(Create)
+                         .ClusterName(cluster.Name)
+                         .Region(cluster.Location)
+                         .StorageAccounts
+                           .b
+                             .BlobContainerReference
+                             .b
+                               .AccountName(cluster.DefaultStorageAccountName)
+                               .BlobContainerName(cluster.DefaultStorageContainer)
+                               .Key(cluster.DefaultStorageAccountKey)
+                             .d
+                             .sp("asv")
+                          .d
+                        .Settings
+                         .b
+                            .Core
+                                .b
+                                  .sp("coresettings")
+                                .d
+                            .d
+                           .b
+                            .Hdfs
+                                .b
+                                  .sp("hdfssettings")
+                                .d
+                            .d
+                            .b
+                            .MapReduce
+                                .b
+                                  .sp("mapreduceconfiguration")
+                                  .sp("mapreducecapacityschedulerconfiguration")
+                                .d
+                            .d
+                           .b
+                           .Hive
+                           .b
+                              .sp("hivesettings")
+                              .sp("hiveresources")
+                           .d
+                           .Oozie
+                           .b
+                              .sp("ooziesettings")
+                              .sp("oozieadditionalsharedlibraries")
+                              .sp("ooziesharedexecutables")
+                           .d
+                         .d
                        .d
                      .d
                    .d
@@ -191,41 +331,22 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data
             dynaXml.rp("asv");
             foreach (var asv in cluster.AdditionalStorageAccounts)
             {
-                dynaXml.ASVAccount
-                       .b
-                         .AccountName(asv.Name)
-                         .BlobContainerName("deploymentcontainer")
-                         .SecretKey(asv.Key)
-                       .d
-                       .End();
+                this.AddStorageAccount(dynaXml, asv, "deploymentcontainer");
             }
 
-            if (cluster.OozieMetastore != null)
+            this.AddConfigurationOptions(dynaXml, cluster.CoreConfiguration, "coresettings");
+            this.AddConfigurationOptions(dynaXml, cluster.HdfsConfiguration, "hdfssettings");
+            if (cluster.MapReduceConfiguration != null)
             {
-                dynaXml.rp("metastore")
-                        .SqlAzureMetaStore
-                        .b
-                            .AzureServerName(cluster.OozieMetastore.Server)
-                            .DatabaseName(cluster.OozieMetastore.Database)
-                            .Password(cluster.OozieMetastore.Password)
-                            .Type(SqlAzureMetaStorePayload.SqlMetastoreType.OozieMetastore)
-                            .Username(cluster.OozieMetastore.User)
-                        .d
-                        .End();
+                this.AddConfigurationOptions(dynaXml, cluster.MapReduceConfiguration.ConfigurationCollection, "mapreduceconfiguration");
+                this.AddConfigurationOptions(dynaXml, cluster.MapReduceConfiguration.CapacitySchedulerConfigurationCollection, "mapreducecapacityschedulerconfiguration");
             }
-            if (cluster.HiveMetastore != null)
-            {
-                dynaXml.rp("metastore")
-                        .SqlAzureMetaStore
-                        .b
-                            .AzureServerName(cluster.HiveMetastore.Server)
-                            .DatabaseName(cluster.HiveMetastore.Database)
-                            .Password(cluster.HiveMetastore.Password)
-                            .Type(SqlAzureMetaStorePayload.SqlMetastoreType.HiveMetastore)
-                            .Username(cluster.HiveMetastore.User)
-                        .d
-                        .End();
-            }
+
+            this.AddConfigurationOptions(dynaXml, cluster.HiveConfiguration.ConfigurationCollection, "hivesettings");
+
+            this.SerializeOozieConfiguration(cluster, dynaXml);
+
+            this.SerializeHiveConfiguration(cluster, dynaXml);
 
             string xml;
             using (var stream = new MemoryStream())
@@ -235,136 +356,348 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data
                 stream.Position = 0;
                 xml = reader.ReadToEnd();
             }
+
             return xml;
-
-            //// Container with the basic info
-            //var deployment = new ClusterDeploymentPayload()
-            //{
-            //    ClusterPassword = cluster.Password,
-            //    ClusterUsername = cluster.UserName,
-            //    Version = ClusterDeploymentPayload.DEFAULTVERSION
-            //};
-
-            //// Node information
-            //deployment.NodeSizes.Add(new ClusterNodeSizePayload()
-            //{
-            //    Count = 1,
-            //    RoleType = ClusterNodeType.HeadNode,
-            //    VMSize = NodeVMSize.ExtraLarge
-            //});
-            //deployment.NodeSizes.Add(new ClusterNodeSizePayload()
-            //{
-            //    Count = cluster.ClusterSizeInNodes,
-            //    RoleType = ClusterNodeType.DataNode,
-            //    VMSize = NodeVMSize.Large
-            //});
-
-            //// ASV information
-            //deployment.ASVAccounts.Add(new ASVAccountPayload()
-            //{
-            //    AccountName = cluster.DefaultStorageAccountName,
-            //    SecretKey = cluster.DefaultStorageAccountKey,
-            //    BlobContainerName = cluster.DefaultStorageContainer
-            //});
-            //foreach (var asv in cluster.AdditionalStorageAccounts)
-            //{
-            //    deployment.ASVAccounts.Add(new ASVAccountPayload() { AccountName = asv.Name, SecretKey = asv.Key, BlobContainerName = "deploymentcontainer" });
-            //}
-
-            //// Metastores
-            //if (cluster.OozieMetastore != null)
-            //{
-            //    deployment.SqlMetaStores.Add(new SqlAzureMetaStorePayload
-            //    {
-            //        AzureServerName = cluster.OozieMetastore.Server,
-            //        DatabaseName = cluster.OozieMetastore.Database,
-            //        Password = cluster.OozieMetastore.Password,
-            //        Username = cluster.OozieMetastore.User,
-            //        Type = SqlAzureMetaStorePayload.SqlMetastoreType.OozieMetastore
-            //    });
-            //}
-            //if (cluster.HiveMetastore != null)
-            //{
-            //    deployment.SqlMetaStores.Add(new SqlAzureMetaStorePayload
-            //    {
-            //        AzureServerName = cluster.HiveMetastore.Server,
-            //        DatabaseName = cluster.HiveMetastore.Database,
-            //        Password = cluster.HiveMetastore.Password,
-            //        Username = cluster.HiveMetastore.User,
-            //        Type = SqlAzureMetaStorePayload.SqlMetastoreType.HiveMetastore
-            //    });
-            //}
-
-            //// Container information
-            //var payloadObject = new ClusterContainerPayload()
-            //{
-            //    AzureStorageLocation = cluster.Location,
-            //    DnsName = cluster.Name,
-            //    SubscriptionId = subscriptionId,
-            //    DeploymentAction = AzureClusterDeploymentAction.Create,
-            //    Deployment = deployment,
-            //    IncarnationID = Guid.NewGuid(),
-            //};
-
-            //var input = new Resource { IntrinsicSettings = new[] { payloadObject.SerializeToXmlNode() } };
-            //return input.SerializeToXml();
-
-            //// TODO: EXTRACT METADATA INFO
         }
 
-        private static Resource ListClusterContainerResult_ToInternal(HDInsightCluster result, string nameSpace)
+        private void SerializeHiveConfiguration(ClusterCreateParameters cluster, dynamic dynaXml)
         {
-            var resource = new Resource { Name = result.Name, SubState = result.StateString, ResourceProviderNamespace = nameSpace, Type = "containers" };
-            if (result.Error != null)
+            if (cluster.HiveConfiguration.AdditionalLibraries != null)
             {
-                resource.OperationStatus = new ResourceOperationStatus { Type = result.Error.OperationType };
-                resource.OperationStatus.Error = new ResourceErrorInfo
+                dynaXml.rp("hiveresources")
+                       .AdditionalLibraries.b.AccountName(cluster.HiveConfiguration.AdditionalLibraries.Name)
+                       .BlobContainerName(cluster.HiveConfiguration.AdditionalLibraries.Container)
+                       .Key(cluster.HiveConfiguration.AdditionalLibraries.Key)
+                       .d.End();
+            }
+
+            if (cluster.HiveMetastore != null)
+            {
+                dynaXml.rp("hivesettings")
+                       .Catalog.b.DatabaseName(cluster.HiveMetastore.Database)
+                       .Password(cluster.HiveMetastore.Password)
+                       .Server(cluster.HiveMetastore.Server)
+                       .Username(cluster.HiveMetastore.User)
+                       .d.End();
+            }
+        }
+
+        private void SerializeOozieConfiguration(ClusterCreateParameters cluster, dynamic dynaXml)
+        {
+            this.AddConfigurationOptions(dynaXml, cluster.OozieConfiguration.ConfigurationCollection, "ooziesettings");
+            if (cluster.OozieConfiguration.AdditionalSharedLibraries != null)
+            {
+                dynaXml.rp("oozieadditionalsharedlibraries")
+                       .AdditionalSharedLibraries
+                       .b
+                        .AccountName(cluster.OozieConfiguration.AdditionalSharedLibraries.Name)
+                        .BlobContainerName(cluster.OozieConfiguration.AdditionalSharedLibraries.Container)
+                        .Key(cluster.OozieConfiguration.AdditionalSharedLibraries.Key)
+                       .d.End();
+            }
+
+            if (cluster.OozieConfiguration.AdditionalActionExecutorLibraries != null)
+            {
+                dynaXml.rp("ooziesharedexecutables")
+                       .AdditionalActionExecutorLibraries
+                       .b
+                        .AccountName(cluster.OozieConfiguration.AdditionalActionExecutorLibraries.Name)
+                        .BlobContainerName(cluster.OozieConfiguration.AdditionalActionExecutorLibraries.Container)
+                        .Key(cluster.OozieConfiguration.AdditionalActionExecutorLibraries.Key)
+                       .d.End();
+            }
+
+            this.SerializeOozieMetastore(cluster, dynaXml);
+        }
+
+        private void SerializeOozieMetastore(ClusterCreateParameters cluster, dynamic dynaXml)
+        {
+            if (cluster.OozieMetastore != null)
+            {
+                dynaXml.rp("ooziesettings")
+                       .Catalog.b.DatabaseName(cluster.OozieMetastore.Database)
+                       .Password(cluster.OozieMetastore.Password)
+                       .Server(cluster.OozieMetastore.Server)
+                       .Username(cluster.OozieMetastore.User)
+                       .d.End();
+            }
+        }
+
+        private void AddStorageAccount(dynamic dynaXml, WabStorageAccountConfiguration asv, string containerName)
+        {
+            dynaXml.BlobContainerReference
+                .b
+                    .AccountName(asv.Name)
+                    .BlobContainerName(containerName)
+                    .Key(asv.Key)
+                .d.End();
+        }
+
+        private void AddConfigurationOptions(dynamic dynaXml, ConfigValuesCollection configProperties, string sectionName)
+        {
+            if (configProperties.Any())
+            {
+                var coreConfigurationElement = dynaXml.rp(sectionName).Configuration.b;
+                foreach (var coreConfigPropety in configProperties)
                 {
-                    HttpCode = result.Error.HttpCode,
-                    Message = result.Error.Message
-                };
-            }
+                    coreConfigurationElement.Property.b.Name(coreConfigPropety.Key).Value(coreConfigPropety.Value).d.End();
+                }
 
-            resource.OutputItems = new OutputItemList
-            {
-                new OutputItem { Key = "CreatedDate", Value = result.CreatedDate.ToString(CultureInfo.InvariantCulture) },
-                new OutputItem { Key = "ConnectionURL", Value = result.ConnectionUrl },
-                new OutputItem { Key = "ClusterUsername", Value = result.UserName },
-                new OutputItem { Key = "NodesCount", Value = result.ClusterSizeInNodes.ToString(CultureInfo.InvariantCulture) }
-            };
-
-            return resource;
-        }
-
-        private static HDInsightCluster ListClusterContainerResult_FromInternal(Resource res, CloudService service)
-        {
-            // Extracts static properties from the Resource
-            var c = new HDInsightCluster(res.Name, res.SubState) { Location = service.GeoRegion };
-
-            // Extracts dynamic properties from the resource
-            c.CreatedDate = ExtractResourceOutputValue<DateTime>(res, "CreatedDate");
-            c.ConnectionUrl = ExtractResourceOutputValue<string>(res, "ConnectionURL");
-            c.UserName = ExtractResourceOutputValue<string>(res, "ClusterUsername");
-            c.ClusterSizeInNodes = ExtractResourceOutputValue<int>(res, "NodesCount");
-
-            // Extracts a possible error status
-            c.Error = res.OperationStatus == null || res.OperationStatus.Error == null
-                ? null
-                : new ClusterErrorStatus(res.OperationStatus.Error.HttpCode, res.OperationStatus.Error.Message, res.OperationStatus.Type);
-
-            // Ideally, we want to serialize the Resource and put in a property for better debuggability
-
-            return c;
-        }
-
-        private static T DeserializeFromXml<T>(string data) where T : new()
-        {
-            var ser = new DataContractSerializer(typeof(T));
-            using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(data)))
-            {
-                return (T)ser.ReadObject(ms);
+                coreConfigurationElement.d.End();
             }
         }
 
+        internal IEnumerable<ClusterDetails> DeserializeHDInsightClusterList(string payload, string deploymentNamespace, Guid subscriptionId)
+        {
+            payload.ArgumentNotNullOrEmpty("payload");
+            var payloadDocument = XDocument.Parse(payload);
+            var clusterList = new List<ClusterDetails>();
+            var clusterEnumerable = from cloudServices in payloadDocument.Elements(CloudServicesElementName)
+                                    from cloudService in cloudServices.Elements(CloudServiceElementName)
+                                    let geoRegion = cloudService.Element(GeoRegionElementName)
+                                    from resource in cloudService.Descendants(ResourceElementName)
+                                    let resourceNamespace = this.GetStringValue(resource, ResourceProviderNamespaceElementName)
+                                    let intrinsicSettings = this.GetIntrinsicSettings(resource)
+                                    let storageAccounts = this.GetStorageAccounts(resource, intrinsicSettings)
+                                    where resourceNamespace == deploymentNamespace
+                                    let versionString = this.GetClusterProperty(resource, intrinsicSettings, VersionName)
+                                    select new ClusterDetails()
+                                    {
+                                        Name = this.GetStringValue(resource, NameElementName),
+                                        Location = geoRegion.Value,
+                                        StateString = this.GetStringValue(resource, SubStateElementName),
+                                        RdpUserName = this.GetClusterProperty(resource, intrinsicSettings, RdpUserName),
+                                        HttpUserName = this.GetClusterProperty(resource, intrinsicSettings, HttpUserName),
+                                        HttpPassword = this.GetClusterProperty(resource, intrinsicSettings, HttpPassword),
+                                        ClusterSizeInNodes = this.ExtractClusterPropertyIntValue(resource, intrinsicSettings, NodesCount),
+                                        ConnectionUrl = this.GetClusterProperty(resource, intrinsicSettings, ConnectionUrl),
+                                        CreatedDate = this.ExtractClusterPropertyDateTimeValue(resource, intrinsicSettings, CreatedDate),
+                                        Version = versionString,
+                                        VersionStatus = VersionFinderClient.GetVersionStatus(versionString),
+                                        DefaultStorageAccount = this.GetDefaultStorageAccount(storageAccounts),
+                                        AdditionalStorageAccounts = this.GetAdditionalStorageAccounts(storageAccounts),
+                                        VersionNumber = this.ConvertStringToVersion(versionString),
+                                        Error = this.DeserializeClusterError(resource),
+                                        SubscriptionId = subscriptionId
+                                    };
+
+            clusterList.AddRange(clusterEnumerable);
+            return clusterList;
+        }
+
+        private IEnumerable<WabStorageAccountConfiguration> GetAdditionalStorageAccounts(IEnumerable<WabStorageAccountConfiguration> storageAccounts)
+        {
+            return storageAccounts.Skip(1);
+        }
+
+        private WabStorageAccountConfiguration GetDefaultStorageAccount(IEnumerable<WabStorageAccountConfiguration> storageAccounts)
+        {
+            return storageAccounts.FirstOrDefault();
+        }
+
+        private IEnumerable<WabStorageAccountConfiguration> GetStorageAccounts(XElement resource, IEnumerable<KeyValuePair<string, string>> intrinsicSettings)
+        {
+            var blobContainerSerializedJson = this.GetClusterProperty(resource, intrinsicSettings, BlobContainersElementName);
+            if (blobContainerSerializedJson.IsNullOrEmpty())
+            {
+                return Enumerable.Empty<WabStorageAccountConfiguration>();
+            }
+
+            return this.GetStorageAccountsFromJson(blobContainerSerializedJson);
+        }
+
+        /// <summary>
+        /// Converts an HDInsight version string to a Version object.
+        /// </summary>
+        /// <param name="version">
+        /// The version string.
+        /// </param>
+        /// <returns>
+        /// A version object that represents the components of the version string.
+        /// </returns>
+        public Version ConvertStringToVersion(string version)
+        {
+            if (version.IsNotNullOrEmpty())
+            {
+                version.ArgumentNotNullOrEmpty("version");
+                if (version.IsNotNullOrEmpty())
+                {
+                    Version outVersion = new Version();
+                    if (Version.TryParse(version, out outVersion))
+                    {
+                        return outVersion;
+                    }
+                    else
+                    {
+                        string[] parts = version.Split('.');
+                        int major;
+                        int minor;
+                        int build;
+                        int rev;
+                        if (parts.Length >= 4 && int.TryParse(parts[0], out major) && int.TryParse(parts[1], out minor) &&
+                            int.TryParse(parts[2], out build) && int.TryParse(parts[3], out rev))
+                        {
+                            return new Version(major, minor, build, rev);
+                        }
+                    }
+                    return outVersion;
+                }
+            }
+
+            return new Version();
+        }
+
+        internal ClusterErrorStatus DeserializeClusterError(XElement resource)
+        {
+            resource.ArgumentNotNull("resource");
+            var operationStatusElement = resource.Element(OperationStatusElementName);
+            if (operationStatusElement == null)
+            {
+                return null;
+            }
+
+            var errorElement = operationStatusElement.Element(ErrorElementName);
+            if (errorElement == null)
+            {
+                return null;
+            }
+
+            var errorMessage = this.GetStringValue(errorElement, MessageElementName);
+            string errorType = this.GetStringValue(operationStatusElement, TypeElementName);
+            var httpCode = int.Parse(this.GetStringValue(errorElement, HttpCodeElementName), CultureInfo.InvariantCulture);
+            return new ClusterErrorStatus(httpCode, errorMessage, errorType);
+        }
+
+        internal int ExtractClusterPropertyIntValue(XElement resource, IEnumerable<KeyValuePair<string, string>> intrinsicSettings, string name)
+        {
+            int intValue;
+            var intString = this.GetClusterProperty(resource, intrinsicSettings, name);
+            if (int.TryParse(intString, NumberStyles.None, CultureInfo.InvariantCulture, out intValue))
+            {
+                return intValue;
+            }
+
+            return 0;
+        }
+
+        internal DateTime ExtractClusterPropertyDateTimeValue(XElement resource, IEnumerable<KeyValuePair<string, string>> intrinsicSettings, string name)
+        {
+            DateTime outputDateTime;
+            var dateTimeString = this.GetClusterProperty(resource, intrinsicSettings, name);
+            if (DateTime.TryParse(dateTimeString, CultureInfo.InvariantCulture, DateTimeStyles.None, out outputDateTime))
+            {
+                return outputDateTime;
+            }
+
+            return DateTime.MinValue;
+        }
+
+        internal string GetClusterProperty(XElement resource, IEnumerable<KeyValuePair<string, string>> intrinsicSettings, string intrinsicSettingPropertyName)
+        {
+            return GetClusterProperty(resource, intrinsicSettings, intrinsicSettingPropertyName, intrinsicSettingPropertyName);
+        }
+
+        internal string GetClusterProperty(XElement resource, IEnumerable<KeyValuePair<string, string>> intrinsicSettings, string intrinsicSettingPropertyName, string outputItemPropertyName)
+        {
+            var intrinsicSettingsList = intrinsicSettings.ToList();
+            if (intrinsicSettingsList.Any(setting => setting.Key == intrinsicSettingPropertyName))
+            {
+                var valueFromIntrinsicSetting = intrinsicSettingsList.First(setting => setting.Key == intrinsicSettingPropertyName);
+                return valueFromIntrinsicSetting.Value;
+
+            }
+
+            return this.ExtractResourceOutputStringValue(resource, outputItemPropertyName);
+        }
+
+        internal string ExtractResourceOutputStringValue(XElement resource, string name)
+        {
+            var outputItemValue = from outputItem in resource.Descendants(OutputItemElementName)
+                                  let outputItemName = this.GetStringValue(outputItem, KeyElementName)
+                                  where outputItemName == name
+                                  select this.GetStringValue(outputItem, ValueElementName);
+
+            return outputItemValue.FirstOrDefault();
+        }
+
+        internal IEnumerable<KeyValuePair<string, string>> GetIntrinsicSettings(XElement resource)
+        {
+            var intrinsicSettingsElement = resource.Descendants(IntrinsicSettingItemElementName).FirstOrDefault();
+            if (intrinsicSettingsElement != null)
+            {
+                return this.GetOutputItemsFromJson(intrinsicSettingsElement.Value);
+            }
+
+            return Enumerable.Empty<KeyValuePair<string, string>>();
+        }
+
+        private IEnumerable<KeyValuePair<string, string>> GetOutputItemsFromJson(string value)
+        {
+            var outputItems = new List<KeyValuePair<string, string>>();
+            var bytes = Encoding.UTF8.GetBytes(value);
+            using (var memoryStream = new MemoryStream(bytes))
+            {
+                var jsonParser = new JsonParser(memoryStream);
+                var jsonItem = jsonParser.ParseNext();
+                var jsonArray = jsonItem as JsonArray;
+                if (jsonArray == null)
+                {
+                    return Enumerable.Empty<KeyValuePair<string, string>>();
+                }
+
+                for (int index = 0; index < jsonArray.Count(); index++)
+                {
+                    var outputItem = jsonArray.GetIndex(index);
+                    var keyProperty = this.GetJsonStringValue(outputItem.GetProperty("Key"));
+                    var valueProperty = this.GetJsonStringValue(outputItem.GetProperty("Value"));
+
+                    outputItems.Add(new KeyValuePair<string, string>(keyProperty, valueProperty));
+                }
+            }
+
+            return outputItems;
+        }
+
+        private IEnumerable<WabStorageAccountConfiguration> GetStorageAccountsFromJson(string value)
+        {
+            var storageAccounts = new List<WabStorageAccountConfiguration>();
+            var bytes = Encoding.UTF8.GetBytes(value);
+            using (var memoryStream = new MemoryStream(bytes))
+            {
+                var jsonParser = new JsonParser(memoryStream);
+                var jsonItem = jsonParser.ParseNext();
+                var jsonArray = jsonItem as JsonArray;
+                if (jsonArray == null)
+                {
+                    return Enumerable.Empty<WabStorageAccountConfiguration>();
+                }
+
+                for (int index = 0; index < jsonArray.Count(); index++)
+                {
+                    var outputItem = jsonArray.GetIndex(index);
+                    var key = this.GetJsonStringValue(outputItem.GetProperty("Key"));
+                    var account = this.GetJsonStringValue(outputItem.GetProperty("AccountName"));
+                    var container = this.GetJsonStringValue(outputItem.GetProperty("Container"));
+
+                    storageAccounts.Add(new WabStorageAccountConfiguration(account, key, container));
+                }
+            }
+
+            return storageAccounts;
+        }
+
+        private string GetJsonStringValue(JsonItem item)
+        {
+            string value;
+            item.TryGetValue(out value);
+            return value;
+        }
+
+        internal string GetStringValue(XElement element, XName elementName)
+        {
+            element.ArgumentNotNull("element");
+            var childElement = element.Element(elementName);
+            return childElement != null ? childElement.Value : string.Empty;
+        }
     }
 }

@@ -6,16 +6,28 @@
     using System.Runtime.Serialization;
     using System.Security.Cryptography.X509Certificates;
     using System.Threading.Tasks;
-    using Microsoft.ClusterServices.RDFEProvider.ResourceExtensions.JobSubmission.Models;
+    using Microsoft.Hadoop.Client;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Microsoft.WindowsAzure.Management.Framework.InversionOfControl;
+    using Microsoft.WindowsAzure.Management.Framework.ServiceLocator;
     using Microsoft.WindowsAzure.Management.HDInsight.JobSubmission.Data;
     using Microsoft.WindowsAzure.Management.HDInsight.JobSubmission.PocoClient;
-    using Microsoft.WindowsAzure.Management.HDInsight.ConnectionContext;
+    using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities;
+
 
     [TestClass]
     public class JobPocoTests : IntegrationTestBase
     {
+        [TestInitialize]
+        public override void Initialize()
+        {
+            base.Initialize();
+        }
+
+        [TestCleanup]
+        public override void TestCleanup()
+        {
+            base.TestCleanup();
+        }
 
         [TestMethod]
         public async Task SubmitJobWithNoArguments()
@@ -33,9 +45,9 @@
             cloudNamespace = "hdinsight-current";
             endPoint = @"https://umapi.rdfetest.dnsdemo4.com:8443/";
 
-            var createRequest = new HDInsightHiveJobCreationDetails();
+            var createRequest = new HadoopHiveJobCreationDetails();
             createRequest.JobName = "HivePositive";
-            createRequest.OutputStorageLocation = "asv://laurenycluster2-laureny@laurenasv.blob.core.test-cint.azure-test.net/output/job1";
+            createRequest.StatusFolder = Constants.WabsProtocolSchemeName + "laurenycluster2-laureny@laurenasv.blob.core.test-cint.azure-test.net/output/job1";
             createRequest.Query = "show tables";
 
             //var knowTypes = new Type[]
@@ -54,9 +66,9 @@
             //    var text = reader.ReadToEnd();
             //}
 
-            var conCreds = new ConnectionCredentials(new Uri(endPoint), cloudNamespace, subId, x509);
+            var conCreds = new HDInsightSubscriptionCertificateCredentials(subId, x509, new Uri(endPoint), cloudNamespace);
             var client = ServiceLocator.Instance.Locate<IHDInsightJobSubmissionPocoClientFactory>().Create(conCreds);
-            var result = await client.CreateHiveJob(dnsName, "West US", createRequest);
+            var result = await client.SubmitHiveJob(dnsName, "West US", createRequest);
             Assert.IsNotNull(result);
             
         }
@@ -81,20 +93,20 @@
             //endPoint = @"https://umapi.rdfetest.dnsdemo4.com:8443/";
 
             //var createRequest = new ClientJobRequest();
-            //createRequest.ApplicationName = "pi";
+            //createRequest.ClassName = "pi";
             //createRequest.JobName = "foo";
             //var args = new List<string>();
             //args.Add("16");
             //args.Add("10000");
             //createRequest.Arguments = args;
-            //createRequest.OutputStorageLocation = "/output";
+            //createRequest.StatusFolder = "/output";
             //createRequest.JobType = JobType.MapReduce;
             //var parameters = new List<JobRequestParameter>();
             //parameters.Add(new JobRequestParameter() { Key = "one", Value = "two" });
-            //createRequest.Parameters = parameters;
+            //createRequest.Defines = parameters;
             //var resources = new List<JobRequestParameter>();
             //resources.Add(new JobRequestParameter() { Key = "1", Value = "2" });
-            //createRequest.Resources = resources;
+            //createRequest.Files = resources;
             //createRequest.Query = "bar";
 
             //var knowTypes = new Type[]
@@ -113,7 +125,7 @@
             //    var text = reader.ReadToEnd();
             //}
 
-            var conCreds = new ConnectionCredentials(new Uri(endPoint), cloudNamespace, subId, x509);
+            var conCreds = new HDInsightSubscriptionCertificateCredentials(subId, x509, new Uri(endPoint), cloudNamespace);
             var client = ServiceLocator.Instance.Locate<IHDInsightJobSubmissionPocoClientFactory>().Create(conCreds);
             var result = await client.ListJobs(dnsName, "East US");
             Assert.IsNotNull(result);
@@ -134,7 +146,7 @@
             endPoint = @"https://";
             var dnsName = "wfoley-tortuga-07";
 
-            var conCreds = new ConnectionCredentials(new Uri(endPoint), cloudNamespace, creds.SubscriptionId, x509);
+            var conCreds = new HDInsightSubscriptionCertificateCredentials(creds.SubscriptionId, x509, new Uri(endPoint), cloudNamespace);
             var client = ServiceLocator.Instance.Locate<IHDInsightJobSubmissionPocoClientFactory>().Create(conCreds);
             var result = await client.GetJobDetail(dnsName, "East US", "job_201306130113_0017");
             Assert.IsNotNull(result);

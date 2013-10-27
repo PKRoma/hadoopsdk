@@ -12,16 +12,16 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
-
 namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoClient
 {
-    using Microsoft.WindowsAzure.Management.HDInsight.ConnectionContext;
+    using System.Threading;
+    using Microsoft.WindowsAzure.Management.HDInsight;
 
     internal class HDInsightManagementPocoClientFactory : IHDInsightManagementPocoClientFactory
     {
-        public IHDInsightManagementPocoClient Create(IConnectionCredentials credentials)
+        public IHDInsightManagementPocoClient Create(IHDInsightSubscriptionCredentials credentials, IAbstractionContext context)
         {
-            return new HDInsightManagementPocoClient(credentials);
+            return new HDInsightManagementPocoClient(credentials, context);
         }
     }
 }

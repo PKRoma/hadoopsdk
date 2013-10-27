@@ -1,36 +1,47 @@
-﻿namespace Microsoft.WindowsAzure.Management.HDInsight.Tests
+﻿// Copyright (c) Microsoft Corporation
+// All rights reserved.
+// 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at http://www.apache.org/licenses/LICENSE-2.0
+// 
+// THIS CODE IS PROVIDED *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
+// WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
+// MERCHANTABLITY OR NON-INFRINGEMENT.
+// 
+// See the Apache Version 2.0 License for specific language governing
+// permissions and limitations under the License.
+namespace Microsoft.WindowsAzure.Management.HDInsight.Tests
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Security.Cryptography.X509Certificates;
-    using System.Text;
-    using System.Threading.Tasks;
+    using Microsoft.Hadoop.Client;
+    using Microsoft.Hadoop.Client.HadoopJobSubmissionPocoClient;
+    using Microsoft.Hadoop.Client.HadoopJobSubmissionPocoClient.RemoteHadoop;
+    using Microsoft.Hadoop.Client.Storage;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Microsoft.WindowsAzure.Management.Framework.InversionOfControl;
+    using Microsoft.WindowsAzure.Management.Configuration;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Asv;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.AzureManagementClient;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestClient;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.BaseInterfaces;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Logging;
+    using Microsoft.WindowsAzure.Management.HDInsight.Logging;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
+    using Microsoft.WindowsAzure.Management.HDInsight.JobSubmission.PocoClient;
     using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities;
+    using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulator;
     using Microsoft.WindowsAzure.Management.HDInsight.Tests.RestSimulator;
 
     [TestClass]
     public static class TestSetupCleanup
     {
-        private static List<Type> types = new List<Type>();
-
         [AssemblyInitialize]
         public static void AssemblyInit(TestContext context)
         {
-            // This is to ensure that all key assemblies are loaded before IOC registration is required.
-            // This is only necessary for the test system as load order is correct for a production run.
-            types.Add(typeof(NewAzureHDInsightClusterCmdlet));
-            // Sets the simulator
-            var runManager = ServiceLocator.Instance.Locate<IIocServiceLocationTestRunManager>();
-            runManager.RegisterType<IHDInsightManagementRestClientFactory, HDInsightManagementRestSimulatorClientFactory>();
-            runManager.RegisterType<ISubscriptionRegistrationClientFactory, SubscriptionRegistrationSimulatorClientFactory>();
-
-            // Reads configurations
             IntegrationTestBase.TestRunSetup();
         }
 

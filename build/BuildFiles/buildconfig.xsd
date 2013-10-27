@@ -4,63 +4,262 @@
     xmlns="http://microsoft.com/sat/buildconfig.xsd"
     xmlns:mstns="http://microsoft.com/sat/buildconfig.xsd"
     xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
   <xs:complexType name="ctVersion">
     <xs:sequence>
       <xs:element minOccurs="1" maxOccurs="1" name="Major" type="xs:integer" />
       <xs:element minOccurs="1" maxOccurs="1" name="Minor" type="xs:integer" />
+      <xs:element minOccurs="0" maxOccurs="1" name="Patch" type="xs:integer" />
     </xs:sequence>
   </xs:complexType>
   <xs:complexType name="ctEngineering">
-    <xs:sequence >
+    <xs:all>
       <xs:element minOccurs="1" maxOccurs="1" name="CodeReviewAlias" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="TFSConfig" type="ctTFSConfig" />
+    </xs:all>
+  </xs:complexType>
+  <xs:complexType name="ctProduct">
+    <xs:sequence>
+      <xs:element minOccurs="1" maxOccurs="1" name="Group" type="xs:string" />
+      <xs:element minOccurs="1" maxOccurs="1" name="ShortName" type="xs:string" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Name" type="xs:string" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Description" type="xs:string" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Url" type="xs:anyURI" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Eula" type="xs:string" />
     </xs:sequence>
   </xs:complexType>
-  <xs:complexType name="ctCertificates">
+
+  <xs:complexType name="ctApiScan">
+    <xs:attribute name="name" type="xs:string" />
+  </xs:complexType>
+  <xs:complexType name="ctPoliCheck">
+    <xs:attribute name="workspace" type="xs:string" />
+  </xs:complexType>
+
+  <xs:complexType name="ctPublic">
     <xs:sequence>
-      <xs:element minOccurs="1" maxOccurs="1" name="PortableExecutable" >
+      <xs:element minOccurs="1" maxOccurs="1" name="ApiScan" type="ctApiScan" />
+      <xs:element minOccurs="1" maxOccurs="1" name="PoliCheck" type="ctPoliCheck" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="ctInternal">
+  </xs:complexType>
+  <xs:attributeGroup name="agRelease">
+    <xs:attribute name="push" use="required" type="xs:string" />
+  </xs:attributeGroup>
+  <xs:complexType name="ctRelease">
+    <xs:choice minOccurs="1" maxOccurs="1">
+      <xs:element minOccurs="1" maxOccurs="1" name="Public" type="ctPublic" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Internal" type="ctInternal" />
+    </xs:choice>
+    <xs:attributeGroup ref="agRelease" />
+  </xs:complexType>
+  <xs:simpleType name="stFullGuid">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="\{[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}\}"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="stSimpleGuid">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}"/>
+    </xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="stGuid">
+    <xs:union memberTypes="stSimpleGuid stFullGuid" />
+  </xs:simpleType>
+  <xs:attributeGroup name="agXCopy">
+    <xs:attribute name="ProductGuid" type="stGuid" use="required" />
+    <xs:attribute name="SourceFolder" type="xs:string" use="optional" />
+  </xs:attributeGroup>
+  <xs:complexType name="ctGuiStyle">
+    <xs:choice minOccurs="1" maxOccurs="1">
+      <xs:element name="SAT" />
+    </xs:choice>
+  </xs:complexType>
+
+  <xs:complexType name="ctNuGetDependency">
+    <xs:attribute name="id" type="xs:string" />
+    <xs:attribute name="version" type="xs:string" />
+  </xs:complexType>
+
+  <xs:complexType name="ctNuGetDependencies">
+    <xs:sequence minOccurs="1" maxOccurs="1" >
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="Dependency" type="ctNuGetDependency" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="ctNuGetFrameworkAssembly">
+    <xs:attribute name="assemblyName" type="xs:string" />
+    <xs:attribute name="targetFramework" type="xs:string" />
+  </xs:complexType>
+
+  <xs:complexType name="ctNuGetFrameworkAssemblies">
+    <xs:sequence minOccurs="1" maxOccurs="1" >
+      <xs:element minOccurs="1" maxOccurs="unbounded" name="FrameworkAssembly" type="ctNuGetFrameworkAssembly" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="ctNugetNoReferences">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element name="NoReference" minOccurs="1" maxOccurs="unbounded">
         <xs:complexType>
-          <xs:sequence minOccurs="1" maxOccurs="1">
-            <xs:element minOccurs="1" maxOccurs="1" name="StrongName" type="xs:integer" />
-            <xs:element minOccurs="1" maxOccurs="1" name="Authenticode" type="xs:integer" />
-          </xs:sequence>
+          <xs:attribute name="file" type="xs:string" use="required" />
+          <xs:attribute name="targetFramework" type="xs:string" use="optional" />
         </xs:complexType>
       </xs:element>
     </xs:sequence>
   </xs:complexType>
-  <xs:complexType name="ctSigning">
-    <xs:sequence>
-      <xs:element minOccurs="1" maxOccurs="1" name="Approvers" type="xs:string" />
-      <xs:element minOccurs="1" maxOccurs="1" name="Certificates" type="ctCertificates" />
+
+
+  <xs:complexType name="ctNuGet">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element minOccurs="1" maxOccurs="1" name="Title" type="xs:string" />
+      <xs:element minOccurs="1" maxOccurs="1" name="ProjectUrl" type="xs:string" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Description" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="NoReferences" type="ctNugetNoReferences" />
+      <xs:element minOccurs="0" maxOccurs="1" name="Dependencies" type="ctNuGetDependencies" />
+      <xs:element minOccurs="0" maxOccurs="1" name="FrameworkAssemblies" type="ctNuGetFrameworkAssemblies" />
+      <xs:element minOccurs="0" maxOccurs="1" name="Authors" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="Owners" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="IconUrl" type="xs:anyURI" />
+      <xs:element minOccurs="0" maxOccurs="1" name="LicenseUrl" type="xs:anyURI" />
+      <xs:element minOccurs="0" maxOccurs="1" name="Tags" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="RequireLicenseAcceptance" type="xs:boolean" />
+    </xs:sequence>
+    <xs:attribute name="id" type="xs:string" use="required" />
+    <xs:attribute name="outputFolder" type="xs:string" use="required" />
+  </xs:complexType>
+
+  <xs:complexType name="ctPowerShell">
+
+  </xs:complexType>
+
+  <xs:complexType name="ctXCopy">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element minOccurs="1" maxOccurs="1" name="GuiStyle" type="ctGuiStyle" />
+      <xs:element minOccurs="0" maxOccurs="1" name="ArpIcon" type="ctArpIcon" />
+      <xs:element minOccurs="0" maxOccurs="1" name="InstallFolder" type="xs:string" />
+      <xs:element minOccurs="0" maxOccurs="1" name="FileVersionProperties" type="ctFileVersionProperties" />
+      <xs:element minOccurs="0" maxOccurs="1" name="RegistryKeyProperties" type="ctRegistryKeyProperties" />
+      <xs:element minOccurs="0" maxOccurs="1" name="Conditions" type="ctConditions" />
+      <xs:element minOccurs="0" maxOccurs="1" name="StartMenu" type="ctStartMenu" />
+      <xs:element minOccurs="0" maxOccurs="1" name="PowerShell" type="ctPowerShell" />
+    </xs:sequence>
+    <xs:attributeGroup ref="agXCopy"/>
+  </xs:complexType>
+  <xs:attributeGroup name="agStartMenu">
+    <xs:attribute name="allUsers" type="xs:boolean" />
+  </xs:attributeGroup>
+  <xs:complexType name="ctStartMenu">
+    <xs:all minOccurs="1" maxOccurs="1">
+      <xs:element minOccurs="1" maxOccurs="1" name="Folder" type="ctFolder" />
+    </xs:all>
+    <xs:attributeGroup ref="agStartMenu"/>
+  </xs:complexType>
+  <xs:complexType name="ctFolder">
+    <xs:all minOccurs="1" maxOccurs="1">
+      <xs:element minOccurs="1" maxOccurs="1" name="Name" type="xs:string" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Shortcuts" type="ctShortcuts" />
+    </xs:all>
+  </xs:complexType>
+  <xs:complexType name="ctShortcuts">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element minOccurs="1" maxOccurs="unbounded" name="StartMenuShortcut" type="ctStartMenuShortcut" />
     </xs:sequence>
   </xs:complexType>
-  <xs:complexType name="ctProduct">
-    <xs:sequence>
+  <xs:complexType name="ctStartMenuShortcut">
+    <xs:all minOccurs="1" maxOccurs="1">
       <xs:element minOccurs="1" maxOccurs="1" name="Name" type="xs:string" />
       <xs:element minOccurs="1" maxOccurs="1" name="Description" type="xs:string" />
-      <xs:element minOccurs="1" maxOccurs="1" name="Url" type="xs:anyURI" />
+      <xs:element minOccurs="1" maxOccurs="1" name="Target" type="xs:string" />
+    </xs:all>
+  </xs:complexType>
+  <xs:complexType name="ctFileVersionProperties">
+    <xs:sequence minOccurs="0" maxOccurs="1">
+      <xs:element minOccurs="1" maxOccurs="unbounded" name="FileVersionProperty" type="ctFileVersionProperty" />
     </xs:sequence>
   </xs:complexType>
-  <xs:complexType name="ctApiScan">
+  <xs:complexType name="ctRegistryKeyProperties">
+    <xs:sequence minOccurs="0" maxOccurs="1">
+      <xs:element minOccurs="1" maxOccurs="unbounded" name="RegistryKeyProperty" type="ctRegistryKeyProperty" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ctConditions">
+    <xs:sequence minOccurs="1" maxOccurs="1">
+      <xs:element minOccurs="1" maxOccurs="unbounded" name="Condition" type="ctCondition" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ctFileVersionProperty">
+    <xs:attribute name="Id" type="xs:string" use="required" />
+    <xs:attribute name="Path" type="xs:string" use="required" />
+    <xs:attribute name="FileName" type="xs:string" use="required" />
+    <xs:attribute name="MinVersion" type="xs:string" use="required" />
+    <xs:attribute name="MaxVersion" type="xs:string" use="required" />
+  </xs:complexType>
+  <xs:complexType name="ctRegistryKeyProperty">
+    <xs:attribute name="Id" type="xs:string" use="required" />
+    <xs:attribute name="Key" type="xs:string" use="required" />
+    <xs:attribute name="Path" type="xs:string" use="required" />
+    <xs:attribute name="Win64" type="xs:boolean" use="required" />
+  </xs:complexType>
+  <xs:complexType name="ctCondition">
+    <xs:attribute name="Message" type="xs:string" use="required" />
+    <xs:attribute name="ConditionBody" type="xs:string" use="required" />
+  </xs:complexType>
+  <xs:complexType name="ctArpIcon">
+    <xs:attribute name="RootRelativePath" type="xs:string" use="required" />
+  </xs:complexType>
+  <xs:complexType name="ctPackage">
+    <xs:choice minOccurs="1" maxOccurs="unbounded">
+      <xs:element minOccurs="1" maxOccurs="1" name="None" type="ctNone" />
+      <xs:element minOccurs="1" maxOccurs="unbounded" name="Copy" type="ctCopy" />
+      <xs:element minOccurs="1" maxOccurs="unbounded" name="CopyTree" type="ctCopy" />
+      <xs:element minOccurs="1" maxOccurs="unbounded" name="XCopy" type="ctXCopy" />
+    </xs:choice>
+  </xs:complexType>
+  <xs:complexType name="ctNone" />
+
+  <xs:complexType name="ctCopy">
+    <xs:sequence>
+      <xs:element minOccurs="1" maxOccurs="1" name="From" type="xs:string" />
+      <xs:element minOccurs="1" maxOccurs="1" name="To" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="ctZip">
+    <xs:attribute name="folder" type="xs:string" />
     <xs:attribute name="name" type="xs:string" />
   </xs:complexType>
-  <xs:complexType name="ctPublic">
-    <xs:sequence>
-      <xs:element minOccurs="1" maxOccurs="1" name="ApiScan" type="ctApiScan" />
-    </xs:sequence>
+
+  <xs:complexType name="ctPrepare">
+    <xs:choice minOccurs="1" maxOccurs="unbounded">
+      <xs:element minOccurs="1" maxOccurs="1" name="None" type="ctNone" />
+      <xs:element minOccurs="1" maxOccurs="unbounded" name="NuGet" type="ctNuGet" />
+      <xs:element minOccurs="1" maxOccurs="unbounded" name="Copy" type="ctCopy" />
+      <xs:element minOccurs="1" maxOccurs="unbounded" name="CopyTree" type="ctCopy" />
+      <xs:element minOccurs="1" maxOccurs="unbounded" name="Zip" type="ctZip" />
+    </xs:choice>
   </xs:complexType>
-  <xs:complexType name="ctInternal">
-  </xs:complexType>
+
   <xs:complexType name="ctBuildConfig">
     <xs:sequence>
       <xs:element name="Product" type="ctProduct" minOccurs="1" maxOccurs="1" />
       <xs:element name="Engineering" type="ctEngineering" minOccurs="1" maxOccurs="1" />
       <xs:element name="Version" type="ctVersion" minOccurs="1" maxOccurs="1" />
-      <xs:element name="Signing" type="ctSigning" minOccurs="1" maxOccurs="1" />
-      <xs:choice minOccurs="1" maxOccurs="1">
-        <xs:element minOccurs="1" maxOccurs="1" name="Public" type="ctPublic" />
-        <xs:element minOccurs="1" maxOccurs="1" name="Internal" type="ctInternal" />
-      </xs:choice>
+      <xs:element name="Prepare" type="ctPrepare" minOccurs="1" maxOccurs="1" />
+      <xs:element name="Package" type="ctPackage" minOccurs="1" maxOccurs="1" />
+      <xs:element name="Release" type="ctRelease" minOccurs="1" maxOccurs="1" />
     </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ctTFSConfig">
+    <xs:all>
+      <xs:element name="CollectionURL" type="xs:anyURI" minOccurs="1" maxOccurs="1" />
+      <xs:element name="ProjectName" type="xs:string" minOccurs="1" maxOccurs="1" />
+      <xs:element name="BuildDefinition" type="xs:string" minOccurs="1" maxOccurs="1" />
+      <xs:element name="SuiteID" type="xs:integer" minOccurs="1" maxOccurs="1" />
+      <xs:element name="ConfigID" type="xs:integer" minOccurs="1" maxOccurs="1" />
+    </xs:all>
   </xs:complexType>
   <xs:element name="BuildConfig" type="ctBuildConfig" />
 </xs:schema>

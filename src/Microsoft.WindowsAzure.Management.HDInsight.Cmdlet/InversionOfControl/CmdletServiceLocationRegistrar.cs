@@ -1,18 +1,35 @@
-﻿namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet
+﻿// Copyright (c) Microsoft Corporation
+// All rights reserved.
+// 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at http://www.apache.org/licenses/LICENSE-2.0
+// 
+// THIS CODE IS PROVIDED *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
+// WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
+// MERCHANTABLITY OR NON-INFRINGEMENT.
+// 
+// See the Apache Version 2.0 License for specific language governing
+// permissions and limitations under the License.
+namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet
 {
     using System;
-    using Microsoft.WindowsAzure.Management.Framework;
-    using Microsoft.WindowsAzure.Management.Framework.InversionOfControl;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters;
-    using Microsoft.WindowsAzure.Management.HDInsight.InversionOfControl;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.BaseInterfaces;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Logging;
+    using Microsoft.WindowsAzure.Management.HDInsight;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Logging;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
 
     /// <summary>
     /// Registers Cmdlet services with the IoC system.
     /// </summary>
-    public class CmdletServiceLocationRegistrar : IServiceLocationRegistrar
+    internal class CmdletServiceLocationRegistrar : IServiceLocationRegistrar
     {
         /// <inheritdoc />
-        public void Register(IIocServiceLocationRuntimeManager manager)
+        public void Register(IServiceLocationRuntimeManager manager, IServiceLocator locator)
         {
             if (manager.IsNull())
             {
@@ -20,6 +37,10 @@
             }
 
             manager.RegisterType<IAzureHDInsightCommandFactory, AzureHDInsightCommandFactory>();
+            manager.RegisterType<IAzureHDInsightSubscriptionsFileManagerFactory, AzureHDInsightSubscriptionsFileManagerFactory>();
+            manager.RegisterType<IAzureHDInsightSubscriptionsManagerFactory, AzureHDInsightSubscriptionsManagerFactory>();
+            manager.RegisterType<IAzureHDInsightConnectionSessionManagerFactory, AzureHDInsightConnectionSessionManagerFactory>();
+            manager.RegisterType<IBufferingLogWriterFactory, PowershellLogWriterFactory>();
         }
     }
 }

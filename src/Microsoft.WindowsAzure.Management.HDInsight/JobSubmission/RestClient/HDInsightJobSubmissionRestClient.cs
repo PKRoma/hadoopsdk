@@ -12,35 +12,37 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
-
 namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission.RestClient
 {
     using System;
     using System.Net;
     using System.Net.Http;
     using System.Threading.Tasks;
-    using Microsoft.WindowsAzure.Management.Framework;
-    using Microsoft.WindowsAzure.Management.Framework.InversionOfControl;
-    using Microsoft.WindowsAzure.Management.Framework.WebRequest;
+    using Microsoft.Hadoop.Client;
+    using Microsoft.Hadoop.Client.WebHCatRest;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestClient;
-    using Microsoft.WindowsAzure.Management.HDInsight.ConnectionContext;
+    using Microsoft.WindowsAzure.Management.HDInsight;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
 
     internal class HDInsightJobSubmissionRestClient : DisposableObject, IHDInsightJobSubmissionRestClient
     {
-        private readonly IConnectionCredentials credentials;
+        private readonly IHDInsightCertificateCredential credentials;
+        private readonly HDInsight.IAbstractionContext context;
 
-        public HDInsightJobSubmissionRestClient(IConnectionCredentials credentials)
+        public HDInsightJobSubmissionRestClient(IHDInsightCertificateCredential credentials, HDInsight.IAbstractionContext context)
         {
+            this.context = context;
             this.credentials = credentials;
         }
 
         // Method = "GET", UriTemplate = "{subscriptionId}/cloudservices/{cloudServiceName}/resources/hdinsight/~/containers/{containerName}/jobs"
-        public async Task<string> ListJobs(string containerName, string location)
+        public async Task<IHttpResponseMessageAbstraction> ListJobs(string containerName, string location)
         {
             // Creates an HTTP client
             var resolver = ServiceLocator.Instance.Locate<ICloudServiceNameResolver>();
-            using (
-                IHttpClientAbstraction client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(this.credentials.Certificate))
+            using (IHttpClientAbstraction client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(this.credentials.Certificate, this.context))
             {
                 string regionCloudServicename = resolver.GetCloudServiceName(
                     this.credentials.SubscriptionId, this.credentials.DeploymentNamespace, location);
@@ -54,26 +56,26 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission.RestClient
 
                 client.RequestUri = new Uri(this.credentials.Endpoint, new Uri(relativeUri, UriKind.Relative));
                 client.Method = HttpMethod.Get;
-                client.RequestHeaders.Add(HDInsightRestHardcodes.XMsVersion);
-                client.RequestHeaders.Add(HDInsightRestHardcodes.SchemaVersion2);
-                client.RequestHeaders.Add(HDInsightRestHardcodes.Accept);
+                client.RequestHeaders.Add(HDInsightRestConstants.XMsVersion);
+                client.RequestHeaders.Add(HDInsightRestConstants.SchemaVersion2);
+                client.RequestHeaders.Add(HDInsightRestConstants.Accept);
 
                 IHttpResponseMessageAbstraction httpResponse = await client.SendAsync();
                 if (httpResponse.StatusCode != HttpStatusCode.Accepted)
                 {
-                    throw new HDInsightRestClientException(httpResponse.StatusCode, httpResponse.Content);
+                    throw new HttpLayerException(httpResponse.StatusCode, httpResponse.Content);
                 }
-                return httpResponse.Content;
+                return httpResponse;
             }
         }
 
         // Method = "GET", UriTemplate = "{subscriptionId}/cloudservices/{cloudServiceName}/resources/hdinsight/~/containers/{containerName}/jobs/{jobId}"
-        public async Task<string> GetJobDetail(string containerName, string location, string jobId)
+        public async Task<IHttpResponseMessageAbstraction> GetJobDetail(string containerName, string location, string jobId)
         {
             // Creates an HTTP client
             var resolver = ServiceLocator.Instance.Locate<ICloudServiceNameResolver>();
             using (
-                IHttpClientAbstraction client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(this.credentials.Certificate))
+                IHttpClientAbstraction client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(this.credentials.Certificate, this.context))
             {
                 string regionCloudServicename = resolver.GetCloudServiceName(
                     this.credentials.SubscriptionId, this.credentials.DeploymentNamespace, location);
@@ -88,25 +90,25 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission.RestClient
 
                 client.RequestUri = new Uri(this.credentials.Endpoint, new Uri(relativeUri, UriKind.Relative));
                 client.Method = HttpMethod.Get;
-                client.RequestHeaders.Add(HDInsightRestHardcodes.XMsVersion);
-                client.RequestHeaders.Add(HDInsightRestHardcodes.SchemaVersion2);
-                client.RequestHeaders.Add(HDInsightRestHardcodes.Accept);
+                client.RequestHeaders.Add(HDInsightRestConstants.XMsVersion);
+                client.RequestHeaders.Add(HDInsightRestConstants.SchemaVersion2);
+                client.RequestHeaders.Add(HDInsightRestConstants.Accept);
 
                 IHttpResponseMessageAbstraction httpResponse = await client.SendAsync();
                 if (httpResponse.StatusCode != HttpStatusCode.Accepted)
                 {
-                    throw new HDInsightRestClientException(httpResponse.StatusCode, httpResponse.Content);
+                    throw new HttpLayerException(httpResponse.StatusCode, httpResponse.Content);
                 }
-                return httpResponse.Content;
+                return httpResponse;
             }
         }
 
         // Method = "PUT", UriTemplate = "{subscriptionId}/cloudservices/{cloudServiceName}/resources/hdinsight/~/containers/{containerName}/jobs"
-        public async Task<string> CreateJob(string containerName, string location, string payLoad)
+        public async Task<IHttpResponseMessageAbstraction> CreateJob(string containerName, string location, string payLoad)
         {
             // Creates an HTTP client
             var resolver = ServiceLocator.Instance.Locate<ICloudServiceNameResolver>();
-            using (IHttpClientAbstraction client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(this.credentials.Certificate))
+            using (IHttpClientAbstraction client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(this.credentials.Certificate, this.context))
             {
                 string regionCloudServicename = resolver.GetCloudServiceName(
                     this.credentials.SubscriptionId, this.credentials.DeploymentNamespace, location);
@@ -120,17 +122,17 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission.RestClient
 
                 client.RequestUri = new Uri(this.credentials.Endpoint, new Uri(relativeUri, UriKind.Relative));
                 client.Method = HttpMethod.Put;
-                client.RequestHeaders.Add(HDInsightRestHardcodes.XMsVersion);
-                client.RequestHeaders.Add(HDInsightRestHardcodes.SchemaVersion2);
-                client.RequestHeaders.Add(HDInsightRestHardcodes.Accept);
+                client.RequestHeaders.Add(HDInsightRestConstants.XMsVersion);
+                client.RequestHeaders.Add(HDInsightRestConstants.SchemaVersion2);
+                client.RequestHeaders.Add(HDInsightRestConstants.Accept);
                 client.Content = payLoad;
 
                 IHttpResponseMessageAbstraction httpResponse = await client.SendAsync();
                 if (httpResponse.StatusCode != HttpStatusCode.Accepted)
                 {
-                    throw new HDInsightRestClientException(httpResponse.StatusCode, httpResponse.Content);
+                    throw new HttpLayerException(httpResponse.StatusCode, httpResponse.Content);
                 }
-                return httpResponse.Content;
+                return httpResponse;
             }
         }
     }

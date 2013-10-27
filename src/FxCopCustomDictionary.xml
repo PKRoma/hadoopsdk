@@ -20,13 +20,19 @@
       (for example 'FileName' -> 'Filename').
     -->
     <Recognized>
+      <Word>Rdfe</Word>
       <Word>procdetails</Word>
+      <Word>Wab</Word>
+      <Word>Serdes</Word>
+      <Word>Wabs</Word>
+      <Word>HDInsight</Word>
       <Word>Hadoop</Word>
       <Word>Bfs</Word>
       <Word>Chs</Word>
       <Word>Efi</Word>
       <Word>Dyna</Word>
       <Word>Ioc</Word>
+      <Word>Rdp</Word>
       <Word>Endianness</Word>
       <Word>Esx</Word>
       <Word>Awaiter</Word>

@@ -12,18 +12,21 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
-
 namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.PowerShellTestAbstraction.Concreates
 {
+    using System.Linq;
     using System.Management.Automation.Runspaces;
-    using Microsoft.WindowsAzure.Management.Framework;
+    using System.Threading;
+    using Microsoft.WindowsAzure.Management.HDInsight;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
     using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.PowerShellTestAbstraction.Interfaces;
 
     public class PipelineAbstraction : RunspaceAbstraction, IPipeline
     {
         protected Pipeline Pipeline { get; private set; }
 
-        internal PipelineAbstraction(Pipeline pipeline, Runspace runspace) : base(runspace)
+        internal PipelineAbstraction(Pipeline pipeline, Runspace runspace)
+            : base(runspace)
         {
             this.Pipeline = pipeline;
         }
@@ -32,13 +35,13 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.PowerShellTe
         {
             var command = new Command(commandName);
             this.Pipeline.Commands.Add(command);
-            return Help.SaveCreate(() => new CommandAbstraction(command, this.Pipeline, this.Runspace));
+            return Help.SafeCreate(() => new CommandAbstraction(command, this.Pipeline, this.Runspace));
         }
 
         public IPipelineResult Invoke()
         {
             var results = this.Pipeline.Invoke();
-            return Help.SaveCreate(() => new PipelineResultsAbstraction(results, this.Runspace));
+            return Help.SafeCreate(() => new PipelineResultsAbstraction(results, this.Runspace));
         }
     }
 }

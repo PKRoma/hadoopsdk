@@ -1,22 +1,49 @@
-﻿namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
+﻿// Copyright (c) Microsoft Corporation
+// All rights reserved.
+// 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at http://www.apache.org/licenses/LICENSE-2.0
+// 
+// THIS CODE IS PROVIDED *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
+// WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
+// MERCHANTABLITY OR NON-INFRINGEMENT.
+// 
+// See the Apache Version 2.0 License for specific language governing
+// permissions and limitations under the License.
+namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Management.Automation;
+    using System.Reflection;
     using System.Text;
-    using Microsoft.WindowsAzure.Management.Framework;
-    using Microsoft.WindowsAzure.Management.Framework.InversionOfControl;
+    using System.Threading.Tasks;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.BaseCommandInterfaces;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandInterfaces;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters;
+    using Microsoft.WindowsAzure.Management.HDInsight;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
     using Microsoft.WindowsAzure.Management.HDInsight.InversionOfControl;
+    using Microsoft.WindowsAzure.Management.HDInsight.Logging;
 
     /// <summary>
     /// Adds an AzureHDInsight metastore to the AzureHDInsight configuration.
     /// </summary>
-    [Cmdlet(VerbsCommon.Add, AzureHdInsightPowerShellHardCodes.AzureHDInsightMetastore)]
+    [Cmdlet(VerbsCommon.Add, AzureHdInsightPowerShellConstants.AzureHDInsightMetastore)]
     public class AddAzureHDInsightMetastoreCmdlet : AzureHDInsightCmdlet, IAddAzureHDInsightMetastoreBase
     {
         private IAddAzureHDInsightMetastoreCommand command;
+
+        /// <inheritdoc />
+        protected override void StopProcessing()
+        {
+            this.command.Cancel();
+        }
 
         /// <summary>
         /// Initializes a new instance of the AddAzureHDInsightMetastoreCmdlet class.
@@ -32,7 +59,7 @@
         [Parameter(Position = 0, Mandatory = true,
                    HelpMessage = "The HDInsight cluster configuration to use when creating the new cluster (created by New-AzureHDInsightConfig).",
                    ValueFromPipeline = true,
-                   ParameterSetName = AzureHdInsightPowerShellHardCodes.ParameterSetAddMetastore)]
+                   ParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetAddMetastore)]
         public AzureHDInsightConfig Config
         {
             get { return this.command.Config; }
@@ -63,7 +90,7 @@
         [Parameter(Position = 1, Mandatory = true,
                    HelpMessage = "The Azure SQL Server instance to use for this metastore.",
                    ValueFromPipeline = false,
-                   ParameterSetName = AzureHdInsightPowerShellHardCodes.ParameterSetAddMetastore)]
+                   ParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetAddMetastore)]
         public string SqlAzureServerName
         {
             get { return this.command.SqlAzureServerName; }
@@ -76,7 +103,7 @@
         [Parameter(Position = 2, Mandatory = true,
                    HelpMessage = "The database on the Azure SQL Server instance to use for this metastore.",
                    ValueFromPipeline = false,
-                   ParameterSetName = AzureHdInsightPowerShellHardCodes.ParameterSetAddMetastore)]
+                   ParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetAddMetastore)]
         public string DatabaseName
         {
             get { return this.command.DatabaseName; }
@@ -84,29 +111,16 @@
         }
 
         /// <summary>
-        /// Gets or sets the User name to use for the Azure SQL Server database.
+        /// Gets or sets the user credentials to use for the Azure SQL Server database.
         /// </summary>
         [Parameter(Position = 3, Mandatory = true,
-                   HelpMessage = "The username to use for the Azure SQL Server database.",
+                   HelpMessage = "The user credentials to use for the Azure SQL Server database.",
                    ValueFromPipeline = false,
-                   ParameterSetName = AzureHdInsightPowerShellHardCodes.ParameterSetAddMetastore)]
-        public string UserName
+                   ParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetAddMetastore)]
+        public PSCredential Credential
         {
-            get { return this.command.UserName; }
-            set { this.command.UserName = value; }
-        }
-
-        /// <summary>
-        /// Gets or sets the password to use for the Azure SQL Server database.
-        /// </summary>
-        [Parameter(Position = 4, Mandatory = true,
-                   HelpMessage = "The password to use for the Azure SQL Server database.",
-                   ValueFromPipeline = false,
-                   ParameterSetName = AzureHdInsightPowerShellHardCodes.ParameterSetAddMetastore)]
-        public string Password
-        {
-            get { return this.command.Password; }
-            set { this.command.Password = value; }
+            get { return this.command.Credential; }
+            set { this.command.Credential = value; }
         }
 
         /// <summary>
@@ -115,7 +129,7 @@
         [Parameter(Position = 5, Mandatory = true,
                    HelpMessage = "The type of AzureHDInsight metastore represented by this metastore.",
                    ValueFromPipeline = false,
-                   ParameterSetName = AzureHdInsightPowerShellHardCodes.ParameterSetAddMetastore)]
+                   ParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetAddMetastore)]
         public AzureHDInsightMetastoreType MetastoreType
         {
             get { return this.command.MetastoreType; }
@@ -131,11 +145,29 @@
         /// <inheritdoc />
         protected override void EndProcessing()
         {
-            this.command.EndProcessing();
-            foreach (var output in this.command.Output)
+            try
             {
-                this.WriteObject(output);
+                this.command.EndProcessing().Wait();
+                foreach (var output in this.command.Output)
+                {
+                    this.WriteObject(output);
+                }
             }
+            catch (Exception ex)
+            {
+                var type = ex.GetType();
+                this.Logger.Log(Severity.Error, Verbosity.Normal, this.FormatException(ex));
+                this.WriteDebugLog();
+                if (type == typeof(AggregateException) || type == typeof(TargetInvocationException) || type == typeof(TaskCanceledException))
+                {
+                    ex.Rethrow();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            this.WriteDebugLog();
         }
     }
 }

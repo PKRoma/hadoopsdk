@@ -12,19 +12,20 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
-
 namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission.RestClient
 {
     using System.Threading.Tasks;
-    using Microsoft.WindowsAzure.Management.Framework;
+    using Microsoft.WindowsAzure.Management.HDInsight;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core;
 
     /// <summary>
     /// Represents a rest call to the server.
     /// </summary>
-    public interface IHDInsightJobSubmissionRestClient : IQueryDisposable
+    internal interface IHDInsightJobSubmissionRestClient : IQueryDisposable
     {
         /// <summary>
-        /// Creates a job on the cluster.
+        /// Creates a jobDetails on the cluster.
         /// </summary>
         /// <param name="containerName">
         /// The container name.
@@ -36,12 +37,12 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission.RestClient
         /// The payload representing the request.
         /// </param>
         /// <returns>
-        /// A task representing the job creation.
+        /// A task representing the jobDetails creation.
         /// </returns>
-        Task<string> CreateJob(string containerName, string location, string payload);
+        Task<IHttpResponseMessageAbstraction> CreateJob(string containerName, string location, string payload);
 
         /// <summary>
-        /// Lists the job on a cluster.
+        /// Lists the jobDetails on a cluster.
         /// </summary>
         /// <param name="containerName">
         /// The container name.
@@ -50,12 +51,12 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission.RestClient
         /// The geo location of the container.
         /// </param>
         /// <returns>
-        /// A task representing the job creation.
+        /// A task representing the jobDetails creation.
         /// </returns>
-        Task<string> ListJobs(string containerName, string location);
+        Task<IHttpResponseMessageAbstraction> ListJobs(string containerName, string location);
 
         /// <summary>
-        /// Returns job details for a given job.
+        /// Returns jobDetails details for a given jobDetails.
         /// </summary>
         /// <param name="containerName">
         /// The container name.
@@ -64,11 +65,11 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission.RestClient
         /// The geo location of the container.
         /// </param>
         /// <param name="id">
-        /// The id of the job to retrieve.
+        /// The id of the jobDetails to retrieve.
         /// </param>
         /// <returns>
-        /// A task representing the job creation.
+        /// A task representing the jobDetails creation.
         /// </returns>
-        Task<string> GetJobDetail(string containerName, string location, string id);
+        Task<IHttpResponseMessageAbstraction> GetJobDetail(string containerName, string location, string id);
     }
 }

@@ -120,6 +120,17 @@
       <TestProject>true</TestProject>
    </PropertyGroup>
    
+   <PropertyGroup Condition="'$(TestProject)' != 'true' and '$(SampleProject)' != 'true'" >
+      <ProductionProject>true</ProductionProject>
+	  <DocumentationFile Condition="'$(OfficialBuild)' == 'true'">$(LogPath)\Docs\$(AssemblyName).XML</DocumentationFile>
+   </PropertyGroup>
+   
+   <Target Name="MoveDocumentationFiles"
+           AfterTargets="CoreCompile"
+		   Condition="'$(OfficialBuild)' == 'true' and '$(TestProject)' != 'true' and '$(SampleProject)' != 'true'">
+		<Copy SourceFiles="$(LogPath)\Docs\$(AssemblyName).XML" DestinationFolder="$(OutDir)" />
+	</Target>
+   
    <PropertyGroup>
       <EmbeddedResourceManifestFile>$(GenPath)\$(MSBuildProjectFile).embedded-resource.map</EmbeddedResourceManifestFile>
       <TestResourceManifestFile>$(GenPath)\$(MSBuildProjectFile).test-resource.list</TestResourceManifestFile>

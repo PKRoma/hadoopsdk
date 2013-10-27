@@ -1,149 +1,163 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 
 <Drop xmlns="http://microsoft.com/sat/drop.xsd">
-  <!-- Internal ONLY Test Utilities -->
   <Copy>
-    <From>Microsoft.WindowsAzure.Management.HDInsight.TestUtilities\Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.dll</From>
-    <To>Microsoft.WindowsAzure.Management.HDInsight.TestUtilities\lib\net40\Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.dll</To>
-  </Copy>
-  <Copy>
-    <From>Microsoft.WindowsAzure.Management.Framework\Microsoft.WindowsAzure.Management.Framework.dll</From>
-    <To>Microsoft.WindowsAzure.Management.HDInsight.TestUtilities\lib\net40\Microsoft.WindowsAzure.Management.Framework.dll</To>
-  </Copy>
-  <Copy>
-    <From>Microsoft.WindowsAzure.Management.Framework.Threading\Microsoft.WindowsAzure.Management.Framework.Threading.dll</From>
-    <To>Microsoft.WindowsAzure.Management.HDInsight.TestUtilities\lib\net40\Microsoft.WindowsAzure.Management.Framework.Threading.dll</To>
+    <From>Microsoft.WindowsAzure.Management.HDInsight\HadoopSdkLicense.rtf</From>
+    <To>HadoopSdkLicense.rtf</To>
   </Copy>
 
-  <!-- Internal ONLY Framework -->
+  <!-- Hadoop Client -->
   <Copy>
-    <From>Microsoft.WindowsAzure.Management.Framework\Microsoft.WindowsAzure.Management.Framework.dll</From>
-    <To>Microsoft.WindowsAzure.Management.Framework\lib\net40\Microsoft.WindowsAzure.Management.Framework.dll</To>
+    <From>Microsoft.HDInsight.Threading\Microsoft.HDInsight.Threading.dll</From>
+    <To>Microsoft.Hadoop.Client\lib\net40\Microsoft.HDInsight.Threading.dll</To>
   </Copy>
   <Copy>
-    <From>Microsoft.WindowsAzure.Management.Framework.Threading\Microsoft.WindowsAzure.Management.Framework.Threading.dll</From>
-    <To>Microsoft.WindowsAzure.Management.Framework\lib\net40\Microsoft.WindowsAzure.Management.Framework.Threading.dll</To>
+    <From>Microsoft.Hadoop.Client\Microsoft.Hadoop.Client.dll</From>
+    <To>Microsoft.Hadoop.Client\lib\net40\Microsoft.Hadoop.Client.dll</To>
+  </Copy>
+    <Copy>
+    <From>Microsoft.Hadoop.Client\Microsoft.Hadoop.Client.xml</From>
+    <To>Microsoft.Hadoop.Client\lib\net40\Microsoft.Hadoop.Client.xml</To>
+  </Copy>
+  <Copy>
+    <From>Microsoft.Hadoop.Client\Microsoft.Data.Edm.dll</From>
+    <To>Microsoft.Hadoop.Client\lib\net40\Microsoft.Data.Edm.dll</To>
+  </Copy>
+  <Copy>
+    <From>Microsoft.Hadoop.Client\Microsoft.Data.OData.dll</From>
+    <To>Microsoft.Hadoop.Client\lib\net40\Microsoft.Data.OData.dll</To>
+  </Copy>
+  <Copy>
+    <From>Microsoft.Hadoop.Client\System.Spatial.dll</From>
+    <To>Microsoft.Hadoop.Client\lib\net40\System.Spatial.dll</To>
+  </Copy>
+  <Copy>
+    <From>Microsoft.Hadoop.Client\Microsoft.WindowsAzure.Storage.dll</From>
+    <To>Microsoft.Hadoop.Client\lib\net40\Microsoft.WindowsAzure.Storage.dll</To>
+  </Copy>
+  <Copy>
+    <From>Microsoft.WindowsAzure.Management.HDInsight.Framework\Microsoft.WindowsAzure.Management.HDInsight.Framework.dll</From>
+    <To>Microsoft.Hadoop.Client\lib\net40\Microsoft.WindowsAzure.Management.HDInsight.Framework.dll</To>
+  </Copy>
+  <Copy>
+    <From>Microsoft.WindowsAzure.Management.HDInsight.Framework\Microsoft.WindowsAzure.Management.HDInsight.Framework.xml</From>
+    <To>Microsoft.Hadoop.Client\lib\net40\Microsoft.WindowsAzure.Management.HDInsight.Framework.xml</To>
+  </Copy>
+  <Copy>
+    <From>Microsoft.WindowsAzure.Management.HDInsight.Framework.Core\Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.dll</From>
+    <To>Microsoft.Hadoop.Client\lib\net40\Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.dll</To>
+  </Copy>
+  <Copy>
+    <From>Microsoft.WindowsAzure.Management.HDInsight.Framework.Core\Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.xml</From>
+    <To>Microsoft.Hadoop.Client\lib\net40\Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.xml</To>
   </Copy>
 
-  <!-- Managment SDK -->
+  <!-- HDInsight Client -->
   <Copy>
-    <From>Microsoft.WindowsAzure.Management.Framework\Microsoft.WindowsAzure.Management.Framework.dll</From>
-    <To>Microsoft.WindowsAzure.Management.HDInsight\lib\net40\Microsoft.WindowsAzure.Management.Framework.dll</To>
-  </Copy>
-  <Copy>
-    <From>Microsoft.WindowsAzure.Management.Framework.Threading\Microsoft.WindowsAzure.Management.Framework.Threading.dll</From>
-    <To>Microsoft.WindowsAzure.Management.HDInsight\lib\net40\Microsoft.WindowsAzure.Management.Framework.Threading.dll</To>
+    <From>Microsoft.HDInsight.Threading\Microsoft.HDInsight.Threading.dll</From>
+    <To>Microsoft.WindowsAzure.Management.HDInsight\lib\net40\Microsoft.HDInsight.Threading.dll</To>
   </Copy>
   <Copy>
     <From>Microsoft.WindowsAzure.Management.HDInsight\Microsoft.WindowsAzure.Management.HDInsight.dll</From>
     <To>Microsoft.WindowsAzure.Management.HDInsight\lib\net40\Microsoft.WindowsAzure.Management.HDInsight.dll</To>
   </Copy>
-  
+  <Copy>
+    <From>Microsoft.WindowsAzure.Management.HDInsight\Microsoft.WindowsAzure.Management.HDInsight.xml</From>
+    <To>Microsoft.WindowsAzure.Management.HDInsight\lib\net40\Microsoft.WindowsAzure.Management.HDInsight.xml</To>
+  </Copy>
+
   <!-- Cmdlets -->
   <Copy>
-    <From>Microsoft.WindowsAzure.Management.Framework\Microsoft.WindowsAzure.Management.Framework.dll</From>
-    <To>Cmdlet\Microsoft.WindowsAzure.Management.Framework.dll</To>
+    <From>Microsoft.Hadoop.Client\Microsoft.Hadoop.Client.dll</From>
+    <To>Cmdlet\Microsoft.WindowsAzure.Management.HDInsight.Cmdlet\Microsoft.Hadoop.Client.dll</To>
   </Copy>
   <Copy>
-    <From>Microsoft.WindowsAzure.Management.Framework.Threading\Microsoft.WindowsAzure.Management.Framework.Threading.dll</From>
-    <To>Cmdlet\Microsoft.WindowsAzure.Management.Framework.Threading.dll</To>
+    <From>Microsoft.WindowsAzure.Management.HDInsight.Framework.Core\Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.dll</From>
+    <To>Cmdlet\Microsoft.WindowsAzure.Management.HDInsight.Cmdlet\Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.dll</To>
+  </Copy>
+  <Copy>
+    <From>Microsoft.WindowsAzure.Management.HDInsight.Framework\Microsoft.WindowsAzure.Management.HDInsight.Framework.dll</From>
+    <To>Cmdlet\Microsoft.WindowsAzure.Management.HDInsight.Cmdlet\Microsoft.WindowsAzure.Management.HDInsight.Framework.dll</To>
+  </Copy>
+  <Copy>
+    <From>Microsoft.HDInsight.Threading\Microsoft.HDInsight.Threading.dll</From>
+    <To>Cmdlet\Microsoft.WindowsAzure.Management.HDInsight.Cmdlet\Microsoft.HDInsight.Threading.dll</To>
   </Copy>
   <Copy>
     <From>Microsoft.WindowsAzure.Management.HDInsight\Microsoft.WindowsAzure.Management.HDInsight.dll</From>
-    <To>Cmdlet\Microsoft.WindowsAzure.Management.HDInsight.dll</To>
+    <To>Cmdlet\Microsoft.WindowsAzure.Management.HDInsight.Cmdlet\Microsoft.WindowsAzure.Management.HDInsight.dll</To>
+  </Copy>
+  <Copy>
+    <From>Microsoft.Hadoop.Client\Microsoft.Hadoop.Client.xml</From>
+    <To>Cmdlet\Microsoft.WindowsAzure.Management.HDInsight.Cmdlet\Microsoft.Hadoop.Client.xml</To>
+  </Copy>
+  <Copy>
+    <From>Microsoft.WindowsAzure.Management.HDInsight.Framework.Core\Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.xml</From>
+    <To>Cmdlet\Microsoft.WindowsAzure.Management.HDInsight.Cmdlet\Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.xml</To>
+  </Copy>
+  <Copy>
+    <From>Microsoft.WindowsAzure.Management.HDInsight.Framework\Microsoft.WindowsAzure.Management.HDInsight.Framework.xml</From>
+    <To>Cmdlet\Microsoft.WindowsAzure.Management.HDInsight.Cmdlet\Microsoft.WindowsAzure.Management.HDInsight.Framework.xml</To>
+  </Copy>
+  <Copy>
+    <From>Microsoft.WindowsAzure.Management.HDInsight\Microsoft.WindowsAzure.Management.HDInsight.xml</From>
+    <To>Cmdlet\Microsoft.WindowsAzure.Management.HDInsight.Cmdlet\Microsoft.WindowsAzure.Management.HDInsight.xml</To>
+  </Copy>
+  <Copy>
+    <From>Procdetails\Procdetails.exe</From>
+    <To>Cmdlet\Procdetails.exe</To>
   </Copy>
   <Copy>
     <From>Microsoft.WindowsAzure.Management.HDInsight.Cmdlet\Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.dll</From>
-    <To>Cmdlet\Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.dll</To>
+    <To>Cmdlet\Microsoft.WindowsAzure.Management.HDInsight.Cmdlet\Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.dll</To>
+  </Copy>
+  <Copy>
+    <From>Microsoft.WindowsAzure.Management.HDInsight.Cmdlet\Microsoft.Data.Edm.dll</From>
+    <To>Cmdlet\Microsoft.WindowsAzure.Management.HDInsight.Cmdlet\Microsoft.Data.Edm.dll</To>
+  </Copy>
+  <Copy>
+    <From>Microsoft.WindowsAzure.Management.HDInsight.Cmdlet\Microsoft.Data.OData.dll</From>
+    <To>Cmdlet\Microsoft.WindowsAzure.Management.HDInsight.Cmdlet\Microsoft.Data.OData.dll</To>
+  </Copy>
+  <Copy>
+    <From>Microsoft.WindowsAzure.Management.HDInsight.Cmdlet\System.Spatial.dll</From>
+    <To>Cmdlet\Microsoft.WindowsAzure.Management.HDInsight.Cmdlet\System.Spatial.dll</To>
+  </Copy>
+  <Copy>
+    <From>Microsoft.WindowsAzure.Management.HDInsight.Cmdlet\Microsoft.WindowsAzure.Storage.dll</From>
+    <To>Cmdlet\Microsoft.WindowsAzure.Management.HDInsight.Cmdlet\Microsoft.WindowsAzure.Storage.dll</To>
+  </Copy>
+  <Copy>
+    <From>Microsoft.WindowsAzure.Management.HDInsight.Cmdlet\Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.dll-help.xml</From>
+    <To>Cmdlet\Microsoft.WindowsAzure.Management.HDInsight.Cmdlet\en-us\Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.dll-help.xml</To>
   </Copy>
 
-  <!-- Microsoft.Hadoop.MapReduce -->
-  <Copy>
-    <From>Microsoft.Hadoop.MapReduce\Microsoft.Hadoop.MapReduce.dll</From>
-    <To>Microsoft.Hadoop.MapReduce\lib\net40\Microsoft.Hadoop.MapReduce.dll</To>
-  </Copy>
-  <Copy>
-    <From>Microsoft.WindowsAzure.Management.Framework\Microsoft.WindowsAzure.Management.Framework.dll</From>
-    <To>Microsoft.Hadoop.MapReduce\lib\net40\Microsoft.WindowsAzure.Management.Framework.dll</To>
-  </Copy>
-  <Copy>
-    <From>Microsoft.Hadoop.WebClient\Microsoft.Hadoop.WebClient.dll</From>
-    <To>Microsoft.Hadoop.MapReduce\lib\net40\Microsoft.Hadoop.WebClient.dll</To>
-  </Copy>
-  <Copy>
-    <From>Microsoft.Hadoop.Client\Microsoft.Hadoop.Client.dll</From>
-    <To>Microsoft.Hadoop.MapReduce\lib\net40\Microsoft.Hadoop.Client.dll</To>
-  </Copy>
-  <Copy>
-    <From>Microsoft.Hadoop.MapReduce\Microsoft.Hadoop.MapReduce.dll</From>
-    <To>Microsoft.Hadoop.MapReduce\content\net40\MRLib\Microsoft.Hadoop.MapReduce.dll</To>
-  </Copy>
-  <Copy>
-    <From>Microsoft.Hadoop.MapDriver\Microsoft.Hadoop.MapDriver.exe</From>
-    <To>Microsoft.Hadoop.MapReduce\content\net40\MRLib\Microsoft.Hadoop.MapDriver.exe</To>
-  </Copy>
-  <Copy>
-    <From>Microsoft.Hadoop.CombineDriver\Microsoft.Hadoop.CombineDriver.exe</From>
-    <To>Microsoft.Hadoop.MapReduce\content\net40\MRLib\Microsoft.Hadoop.CombineDriver.exe</To>
-  </Copy>
-  <Copy>
-    <From>Microsoft.Hadoop.Client\Microsoft.Hadoop.Client.dll</From>
-    <To>Microsoft.Hadoop.MapReduce\content\net40\MRLib\Microsoft.Hadoop.Client.dll</To>
-  </Copy>
-  <Copy>
-    <From>Microsoft.WindowsAzure.Management.Framework.Threading\Microsoft.WindowsAzure.Management.Framework.Threading.dll</From>
-    <To>Microsoft.Hadoop.MapReduce\content\net40\MRLib\Microsoft.WindowsAzure.Management.Framework.Threading.dll</To>
-  </Copy>
-  <Copy>
-    <From>Microsoft.Hadoop.ReduceDriver\Microsoft.Hadoop.ReduceDriver.exe</From>
-    <To>Microsoft.Hadoop.MapReduce\content\net40\MRLib\Microsoft.Hadoop.ReduceDriver.exe</To>
-  </Copy>
-  <Copy>
-    <From>Microsoft.Hadoop.WebClient\Microsoft.WindowsAzure.Management.Framework.Threading.dll</From>
-    <To>Microsoft.Hadoop.MapReduce\lib\net40\Microsoft.WindowsAzure.Management.Framework.Threading.dll</To>
-  </Copy>
-  <Copy>
-    <From>MRRunner\MRRunner.exe</From>
-    <To>Microsoft.Hadoop.MapReduce\content\net40\MRLib\MRRunner.exe</To>
-  </Copy>
 
-  <!-- Microsoft.Hadoop.WebClient -->
+  <!-- [Internal ONLY] Test assemblies -->
   <Copy>
-    <From>Microsoft.Hadoop.Client\Microsoft.Hadoop.Client.dll</From>
-    <To>Microsoft.Hadoop.WebClient\lib\net40\Microsoft.Hadoop.Client.dll</To>
+    <From>Microsoft.WindowsAzure.Management.HDInsight.Tests\Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.dll</From>
+    <To>NonPublic\Library\Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.dll</To>
   </Copy>
   <Copy>
-    <From>Microsoft.Hadoop.WebClient\Microsoft.Hadoop.WebClient.dll</From>
-    <To>Microsoft.Hadoop.WebClient\lib\net40\Microsoft.Hadoop.WebClient.dll</To>
+    <From>Microsoft.WindowsAzure.Management.HDInsight.Tests\Microsoft.WindowsAzure.Management.Configuration.dll</From>
+    <To>NonPublic\Library\Microsoft.WindowsAzure.Management.Configuration.dll</To>
   </Copy>
   <Copy>
-    <From>Microsoft.Hadoop.WebClient\Microsoft.WindowsAzure.Management.Framework.Threading.dll</From>
-    <To>Microsoft.Hadoop.WebClient\lib\net40\Microsoft.WindowsAzure.Management.Framework.Threading.dll</To>
-  </Copy>
-  
-  <!-- Microsoft.Hadoop.Hive -->
-  <Copy>
-    <From>Microsoft.Hadoop.Client\Microsoft.Hadoop.Client.dll</From>
-    <To>Microsoft.Hadoop.Client\lib\net40\Microsoft.Hadoop.Client.dll</To>
+    <From>Microsoft.WindowsAzure.Management.HDInsight.Tests\Microsoft.HDInsight.Management.Contracts.dll</From>
+    <To>NonPublic\Library\Microsoft.HDInsight.Management.Contracts.dll</To>
   </Copy>
   <Copy>
-    <From>Microsoft.Hadoop.Hive\Microsoft.Hadoop.Hive.dll</From>
-    <To>Microsoft.Hadoop.Hive\lib\net40\Microsoft.Hadoop.Hive.dll</To>
+    <From>Microsoft.WindowsAzure.Management.HDInsight.Framework.Internal\Microsoft.WindowsAzure.Management.HDInsight.Framework.Internal.dll</From>
+    <To>NonPublic\Library\lib\net40\Microsoft.WindowsAzure.Management.HDInsight.Framework.Internal.dll</To>
   </Copy>
   <Copy>
-    <From>Microsoft.Hadoop.WebClient\Microsoft.Hadoop.WebClient.dll</From>
-    <To>Microsoft.Hadoop.Hive\lib\net40\Microsoft.Hadoop.WebClient.dll</To>
+    <From>Microsoft.WindowsAzure.Management.HDInsight.Internal\Microsoft.WindowsAzure.Management.HDInsight.Internal.dll</From>
+    <To>NonPublic\Library\lib\net40\Microsoft.WindowsAzure.Management.HDInsight.Internal.dll</To>
   </Copy>
-  <Copy>
-    <From>Microsoft.Hadoop.WebClient\Microsoft.WindowsAzure.Management.Framework.Threading.dll</From>
-    <To>Microsoft.Hadoop.Hive\lib\net40\Microsoft.WindowsAzure.Management.Framework.Threading.dll</To>
-  </Copy>
-  <Copy>
-    <From>Microsoft.WindowsAzure.Management.Framework.Threading\Microsoft.WindowsAzure.Management.Framework.Threading.dll</From>
-    <To>Microsoft.Hadoop.Hive\content\net40\MRLib\Microsoft.WindowsAzure.Management.Framework.Threading.dll</To>
-  </Copy>
-  <Copy>
-    <From>HiveDriver\HiveDriver.exe</From>
-    <To>Microsoft.Hadoop.Hive\content\net40\MRLib\HiveDriver.exe</To>
-  </Copy>
+  <CopyTree>
+    <From>Microsoft.WindowsAzure.Management.HDInsight.Framework.Core\Library</From>
+    <To>NonPublic\Source\build\net40\Library</To>
+  </CopyTree>
+
+
 </Drop>

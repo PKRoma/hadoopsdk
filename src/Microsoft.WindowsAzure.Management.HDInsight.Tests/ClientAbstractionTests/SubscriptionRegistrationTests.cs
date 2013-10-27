@@ -1,49 +1,56 @@
-﻿namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTests
+﻿// Copyright (c) Microsoft Corporation
+// All rights reserved.
+// 
+// Licensed under the Apache License, Version 2.0 (the "License"); you may not
+// use this file except in compliance with the License.  You may obtain a copy
+// of the License at http://www.apache.org/licenses/LICENSE-2.0
+// 
+// THIS CODE IS PROVIDED *AS IS* BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, EITHER EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY IMPLIED
+// WARRANTIES OR CONDITIONS OF TITLE, FITNESS FOR A PARTICULAR PURPOSE,
+// MERCHANTABLITY OR NON-INFRINGEMENT.
+// 
+// See the Apache Version 2.0 License for specific language governing
+// permissions and limitations under the License.
+namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTests
 {
     using System;
-    using System.IO;
-    using System.Linq;
     using System.Net;
-    using System.Threading;
     using System.Threading.Tasks;
-    using System.Xml;
+    using Microsoft.Hadoop.Client;
+    using Microsoft.Hadoop.Client.WebHCatRest;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Microsoft.WindowsAzure.Management.Framework;
-    using Microsoft.WindowsAzure.Management.Framework.InversionOfControl;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.AzureManagementClient;
-    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data;
-    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Old;
-    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoClient;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestClient;
-    using Microsoft.WindowsAzure.Management.HDInsight.ConnectionContext;
+    
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
+    using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities;
 
     [TestClass]
     public class SubscriptionRegistrationTests : IntegrationTestBase
     {
         [TestInitialize]
-        public void Initialize()
+        public override void Initialize()
         {
-            this.ApplyFullMocking();
-            this.ResetIndividualMocks();
+            base.Initialize();
         }
 
         [TestCleanup]
-        public void TestCleanup()
+        public override void TestCleanup()
         {
-            this.ApplyFullMocking();
-            this.ResetIndividualMocks();
+            base.TestCleanup();
         }
 
         [TestMethod]
         [TestCategory("Integration")]
-        [TestCategory("CheckIn")]
+        [TestCategory("Nightly")]
         [TestCategory("SubscriptionRegistrationClient")]
         [TestCategory("Scenario")]
         public async Task ICanPerformA_PositiveSubscriptionValidation_Using_SubscriptionRegistrationAbstraction_AgainstAzure() // Always goes against azure to quickly validate end2end
         {
-            IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
-            var client = new SubscriptionRegistrationClient(credentials);
+            IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
+            var client = new SubscriptionRegistrationClient(credentials, GetAbstractionContext());
             Assert.IsTrue(await client.ValidateSubscriptionLocation("East US 2"));
         }
 
@@ -53,8 +60,8 @@
         [TestCategory("SubscriptionRegistrationClient")]
         public async Task ICanPerformA_PositiveSubscriptionValidation_Using_SubscriptionRegistrationAbstraction()
         {
-            IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
-            var client = ServiceLocator.Instance.Locate<ISubscriptionRegistrationClientFactory>().Create(credentials);
+            IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
+            var client = ServiceLocator.Instance.Locate<ISubscriptionRegistrationClientFactory>().Create(credentials, GetAbstractionContext());
             Assert.IsTrue(await client.ValidateSubscriptionLocation("East US 2"));
             Assert.IsFalse(await client.ValidateSubscriptionLocation("No Where"));
         }
@@ -65,8 +72,8 @@
         [TestCategory("SubscriptionRegistrationClient")]
         public async Task ICanPerformA_RepeatedSubscriptionRegistration_Using_SubscriptionRegistrationAbstraction()
         {
-            IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
-            var client = ServiceLocator.Instance.Locate<ISubscriptionRegistrationClientFactory>().Create(credentials);
+            IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
+            var client = ServiceLocator.Instance.Locate<ISubscriptionRegistrationClientFactory>().Create(credentials, GetAbstractionContext());
             await client.RegisterSubscription();
             await client.RegisterSubscription();
             await client.RegisterSubscriptionLocation("North Europe");
@@ -77,6 +84,8 @@
         [TestMethod]
         [TestCategory("Integration")]
         [TestCategory("Scenario")]
+        [TestCategory("Production")]
+        [TestCategory(TestRunMode.Nightly)]
         [TestCategory("SubscriptionRegistrationClient")]
         public async Task ICanPerformA_RepeatedSubscriptionRegistration_Using_SubscriptionRegistrationAbstraction_AgainstAzure()
         {
@@ -90,19 +99,19 @@
         [TestCategory("SubscriptionRegistrationClient")]
         public async Task ICannotPerformA_RepeatedUnregistration_Using_SubscriptionRegistrationAbstraction()
         {
-            IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
+            IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
             string location = "North Europe";
             DeleteClusters(credentials, location);
 
             // Need to delete clusters, otherwise unregister will no-op
-            var client = ServiceLocator.Instance.Locate<ISubscriptionRegistrationClientFactory>().Create(credentials);
+            var client = ServiceLocator.Instance.Locate<ISubscriptionRegistrationClientFactory>().Create(credentials, GetAbstractionContext());
             try
             {
                 await client.UnregisterSubscriptionLocation("North Europe");
                 await client.UnregisterSubscriptionLocation("North Europe");
                 Assert.Fail("Expected exception.");
             }
-            catch (HDInsightRestClientException e)
+            catch (HttpLayerException e)
             {
                 Assert.AreEqual(HttpStatusCode.NotFound, e.RequestStatusCode);
                 // Error looks like The cloud service with name [namespace] was not found.
@@ -116,6 +125,8 @@
         [TestMethod]
         [TestCategory("Integration")]
         [TestCategory("Scenario")]
+        [TestCategory("Production")]
+        [TestCategory(TestRunMode.Nightly)]
         [TestCategory("SubscriptionRegistrationClient")]
         public async Task ICannotPerformA_RepeatedUnregistration_Using_SubscriptionRegistrationAbstraction_AgainstAzure()
         {
@@ -129,9 +140,9 @@
         [TestCategory("SubscriptionRegistrationClient")]
         public async Task ICannotPerformA_UnregisterIfClustersExist_Using_SubscriptionRegistrationAbstraction()
         {
-            IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
-           
-            var client = ServiceLocator.Instance.Locate<ISubscriptionRegistrationClientFactory>().Create(credentials);
+            IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
+
+            var client = ServiceLocator.Instance.Locate<ISubscriptionRegistrationClientFactory>().Create(credentials, GetAbstractionContext());
             try
             {
                 await client.UnregisterSubscriptionLocation("East US 2");
@@ -148,6 +159,8 @@
         [TestMethod]
         [TestCategory("Integration")]
         [TestCategory("Scenario")]
+        [TestCategory("Production")]
+        [TestCategory(TestRunMode.Nightly)]
         [TestCategory("SubscriptionRegistrationClient")]
         public async Task ICannotPerformA_UnregisterIfClustersExist_Using_SubscriptionRegistrationAbstraction_AgainstAzure()
         {
@@ -161,14 +174,14 @@
         [TestCategory("SubscriptionRegistrationClient")]
         public async Task ICanPerformA_UnregisterSubscription_Using_SubscriptionRegistrationAbstraction()
         {
-            IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
+            IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
             DeleteClusters(credentials, "North Europe");
 
-            var client = ServiceLocator.Instance.Locate<ISubscriptionRegistrationClientFactory>().Create(credentials);
+            var client = ServiceLocator.Instance.Locate<ISubscriptionRegistrationClientFactory>().Create(credentials, GetAbstractionContext());
             await client.RegisterSubscriptionLocation("North Europe");
             await client.UnregisterSubscriptionLocation("North Europe");
         }
-        
+
         [TestMethod]
         [TestCategory("Integration")]
         [TestCategory("RestClient")]
@@ -176,31 +189,29 @@
         [TestCategory("CheckIn")]
         public async Task ICannotPerformA_CreateContainersOnUnregisterdSubscription_Using_RestClient()
         {
-            IConnectionCredentials credentials = IntegrationTestBase.GetValidCredentials();
+            IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
 
             // Unregisters location
             var location = "North Europe";
             DeleteClusters(credentials, location);
-            var client = ServiceLocator.Instance.Locate<ISubscriptionRegistrationClientFactory>().Create(credentials);
+            var client = ServiceLocator.Instance.Locate<ISubscriptionRegistrationClientFactory>().Create(credentials, GetAbstractionContext());
             if (await client.ValidateSubscriptionLocation(location))
             {
                 await client.UnregisterSubscriptionLocation(location);
             }
-            Assert.IsFalse(await client.ValidateSubscriptionLocation(location));
+            Assert.IsFalse(await client.ValidateSubscriptionLocation(location), "Subscription location '{0}' is still registered.", location);
 
             try
             {
                 // Creates the cluster
-                using (var restClient = ServiceLocator.Instance.Locate<IHDInsightManagementRestClientFactory>().Create(credentials))
-                {
-                    var cluster = base.GetRandomCluster();
-                    string payload = PayloadConverter.SerializeClusterCreateRequest(cluster, credentials.SubscriptionId);
-                    await restClient.CreateContainer(cluster.Name, location, payload);
-                }
+                var restClient = ServiceLocator.Instance.Locate<IHDInsightManagementRestClientFactory>().Create(credentials, GetAbstractionContext());
+                var cluster = base.GetRandomCluster();
+                string payload = new PayloadConverter().SerializeClusterCreateRequest(cluster);
+                await restClient.CreateContainer(cluster.Name, location, payload);
 
                 Assert.Fail("Expected exception.");
             }
-            catch (HDInsightRestClientException e)
+            catch (HttpLayerException e)
             {
                 Assert.AreEqual(HttpStatusCode.NotFound, e.RequestStatusCode);
                 // Error looks like The cloud service with name [namespace] was not found.
@@ -213,6 +224,8 @@
         [TestCategory("Integration")]
         [TestCategory("RestClient")]
         [TestCategory("SubscriptionRegistrationClient")]
+        [TestCategory("Production")]
+        [TestCategory(TestRunMode.Nightly)]
         [TestCategory("Scenario")]
         public async Task ICannotPerformA_CreateContainersOnUnregisterdSubscription_Using_RestClient_AgainstAzure()
         {
