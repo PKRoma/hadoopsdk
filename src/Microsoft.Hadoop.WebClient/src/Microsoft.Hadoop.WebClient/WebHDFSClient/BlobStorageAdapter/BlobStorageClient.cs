@@ -36,7 +36,7 @@ namespace Microsoft.Hadoop.WebHDFS.Adapters
 
         private CloudBlobContainer blobContainer;
 
-        private const string IsFolderProp = "asv_isfolder";
+        private const string IsFolderProp = "hdi_isfolder";
 
         internal BlobStorageClient(string baseUri, string account, string key)
         {

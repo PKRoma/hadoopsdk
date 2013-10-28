@@ -37,7 +37,7 @@ namespace WebClientTests
         internal string GetBasePath()
         {
             var uri = adapter.BaseUri;
-            return "asv://" + this.container + "@" + TestConfig.StorageAccount + ".blob.core.windows.net" + "/";
+            return "wasb://" + this.container + "@" + TestConfig.StorageAccount + ".blob.core.windows.net" + "/";
         }
 
         [TestMethod]

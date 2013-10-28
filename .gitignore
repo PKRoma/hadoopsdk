@@ -31,6 +31,7 @@ _UpgradeReport_Files
 UpgradeLog.htm
 *.class
 *.jar
+*.feature.cs
 
 # ncrunchfiles
 *.ncrunchsolution

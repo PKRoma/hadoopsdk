@@ -34,7 +34,10 @@ namespace WordCountSampleApplication
     {
         public static void Main(string[] args)
         {
-            Uri myAzureCluster = new Uri("http://myAzureCluster");
+            Environment.SetEnvironmentVariable("HADOOP_HOME", @"c:\hadoop");
+            Environment.SetEnvironmentVariable("Java_HOME", @"c:\hadoop\jvm");
+
+            Uri myAzureCluster = new Uri("https://myAzureCluster.azurehdinsight.net");
             string myAzureUserName = "{Your Azure user name}";
             string myAzurePassword = "{Your Azure password}";
 
@@ -56,6 +59,12 @@ namespace WordCountSampleApplication
                                         myAzureStorageKey,
                                         myAzureStorageContainer,
                                         createContinerIfNotExist);
+
+            using (WebClient client = new WebClient())
+            {
+                var data1 = client.DownloadString("http://www.gutenberg.org/cache/epub/11/pg11.txt");
+                hadoop.StorageSystem.WriteAllText(WordCount._input1HDFS, data1);
+            }
 
             var result = hadoop.MapReduceJob.ExecuteJob<WordCount>();
 
@@ -81,15 +90,10 @@ namespace WordCountSampleApplication
 
         public override void Initialize(ExecutorContext context)
         {
-            CreateInput();
         }
 
         public override void Cleanup(ExecutorContext context)
         {
-            foreach (string s in HdfsFile.EnumerateDataInFolder(s_outputFolderHDFS, 20))
-            {
-                Console.WriteLine(s);
-            }
         }
 
         public override HadoopJobConfiguration Configure(ExecutorContext context)
@@ -100,18 +104,6 @@ namespace WordCountSampleApplication
             config.OutputFolder = s_outputFolderHDFS;
             config.AdditionalGenericArguments.Add("-D \"mapred.map.tasks=3\""); // example of controlling arbitrary hadoop options.
             return config;
-        }
-
-        private static void CreateInput()
-        {
-            using (WebClient client = new WebClient())
-            {
-                if (!HdfsFile.Exists(_input1HDFS))
-                {
-                    string data1 = client.DownloadString(s_input1WebSource);
-                    HdfsFile.WriteAllText(_input1HDFS, data1);
-                }
-            }
         }
     }
 

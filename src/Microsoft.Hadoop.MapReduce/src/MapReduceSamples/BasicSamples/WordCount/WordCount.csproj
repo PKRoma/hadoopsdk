@@ -33,6 +33,22 @@
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\MapReduce\Drivers\Microsoft.Hadoop.MapReduce.CombineDriver\Microsoft.Hadoop.MapReduce.CombineDriver.csproj">
+      <Project>{88868d8f-fb2a-478e-ba4a-630a2ae9c1cd}</Project>
+      <Name>Microsoft.Hadoop.MapReduce.CombineDriver</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\MapReduce\Drivers\Microsoft.Hadoop.MapReduce.MapDriver\Microsoft.Hadoop.MapReduce.MapDriver.csproj">
+      <Project>{78d79672-a80a-42c6-a347-b1d2e3c02bbe}</Project>
+      <Name>Microsoft.Hadoop.MapReduce.MapDriver</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\MapReduce\Drivers\Microsoft.Hadoop.MapReduce.MRRunner\Microsoft.Hadoop.MapReduce.MRRunner.csproj">
+      <Project>{e95ff1ef-a5ff-45f7-96b4-52f707f996a9}</Project>
+      <Name>Microsoft.Hadoop.MapReduce.MRRunner</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\MapReduce\Drivers\Microsoft.Hadoop.MapReduce.ReduceDriver\Microsoft.Hadoop.MapReduce.ReduceDriver.csproj">
+      <Project>{2d8cba09-68bf-47c3-aa6d-0016d263d5f4}</Project>
+      <Name>Microsoft.Hadoop.MapReduce.ReduceDriver</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\MapReduce\Microsoft.Hadoop.MapReduce\Microsoft.Hadoop.MapReduce.csproj">
       <Project>{afd1befa-97ca-4e92-94f5-1f6e4e271b46}</Project>
       <Name>Microsoft.Hadoop.MapReduce</Name>
@@ -50,6 +66,7 @@
     <Compile Include="WordCount.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="..\..\..\..\..\..\build\targets\Project.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

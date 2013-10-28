@@ -24,7 +24,7 @@ namespace LinqToHiveMapReduceSample
     class Program
     {
         static void Main(string[] args)
-        {
+            {
             LinqToHiveWordCount.RunSample();
             LinqToHiveCondense.RunSample();
             LinqToHiveWebSiteLogs.RunSample();

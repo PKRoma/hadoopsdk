@@ -93,7 +93,7 @@ namespace Microsoft.Hadoop.WebHDFS
             else
             {
                 var asAdapter = (BlobStorageAdapter)this.handler;
-                return "asv://" + asAdapter.ContainerName + "@" + asAdapter.FullAccountName + path;
+                return "wasb://" + asAdapter.ContainerName + "@" + asAdapter.FullAccountName + path;
             }
         }
 

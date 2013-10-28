@@ -205,7 +205,7 @@ namespace Microsoft.Hadoop.WebHDFS.Adapters
 
                 blobStorageClient.CreateFile(path, contents, true);
                 resp.StatusCode = HttpStatusCode.Created;
-                var location = new Uri(new Uri("asv://" + this.ContainerName + "@" + this.accountNameResolver.FullAccount + "/"), new Uri(path, UriKind.Relative));
+                var location = new Uri(new Uri("wasb://" + this.ContainerName + "@" + this.accountNameResolver.FullAccount + "/"), new Uri(path, UriKind.Relative));
                 resp.Headers.Add("Location", location.ToString());
             }
             return resp;

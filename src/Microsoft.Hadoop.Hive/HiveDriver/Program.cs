@@ -141,7 +141,7 @@ namespace Microsoft.Hadoop.Hive
             var fs_default_name = Environment.GetEnvironmentVariable("fs_default_name");
             if (fs_default_name != null)
             {
-                var regex = new Regex(@"asv://(?<container>\w+)\@(?<account>.+)");
+                var regex = new Regex(@"wasb://(?<container>\w+)\@(?<account>.+)");
                 var match = regex.Match(fs_default_name);
                 var container = match.Groups["container"].Value;
                 var account = match.Groups["account"].Value;

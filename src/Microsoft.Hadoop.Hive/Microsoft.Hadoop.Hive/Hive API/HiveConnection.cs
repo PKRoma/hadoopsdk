@@ -53,7 +53,7 @@ namespace Microsoft.Hadoop.Hive
         internal StreamReader HiveQueryResults { get; set; }
         internal Dictionary<Type, string> TypeToTableMap { get; set; }
         internal List<string> JobFolders { get; set; }
-        internal string baseDirectory = "asv://{0}@{1}";
+        internal string baseDirectory = "wasb://{0}@{1}";
 
         internal readonly HiveMapping Mapping;
         private bool disposed;

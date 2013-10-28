@@ -58,7 +58,7 @@ namespace LinqToHiveMapReduceSample
         static void LoadData(AzureTestCredentials creds)
         {
             var hadoop = Hadoop.Connect(new Uri(creds.WellKnownCluster.Cluster), creds.AzureUserName, creds.HadoopUserName, creds.AzurePassword, creds.Environments[0].DefaultStorageAccount.Name, creds.Environments[0].DefaultStorageAccount.Key, creds.Environments[0].DefaultStorageAccount.Container, true);
-            var dataFile = "/input/pg11.txt";
+            var dataFile = "/input/test.txt";
 
             using (WebClient webclient = new WebClient())
             {
