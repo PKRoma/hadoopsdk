@@ -12,6 +12,7 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.BaseInterfaces
 {
     using System;
@@ -21,28 +22,28 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightCl
     internal interface IAzureHDInsightCommonCommandBase
     {
         /// <summary>
-        /// Gets or sets the Azure Subscription to be used.
-        /// </summary>
-        string Subscription { get; set; }
-
-        /// <summary>
-        /// Gets or sets the certificate File to be used.
+        ///     Gets or sets the certificate File to be used.
         /// </summary>
         X509Certificate2 Certificate { get; set; }
 
         /// <summary>
-        /// Gets or sets the EndPoint URI to use (if provided).
-        /// </summary>
-        Uri EndPoint { get; set; }
-
-        /// <summary>
-        /// Gets or sets the cloud service name to use (if provided).
+        ///     Gets or sets the cloud service name to use (if provided).
         /// </summary>
         string CloudServiceName { get; set; }
 
         /// <summary>
-        /// Gets or sets a logger to write log messages to.
+        ///     Gets or sets the EndPoint URI to use (if provided).
+        /// </summary>
+        Uri EndPoint { get; set; }
+
+        /// <summary>
+        ///     Gets or sets a logger to write log messages to.
         /// </summary>
         ILogWriter Logger { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the Azure Subscription to be used.
+        /// </summary>
+        string Subscription { get; set; }
     }
 }

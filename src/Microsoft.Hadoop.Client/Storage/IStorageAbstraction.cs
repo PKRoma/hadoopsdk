@@ -43,10 +43,7 @@ namespace Microsoft.Hadoop.Client.Storage
         /// <param name="path">
         /// The Uri to the file.
         /// </param>
-        /// <returns>
-        /// A task object that can be awaited.
-        /// </returns>
-        Task Delete(Uri path);
+        void Delete(Uri path);
 
         /// <summary>
         /// Creates a WASB container.

@@ -18,6 +18,7 @@ namespace Microsoft.WindowsAzure.Management.Configuration
     using System.Threading.Tasks;
     using Microsoft.WindowsAzure.Management.HDInsight;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest;
 
     internal interface IAzureHdInsightConfigurationRestClient
     {

@@ -12,6 +12,7 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Logging
 {
     using System.Collections.Generic;
@@ -19,8 +20,8 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Logging
 
     internal interface IBufferingLogWriter : ILogWriter
     {
-        IEnumerable<string> DequeueBuffer();
-
         IEnumerable<string> Buffer { get; }
+
+        IEnumerable<string> DequeueBuffer();
     }
 }

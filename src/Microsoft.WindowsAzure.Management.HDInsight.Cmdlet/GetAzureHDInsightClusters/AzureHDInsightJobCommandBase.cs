@@ -12,19 +12,16 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.BaseInterfaces;
 
     internal abstract class AzureHDInsightJobCommandBase : AzureHDInsightJobCommandExecutorBase, IAzureHDInsightJobCommandBase
     {
-        public string JobId { get; set; }
-
         public string Cluster { get; set; }
+
+        public string JobId { get; set; }
 
         public string Name { get; set; }
     }

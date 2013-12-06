@@ -12,6 +12,7 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandInterfaces
 {
     using System;
@@ -23,13 +24,13 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandInt
 
     internal interface IWaitAzureHDInsightJobCommand : IAzureHDInsightCommand<AzureHDInsightJob>, IWaitAzureHDInsightJobBase
     {
-        Task ProcessRecord();
-
         /// <summary>
-        /// Event that is fired when the client provisions a cluster.
+        ///     Event that is fired when the client provisions a cluster.
         /// </summary>
         event EventHandler<WaitJobStatusEventArgs> JobStatusEvent;
 
         JobDetails JobDetailsStatus { get; }
+
+        Task ProcessRecord();
     }
 }

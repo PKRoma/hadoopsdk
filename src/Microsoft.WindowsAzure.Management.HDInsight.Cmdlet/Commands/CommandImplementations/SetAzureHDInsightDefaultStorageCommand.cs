@@ -12,6 +12,7 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImplementations
 {
     using System.Threading.Tasks;
@@ -26,6 +27,14 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImp
             this.Config = new AzureHDInsightConfig();
         }
 
+        public AzureHDInsightConfig Config { get; set; }
+
+        public string StorageAccountKey { get; set; }
+
+        public string StorageAccountName { get; set; }
+
+        public string StorageContainerName { get; set; }
+
         public override Task EndProcessing()
         {
             this.Config.DefaultStorageAccount.StorageAccountName = this.StorageAccountName;
@@ -34,13 +43,5 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImp
             this.Output.Add(this.Config);
             return TaskEx.GetCompletedTask();
         }
-
-        public AzureHDInsightConfig Config { get; set; }
-        
-        public string StorageAccountName { get; set; }
-
-        public string StorageAccountKey { get; set; }
-
-        public string StorageContainerName { get; set; }
     }
 }

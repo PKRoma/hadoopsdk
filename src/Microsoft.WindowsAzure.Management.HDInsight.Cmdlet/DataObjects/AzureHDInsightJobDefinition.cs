@@ -12,18 +12,19 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects
 {
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
 
     /// <summary>
-    /// Provides the details of an HDInsight jobDetails when creating the jobDetails.
+    ///     Provides the details of an HDInsight jobDetails when creating the jobDetails.
     /// </summary>
     public abstract class AzureHDInsightJobDefinition
     {
         /// <summary>
-        /// Initializes a new instance of the AzureHDInsightJobDefinition class.
+        ///     Initializes a new instance of the AzureHDInsightJobDefinition class.
         /// </summary>
         protected AzureHDInsightJobDefinition()
         {
@@ -32,17 +33,17 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects
         }
 
         /// <summary>
-        /// Gets the arguments for the jobDetails.
+        ///     Gets the arguments for the jobDetails.
         /// </summary>
         public ICollection<string> Arguments { get; private set; }
 
         /// <summary>
-        /// Gets the resources for the jobDetails.
+        ///     Gets the resources for the jobDetails.
         /// </summary>
         public ICollection<string> Files { get; private set; }
 
         /// <summary>
-        /// Gets or sets the status folder to use for the jobDetails.
+        ///     Gets or sets the status folder to use for the jobDetails.
         /// </summary>
         public string StatusFolder { get; set; }
     }

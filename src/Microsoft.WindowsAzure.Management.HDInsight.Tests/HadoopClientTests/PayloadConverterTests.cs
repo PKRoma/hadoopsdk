@@ -109,7 +109,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
 
             Assert.AreEqual(1, jobList.Jobs.Count);
             var jobDetails = jobList.Jobs.First();
-            Assert.AreEqual("job_001", jobDetails.JobId);
+            Assert.AreEqual("job_002", jobDetails.JobId);
             Assert.AreEqual(0, jobDetails.ExitCode);
             Assert.AreEqual(unixEpoch.AddMilliseconds(1375484358898).ToLocalTime(), jobDetails.SubmissionTime);
             Assert.AreEqual("TestJob1", jobDetails.Name);
@@ -264,7 +264,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             var converter = new PayloadConverter();
             var jobDetails = converter.DeserializeJobDetails(ValidjobDetailsPayload);
 
-            Assert.AreEqual("job_000", jobDetails.JobId);
+            Assert.AreEqual("job_001", jobDetails.JobId);
             Assert.AreEqual(0, jobDetails.ExitCode);
             Assert.AreEqual(unixEpoch.AddMilliseconds(1375484358898), jobDetails.SubmissionTime);
             Assert.AreEqual("TestJob1", jobDetails.Name);
@@ -280,7 +280,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             var converter = new PayloadConverter();
             var jobDetails = converter.DeserializeJobDetails(JobDetailsPayloadWithMissingStatusCode);
 
-            Assert.AreEqual("job_000", jobDetails.JobId);
+            Assert.AreEqual("job_001", jobDetails.JobId);
             Assert.AreEqual(0, jobDetails.ExitCode);
             Assert.AreEqual(unixEpoch.AddMilliseconds(1375484358898), jobDetails.SubmissionTime);
             Assert.AreEqual("TestJob1", jobDetails.Name);
@@ -296,7 +296,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             var converter = new PayloadConverter();
             var jobDetails = converter.DeserializeJobDetails(JobDetailsPayloadWithMissingExecuteProperty);
 
-            Assert.AreEqual("job_000", jobDetails.JobId);
+            Assert.AreEqual("job_001", jobDetails.JobId);
             Assert.AreEqual(0, jobDetails.ExitCode);
             Assert.AreEqual(unixEpoch.AddMilliseconds(1375484358898), jobDetails.SubmissionTime);
             Assert.AreEqual("TestJob1", jobDetails.Name);
@@ -312,7 +312,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             var converter = new PayloadConverter();
             var jobDetails = converter.DeserializeJobDetails(JobDetailsPayloadWithMissingStatusObject);
 
-            Assert.AreEqual("job_000", jobDetails.JobId);
+            Assert.AreEqual("job_001", jobDetails.JobId);
             Assert.AreEqual(0, jobDetails.ExitCode);
             Assert.AreEqual(DateTime.MinValue, jobDetails.SubmissionTime);
             Assert.AreEqual("TestJob1", jobDetails.Name);
@@ -328,7 +328,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             var converter = new PayloadConverter();
             var jobDetails = converter.DeserializeJobDetails(JobDetailsPayloadWithMissingUserArgsObject);
 
-            Assert.AreEqual("job_000", jobDetails.JobId);
+            Assert.AreEqual("job_001", jobDetails.JobId);
             Assert.AreEqual(0, jobDetails.ExitCode);
             Assert.AreEqual(unixEpoch.AddMilliseconds(1375484358898), jobDetails.SubmissionTime);
             Assert.AreEqual(JobStatusCode.Completed, jobDetails.StatusCode);
@@ -344,7 +344,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             var converter = new PayloadConverter();
             var jobDetails = converter.DeserializeJobDetails(JobDetailsPayloadWithMissingStatusDirectory);
 
-            Assert.AreEqual("job_000", jobDetails.JobId);
+            Assert.AreEqual("job_001", jobDetails.JobId);
             Assert.AreEqual(0, jobDetails.ExitCode);
             Assert.AreEqual(unixEpoch.AddMilliseconds(1375484358898), jobDetails.SubmissionTime);
             Assert.AreEqual(JobStatusCode.Completed, jobDetails.StatusCode);
@@ -360,7 +360,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             var converter = new PayloadConverter();
             var jobDetails = converter.DeserializeJobDetails(JobDetailsPayloadWithMissingDefineArray);
 
-            Assert.AreEqual("job_000", jobDetails.JobId);
+            Assert.AreEqual("job_001", jobDetails.JobId);
             Assert.AreEqual(0, jobDetails.ExitCode);
             Assert.AreEqual(unixEpoch.AddMilliseconds(1375484358898), jobDetails.SubmissionTime);
             Assert.AreEqual(JobStatusCode.Completed, jobDetails.StatusCode);
@@ -376,7 +376,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             var converter = new PayloadConverter();
             var jobDetails = converter.DeserializeJobDetails(JobDetailsPayloadWithMissingExitValue);
 
-            Assert.AreEqual("job_000", jobDetails.JobId);
+            Assert.AreEqual("job_001", jobDetails.JobId);
             Assert.IsNull(jobDetails.ExitCode);
             Assert.AreEqual(unixEpoch.AddMilliseconds(1375484358898), jobDetails.SubmissionTime);
             Assert.AreEqual(JobStatusCode.Completed, jobDetails.StatusCode);
@@ -393,7 +393,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             var converter = new PayloadConverter();
             var jobDetails = converter.DeserializeJobDetails(JobDetailsPayloadWithNullExitValue);
 
-            Assert.AreEqual("job_000", jobDetails.JobId);
+            Assert.AreEqual("job_001", jobDetails.JobId);
             Assert.IsNull(jobDetails.ExitCode);
             Assert.AreEqual(unixEpoch.AddMilliseconds(1375484358898), jobDetails.SubmissionTime);
             Assert.AreEqual(JobStatusCode.Completed, jobDetails.StatusCode);
@@ -409,7 +409,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             var converter = new PayloadConverter();
             var jobDetails = converter.DeserializeJobDetails(JobDetailsPayloadWithMissingStartTime);
 
-            Assert.AreEqual("job_000", jobDetails.JobId);
+            Assert.AreEqual("job_001", jobDetails.JobId);
             Assert.AreEqual(0, jobDetails.ExitCode);
             Assert.AreEqual(DateTime.MinValue, jobDetails.SubmissionTime);
             Assert.AreEqual(JobStatusCode.Completed, jobDetails.StatusCode);
@@ -425,6 +425,18 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
         {
             var converter = new PayloadConverter();
             converter.DeserializeJobDetails(JobDetailsPayloadWithMissingJobId);
+        }
+
+        [TestMethod]
+        [TestCategory("CheckIn")]
+        public void ICanDeserializeJobDetailsWithParentIdAndMissingJobId()
+        {
+            var converter = new PayloadConverter();
+            var jobDetails = converter.DeserializeJobDetails(JobDetailsPayloadWithParentIdAndMissingJobId);
+            Assert.AreEqual("job_000", jobDetails.JobId);
+            Assert.AreEqual(0, jobDetails.ExitCode);
+            Assert.AreEqual(unixEpoch.AddMilliseconds(1375484358898), jobDetails.SubmissionTime);
+            Assert.AreEqual(JobStatusCode.Completed, jobDetails.StatusCode);
         }
 
         [TestMethod]
@@ -598,7 +610,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
      }
   }
 ]";
-
+        
         private const string ValidAllFieldsListJobsPayloadWithOneValidAndOneEmptyObject = @"[
  {
    ""id"":""job_001"",
@@ -967,12 +979,25 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
       }
 }";
 
+        private const string JobDetailsPayloadWithParentIdAndMissingJobId = @"{
+""status"":
+      {
+         ""startTime"":1375484358898,
+         ""jobPriority"":""NORMAL"",
+         ""runState"":2,
+         ""jobComplete"":true
+      },
+   ""parentId"":""job_000"",
+   ""percentComplete"":""map 100% reduce 100%"",
+   ""exitValue"":0
+    }
+}";
+
         private const string JobDetailsPayloadWithMissingJobId = @"{
    ""status"":
       {
          ""startTime"":1375484358898,
-         ""runState"":2,
-         ""jobId"":""job_001""
+         ""runState"":2
       },
    ""exitValue"":0,
    ""userargs"":

@@ -12,34 +12,26 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Logging
 {
     using System.Collections.Generic;
-    using System.Text;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Logging;
+    using System.Globalization;
     using Microsoft.WindowsAzure.Management.HDInsight.Logging;
 
-    internal class PowershellLogWriter : LogWriter, IBufferingLogWriter
+    internal class PowershellLogWriter : IBufferingLogWriter
     {
-        private readonly Queue<string> messageLines = new Queue<string>();
         private readonly List<string> buffer = new List<string>();
+        private readonly Queue<string> messageLines = new Queue<string>();
 
-        public PowershellLogWriter() : base(Severity.Informational, Verbosity.Diagnostic)
+        public IEnumerable<string> Buffer
         {
-        }
-
-        protected override void Write(string content)
-        {
-            lock (this.messageLines)
-            {
-                this.messageLines.Enqueue(content);
-                this.buffer.Add(content);
-            }
+            get { return this.buffer; }
         }
 
         public IEnumerable<string> DequeueBuffer()
         {
-            List<string> results = new List<string>();
+            var results = new List<string>();
             lock (this.messageLines)
             {
                 while (this.messageLines.Count > 0)
@@ -50,9 +42,19 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Logging
             return results;
         }
 
-        public IEnumerable<string> Buffer
+        public void Log(Severity severity, Verbosity verbosity, string content)
         {
-            get { return this.buffer; }
+            string msg = string.Format(CultureInfo.InvariantCulture, "Severity: {0}\r\n{1}", severity, content);
+            this.Write(msg);
+        }
+
+        protected void Write(string content)
+        {
+            lock (this.messageLines)
+            {
+                this.messageLines.Enqueue(content);
+                this.buffer.Add(content);
+            }
         }
     }
 }

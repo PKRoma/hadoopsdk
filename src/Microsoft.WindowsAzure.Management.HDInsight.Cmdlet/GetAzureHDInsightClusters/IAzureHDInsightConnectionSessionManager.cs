@@ -12,16 +12,15 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet
 {
-    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects;
-    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters;
 
     internal interface IAzureHDInsightConnectionSessionManager
     {
-        void SetCurrentCluster(AzureHDInsightClusterConnection cluster);
-
         AzureHDInsightClusterConnection GetCurrentCluster();
+
+        void SetCurrentCluster(AzureHDInsightClusterConnection cluster);
     }
 }

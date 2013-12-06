@@ -12,6 +12,7 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImplementations
 {
     using System;
@@ -22,21 +23,51 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImp
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandInterfaces;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters;
-    using Microsoft.WindowsAzure.Management.HDInsight;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.Extensions;
 
     internal class StartAzureHDInsightJobCommand : AzureHDInsightJobCommand<AzureHDInsightJob>, IStartAzureHDInsightJobCommand
     {
-        public AzureHDInsightJobDefinition JobDefinition { get; set; }
-
-        private const int MaxLengthForJobName = 20;
         private const string HiveJobNameFormat = "Hive: {0}";
+        private const int MaxLengthForJobName = 20;
+
+        private static async Task<JobCreationResults> CreateSqoopJob(
+            AzureHDInsightSqoopJobDefinition azureSqoopJobDefinition, IJobSubmissionClient client)
+        {
+            SqoopJobCreateParameters sqoopJobDefinition = azureSqoopJobDefinition.ToSqoopJobCreateParameters();
+
+            var jobCreationResults = await client.CreateSqoopJobAsync(sqoopJobDefinition);
+            return jobCreationResults;
+        }
+
+        private static async Task<JobCreationResults> CreateStreamingJob(
+            AzureHDInsightStreamingMapReduceJobDefinition azureStreamingJobDefinition, IJobSubmissionClient client)
+        {
+            var streamingJobDefinition = new StreamingMapReduceJobCreateParameters
+            {
+                JobName = azureStreamingJobDefinition.JobName,
+                Input = azureStreamingJobDefinition.Input,
+                Output = azureStreamingJobDefinition.Output,
+                Reducer = azureStreamingJobDefinition.Reducer,
+                Combiner = azureStreamingJobDefinition.Combiner,
+                Mapper = azureStreamingJobDefinition.Mapper
+            };
+            streamingJobDefinition.StatusFolder = azureStreamingJobDefinition.StatusFolder;
+            streamingJobDefinition.CommandEnvironment.AddRange(azureStreamingJobDefinition.CommandEnvironment);
+            streamingJobDefinition.Arguments.AddRange(azureStreamingJobDefinition.Arguments);
+            streamingJobDefinition.Defines.AddRange(azureStreamingJobDefinition.Defines);
+            streamingJobDefinition.Files.AddRange(azureStreamingJobDefinition.Files);
+
+            var jobCreationResults = await client.CreateStreamingJobAsync(streamingJobDefinition);
+            return jobCreationResults;
+        }
+
+        public AzureHDInsightJobDefinition JobDefinition { get; set; }
 
         public override async Task EndProcessing()
         {
             this.JobDefinition.ArgumentNotNull("JobDefinition");
 
-            var client = this.GetClient(this.Cluster);
+            IJobSubmissionClient client = this.GetClient(this.Cluster);
             JobCreationResults jobCreationResults = null;
             if (this.JobDefinition.StatusFolder.IsNullOrEmpty())
             {
@@ -61,8 +92,10 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImp
             {
                 if (azureHiveJobDefinition.JobName.IsNullOrEmpty())
                 {
-                    azureHiveJobDefinition.JobName = string.Format(CultureInfo.InvariantCulture, HiveJobNameFormat, GetJobNameFromQueryOrFile(azureHiveJobDefinition.Query, azureHiveJobDefinition.File));
-
+                    azureHiveJobDefinition.JobName = string.Format(
+                        CultureInfo.InvariantCulture,
+                        HiveJobNameFormat,
+                        GetJobNameFromQueryOrFile(azureHiveJobDefinition.Query, azureHiveJobDefinition.File));
                 }
                 jobCreationResults = await SubmitHiveJob(azureHiveJobDefinition, client);
             }
@@ -84,7 +117,8 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImp
             }
             else
             {
-                throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "Cannot start jobDetails of type : {0}.", this.JobDefinition.GetType()));
+                throw new NotSupportedException(
+                    string.Format(CultureInfo.InvariantCulture, "Cannot start jobDetails of type : {0}.", this.JobDefinition.GetType()));
             }
 
             var startedJob = await client.GetJobAsync(jobCreationResults.JobId);
@@ -95,76 +129,6 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImp
 
             var jobDetail = new AzureHDInsightJob(startedJob, this.Cluster);
             this.Output.Add(jobDetail);
-        }
-
-        private static async Task<JobCreationResults> CreateStreamingJob(AzureHDInsightStreamingMapReduceJobDefinition azureStreamingJobDefinition, IJobSubmissionClient client)
-        {
-            var streamingJobDefinition = new StreamingMapReduceJobCreateParameters()
-            {
-                JobName = azureStreamingJobDefinition.JobName,
-                Input = azureStreamingJobDefinition.Input,
-                Output = azureStreamingJobDefinition.Output,
-                Reducer = azureStreamingJobDefinition.Reducer,
-                Combiner = azureStreamingJobDefinition.Combiner,
-                Mapper = azureStreamingJobDefinition.Mapper
-            };
-            streamingJobDefinition.StatusFolder = azureStreamingJobDefinition.StatusFolder;
-            streamingJobDefinition.CommandEnvironment.AddRange(azureStreamingJobDefinition.CommandEnvironment);
-            streamingJobDefinition.Arguments.AddRange(azureStreamingJobDefinition.Arguments);
-            streamingJobDefinition.Defines.AddRange(azureStreamingJobDefinition.Defines);
-            streamingJobDefinition.Files.AddRange(azureStreamingJobDefinition.Files);
-
-            var jobCreationResults = await client.CreateStreamingJobAsync(streamingJobDefinition);
-            return jobCreationResults;
-        }
-
-        private static async Task<JobCreationResults> CreateSqoopJob(AzureHDInsightSqoopJobDefinition azureSqoopJobDefinition, IJobSubmissionClient client)
-        {
-            var sqoopJobDefinition = azureSqoopJobDefinition.ToSqoopJobCreateParameters();
-
-            var jobCreationResults = await client.CreateSqoopJobAsync(sqoopJobDefinition);
-            return jobCreationResults;
-        }
-
-        private static async Task<JobCreationResults> SubmitPigJob(AzureHDInsightPigJobDefinition azurePigJobDefinition, IJobSubmissionClient client)
-        {
-            var pigJobDefinition = new PigJobCreateParameters()
-            {
-                Query = azurePigJobDefinition.Query,
-                File = azurePigJobDefinition.File
-            };
-
-            pigJobDefinition.StatusFolder = azurePigJobDefinition.StatusFolder;
-            pigJobDefinition.Arguments.AddRange(azurePigJobDefinition.Arguments);
-            pigJobDefinition.Files.AddRange(azurePigJobDefinition.Files);
-
-            var jobCreationResults = await client.CreatePigJobAsync(pigJobDefinition);
-            return jobCreationResults;
-        }
-
-        private static async Task<JobCreationResults> SubmitHiveJob(AzureHDInsightHiveJobDefinition azureHiveJobDefinition, IJobSubmissionClient client)
-        {
-            var hiveJobDefinition = new HiveJobCreateParameters()
-            {
-                JobName = azureHiveJobDefinition.JobName,
-                Query = azureHiveJobDefinition.Query,
-                File = azureHiveJobDefinition.File
-            };
-
-            hiveJobDefinition.StatusFolder = azureHiveJobDefinition.StatusFolder;
-            hiveJobDefinition.Arguments.AddRange(azureHiveJobDefinition.Arguments);
-            hiveJobDefinition.Defines.AddRange(azureHiveJobDefinition.Defines);
-            hiveJobDefinition.Files.AddRange(azureHiveJobDefinition.Files);
-
-            var jobCreationResults = await client.CreateHiveJobAsync(hiveJobDefinition);
-            return jobCreationResults;
-        }
-
-        private static async Task<JobCreationResults> SubmitMapReduceJob(AzureHDInsightMapReduceJobDefinition azureMapReduceJobDefinition, IJobSubmissionClient client)
-        {
-            var mapReduceJobDefinition = azureMapReduceJobDefinition.ToMapReduceJobCreateParameters();
-            var jobCreationResults = await client.CreateMapReduceJobAsync(mapReduceJobDefinition);
-            return jobCreationResults;
         }
 
         private static string GetJobNameFromQueryOrFile(string query, string file)
@@ -186,12 +150,51 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImp
             Uri uriAddress = null;
             if (Uri.TryCreate(uriString, UriKind.Absolute, out uriAddress))
             {
-            string fileName = uriAddress.Segments.Last();
-            return fileName.Substring(0, Math.Min(MaxLengthForJobName, fileName.Length));
-        }
+                string fileName = uriAddress.Segments.Last();
+                return fileName.Substring(0, Math.Min(MaxLengthForJobName, fileName.Length));
+            }
 
             string lastSegment = uriString.Split('/').Last();
             return lastSegment.Substring(0, Math.Min(MaxLengthForJobName, lastSegment.Length));
+        }
+
+        private static async Task<JobCreationResults> SubmitHiveJob(
+            AzureHDInsightHiveJobDefinition azureHiveJobDefinition, IJobSubmissionClient client)
+        {
+            var hiveJobDefinition = new HiveJobCreateParameters
+            {
+                JobName = azureHiveJobDefinition.JobName,
+                Query = azureHiveJobDefinition.Query,
+                File = azureHiveJobDefinition.File
+            };
+
+            hiveJobDefinition.StatusFolder = azureHiveJobDefinition.StatusFolder;
+            hiveJobDefinition.Arguments.AddRange(azureHiveJobDefinition.Arguments);
+            hiveJobDefinition.Defines.AddRange(azureHiveJobDefinition.Defines);
+            hiveJobDefinition.Files.AddRange(azureHiveJobDefinition.Files);
+
+            var jobCreationResults = await client.CreateHiveJobAsync(hiveJobDefinition);
+            return jobCreationResults;
+        }
+
+        private static async Task<JobCreationResults> SubmitMapReduceJob(
+            AzureHDInsightMapReduceJobDefinition azureMapReduceJobDefinition, IJobSubmissionClient client)
+        {
+            MapReduceJobCreateParameters mapReduceJobDefinition = azureMapReduceJobDefinition.ToMapReduceJobCreateParameters();
+            var jobCreationResults = await client.CreateMapReduceJobAsync(mapReduceJobDefinition);
+            return jobCreationResults;
+        }
+
+        private static async Task<JobCreationResults> SubmitPigJob(AzureHDInsightPigJobDefinition azurePigJobDefinition, IJobSubmissionClient client)
+        {
+            var pigJobDefinition = new PigJobCreateParameters { Query = azurePigJobDefinition.Query, File = azurePigJobDefinition.File };
+
+            pigJobDefinition.StatusFolder = azurePigJobDefinition.StatusFolder;
+            pigJobDefinition.Arguments.AddRange(azurePigJobDefinition.Arguments);
+            pigJobDefinition.Files.AddRange(azurePigJobDefinition.Files);
+
+            var jobCreationResults = await client.CreatePigJobAsync(pigJobDefinition);
+            return jobCreationResults;
+        }
     }
-}
 }

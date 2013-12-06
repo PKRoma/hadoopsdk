@@ -23,7 +23,7 @@ namespace Microsoft.Hadoop.Client
         /// <summary>
         /// Indicates the jobDetails is running.
         /// </summary>
-        Initializing = 0,
+        Unknown = 0,
 
         /// <summary>
         /// Indicates the jobDetails is running.
@@ -43,7 +43,7 @@ namespace Microsoft.Hadoop.Client
         /// <summary>
         /// Indicates that the job is in an unknown state.
         /// </summary>
-        Unknown = 4,
+        Initializing = 4,
 
         /// <summary>
         /// Indicates that the jobDetails is canceled.

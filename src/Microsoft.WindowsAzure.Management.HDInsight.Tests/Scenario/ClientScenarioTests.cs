@@ -17,6 +17,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Net;
     using System.Threading;
     using Microsoft.Hadoop.Client;
     using Microsoft.Hadoop.Client.WebHCatRest;
@@ -29,7 +30,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
     using Microsoft.WindowsAzure.Management.HDInsight.JobSubmission;
     using Microsoft.WindowsAzure.Management.HDInsight.JobSubmission.PocoClient;
-    using Microsoft.WindowsAzure.Management.HDInsight.Tests.CmdletAbstractionTests;
+    using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulator;
     using Microsoft.WindowsAzure.Management.HDInsight.Tests.ConnectionCredentials;
     using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities;
 
@@ -116,19 +117,15 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
         public void EnableHttpServices_GetJobHistory()
         {
             var testCluster = GetHttpAccessEnabledCluster(true);
-            //var connectionCredentials = new JobSubmissionCertificateCredential(
-            //    IntegrationTestBase.GetValidCredentials().SubscriptionId,
-            //    IntegrationTestBase.GetValidCredentials().Certificate,
-            //    testCluster.Name);
             var connectionCredentials = new BasicAuthCredential()
             {
-                Server = new Uri(IntegrationTestBase.TestCredentials.WellKnownCluster.Cluster),
-                Password = TestCredentials.AzurePassword,
-                UserName = TestCredentials.AzureUserName
+                Server = new Uri(testCluster.ConnectionUrl),
+                Password = testCluster.HttpPassword,
+                UserName = testCluster.HttpUserName
             };
             var jobSubmissionClient = new HDInsightJobSubmissionPocoClient(connectionCredentials, GetAbstractionContext());
             var jobHistory = jobSubmissionClient.ListJobs().WaitForResult();
-            var expectedJobHistory = HDInsightGetJobsCommandTests.GetJobHistory(TestCredentials.WellKnownCluster.Cluster);
+            var expectedJobHistory = SyncClientScenarioTests.GetJobHistory(connectionCredentials.Server.OriginalString);
             Assert.AreEqual(jobHistory.Jobs.Count, expectedJobHistory.Jobs.Count);
         }
 
@@ -149,15 +146,11 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
         public void DisableHttpServices_GetJobHistory()
         {
             var testCluster = GetHttpAccessDisabledCluster();
-            //var connectionCredentials = new JobSubmissionCertificateCredential(
-            //    IntegrationTestBase.GetValidCredentials().SubscriptionId,
-            //    IntegrationTestBase.GetValidCredentials().Certificate,
-            //    testCluster.Name);
             var connectionCredentials = new BasicAuthCredential()
             {
-                Server = new Uri(IntegrationTestBase.TestCredentials.WellKnownCluster.Cluster),
-                Password = TestCredentials.AzurePassword,
-                UserName = TestCredentials.AzureUserName
+                Server = new Uri(testCluster.ConnectionUrl),
+                Password = testCluster.HttpPassword,
+                UserName = testCluster.HttpUserName
             };
             var jobSubmissionClient = new HDInsightJobSubmissionPocoClient(connectionCredentials, GetAbstractionContext());
             jobSubmissionClient.ListJobs().WaitForResult();
@@ -297,7 +290,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
 
             // Sets the simulator
             var runManager = ServiceLocator.Instance.Locate<IServiceLocationIndividualTestManager>();
-            runManager.Override<IHDInsightSubscriptionCertificateCredentialsFactory>(new AlternativeEnvironmentIHDInsightSubscriptionCertificateCredentialsFactory());
+            runManager.Override<IHDInsightSubscriptionCredentialsFactory>(new AlternativeEnvironmentIHDInsightSubscriptionCertificateCredentialsFactory());
 
             // Creates the client
             var creds = IntegrationTestBase.GetCredentialsForEnvironmentType(EnvironmentType.Current);
@@ -832,5 +825,22 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
 
         // Negative tests mocking the Create\List\Delete poco layers and making sure I don't get AggregateExceptions
 
+        internal static JobList GetJobHistory(string clusterEndpoint)
+        {
+            string clusterGatewayUri = JobSubmission.GatewayUriResolver.GetGatewayUri(clusterEndpoint).AbsoluteUri.ToUpperInvariant();
+            var manager = ServiceLocator.Instance.Locate<IServiceLocationSimulationManager>();
+            if (manager.MockingLevel == ServiceLocationMockingLevel.ApplyFullMocking)
+            {
+                if (HadoopJobSubmissionPocoSimulatorClientFactory.pocoSimulators.ContainsKey(clusterGatewayUri))
+                {
+                    return HadoopJobSubmissionPocoSimulatorClientFactory.pocoSimulators[clusterGatewayUri].ListJobs().WaitForResult();
+                }
+            }
+
+            return new JobList()
+            {
+                ErrorCode = HttpStatusCode.NotFound.ToString()
+            };
+        }
     }
 }

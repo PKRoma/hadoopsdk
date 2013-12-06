@@ -12,54 +12,55 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters
 {
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandInterfaces;
 
     internal interface IAzureHDInsightCommandFactory
     {
-        IGetAzureHDInsightClusterCommand CreateGet();
+        IAddAzureHDInsightConfigValuesCommand CreateAddConfig();
 
-        IWaitAzureHDInsightJobCommand CreateWaitJobs();
+        IAddAzureHDInsightMetastoreCommand CreateAddMetastore();
 
-        IUseAzureHDInsightClusterCommand CreateUseCluster();
-
-        IInvokeHiveCommand CreateInvokeHive();
-
-        IGetAzureHDInsightPropertiesCommand CreateGetProperties();
+        IAddAzureHDInsightStorageCommand CreateAddStorage();
 
         INewAzureHDInsightClusterCommand CreateCreate();
 
         IRemoveAzureHDInsightClusterCommand CreateDelete();
 
-        INewAzureHDInsightClusterConfigCommand CreateNewConfig();
-
-        IAddAzureHDInsightConfigValuesCommand CreateAddConfig();
-
-        ISetAzureHDInsightDefaultStorageCommand CreateSetDefaultStorage();
-
-        IAddAzureHDInsightStorageCommand CreateAddStorage();
-
-        IAddAzureHDInsightMetastoreCommand CreateAddMetastore();
-
-        IGetAzureHDInsightJobCommand CreateGetJobs();
+        IGetAzureHDInsightClusterCommand CreateGet();
 
         IGetAzureHDInsightJobOutputCommand CreateGetJobOutput();
 
-        IStopAzureHDInsightJobCommand CreateStopJob();
+        IGetAzureHDInsightJobCommand CreateGetJobs();
 
-        INewAzureHDInsightMapReduceJobDefinitionCommand CreateNewMapReduceDefinition();
+        IGetAzureHDInsightPropertiesCommand CreateGetProperties();
 
-        INewAzureHDInsightStreamingJobDefinitionCommand CreateNewStreamingMapReduceDefinition();
+        IInvokeHiveCommand CreateInvokeHive();
+
+        IManageAzureHDInsightHttpAccessCommand CreateManageHttpAccess();
+
+        INewAzureHDInsightClusterConfigCommand CreateNewConfig();
 
         INewAzureHDInsightHiveJobDefinitionCommand CreateNewHiveDefinition();
 
-        INewAzureHDInsightSqoopJobDefinitionCommand CreateNewSqoopDefinition();
+        INewAzureHDInsightMapReduceJobDefinitionCommand CreateNewMapReduceDefinition();
 
         INewAzureHDInsightPigJobDefinitionCommand CreateNewPigJobDefinition();
 
+        INewAzureHDInsightSqoopJobDefinitionCommand CreateNewSqoopDefinition();
+
+        INewAzureHDInsightStreamingJobDefinitionCommand CreateNewStreamingMapReduceDefinition();
+
+        ISetAzureHDInsightDefaultStorageCommand CreateSetDefaultStorage();
+
         IStartAzureHDInsightJobCommand CreateStartJob();
 
-        IManageAzureHDInsightHttpAccessCommand CreateManageHttpAccess();
+        IStopAzureHDInsightJobCommand CreateStopJob();
+
+        IUseAzureHDInsightClusterCommand CreateUseCluster();
+
+        IWaitAzureHDInsightJobCommand CreateWaitJobs();
     }
 }

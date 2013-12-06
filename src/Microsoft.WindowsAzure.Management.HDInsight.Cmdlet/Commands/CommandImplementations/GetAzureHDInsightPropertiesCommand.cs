@@ -12,6 +12,7 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImplementations
 {
     using System.Collections.Generic;
@@ -30,12 +31,12 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImp
 
         public override async Task EndProcessing()
         {
-            var client = this.GetClient();
+            IHDInsightClient client = this.GetClient();
             var capabilities = await client.ListResourceProviderPropertiesAsync();
             capabilities = capabilities.ToList();
             var azureCapabilities = new AzureHDInsightCapabilities(capabilities);
             azureCapabilities.Versions = await client.ListAvailableVersionsAsync();
-            azureCapabilities.Locations = await client.ListAvailableLocationsAsync(); 
+            azureCapabilities.Locations = await client.ListAvailableLocationsAsync();
             azureCapabilities.ClusterCount = this.GetIntCapability(capabilities, ContainersCountKey);
             azureCapabilities.CoresUsed = this.GetIntCapability(capabilities, CoresUsedKey);
             azureCapabilities.MaxCoresAllowed = this.GetIntCapability(capabilities, MaxCoresAllowedKey);
@@ -45,7 +46,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImp
         private int GetIntCapability(IEnumerable<KeyValuePair<string, string>> capabilities, string capabilityName)
         {
             int capabilityValue = 0;
-            var capablity = capabilities.FirstOrDefault(cap => cap.Key == capabilityName);
+            KeyValuePair<string, string> capablity = capabilities.FirstOrDefault(cap => cap.Key == capabilityName);
             if (int.TryParse(capablity.Value, NumberStyles.Any, CultureInfo.InvariantCulture, out capabilityValue))
             {
                 return capabilityValue;

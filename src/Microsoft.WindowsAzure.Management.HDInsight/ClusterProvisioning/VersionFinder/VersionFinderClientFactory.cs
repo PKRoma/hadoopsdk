@@ -21,7 +21,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Versio
     {
         public IVersionFinderClient Create(IHDInsightSubscriptionCredentials creds, IAbstractionContext context)
         {
-            return new VersionFinderClient(creds.As<IHDInsightCertificateCredential>(), context);
+            return new VersionFinderClient(creds, context);
         }
     }
 }

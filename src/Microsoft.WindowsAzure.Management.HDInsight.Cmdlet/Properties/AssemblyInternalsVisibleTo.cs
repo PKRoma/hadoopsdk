@@ -12,8 +12,10 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 using System.Runtime.CompilerServices;
 
 // Uncomment the following line  when your assembly needs to be visible to an external Assembly(and remember to UPDATE the Assembly Name in this line)
 
 [assembly: InternalsVisibleTo("Microsoft.WindowsAzure.Management.HDInsight.Tests")]
+[assembly: InternalsVisibleTo("Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Tests")]

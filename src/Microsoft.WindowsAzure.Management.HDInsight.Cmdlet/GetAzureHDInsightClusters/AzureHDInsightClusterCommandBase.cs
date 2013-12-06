@@ -12,23 +12,24 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters
 {
     using System.Threading;
-    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning;
-    using Microsoft.WindowsAzure.Management.HDInsight;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.BaseInterfaces;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.Extensions;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.ServiceLocation;
 
     internal abstract class AzureHDInsightClusterCommandBase : AzureHDInsightCommandBase, IAzureHDInsightClusterCommandBase
     {
-        public string Name { get; set; }
-
-        private CancellationTokenSource tokenSource = new CancellationTokenSource();
+        private readonly CancellationTokenSource tokenSource = new CancellationTokenSource();
 
         public override CancellationToken CancellationToken
         {
             get { return this.tokenSource.Token; }
         }
+
+        public string Name { get; set; }
 
         public override void Cancel()
         {
@@ -37,14 +38,15 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightCl
 
         protected IHDInsightClient GetClient()
         {
-            var retval = HDInsightClient.Connect(this.GetSubscriptionCertificateCredentials());
-            retval.SetCancellationSource(this.tokenSource);
+            IHDInsightClient clientInstance =
+                ServiceLocator.Instance.Locate<IAzureHDInsightClusterManagementClientFactory>().Create(this.GetSubscriptionCertificateCredentials());
+            clientInstance.SetCancellationSource(this.tokenSource);
             if (this.Logger.IsNotNull())
             {
-                retval.AddLogWriter(this.Logger);
+                clientInstance.AddLogWriter(this.Logger);
             }
 
-            return retval;
+            return clientInstance;
         }
     }
 }

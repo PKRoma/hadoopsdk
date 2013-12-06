@@ -12,34 +12,34 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
 {
     using System;
     using System.Linq;
     using System.Management.Automation;
-    using System.Management.Automation.Internal;
     using System.Reflection;
     using System.Security.Cryptography.X509Certificates;
+    using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.BaseCommandInterfaces;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandInterfaces;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters;
-    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Logging;
-    using Microsoft.WindowsAzure.Management.HDInsight;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.Extensions;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.ServiceLocation;
     using Microsoft.WindowsAzure.Management.HDInsight.Logging;
 
     /// <summary>
-    /// Cmdlet that lists all the properties of a subscription registered with the HDInsight service.
+    ///     Cmdlet that lists all the properties of a subscription registered with the HDInsight service.
     /// </summary>
     [Cmdlet(VerbsCommon.Get, AzureHdInsightPowerShellConstants.AzureHDInsightProperties)]
     public class GetAzureHDInsightPropertiesCmdlet : AzureHDInsightCmdlet, IGetAzureHDInsightPropertiesBase
     {
-        private IGetAzureHDInsightPropertiesCommand command;
+        private readonly IGetAzureHDInsightPropertiesCommand command;
 
         /// <summary>
-        /// Initializes a new instance of the GetAzureHDInsightPropertiesCmdlet class.
+        ///     Initializes a new instance of the GetAzureHDInsightPropertiesCmdlet class.
         /// </summary>
         public GetAzureHDInsightPropertiesCmdlet()
         {
@@ -47,24 +47,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
         }
 
         /// <inheritdoc />
-        protected override void StopProcessing()
-        {
-            this.command.Cancel();
-        }
-
-        /// <inheritdoc />
-        [Parameter(Position = 1, Mandatory = true,
-                   HelpMessage = "The subscription id for the Azure subscription.")]
-        [Alias(AzureHdInsightPowerShellConstants.AliasSub)]
-        public string Subscription
-        {
-            get { return this.command.Subscription; }
-            set { this.command.Subscription = value; }
-        }
-
-        /// <inheritdoc />
-        [Parameter(Position = 2, Mandatory = false,
-                   HelpMessage = "The management certificate used to manage the Azure subscription.")]
+        [Parameter(Position = 2, Mandatory = false, HelpMessage = "The management certificate used to manage the Azure subscription.")]
         [Alias(AzureHdInsightPowerShellConstants.AliasCert)]
         public X509Certificate2 Certificate
         {
@@ -73,37 +56,44 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
         }
 
         /// <inheritdoc />
-        [Parameter(Position = 3, Mandatory = false,
-                   HelpMessage = "The Endpoint to use when connecting to Azure.")]
-        public Uri EndPoint
-        {
-            get { return this.command.EndPoint; }
-            set { this.command.EndPoint = value; }
-        }
-
-        /// <inheritdoc />
-        [Parameter(Position = 4, Mandatory = false,
-                   HelpMessage = "The CloudServiceName to use when managing the HDInsight cluster.")]
+        [Parameter(Position = 4, Mandatory = false, HelpMessage = "The CloudServiceName to use when managing the HDInsight cluster.")]
         public string CloudServiceName
         {
             get { return this.command.CloudServiceName; }
             set { this.command.CloudServiceName = value; }
         }
 
+        /// <inheritdoc />
+        [Parameter(Position = 3, Mandatory = false, HelpMessage = "The Endpoint to use when connecting to Azure.")]
+        public Uri EndPoint
+        {
+            get { return this.command.EndPoint; }
+            set { this.command.EndPoint = value; }
+        }
+
         /// <summary>
-        /// Gets or sets a flag to only show HDInsight versions available to the subscription.
+        ///     Gets or sets a flag to only show Azure regions available to the subscription.
+        /// </summary>
+        [Parameter(Mandatory = false, HelpMessage = "Flag to only show Azure regions available to the subscription.")]
+        public SwitchParameter Locations { get; set; }
+
+        /// <inheritdoc />
+        [Parameter(Position = 1, Mandatory = true, HelpMessage = "The subscription id for the Azure subscription.")]
+        [Alias(AzureHdInsightPowerShellConstants.AliasSub)]
+        public string Subscription
+        {
+            get { return this.command.Subscription; }
+            set { this.command.Subscription = value; }
+        }
+
+        /// <summary>
+        ///     Gets or sets a flag to only show HDInsight versions available to the subscription.
         /// </summary>
         [Parameter(Mandatory = false, HelpMessage = "Flag to only show HDInsight versions available to the subscription")]
         public SwitchParameter Versions { get; set; }
 
         /// <summary>
-        /// Gets or sets a flag to only show Azure regions available to the subscription.
-        /// </summary>
-        [Parameter(Mandatory = false, HelpMessage = "Flag to only show Azure regions available to the subscription.")]
-        public SwitchParameter Locations { get; set; }
-
-        /// <summary>
-        /// Finishes the execution of the cmdlet by listing the clusters.
+        ///     Finishes the execution of the cmdlet by listing the clusters.
         /// </summary>
         protected override void EndProcessing()
         {
@@ -111,8 +101,8 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
             try
             {
                 this.command.Logger = this.Logger;
-                var task = this.command.EndProcessing();
-                var token = this.command.CancellationToken;
+                Task task = this.command.EndProcessing();
+                CancellationToken token = this.command.CancellationToken;
                 while (!task.IsCompleted)
                 {
                     this.WriteDebugLog();
@@ -130,21 +120,21 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
                 {
                     if (this.Versions.IsPresent)
                     {
-                        foreach (var output in this.command.Output)
+                        foreach (AzureHDInsightCapabilities output in this.command.Output)
                         {
                             this.WriteObject(output.Versions);
                         }
                     }
                     else if (this.Locations.IsPresent)
                     {
-                        foreach (var output in this.command.Output)
+                        foreach (AzureHDInsightCapabilities output in this.command.Output)
                         {
                             this.WriteObject(output.Locations);
                         }
                     }
                     else
                     {
-                        foreach (var output in this.command.Output)
+                        foreach (AzureHDInsightCapabilities output in this.command.Output)
                         {
                             this.WriteObject(output);
                         }
@@ -154,7 +144,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
             }
             catch (Exception ex)
             {
-                var type = ex.GetType();
+                Type type = ex.GetType();
                 this.Logger.Log(Severity.Error, Verbosity.Normal, this.FormatException(ex));
                 this.WriteDebugLog();
                 if (type == typeof(AggregateException) || type == typeof(TargetInvocationException) || type == typeof(TaskCanceledException))
@@ -167,7 +157,12 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
                 }
             }
             this.WriteDebugLog();
+        }
 
+        /// <inheritdoc />
+        protected override void StopProcessing()
+        {
+            this.command.Cancel();
         }
     }
 }

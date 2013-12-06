@@ -12,6 +12,7 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.BaseCommandInterfaces
 {
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.BaseInterfaces;
@@ -19,7 +20,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.BaseComman
     internal interface IStopAzureHDInsightJobBase : IAzureHDInsightJobCommandBase
     {
         /// <summary>
-        /// Gets or sets the Id of the jobDetails to retrieve.
+        ///     Gets or sets the Id of the jobDetails to retrieve.
         /// </summary>
         string JobId { get; set; }
     }

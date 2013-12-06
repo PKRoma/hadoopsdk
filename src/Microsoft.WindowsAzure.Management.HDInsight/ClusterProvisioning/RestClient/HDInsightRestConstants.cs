@@ -18,6 +18,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestCl
     using System.Diagnostics.CodeAnalysis;
     using Microsoft.WindowsAzure.Management.HDInsight;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest;
 
     /// <summary>
     /// Provides hard coded values to ensure type safety when interacting with key static values.

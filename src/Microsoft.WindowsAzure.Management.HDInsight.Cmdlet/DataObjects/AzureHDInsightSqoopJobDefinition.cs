@@ -12,39 +12,35 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects
 {
     using Microsoft.Hadoop.Client;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.Extensions;
 
     /// <summary>
-    /// Provides creation details for a new Pig jobDetails.
+    ///     Provides creation details for a new Pig jobDetails.
     /// </summary>
     public class AzureHDInsightSqoopJobDefinition : AzureHDInsightJobDefinition
     {
         /// <summary>
-        /// Gets or sets the Command to use for a sqoop job.
+        ///     Gets or sets the Command to use for a sqoop job.
         /// </summary>
         public string Command { get; set; }
 
         /// <summary>
-        /// Gets or sets the query file to use for a sqoop job.
+        ///     Gets or sets the query file to use for a sqoop job.
         /// </summary>
         public string File { get; set; }
 
         /// <summary>
-        /// Creates a SDK object from the PSCmdlet object type.
+        ///     Creates a SDK object from the PSCmdlet object type.
         /// </summary>
         /// <returns>A SDK Sqoop job definition object.</returns>
         internal SqoopJobCreateParameters ToSqoopJobCreateParameters()
         {
-            var soopJobDefinition = new SqoopJobCreateParameters()
-            {
-                Command = this.Command,
-                File = this.File,
-                StatusFolder = this.StatusFolder
-            };
-             
+            var soopJobDefinition = new SqoopJobCreateParameters { Command = this.Command, File = this.File, StatusFolder = this.StatusFolder };
+
             if (this.Files.IsNotNull())
             {
                 soopJobDefinition.Files.AddRange(this.Files);

@@ -20,6 +20,7 @@
       (for example 'FileName' -> 'Filename').
     -->
     <Recognized>
+      <Word>Awaiter</Word>
       <Word>Rdfe</Word>
       <Word>procdetails</Word>
       <Word>Wab</Word>

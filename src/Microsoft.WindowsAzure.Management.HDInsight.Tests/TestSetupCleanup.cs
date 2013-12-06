@@ -25,9 +25,6 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Asv;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.AzureManagementClient;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestClient;
-    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters;
-    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.BaseInterfaces;
-    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Logging;
     using Microsoft.WindowsAzure.Management.HDInsight.Logging;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;

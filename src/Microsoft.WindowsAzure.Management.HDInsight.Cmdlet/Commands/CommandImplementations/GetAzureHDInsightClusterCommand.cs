@@ -12,6 +12,7 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImplementations
 {
     using System.Linq;
@@ -19,14 +20,13 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImp
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandInterfaces;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters;
-    using Microsoft.WindowsAzure.Management.HDInsight;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.Extensions;
 
     internal class GetAzureHDInsightClusterCommand : AzureHDInsightClusterCommand<AzureHDInsightCluster>, IGetAzureHDInsightClusterCommand
     {
         public override async Task EndProcessing()
         {
-            var client = this.GetClient();
+            IHDInsightClient client = this.GetClient();
             if (!string.IsNullOrWhiteSpace(this.Name))
             {
                 var azureCluster = await client.GetClusterAsync(this.Name);

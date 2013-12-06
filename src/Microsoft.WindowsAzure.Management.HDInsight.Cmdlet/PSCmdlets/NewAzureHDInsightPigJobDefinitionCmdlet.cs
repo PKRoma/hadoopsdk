@@ -12,22 +12,20 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
 {
-    using System;
-    using System.Collections;
-    using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using System.Management.Automation;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.BaseCommandInterfaces;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandInterfaces;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters;
-    using Microsoft.WindowsAzure.Management.HDInsight;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.ServiceLocation;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.Extensions;
 
     /// <summary>
-    /// Represents the New-AzureHDInsightConfig Power Shell Cmdlet.
+    ///     Represents the New-AzureHDInsightConfig Power Shell Cmdlet.
     /// </summary>
     [Cmdlet(VerbsCommon.New, AzureHdInsightPowerShellConstants.AzureHDInsightPigJobDefinition)]
     public class NewAzureHDInsightPigDefinitionCmdlet : AzureHDInsightCmdlet, INewAzureHDInsightPigJobDefinitionBase
@@ -35,7 +33,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
         private readonly INewAzureHDInsightPigJobDefinitionCommand command;
 
         /// <summary>
-        /// Initializes a new instance of the NewAzureHDInsightPigDefinitionCmdlet class.
+        ///     Initializes a new instance of the NewAzureHDInsightPigDefinitionCmdlet class.
         /// </summary>
         public NewAzureHDInsightPigDefinitionCmdlet()
         {
@@ -43,18 +41,13 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
         }
 
         /// <inheritdoc />
-        protected override void StopProcessing()
+        [Parameter(Mandatory = false, HelpMessage = "The Arguments for the jobDetails.")]
+        [Alias(AzureHdInsightPowerShellConstants.AliasArguments)]
+        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "Need collections for input parameters")]
+        public string[] Arguments
         {
-            this.command.Cancel();
-        }
-
-        /// <inheritdoc />
-        [Parameter(Mandatory = false, HelpMessage = "The query to use for a pig jobDetails.")]
-        [Alias(AzureHdInsightPowerShellConstants.AliasQuery)]
-        public string Query
-        {
-            get { return this.command.Query; }
-            set { this.command.Query = value; }
+            get { return this.command.Arguments; }
+            set { this.command.Arguments = value; }
         }
 
         /// <inheritdoc />
@@ -67,19 +60,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
         }
 
         /// <inheritdoc />
-        [Parameter(Mandatory = false,
-                   HelpMessage = "The Arguments for the jobDetails.")]
-        [Alias(AzureHdInsightPowerShellConstants.AliasArguments)]
-        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "Need collections for input parameters")]
-        public string[] Arguments
-        {
-            get { return this.command.Arguments; }
-            set { this.command.Arguments = value; }
-        }
-
-        /// <inheritdoc />
-        [Parameter(Mandatory = false,
-                   HelpMessage = "The resources for the jobDetails.")]
+        [Parameter(Mandatory = false, HelpMessage = "The resources for the jobDetails.")]
         [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "Need collections for input parameters")]
         public string[] Files
         {
@@ -88,8 +69,16 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
         }
 
         /// <inheritdoc />
-        [Parameter(Mandatory = false,
-                   HelpMessage = "The output location to use for the jobDetails.")]
+        [Parameter(Mandatory = false, HelpMessage = "The query to use for a pig jobDetails.")]
+        [Alias(AzureHdInsightPowerShellConstants.AliasQuery)]
+        public string Query
+        {
+            get { return this.command.Query; }
+            set { this.command.Query = value; }
+        }
+
+        /// <inheritdoc />
+        [Parameter(Mandatory = false, HelpMessage = "The output location to use for the jobDetails.")]
         public string StatusFolder
         {
             get { return this.command.StatusFolder; }
@@ -97,7 +86,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
         }
 
         /// <summary>
-        /// Finishes the execution of the cmdlet by writing out the config object.
+        ///     Finishes the execution of the cmdlet by writing out the config object.
         /// </summary>
         protected override void EndProcessing()
         {
@@ -107,11 +96,17 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
             }
 
             this.command.EndProcessing().Wait();
-            foreach (var output in this.command.Output)
+            foreach (AzureHDInsightPigJobDefinition output in this.command.Output)
             {
                 this.WriteObject(output);
             }
             this.WriteDebugLog();
+        }
+
+        /// <inheritdoc />
+        protected override void StopProcessing()
+        {
+            this.command.Cancel();
         }
     }
 }

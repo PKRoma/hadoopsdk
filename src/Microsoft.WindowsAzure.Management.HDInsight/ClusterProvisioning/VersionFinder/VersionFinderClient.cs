@@ -28,10 +28,10 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Versio
     internal class VersionFinderClient : IVersionFinderClient
     {
         private const string VersionPrefix = "CAPABILITY_VERSION_";
-        private readonly IHDInsightCertificateCredential credentials;
+        private readonly IHDInsightSubscriptionCredentials credentials;
         private readonly IAbstractionContext context;
 
-        public VersionFinderClient(IHDInsightCertificateCredential creds, IAbstractionContext context)
+        public VersionFinderClient(IHDInsightSubscriptionCredentials creds, IAbstractionContext context)
         {
             this.context = context;
             this.credentials = creds;

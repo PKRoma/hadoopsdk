@@ -12,16 +12,18 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
 {
     using System.Management.Automation;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.BaseCommandInterfaces;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandInterfaces;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.ServiceLocation;
 
     /// <summary>
-    /// Represents the New-AzureHDInsightClusterConfig  Power Shell Cmdlet.
+    ///     Represents the New-AzureHDInsightClusterConfig  Power Shell Cmdlet.
     /// </summary>
     [Cmdlet(VerbsCommon.New, AzureHdInsightPowerShellConstants.AzureHDInsightClusterConfig)]
     public class NewAzureHDInsightClusterConfigCmdlet : AzureHDInsightCmdlet, INewAzureHDInsightClusterConfigBase
@@ -29,7 +31,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
         private readonly INewAzureHDInsightClusterConfigCommand command;
 
         /// <summary>
-        /// Initializes a new instance of the NewAzureHDInsightClusterConfigCmdlet class.
+        ///     Initializes a new instance of the NewAzureHDInsightClusterConfigCmdlet class.
         /// </summary>
         public NewAzureHDInsightClusterConfigCmdlet()
         {
@@ -37,28 +39,8 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
         }
 
         /// <inheritdoc />
-        protected override void StopProcessing()
-        {
-            this.command.Cancel();
-        }
-
-        /// <summary>
-        /// Finishes the execution of the cmdlet by listing the clusters.
-        /// </summary>
-        protected override void EndProcessing()
-        {
-            this.command.EndProcessing().Wait();
-            foreach (var output in this.command.Output)
-            {
-                this.WriteObject(output);
-            }
-            this.WriteDebugLog();
-        }
-
-        /// <inheritdoc />
-        [Parameter(Position = 0, Mandatory = true,
-                   HelpMessage = "The number of data nodes to use for the HDInsight cluster.",
-                   ParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetConfigClusterSizeInNodesOnly)]
+        [Parameter(Position = 0, Mandatory = true, HelpMessage = "The number of data nodes to use for the HDInsight cluster.",
+            ParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetConfigClusterSizeInNodesOnly)]
         [Alias(AzureHdInsightPowerShellConstants.AliasNodes, AzureHdInsightPowerShellConstants.AliasSize)]
         public int ClusterSizeInNodes
         {
@@ -66,5 +48,23 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
             set { this.command.ClusterSizeInNodes = value; }
         }
 
+        /// <summary>
+        ///     Finishes the execution of the cmdlet by listing the clusters.
+        /// </summary>
+        protected override void EndProcessing()
+        {
+            this.command.EndProcessing().Wait();
+            foreach (AzureHDInsightConfig output in this.command.Output)
+            {
+                this.WriteObject(output);
+            }
+            this.WriteDebugLog();
+        }
+
+        /// <inheritdoc />
+        protected override void StopProcessing()
+        {
+            this.command.Cancel();
+        }
     }
 }

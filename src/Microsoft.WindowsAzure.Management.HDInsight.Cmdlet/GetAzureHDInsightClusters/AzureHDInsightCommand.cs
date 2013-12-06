@@ -12,21 +12,19 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters
 {
-    using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
-    using System.Linq;
-    using System.Text;
 
     internal abstract class AzureHDInsightCommand<T> : AzureHDInsightCommandBase, IAzureHDInsightCommand<T>
     {
-        public ICollection<T> Output { get; private set; }
-
         public AzureHDInsightCommand()
         {
             this.Output = new Collection<T>();
         }
+
+        public ICollection<T> Output { get; private set; }
     }
 }

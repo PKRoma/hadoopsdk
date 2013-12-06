@@ -12,34 +12,34 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandInterfaces
 {
     using System.Collections.Generic;
-    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.BaseCommandInterfaces;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters;
 
     /// <summary>
-    /// Worker object for creating a cluster via PowerShell.
+    ///     Worker object for creating a cluster via PowerShell.
     /// </summary>
     internal interface INewAzureHDInsightClusterCommand : IAzureHDInsightCommand<AzureHDInsightCluster>, INewAzureHDInsightClusterBase
     {
         ICollection<AzureHDInsightStorageAccount> AdditionalStorageAccounts { get; }
 
-        AzureHDInsightMetastore HiveMetastore { get; set; }
-
-        AzureHDInsightMetastore OozieMetastore { get; set; }
-
         ConfigValuesCollection CoreConfiguration { get; set; }
 
         ConfigValuesCollection HdfsConfiguration { get; set; }
 
-        MapReduceConfiguration MapReduceConfiguration { get; set; }
-
         HiveConfiguration HiveConfiguration { get; set; }
 
+        AzureHDInsightMetastore HiveMetastore { get; set; }
+
+        MapReduceConfiguration MapReduceConfiguration { get; set; }
+
         OozieConfiguration OozieConfiguration { get; set; }
+
+        AzureHDInsightMetastore OozieMetastore { get; set; }
 
         ClusterState State { get; }
     }

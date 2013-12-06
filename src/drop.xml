@@ -15,25 +15,9 @@
     <From>Microsoft.Hadoop.Client\Microsoft.Hadoop.Client.dll</From>
     <To>Microsoft.Hadoop.Client\lib\net40\Microsoft.Hadoop.Client.dll</To>
   </Copy>
-    <Copy>
+  <Copy>
     <From>Microsoft.Hadoop.Client\Microsoft.Hadoop.Client.xml</From>
     <To>Microsoft.Hadoop.Client\lib\net40\Microsoft.Hadoop.Client.xml</To>
-  </Copy>
-  <Copy>
-    <From>Microsoft.Hadoop.Client\Microsoft.Data.Edm.dll</From>
-    <To>Microsoft.Hadoop.Client\lib\net40\Microsoft.Data.Edm.dll</To>
-  </Copy>
-  <Copy>
-    <From>Microsoft.Hadoop.Client\Microsoft.Data.OData.dll</From>
-    <To>Microsoft.Hadoop.Client\lib\net40\Microsoft.Data.OData.dll</To>
-  </Copy>
-  <Copy>
-    <From>Microsoft.Hadoop.Client\System.Spatial.dll</From>
-    <To>Microsoft.Hadoop.Client\lib\net40\System.Spatial.dll</To>
-  </Copy>
-  <Copy>
-    <From>Microsoft.Hadoop.Client\Microsoft.WindowsAzure.Storage.dll</From>
-    <To>Microsoft.Hadoop.Client\lib\net40\Microsoft.WindowsAzure.Storage.dll</To>
   </Copy>
   <Copy>
     <From>Microsoft.WindowsAzure.Management.HDInsight.Framework\Microsoft.WindowsAzure.Management.HDInsight.Framework.dll</From>
@@ -65,7 +49,7 @@
     <From>Microsoft.WindowsAzure.Management.HDInsight\Microsoft.WindowsAzure.Management.HDInsight.xml</From>
     <To>Microsoft.WindowsAzure.Management.HDInsight\lib\net40\Microsoft.WindowsAzure.Management.HDInsight.xml</To>
   </Copy>
-
+  
   <!-- Cmdlets -->
   <Copy>
     <From>Microsoft.Hadoop.Client\Microsoft.Hadoop.Client.dll</From>
@@ -127,11 +111,6 @@
     <From>Microsoft.WindowsAzure.Management.HDInsight.Cmdlet\Microsoft.WindowsAzure.Storage.dll</From>
     <To>Cmdlet\Microsoft.WindowsAzure.Management.HDInsight.Cmdlet\Microsoft.WindowsAzure.Storage.dll</To>
   </Copy>
-  <Copy>
-    <From>Microsoft.WindowsAzure.Management.HDInsight.Cmdlet\Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.dll-help.xml</From>
-    <To>Cmdlet\Microsoft.WindowsAzure.Management.HDInsight.Cmdlet\en-us\Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.dll-help.xml</To>
-  </Copy>
-
 
   <!-- [Internal ONLY] Test assemblies -->
   <Copy>

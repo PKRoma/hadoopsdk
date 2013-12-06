@@ -15,19 +15,20 @@
 namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ConnectionCredentials
 {
     using System;
+    using System.Security.Authentication;
     using System.Security.Cryptography.X509Certificates;
-    
+
     using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities;
 
-    internal class AlternativeEnvironmentIHDInsightSubscriptionCertificateCredentialsFactory : IHDInsightSubscriptionCertificateCredentialsFactory
+    internal class AlternativeEnvironmentIHDInsightSubscriptionCertificateCredentialsFactory : IHDInsightSubscriptionCredentialsFactory
     {
-        private AzureTestCredentials creds; 
+        private AzureTestCredentials creds;
         public AlternativeEnvironmentIHDInsightSubscriptionCertificateCredentialsFactory()
         {
             creds = IntegrationTestBase.GetCredentialsForEnvironmentType(EnvironmentType.Current);
         }
 
-        public IHDInsightCertificateCredential Create(IHDInsightCertificateCredential ignoreCreds)
+        private IHDInsightCertificateCredential Create(IHDInsightCertificateCredential ignoreCreds)
         {
             return new HDInsightCertificateCredential()
             {
@@ -36,6 +37,35 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ConnectionCredential
                 DeploymentNamespace = this.creds.CloudServiceName,
                 SubscriptionId = this.creds.SubscriptionId
             };
+        }
+
+        private IHDInsightAccessTokenCredential Create(IHDInsightAccessTokenCredential credentials)
+        {
+            return new HDInsightAccessTokenCredential()
+            {
+                AccessToken = this.creds.AccessToken,
+                Endpoint = new Uri(this.creds.Endpoint),
+                DeploymentNamespace = this.creds.CloudServiceName,
+                SubscriptionId = this.creds.SubscriptionId
+            };
+        }
+
+        public IHDInsightSubscriptionCredentials Create(IHDInsightSubscriptionCredentials credentials)
+        {
+            IHDInsightCertificateCredential certCreds = credentials as IHDInsightCertificateCredential;
+            IHDInsightAccessTokenCredential tokenCreds = credentials as IHDInsightAccessTokenCredential;
+            if (certCreds != null)
+            {
+                return Create(certCreds);
+            }
+            else if (tokenCreds != null)
+            {
+                return Create(tokenCreds);
+            }
+            else
+            {
+                throw new NotSupportedException("Credential Type is not supported");
+            }
         }
     }
 }

@@ -84,6 +84,7 @@ namespace Microsoft.Hadoop.Client.Data
             }
 
             values.AddRange(this.SerializeJobRequest(userName, details, details.JobName, details.Arguments, details.Defines));
+            values.AddRange(this.BuildList(WebHCatConstants.CmdEnv, details.CommandEnvironment));
             var retval = this.ConvertItems(values.Where(kvp => kvp.Value != null));
             return retval;
         }
@@ -172,9 +173,9 @@ namespace Microsoft.Hadoop.Client.Data
             values.Add(new KeyValuePair<string, string>(WebHCatConstants.StatusDirectory, details.StatusFolder));
             values.Add(new KeyValuePair<string, string>(WebHCatConstants.Files, this.BuildCommaSeparatedList(details.Files)));
             values.Add(new KeyValuePair<string, string>(WebHCatConstants.UserName, userName));
+            values.Add(new KeyValuePair<string, string>(WebHCatConstants.Callback, details.Callback));
+            values.Add(new KeyValuePair<string, string>(HadoopRemoteRestConstants.EnableLogging, details.EnableTaskLogs.ToString().ToLowerInvariant()));
 
-            // enablelog is set to true only if the statusdir is set on the jobDetails being submitted.
-            values.Add(new KeyValuePair<string, string>(HadoopRemoteRestConstants.EnableLogging, details.StatusFolder.IsNotNullOrEmpty().ToString().ToLowerInvariant()));
             return values;
         }
 

@@ -12,31 +12,30 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImplementations
 {
     using System;
     using System.Collections;
-    using System.Collections.Generic;
-    using System.Collections.ObjectModel;
     using System.Threading.Tasks;
     using Microsoft.Hadoop.Client;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandInterfaces;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters;
-    using Microsoft.WindowsAzure.Management.HDInsight;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.Extensions;
 
-    internal class NewAzureHDInsightHiveJobDefinitionCommand : AzureHDInsightNewJobDefinitionCommand<AzureHDInsightHiveJobDefinition>, INewAzureHDInsightHiveJobDefinitionCommand
+    internal class NewAzureHDInsightHiveJobDefinitionCommand
+        : AzureHDInsightNewJobDefinitionCommand<AzureHDInsightHiveJobDefinition>, INewAzureHDInsightHiveJobDefinitionCommand
     {
         private readonly HiveJobCreateParameters hiveJobDefinition = new HiveJobCreateParameters();
+        private string[] args = new string[] { };
         private Hashtable defines = new Hashtable();
         private string[] resources = new string[] { };
-        private string[] args = new string[] { };
 
-        public string JobName
+        public string[] Arguments
         {
-            get { return this.hiveJobDefinition.JobName; }
-            set { this.hiveJobDefinition.JobName = value; }
+            get { return this.args; }
+            set { this.args = value; }
         }
 
         public override Hashtable Defines
@@ -45,28 +44,28 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImp
             set { this.defines = value; }
         }
 
+        public string File
+        {
+            get { return this.hiveJobDefinition.File; }
+            set { this.hiveJobDefinition.File = value; }
+        }
+
         public override string[] Files
         {
             get { return this.resources; }
             set { this.resources = value; }
         }
 
-        public string[] Arguments
+        public string JobName
         {
-            get { return this.args; }
-            set { this.args = value; }
+            get { return this.hiveJobDefinition.JobName; }
+            set { this.hiveJobDefinition.JobName = value; }
         }
 
         public string Query
         {
             get { return this.hiveJobDefinition.Query; }
             set { this.hiveJobDefinition.Query = value; }
-        }
-
-        public string File
-        {
-            get { return this.hiveJobDefinition.File; }
-            set { this.hiveJobDefinition.File = value; }
         }
 
         public override string StatusFolder

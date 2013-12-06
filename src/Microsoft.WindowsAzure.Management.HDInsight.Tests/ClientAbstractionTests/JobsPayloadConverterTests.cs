@@ -53,6 +53,24 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             Assert.IsTrue(payload.Contains(Uri.EscapeDataString(string.Format("{0}={1}", WebHCatConstants.DefineJobName, mapReduceJob.JobName))));
         }
 
+
+        [TestMethod]
+        [TestCategory("CheckIn")]
+        [TestCategory("Payload")]
+        public void CanSerializeValidJobRequestWithCallback()
+        {
+            var mapReduceJob = new MapReduceJobCreateParameters()
+            {
+                JobName = "pi estimation jobDetails",
+                Callback = "http://someball.com/$jobid/notvalid"
+            };
+
+            var payloadConverter = new PayloadConverterBase();
+            var payload = payloadConverter.SerializeMapReduceRequest("hadoop", mapReduceJob);
+            Assert.IsTrue(payload.Contains(Uri.EscapeDataString(string.Format("{0}={1}", WebHCatConstants.DefineJobName, mapReduceJob.JobName))));
+            Assert.IsTrue(payload.Contains(string.Format("{0}={1}", Uri.EscapeDataString(WebHCatConstants.Callback), Uri.EscapeDataString(mapReduceJob.Callback))));
+        }
+
         [TestMethod]
         [TestCategory("CheckIn")]
         [TestCategory("Payload")]
@@ -72,11 +90,29 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         [TestCategory("CheckIn")]
         [TestCategory("Payload")]
         [TestCategory("Defect")]
-        public void PayloadHasEnableLogsTrue()
+        public void PayloadHasEnableLogsFalseByDefault()
         {
             var hiveJob = new HiveJobCreateParameters()
             {
                 Query = "show tables",
+                StatusFolder = "/showtableslocation"
+            };
+
+            var payloadConverter = new PayloadConverterBase();
+            var payload = payloadConverter.SerializeHiveRequest("hadoop", hiveJob);
+            Assert.IsTrue(payload.Contains(string.Format("{0}={1}", HadoopRemoteRestConstants.EnableLogging, "false")));
+        }
+
+        [TestMethod]
+        [TestCategory("CheckIn")]
+        [TestCategory("Payload")]
+        [TestCategory("Defect")]
+        public void JobCanSetEnableLogsTrue()
+        {
+            var hiveJob = new HiveJobCreateParameters()
+            {
+                Query = "show tables",
+                EnableTaskLogs = true,
                 StatusFolder = "/showtableslocation"
             };
 
@@ -271,6 +307,35 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             Assert.IsTrue(payload.Contains(string.Format("{0}={1}", WebHCatConstants.Reducer, Uri.EscapeDataString(streamingMapReduceJob.Reducer))));
         }
 
+        [TestMethod]
+        [TestCategory("CheckIn")]
+        [TestCategory("Payload")]
+        public void CanSerializeValidStreamingMapReduceJobRequest_CmdEnv()
+        {
+            var streamingMapReduceJob = new StreamingMapReduceJobCreateParameters()
+            {
+                Input = "asv://input",
+                Output = "asv://output",
+                Mapper = "asv://mapper",
+                Reducer = "asv://reducer"
+            };
+
+            streamingMapReduceJob.CommandEnvironment.Add("Name1=Value1");
+            streamingMapReduceJob.CommandEnvironment.Add("Name2=Value2");
+
+            var payloadConverter = new PayloadConverterBase();
+            var payload = payloadConverter.SerializeStreamingMapReduceRequest("hadoop", streamingMapReduceJob);
+
+            Assert.IsTrue(payload.Contains(string.Format("{0}={1}", WebHCatConstants.Input, Uri.EscapeDataString(streamingMapReduceJob.Input))));
+            Assert.IsTrue(payload.Contains(string.Format("{0}={1}", WebHCatConstants.Output, Uri.EscapeDataString(streamingMapReduceJob.Output))));
+            Assert.IsTrue(payload.Contains(string.Format("{0}={1}", WebHCatConstants.Mapper, Uri.EscapeDataString(streamingMapReduceJob.Mapper))));
+            Assert.IsTrue(payload.Contains(string.Format("{0}={1}", WebHCatConstants.Reducer, Uri.EscapeDataString(streamingMapReduceJob.Reducer))));
+
+            foreach (var cmdEnvArgument in streamingMapReduceJob.CommandEnvironment)
+            {
+                Assert.IsTrue(payload.Contains(string.Format("{0}={1}", WebHCatConstants.CmdEnv, Uri.EscapeDataString(cmdEnvArgument))));
+            }
+        }
 
         [TestMethod]
         [TestCategory("CheckIn")]

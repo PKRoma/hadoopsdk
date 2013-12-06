@@ -19,7 +19,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission.RestClient
 
     internal class HDInsightJobSubmissionRestClientFactory : IHDInsightJobSubmissionRestClientFactory
     {
-        public IHDInsightJobSubmissionRestClient Create(IHDInsightCertificateCredential credentials, IAbstractionContext context)
+        public IHDInsightJobSubmissionRestClient Create(IHDInsightSubscriptionCredentials credentials, IAbstractionContext context)
         {
             return new HDInsightJobSubmissionRestClient(credentials, context);
         }

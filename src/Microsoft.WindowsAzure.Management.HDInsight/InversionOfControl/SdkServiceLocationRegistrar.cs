@@ -50,9 +50,14 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.InversionOfControl
             }
 
             var overrideManager = new HDInsightClusterOverrideManager();
-            overrideManager.AddOverride<HDInsightCertificateCredential>(new VersionFinderClientFactory(), 
-                                                                                     new HDInsightManagementRdfeUriBuilderFactory(), 
+            overrideManager.AddOverride<HDInsightCertificateCredential>(new VersionFinderClientFactory(),
+                                                                                     new HDInsightManagementRdfeUriBuilderFactory(),
                                                                                      new PayloadConverter());
+
+            overrideManager.AddOverride<HDInsightAccessTokenCredential>(new VersionFinderClientFactory(),
+                                                                                     new HDInsightManagementRdfeUriBuilderFactory(),
+                                                                                     new PayloadConverter());
+
             manager.RegisterInstance<IHDInsightClusterOverrideManager>(overrideManager);
             manager.RegisterType<ICloudServiceNameResolver, CloudServiceNameResolver>();
             manager.RegisterType<IHDInsightManagementRestClientFactory, HDInsightManagementRestClientFactory>();
@@ -60,16 +65,18 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.InversionOfControl
             manager.RegisterType<IHDInsightJobSubmissionRestClientFactory, HDInsightJobSubmissionRestClientFactory>();
             manager.RegisterType<IHDInsightClientFactory, HDInsightClientFactory>();
             manager.RegisterType<IAsvValidatorClientFactory, AsvValidatorValidatorClientFactory>();
-            manager.RegisterType<IHDInsightSubscriptionCertificateCredentialsFactory, ProductionIHDInsightSubscriptionCertificateCredentialsFactory>();
+            manager.RegisterType<IHDInsightSubscriptionCredentialsFactory, ProductionIHDInsightSubscriptionCertificateCredentialsFactory>();
             manager.RegisterType<ISubscriptionRegistrationClientFactory, SubscriptionRegistrationClientFactory>();
             manager.RegisterType<ILocationFinderClientFactory, LocationFinderClientFactory>();
             manager.RegisterType<IRdfeServiceRestClientFactory, RdfeServiceRestClientFactory>();
             manager.RegisterType<IHDInsightJobSubmissionPocoClientFactory, HDInsightJobSubmissionPocoClientFactory>();
+            manager.RegisterType<IHDInsightHttpClientAbstractionFactory, HDInsightHttpClientAbstractionFactory>();
             var changeManager = new UserChangeRequestManager();
             changeManager.RegisterUserChangeRequestHandler(typeof(HDInsightCertificateCredential), UserChangeRequestUserType.Http, HttpChangeRequestUriBuilder, PayloadConverter.SerializeConnectivityRequest);
             manager.RegisterInstance<IUserChangeRequestManager>(changeManager);
             var hadoopManager = locator.Locate<IHadoopClientFactoryManager>();
             hadoopManager.RegisterFactory<JobSubmissionCertificateCredential, IHDInsightHadoopClientFactory, HDInsightHadoopClientFactory>();
+            hadoopManager.RegisterFactory<JobSubmissionAccessTokenCredential, IHDInsightHadoopClientFactory, HDInsightHadoopClientFactory>();
         }
 
         internal static Uri HttpChangeRequestUriBuilder(IHDInsightSubscriptionAbstractionContext context, string dnsName, string location)

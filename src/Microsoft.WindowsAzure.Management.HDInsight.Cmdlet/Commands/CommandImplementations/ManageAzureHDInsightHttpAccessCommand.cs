@@ -12,6 +12,7 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImplementations
 {
     using System.Management.Automation;
@@ -19,20 +20,19 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImp
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandInterfaces;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters;
-    using Microsoft.WindowsAzure.Management.HDInsight;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.Extensions;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.ServiceLocation;
 
     internal class ManageAzureHDInsightHttpAccessCommand : AzureHDInsightClusterCommand<AzureHDInsightCluster>, IManageAzureHDInsightHttpAccessCommand
     {
         /// <inheritdoc />
-        public string Location { get; set; }
+        public PSCredential Credential { get; set; }
 
         /// <inheritdoc />
         public bool Enable { get; set; }
 
         /// <inheritdoc />
-        public PSCredential Credential { get; set; }
+        public string Location { get; set; }
 
         /// <inheritdoc />
         public override async Task EndProcessing()
@@ -40,7 +40,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImp
             this.Name.ArgumentNotNullOrEmpty("Name");
             this.Location.ArgumentNotNullOrEmpty("Location");
 
-            var client = this.GetClient();
+            IHDInsightClient client = this.GetClient();
             if (this.Enable)
             {
                 this.Credential.ArgumentNotNull("Credential");

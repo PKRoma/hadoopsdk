@@ -12,19 +12,20 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects
 {
     using System.Collections.Generic;
     using Microsoft.Hadoop.Client;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.Extensions;
 
     /// <summary>
-    /// Provides creation details for a new MapReduce jobDetails.
+    ///     Provides creation details for a new MapReduce jobDetails.
     /// </summary>
     public class AzureHDInsightMapReduceJobDefinition : AzureHDInsightJobDefinition
     {
         /// <summary>
-        /// Initializes a new instance of the AzureHDInsightMapReduceJobDefinition class.
+        ///     Initializes a new instance of the AzureHDInsightMapReduceJobDefinition class.
         /// </summary>
         public AzureHDInsightMapReduceJobDefinition()
         {
@@ -33,37 +34,37 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects
         }
 
         /// <summary>
-        /// Gets or sets the name of the jobDetails.
-        /// </summary>
-        public string JobName { get; set; }
-
-        /// <summary>
-        /// Gets or sets the jar file to use for the jobDetails.
-        /// </summary>
-        public string JarFile { get; set; }
-
-        /// <summary>
-        /// Gets or sets the class name to use for the jobDetails.
+        ///     Gets or sets the class name to use for the jobDetails.
         /// </summary>
         public string ClassName { get; set; }
 
         /// <summary>
-        /// Gets the libjars to use for the jobDetails.
-        /// </summary>
-        public ICollection<string> LibJars { get; private set; }
-
-        /// <summary>
-        /// Gets the parameters for the jobDetails.
+        ///     Gets the parameters for the jobDetails.
         /// </summary>
         public IDictionary<string, string> Defines { get; private set; }
 
         /// <summary>
-        /// Converts the Powershell object type to SDK object type.
+        ///     Gets or sets the jar file to use for the jobDetails.
+        /// </summary>
+        public string JarFile { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the name of the jobDetails.
+        /// </summary>
+        public string JobName { get; set; }
+
+        /// <summary>
+        ///     Gets the libjars to use for the jobDetails.
+        /// </summary>
+        public ICollection<string> LibJars { get; private set; }
+
+        /// <summary>
+        ///     Converts the Powershell object type to SDK object type.
         /// </summary>
         /// <returns>An SDK MapReduce object type.</returns>
         internal MapReduceJobCreateParameters ToMapReduceJobCreateParameters()
         {
-            var mapReduceJobDefinition = new MapReduceJobCreateParameters()
+            var mapReduceJobDefinition = new MapReduceJobCreateParameters
             {
                 ClassName = this.ClassName,
                 JarFile = this.JarFile,

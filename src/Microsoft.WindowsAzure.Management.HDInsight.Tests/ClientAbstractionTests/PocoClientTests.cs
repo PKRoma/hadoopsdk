@@ -32,6 +32,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoClient;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
     using Microsoft.WindowsAzure.Management.HDInsight;
     using Microsoft.WindowsAzure.Management.HDInsight.JobSubmission;
@@ -638,6 +639,62 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             Assert.AreEqual(internalAccountName, resolvedAcccountName);
         }
 
+        
+        [TestMethod]
+        [TestCategory("Integration")]
+        [TestCategory("CheckIn")]
+        [TestCategory("PocoClient")]
+        [TestCategory("Defect")]
+        public void ICanStopPollingWhenErrorIsDetected()
+        {
+            IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
+            using (var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(credentials, GetAbstractionContext()))
+            {
+                var test = new ClusterDetails("TestCluster", ClusterState.Unknown.ToString());
+                test.Error = new ClusterErrorStatus(400, "Hit an error", "Create");
+                var result = client.PollSignal(test, ClusterState.Operational, ClusterState.Running);
+                Assert.AreEqual(result, IHDInsightManagementPocoClientExtensions.PollResult.Stop);
+                test.State = ClusterState.ClusterStorageProvisioned;
+                result = client.PollSignal(test, ClusterState.Operational, ClusterState.Running);
+                Assert.AreEqual(result, IHDInsightManagementPocoClientExtensions.PollResult.Stop);
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("Integration")]
+        [TestCategory("CheckIn")]
+        [TestCategory("PocoClient")]
+        [TestCategory("Defect")]
+        public void ICanPossibleErrorPollingWhenClusterStateIsUnknown()
+        {
+            IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
+            using (var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(credentials, GetAbstractionContext()))
+            {
+                var result = client.PollSignal(null, ClusterState.Operational, ClusterState.Running);
+                Assert.AreEqual(result, IHDInsightManagementPocoClientExtensions.PollResult.PosibleError);
+
+                var test = new ClusterDetails("TestCluster", ClusterState.Unknown.ToString());
+                result = client.PollSignal(test, ClusterState.Operational, ClusterState.Running);
+                Assert.AreEqual(result, IHDInsightManagementPocoClientExtensions.PollResult.PosibleError);
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("Integration")]
+        [TestCategory("CheckIn")]
+        [TestCategory("PocoClient")]
+        [TestCategory("Defect")]
+        public void ICanContinuePollingWhenClusterStateIsValid()
+        {
+            IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
+            using (var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(credentials, GetAbstractionContext()))
+            {
+                var test = new ClusterDetails("TestCluster", ClusterState.ReadyForDeployment.ToString());
+                var result = client.PollSignal(test, ClusterState.Operational, ClusterState.Running);
+                Assert.AreEqual(result, IHDInsightManagementPocoClientExtensions.PollResult.Continue);
+            }
+        }
+
         internal static void ValidateClusterConfiguration(ClusterDetails testCluster, ClusterCreateParameters cluster)
         {
             var remoteCreds = new BasicAuthCredential()
@@ -947,7 +1004,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             }
             catch (HttpLayerException e)
             {
-                Assert.AreEqual(e.RequestContent, HDInsightClient.ClusterAlreadyExistsError);
+                Assert.IsTrue(e.RequestContent.Contains(HDInsightClient.ClusterAlreadyExistsError));
                 Assert.AreEqual(e.RequestStatusCode, HttpStatusCode.BadRequest);
             }
         }

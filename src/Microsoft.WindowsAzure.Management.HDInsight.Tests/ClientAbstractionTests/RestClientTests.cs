@@ -59,7 +59,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         [TestCategory("RestClient")]
         public void InternalValidation_HDInsightManagementRestClient_GetCloudServiceName()
         {
-            IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
+            IHDInsightSubscriptionCredentials credentials = IntegrationTestBase.GetValidCredentials();
             var resolver = ServiceLocator.Instance.Locate<ICloudServiceNameResolver>();
             var serviceName = resolver.GetCloudServiceName(Guid.Empty, "hdInsight", "EastUS");
             Assert.AreEqual("hdInsightCK4TO7F6PZOJJ2FHBWOSHEUVEPIUV6UVI6JRGD4KHFM4POCJVSUA-EastUS", serviceName);
@@ -108,7 +108,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         [TestCategory("RestClient")]
         public async Task ICanPerformA_ListCloudServices_Using_RestClientAbstraction()
         {
-            IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
+            IHDInsightSubscriptionCredentials credentials = IntegrationTestBase.GetValidCredentials();
             var client = ServiceLocator.Instance.Locate<IHDInsightManagementRestClientFactory>().Create(credentials, GetAbstractionContext());
             var result = await client.ListCloudServices();
             Assert.IsTrue(this.ContainsContainer(TestCredentials.WellKnownCluster.DnsName, result.Content));
@@ -143,7 +143,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         [Timeout(5*60*1000)] // ms
         public async Task ICanPerformA_CreateDeleteContainers_Using_RestClient()
         {
-            IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
+            IHDInsightSubscriptionCredentials credentials = IntegrationTestBase.GetValidCredentials();
             var client = new HDInsightManagementRestClient(credentials, GetAbstractionContext());
             var dnsName = base.GetRandomClusterName();
             var location = "East US 2";
@@ -189,13 +189,27 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
 
             if (creds == null)
                 Assert.Inconclusive("Alternative Azure Endpoint wasn't set up");
-
-            var tempCredentials = new HDInsightCertificateCredential()
+            
+            IHDInsightCertificateCredential certCreds = IntegrationTestBase.GetValidCredentials() as IHDInsightCertificateCredential;
+            IHDInsightAccessTokenCredential tokenCreds = IntegrationTestBase.GetValidCredentials() as IHDInsightAccessTokenCredential;
+            IHDInsightSubscriptionCredentials tempCredentials = null;
+            if (certCreds != null)
             {
-                SubscriptionId = creds.SubscriptionId,
-                Certificate = IntegrationTestBase.GetValidCredentials().Certificate
-            };
-            IHDInsightCertificateCredential credentials = new AlternativeEnvironmentIHDInsightSubscriptionCertificateCredentialsFactory().Create(tempCredentials);
+                tempCredentials = new HDInsightCertificateCredential()
+                {
+                    SubscriptionId = creds.SubscriptionId,
+                    Certificate = certCreds.Certificate
+                };
+            }
+            else if (tokenCreds != null)
+            {
+                tempCredentials = new HDInsightAccessTokenCredential()
+                {
+                    SubscriptionId = creds.SubscriptionId,
+                    AccessToken = tokenCreds.AccessToken
+                };
+            }
+            IHDInsightSubscriptionCredentials credentials = new AlternativeEnvironmentIHDInsightSubscriptionCertificateCredentialsFactory().Create(tempCredentials);
             
             var client = new HDInsightManagementRestClient(credentials, GetAbstractionContext());
             var dnsName = base.GetRandomClusterName();

@@ -39,6 +39,10 @@ namespace Microsoft.Hadoop.Client.Data
         private const string ExecutePropertyName = "execute";
         private const string CommandPropertyName = "command";
         private const string UnknownJobId = "unknown";
+        private const string ParentId = "parentId";
+        private const string JobId = "id";
+        private const string ErrorString = "error";
+        private const string Callback = "callback";
 
         internal string DeserializeJobSubmissionResponse(string payload)
         {
@@ -51,10 +55,10 @@ namespace Microsoft.Hadoop.Client.Data
                     throw new SerializationException(respObj.ToString());
                 }
 
-                var jobId = this.GetJsonPropertyStringValue(respObj, "id");
+                var jobId = this.GetJsonPropertyStringValue(respObj, JobId);
                 if (string.IsNullOrEmpty(jobId))
                 {
-                    var errorString = this.GetJsonPropertyStringValue(respObj, "error");
+                    var errorString = this.GetJsonPropertyStringValue(respObj, ErrorString);
                     if (!string.IsNullOrEmpty(errorString))
                     {
                         throw new InvalidOperationException(errorString);
@@ -139,7 +143,7 @@ namespace Microsoft.Hadoop.Client.Data
             var jobId = string.Empty;
             if (!this.GetJobId(job, out jobId))
             {
-                var errorString = this.GetJsonPropertyStringValue(job, "error");
+                var errorString = this.GetJsonPropertyStringValue(job, ErrorString);
                 if (!string.IsNullOrEmpty(errorString))
                 {
                     return null;
@@ -191,19 +195,20 @@ namespace Microsoft.Hadoop.Client.Data
             }
 
             ret.PercentComplete = this.GetJsonPropertyStringValue(job, PercentCompletePropertyName);
+            ret.Callback = this.GetJsonPropertyStringValue(job, Callback);
 
             return ret;
         }
 
         private bool GetJobId(JsonItem details, out string jobId)
         {
-            var parentId = details.GetProperty("parentId");
-            if (parentId == null || parentId.IsNullOrMissing || parentId.IsError)
+            var jobIdJson = details.GetProperty(JobId);
+            if (jobIdJson == null || jobIdJson.IsNullOrMissing || jobIdJson.IsError)
             {
-                var id = details.GetProperty("id");
+                var id = details.GetProperty(ParentId);
                 return id.TryGetValue(out jobId);
             }
-            return parentId.TryGetValue(out jobId);
+            return jobIdJson.TryGetValue(out jobId);
         }
 
         private bool TryGetJobNameFromJsonArray(IEnumerable<string> jsonArray, out string jobName)

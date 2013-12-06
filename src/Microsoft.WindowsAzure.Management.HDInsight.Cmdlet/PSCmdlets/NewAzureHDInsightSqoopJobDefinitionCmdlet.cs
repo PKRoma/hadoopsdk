@@ -12,19 +12,20 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
 {
-    using System.Collections;
     using System.Diagnostics.CodeAnalysis;
     using System.Management.Automation;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.BaseCommandInterfaces;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandInterfaces;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.ServiceLocation;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.Extensions;
 
     /// <summary>
-    /// Represents the New-AzureHDInsightSqoopJobDefinition Power Shell Cmdlet.
+    ///     Represents the New-AzureHDInsightSqoopJobDefinition Power Shell Cmdlet.
     /// </summary>
     [Cmdlet(VerbsCommon.New, AzureHdInsightPowerShellConstants.AzureHDInsightSqoopJobDefinition)]
     public class NewAzureHDInsightSqoopJobDefinitionCmdlet : AzureHDInsightCmdlet, INewAzureHDInsightSqoopJobDefinitionBase
@@ -32,7 +33,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
         private readonly INewAzureHDInsightSqoopJobDefinitionCommand command;
 
         /// <summary>
-        /// Initializes a new instance of the NewAzureHDInsightSqoopJobDefinitionCmdlet class.
+        ///     Initializes a new instance of the NewAzureHDInsightSqoopJobDefinitionCmdlet class.
         /// </summary>
         public NewAzureHDInsightSqoopJobDefinitionCmdlet()
         {
@@ -40,14 +41,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
         }
 
         /// <inheritdoc />
-        protected override void StopProcessing()
-        {
-            this.command.Cancel();
-        }
-
-        /// <inheritdoc />
-        [Parameter(Mandatory = false,
-                   HelpMessage = "The command to run in the sqoop job.")]
+        [Parameter(Mandatory = false, HelpMessage = "The command to run in the sqoop job.")]
         public string Command
         {
             get { return this.command.Command; }
@@ -55,8 +49,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
         }
 
         /// <inheritdoc />
-        [Parameter(Mandatory = false,
-                   HelpMessage = "The query file to run in the sqoop job.")]
+        [Parameter(Mandatory = false, HelpMessage = "The query file to run in the sqoop job.")]
         [Alias(AzureHdInsightPowerShellConstants.AliasQueryFile)]
         public string File
         {
@@ -65,8 +58,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
         }
 
         /// <inheritdoc />
-        [Parameter(Mandatory = false,
-                   HelpMessage = "The files for the sqoop job.")]
+        [Parameter(Mandatory = false, HelpMessage = "The files for the sqoop job.")]
         [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "Need collections for input parameters")]
         public string[] Files
         {
@@ -75,8 +67,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
         }
 
         /// <inheritdoc />
-        [Parameter(Mandatory = false,
-                   HelpMessage = "The output location to use for the job.")]
+        [Parameter(Mandatory = false, HelpMessage = "The output location to use for the job.")]
         public string StatusFolder
         {
             get { return this.command.StatusFolder; }
@@ -84,7 +75,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
         }
 
         /// <summary>
-        /// Finishes the execution of the cmdlet by writing out the config object.
+        ///     Finishes the execution of the cmdlet by writing out the config object.
         /// </summary>
         protected override void EndProcessing()
         {
@@ -94,11 +85,17 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
             }
 
             this.command.EndProcessing().Wait();
-            foreach (var output in this.command.Output)
+            foreach (AzureHDInsightSqoopJobDefinition output in this.command.Output)
             {
                 this.WriteObject(output);
             }
             this.WriteDebugLog();
+        }
+
+        /// <inheritdoc />
+        protected override void StopProcessing()
+        {
+            this.command.Cancel();
         }
     }
 }

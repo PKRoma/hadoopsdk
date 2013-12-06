@@ -12,34 +12,35 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.BaseInterfaces
 {
     using System;
     using System.Security.Cryptography.X509Certificates;
 
     /// <summary>
-    /// Type that contains subscription information.
+    ///     Type that contains subscription information.
     /// </summary>
     internal class SubscriptionData
     {
         /// <summary>
-        /// Gets or sets the Service management endpoint.
+        ///     Gets or sets the Management certificate.
+        /// </summary>
+        public X509Certificate2 Certificate { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the Service management endpoint.
         /// </summary>
         public string Endpoint { get; set; }
 
         /// <summary>
-        /// Gets or sets the Subscription Id.
+        ///     Gets or sets the Subscription Id.
         /// </summary>
         public Guid SubscriptionId { get; set; }
 
         /// <summary>
-        /// Gets or sets the Subscription name.
+        ///     Gets or sets the Subscription name.
         /// </summary>
         public string SubscriptionName { get; set; }
-
-        /// <summary>
-        /// Gets or sets the Management certificate.
-        /// </summary>
-        public X509Certificate2 Certificate { get; set; }
     }
 }

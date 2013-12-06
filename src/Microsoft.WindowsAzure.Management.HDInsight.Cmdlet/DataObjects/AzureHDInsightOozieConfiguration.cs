@@ -12,18 +12,19 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects
 {
     using System.Collections;
     using System.Diagnostics.CodeAnalysis;
 
     /// <summary>
-    /// Structure to contain Hadoop Map-Reduce service configuration.
+    ///     Structure to contain Hadoop Map-Reduce service configuration.
     /// </summary>
     public class AzureHDInsightOozieConfiguration
     {
         /// <summary>
-        /// Initializes a new instance of the AzureHDInsightOozieConfiguration class.
+        ///     Initializes a new instance of the AzureHDInsightOozieConfiguration class.
         /// </summary>
         public AzureHDInsightOozieConfiguration()
         {
@@ -31,19 +32,20 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects
         }
 
         /// <summary>
-        /// Gets or sets the configuration settings.
+        ///     Gets or sets the location for additional JAR files.
         /// </summary>
-        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "Needed for ease of use in Powershell invocation.")]
-        public Hashtable Configuration { get; set; }
+        public AzureHDInsightDefaultStorageAccount AdditionalActionExecutorLibraries { get; set; }
 
         /// <summary>
-        /// Gets or sets the location for additional JAR files.
+        ///     Gets or sets the location for additional JAR files.
         /// </summary>
         public AzureHDInsightDefaultStorageAccount AdditionalSharedLibraries { get; set; }
 
         /// <summary>
-        /// Gets or sets the location for additional JAR files.
+        ///     Gets or sets the configuration settings.
         /// </summary>
-        public AzureHDInsightDefaultStorageAccount AdditionalActionExecutorLibraries { get; set; }
+        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly",
+            Justification = "Needed for ease of use in Powershell invocation.")]
+        public Hashtable Configuration { get; set; }
     }
 }

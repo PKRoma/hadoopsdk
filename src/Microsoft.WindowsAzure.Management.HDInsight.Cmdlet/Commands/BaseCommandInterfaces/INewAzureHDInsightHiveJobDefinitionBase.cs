@@ -12,25 +12,24 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.BaseCommandInterfaces
 {
-    using System.Collections.Generic;
-
     internal interface INewAzureHDInsightHiveJobDefinitionBase : INewAzureHDInsightJobWithDefinesConfigBase
     {
         /// <summary>
-        /// Gets or sets the query file to use for a hive job.
+        ///     Gets or sets the Arguments for the jobDetails.
+        /// </summary>
+        string[] Arguments { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the query file to use for a hive job.
         /// </summary>
         string File { get; set; }
 
         /// <summary>
-        /// Gets or sets the Query to use for the jobDetails.
+        ///     Gets or sets the Query to use for the jobDetails.
         /// </summary>
         string Query { get; set; }
-
-        /// <summary>
-        /// Gets or sets the Arguments for the jobDetails.
-        /// </summary>
-        string[] Arguments { get; set; }
     }
 }

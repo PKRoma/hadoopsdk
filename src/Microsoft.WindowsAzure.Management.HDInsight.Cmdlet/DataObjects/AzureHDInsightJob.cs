@@ -12,25 +12,24 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects
 {
     using System;
     using Microsoft.Hadoop.Client;
-    using Microsoft.WindowsAzure.Management.HDInsight;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.Extensions;
 
     /// <summary>
-    /// Represents an Azure HD Insight jobDetails for the PowerShell Cmdlets.
+    ///     Represents an Azure HD Insight jobDetails for the PowerShell Cmdlets.
     /// </summary>
     public class AzureHDInsightJob : AzureHDInsightJobBase
     {
         /// <summary>
-        /// Initializes a new instance of the AzureHDInsightJob class.
+        ///     Initializes a new instance of the AzureHDInsightJob class.
         /// </summary>
         /// <param name="jobDetails">The HDInsight jobDetails.</param>
         /// <param name="cluster">The cluster that the jobDetails was created against.</param>
-        public AzureHDInsightJob(JobDetails jobDetails, string cluster)
-            : base(jobDetails)
+        public AzureHDInsightJob(JobDetails jobDetails, string cluster) : base(jobDetails)
         {
             jobDetails.ArgumentNotNull("jobDetails");
             this.ExitCode = jobDetails.ExitCode;
@@ -45,43 +44,43 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects
         }
 
         /// <summary>
-        /// Gets or sets the status directory for the jobDetails.
-        /// </summary>
-        public string StatusDirectory { get; set; }
-
-        /// <summary>
-        /// Gets the exit code for the jobDetails.
-        /// </summary>
-        public int? ExitCode { get; private set; }
-
-        /// <summary>
-        /// Gets the name of the jobDetails.
-        /// </summary>
-        public string Name { get; private set; }
-
-        /// <summary>
-        /// Gets the query for the jobDetails (if it was a hive jobDetails).
-        /// </summary>
-        public string Query { get; private set; }
-
-        /// <summary>
-        /// Gets the status code for the jobDetails.
-        /// </summary>
-        public string State { get; private set; }
-
-        /// <summary>
-        /// Gets the time the jobDetails was submitted.
-        /// </summary>
-        public DateTime SubmissionTime { get; private set; }
-
-        /// <summary>
-        /// Gets or sets the cluster to which the jobDetails was submitted.
+        ///     Gets or sets the cluster to which the jobDetails was submitted.
         /// </summary>
         public string Cluster { get; set; }
 
         /// <summary>
-        /// Gets or sets the percentage completion of the jobDetails.
+        ///     Gets the exit code for the jobDetails.
+        /// </summary>
+        public int? ExitCode { get; private set; }
+
+        /// <summary>
+        ///     Gets the name of the jobDetails.
+        /// </summary>
+        public string Name { get; private set; }
+
+        /// <summary>
+        ///     Gets or sets the percentage completion of the jobDetails.
         /// </summary>
         public string PercentComplete { get; set; }
+
+        /// <summary>
+        ///     Gets the query for the jobDetails (if it was a hive jobDetails).
+        /// </summary>
+        public string Query { get; private set; }
+
+        /// <summary>
+        ///     Gets the status code for the jobDetails.
+        /// </summary>
+        public string State { get; private set; }
+
+        /// <summary>
+        ///     Gets or sets the status directory for the jobDetails.
+        /// </summary>
+        public string StatusDirectory { get; set; }
+
+        /// <summary>
+        ///     Gets the time the jobDetails was submitted.
+        /// </summary>
+        public DateTime SubmissionTime { get; private set; }
     }
 }

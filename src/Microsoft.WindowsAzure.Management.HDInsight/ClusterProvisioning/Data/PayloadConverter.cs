@@ -58,6 +58,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
         private static readonly XName HttpCodeElementName = XName.Get("HttpCode", WindowsAzureNamespace);
         private static readonly XName MessageElementName = XName.Get("Message", WindowsAzureNamespace);
         private const string ClusterUserName = "ClusterUsername";
+        private const string ExtendedErrorElementName = "ExtendedErrorMessage";
         private const string NodesCount = "NodesCount";
         private const string ConnectionUrl = "ConnectionURL";
         private const string CreatedDate = "CreatedDate";
@@ -556,16 +557,30 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
                 return null;
             }
 
+            string errorMessage;
+            ClusterErrorStatus clusterErrorStatus = null;
             var errorElement = operationStatusElement.Element(ErrorElementName);
-            if (errorElement == null)
+            var extendedErrorElement = this.ExtractResourceOutputStringValue(resource, ExtendedErrorElementName);
+
+            if (errorElement != null)
             {
-                return null;
+                var errorType = this.GetStringValue(operationStatusElement, TypeElementName);
+                var httpCode = int.Parse(this.GetStringValue(errorElement, HttpCodeElementName), CultureInfo.InvariantCulture);
+                errorMessage = this.GetStringValue(errorElement, MessageElementName);
+                clusterErrorStatus = new ClusterErrorStatus(httpCode, errorMessage, errorType);
             }
 
-            var errorMessage = this.GetStringValue(errorElement, MessageElementName);
-            string errorType = this.GetStringValue(operationStatusElement, TypeElementName);
-            var httpCode = int.Parse(this.GetStringValue(errorElement, HttpCodeElementName), CultureInfo.InvariantCulture);
-            return new ClusterErrorStatus(httpCode, errorMessage, errorType);
+            if (extendedErrorElement.IsNotNullOrEmpty())
+            {
+                if (clusterErrorStatus == null)
+                {
+                    clusterErrorStatus = new ClusterErrorStatus();
+                }
+
+                clusterErrorStatus.Message = extendedErrorElement;
+            }
+
+            return clusterErrorStatus;
         }
 
         internal int ExtractClusterPropertyIntValue(XElement resource, IEnumerable<KeyValuePair<string, string>> intrinsicSettings, string name)

@@ -27,8 +27,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission
     /// </summary>
     internal class HDInsightHadoopClientFactory : IHDInsightHadoopClientFactory
     {
-        /// <inheritdoc />
-        public IJobSubmissionClient Create(JobSubmissionCertificateCredential credential)
+        public IJobSubmissionClient Create(IHDInsightSubscriptionCredentials credential)
         {
             return Help.SafeCreate(() => new HDInsightHadoopClient(credential));
         }

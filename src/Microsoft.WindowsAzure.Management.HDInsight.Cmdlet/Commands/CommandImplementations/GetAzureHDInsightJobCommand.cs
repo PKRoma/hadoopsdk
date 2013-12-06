@@ -12,21 +12,22 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImplementations
 {
     using System.Linq;
     using System.Threading.Tasks;
+    using Microsoft.Hadoop.Client;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandInterfaces;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters;
-    using Microsoft.WindowsAzure.Management.HDInsight;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.Extensions;
 
     internal class GetAzureHDInsightJobCommand : AzureHDInsightJobCommand<AzureHDInsightJob>, IGetAzureHDInsightJobCommand
     {
-        public async override Task EndProcessing()
+        public override async Task EndProcessing()
         {
-            var client = this.GetClient(this.Cluster);
+            IJobSubmissionClient client = this.GetClient(this.Cluster);
             this.Output.Clear();
             if (string.IsNullOrEmpty(this.JobId))
             {

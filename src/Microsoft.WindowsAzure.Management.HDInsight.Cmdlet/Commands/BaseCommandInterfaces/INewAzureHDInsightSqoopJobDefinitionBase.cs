@@ -12,18 +12,19 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.BaseCommandInterfaces
 {
     internal interface INewAzureHDInsightSqoopJobDefinitionBase : INewAzureHDInsightJobConfigBase
     {
         /// <summary>
-        /// Gets or sets the query file to use for a sqoop job.
-        /// </summary>
-        string File { get; set; }
-
-        /// <summary>
-        /// Gets or sets the Query to use for the sqoop job.
+        ///     Gets or sets the Query to use for the sqoop job.
         /// </summary>
         string Command { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the query file to use for a sqoop job.
+        /// </summary>
+        string File { get; set; }
     }
 }

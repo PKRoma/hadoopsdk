@@ -12,12 +12,13 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.BaseCommandInterfaces
 {
     internal interface IRemoveAzureHDInsightClusterBase : IGetAzureHDInsightClusterBase
     {
         /// <summary>
-        /// Gets or sets the Azure location for the HDInsight cluster.
+        ///     Gets or sets the Azure location for the HDInsight cluster.
         /// </summary>
         string Location { get; set; }
     }

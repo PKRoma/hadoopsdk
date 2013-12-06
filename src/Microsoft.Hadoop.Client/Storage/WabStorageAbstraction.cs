@@ -87,18 +87,27 @@ namespace Microsoft.Hadoop.Client.Storage
             return blobReference != null;
         }
 
-        public Task Delete(Uri path)
+        public void Delete(Uri path)
         {
-            throw new NotImplementedException();
+            path.ArgumentNotNull("path");
+            string localPath = path.LocalPath;
+            var client = this.GetStorageClient();
+            var container = client.GetContainerReference(this.credentials.ContainerName);
+            localPath = localPath.TrimStart('/');
+            foreach (CloudBlockBlob blob in container.ListBlobs(localPath, true, BlobListingDetails.None, null, null))
+            {
+                blob.Delete();
+            }
         }
 
-        public async Task CreateContainerIfNotExists(string containerName)
+        public Task CreateContainerIfNotExists(string containerName)
         {
             containerName.ArgumentNotNullOrEmpty("containerName");
             var blobClient = this.GetStorageClient();
 
             var container = blobClient.GetContainerReference(containerName);
-            await container.CreateIfNotExistsAsync();
+            container.CreateIfNotExists();
+            return TaskEx.GetCompletedTask();
         }
 
         public Task Write(Uri path, Stream stream)

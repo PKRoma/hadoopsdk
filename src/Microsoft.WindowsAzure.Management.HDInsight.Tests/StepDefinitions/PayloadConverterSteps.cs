@@ -73,6 +73,26 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.StepDefinitions
             this.transferObject = job;
         }
 
+
+        [Given(@"I have a job details object with a callback")]
+        public void GivenIHaveAJobDetailsWithCallbackObject()
+        {
+            var job = new Hadoop.Client.JobDetails();
+            job.ErrorCode = string.Empty;
+            job.ErrorOutputPath = string.Empty;
+            job.ExitCode = 0;
+            job.HttpStatusCode = HttpStatusCode.Accepted;
+            job.JobId = string.Empty;
+            job.LogicalOutputPath = string.Empty;
+            job.Name = string.Empty;
+            job.PhysicalOutputPath = "http://output";
+            job.Query = string.Empty;
+            job.StatusCode = Hadoop.Client.JobStatusCode.Unknown;
+            job.SubmissionTime = DateTime.UtcNow;
+            job.Callback = "http://some.url";
+            this.transferObject = job;
+        }
+
         [Given(@"I have a map reduce job request object")]
         public void GivenIHaveAMapReduceJobRequestObject()
         {
@@ -239,6 +259,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.StepDefinitions
                 Assert.AreEqual(asJob.Query, actual.Query);
                 Assert.AreEqual(asJob.StatusCode, actual.StatusCode);
                 Assert.AreEqual(asJob.SubmissionTime, actual.SubmissionTime);
+                Assert.AreEqual(asJob.Callback, actual.Callback);
                 return;
             }
             var asMapReduce = this.transferObject.As<MapReduceJobCreateParameters>();

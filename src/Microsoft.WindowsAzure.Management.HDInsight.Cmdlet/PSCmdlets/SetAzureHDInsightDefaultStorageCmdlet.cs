@@ -12,51 +12,40 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using System.Management.Automation;
-    using System.Text;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.BaseCommandInterfaces;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandInterfaces;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters;
-    using Microsoft.WindowsAzure.Management.HDInsight;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
-    using Microsoft.WindowsAzure.Management.HDInsight.InversionOfControl;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.Extensions;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.ServiceLocation;
 
     /// <summary>
-    /// Sets the Default Storage Container for the HDInsight cluster configuration.
+    ///     Sets the Default Storage Container for the HDInsight cluster configuration.
     /// </summary>
     [Cmdlet(VerbsCommon.Set, AzureHdInsightPowerShellConstants.AzureHDInsightDefaultStorage)]
     public class SetAzureHDInsightDefaultStorageCmdlet : AzureHDInsightCmdlet, ISetAzureHDInsightDefaultStorageBase
     {
-        private ISetAzureHDInsightDefaultStorageCommand command;
+        private readonly ISetAzureHDInsightDefaultStorageCommand command;
 
         /// <summary>
-        /// Initializes a new instance of the SetAzureHDInsightDefaultStorageCmdlet class.
+        ///     Initializes a new instance of the SetAzureHDInsightDefaultStorageCmdlet class.
         /// </summary>
         public SetAzureHDInsightDefaultStorageCmdlet()
         {
             this.command = ServiceLocator.Instance.Locate<IAzureHDInsightCommandFactory>().CreateSetDefaultStorage();
         }
 
-        /// <inheritdoc />
-        protected override void StopProcessing()
-        {
-            this.command.Cancel();
-        }
-
         /// <summary>
-        /// Gets or sets the Azure HDInsight Configuration for the Azure HDInsight cluster being constructed.
+        ///     Gets or sets the Azure HDInsight Configuration for the Azure HDInsight cluster being constructed.
         /// </summary>
         [Parameter(Position = 0, Mandatory = true,
-                   HelpMessage = "The HDInsight cluster configuration to use when creating the new cluster (created by New-AzureHDInsightConfig).",
-                   ValueFromPipeline = true,
-                   ParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetDefaultStorageAccount)]
+            HelpMessage = "The HDInsight cluster configuration to use when creating the new cluster (created by New-AzureHDInsightConfig).",
+            ValueFromPipeline = true, ParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetDefaultStorageAccount)]
         public AzureHDInsightConfig Config
         {
             get { return this.command.Config; }
@@ -64,8 +53,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
             {
                 if (value.IsNull())
                 {
-                    throw new ArgumentNullException("value",
-                                                    "The value for the configuration can not be null.");
+                    throw new ArgumentNullException("value", "The value for the configuration can not be null.");
                 }
 
                 if (value.CoreConfiguration != null)
@@ -80,25 +68,10 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
         }
 
         /// <summary>
-        /// Gets or sets the Storage Account name for the Default Storage Account.
+        ///     Gets or sets the Storage Account key for the Default Storage Account.
         /// </summary>
-        [Parameter(Position = 1, Mandatory = true,
-                   HelpMessage = "The default storage account to use for the new cluster.",
-                   ValueFromPipeline = false,
-                   ParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetDefaultStorageAccount)]
-        public string StorageAccountName
-        {
-            get { return this.command.StorageAccountName; }
-            set { this.command.StorageAccountName = value; }
-        }
-
-        /// <summary>
-        /// Gets or sets the Storage Account key for the Default Storage Account.
-        /// </summary>
-        [Parameter(Position = 2, Mandatory = true,
-                   HelpMessage = "The key to use for the default storage account.",
-                   ValueFromPipeline = false,
-                   ParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetDefaultStorageAccount)]
+        [Parameter(Position = 2, Mandatory = true, HelpMessage = "The key to use for the default storage account.", ValueFromPipeline = false,
+            ParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetDefaultStorageAccount)]
         public string StorageAccountKey
         {
             get { return this.command.StorageAccountKey; }
@@ -106,16 +79,36 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
         }
 
         /// <summary>
-        /// Gets or sets the Storage Account container for the Default Storage Account.
+        ///     Gets or sets the Storage Account name for the Default Storage Account.
         /// </summary>
-        [Parameter(Position = 3, Mandatory = true,
-                   HelpMessage = "The container in the storage account to use for default HDInsight storage.",
-                   ValueFromPipeline = false,
-                   ParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetDefaultStorageAccount)]
+        [Parameter(Position = 1, Mandatory = true, HelpMessage = "The default storage account to use for the new cluster.", ValueFromPipeline = false,
+            ParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetDefaultStorageAccount)]
+        public string StorageAccountName
+        {
+            get { return this.command.StorageAccountName; }
+            set { this.command.StorageAccountName = value; }
+        }
+
+        /// <summary>
+        ///     Gets or sets the Storage Account container for the Default Storage Account.
+        /// </summary>
+        [Parameter(Position = 3, Mandatory = true, HelpMessage = "The container in the storage account to use for default HDInsight storage.",
+            ValueFromPipeline = false, ParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetDefaultStorageAccount)]
         public string StorageContainerName
         {
             get { return this.command.StorageContainerName; }
             set { this.command.StorageContainerName = value; }
+        }
+
+        /// <inheritdoc />
+        protected override void EndProcessing()
+        {
+            this.command.EndProcessing().Wait();
+            foreach (AzureHDInsightConfig output in this.command.Output)
+            {
+                this.WriteObject(output);
+            }
+            this.WriteDebugLog();
         }
 
         /// <inheritdoc />
@@ -125,14 +118,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
         }
 
         /// <inheritdoc />
-        protected override void EndProcessing()
+        protected override void StopProcessing()
         {
-            this.command.EndProcessing().Wait();
-            foreach (var output in this.command.Output)
-            {
-                this.WriteObject(output);
-            }
-            this.WriteDebugLog();
+            this.command.Cancel();
         }
     }
 }

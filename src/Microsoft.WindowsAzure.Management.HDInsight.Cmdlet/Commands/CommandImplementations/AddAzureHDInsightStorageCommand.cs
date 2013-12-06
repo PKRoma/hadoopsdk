@@ -12,6 +12,7 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImplementations
 {
     using System.Collections.Generic;
@@ -20,20 +21,36 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImp
     using System.Threading.Tasks;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandInterfaces;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects;
-    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters;
 
     /// <summary>
-    /// Adds a storage account to the HDInsight cluster configuration.
+    ///     Adds a storage account to the HDInsight cluster configuration.
     /// </summary>
     internal class AddAzureHDInsightStorageCommand : IAddAzureHDInsightStorageCommand
     {
         /// <summary>
-        /// Initializes a new instance of the AddAzureHDInsightStorageCommand class.
+        ///     Initializes a new instance of the AddAzureHDInsightStorageCommand class.
         /// </summary>
         public AddAzureHDInsightStorageCommand()
         {
             this.Config = new AzureHDInsightConfig();
             this.Output = new Collection<AzureHDInsightConfig>();
+        }
+
+        public CancellationToken CancellationToken
+        {
+            get { return CancellationToken.None; }
+        }
+
+        public AzureHDInsightConfig Config { get; set; }
+
+        public ICollection<AzureHDInsightConfig> Output { get; private set; }
+
+        public string StorageAccountKey { get; set; }
+
+        public string StorageAccountName { get; set; }
+
+        public void Cancel()
+        {
         }
 
         public Task EndProcessing()
@@ -45,22 +62,5 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImp
             this.Output.Add(this.Config);
             return TaskEx.GetCompletedTask();
         }
-
-        public void Cancel()
-        {
-        }
-
-        public CancellationToken CancellationToken
-        {
-            get { return CancellationToken.None; }
-        }
-
-        public ICollection<AzureHDInsightConfig> Output { get; private set; }
-
-        public AzureHDInsightConfig Config { get; set; }
-
-        public string StorageAccountName { get; set; }
-
-        public string StorageAccountKey { get; set; }
     }
 }

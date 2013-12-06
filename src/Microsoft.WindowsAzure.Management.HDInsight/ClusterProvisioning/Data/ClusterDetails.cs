@@ -26,17 +26,17 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
         private string stateString;
 
         /// <summary>
-        /// Gets the Name of the cluster.
+        /// Gets or sets the Name of the cluster.
         /// </summary>
-        public string Name { get; internal set; }
+        public string Name { get; set; }
 
         /// <summary>
-        /// Gets the a string value of the state of the cluster.
+        /// Gets or sets the a string value of the state of the cluster.
         /// </summary>
         public string StateString
         {
             get { return this.stateString; }
-            internal set
+            set
             {
                 this.stateString = value;
                 this.UpdateState(this.stateString);
@@ -49,9 +49,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
         public string Version { get; set; }
 
         /// <summary>
-        /// Gets the version status of the HDInsight cluster.
+        /// Gets or sets the version status of the HDInsight cluster.
         /// </summary>
-        public VersionStatus VersionStatus { get; internal set; }
+        public VersionStatus VersionStatus { get; set; }
 
         /// <summary>
         /// Gets or sets the version of the HDInsight cluster as a number.
@@ -59,70 +59,73 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
         public Version VersionNumber { get; set; }
 
         /// <summary>
-        /// Gets the parsed value of the state of the cluster
+        /// Gets or sets the parsed value of the state of the cluster
         /// Note: For compatibility reassons, any new or null states will revert to "UNKOWN".
         /// but the value will be preserved in State.
         /// </summary>
-        public ClusterState State { get; internal set; }
+        public ClusterState State { get; set; }
 
         /// <summary>
-        /// Gets a possible error state for the cluster (if exists).
+        /// Gets or sets a possible error state for the cluster (if exists).
         /// </summary>
-        public ClusterErrorStatus Error { get; internal set; }
+        public ClusterErrorStatus Error { get; set; }
 
         /// <summary>
-        /// Gets the CreateDate of the cluster.
+        /// Gets or sets the CreateDate of the cluster.
         /// </summary>
-        public DateTime CreatedDate { get; internal set; }
+        public DateTime CreatedDate { get; set; }
 
         /// <summary>
-        /// Gets the connection URL for the cluster.
+        /// Gets or sets the connection URL for the cluster.
         /// </summary>
         [SuppressMessage("Microsoft.Design", "CA1056:UriPropertiesShouldNotBeStrings",
             Justification = "Value coming from the server. Value of parsing vs value of breaking is not worth it")]
-        public string ConnectionUrl { get; internal set; }
+        public string ConnectionUrl { get; set; }
 
         /// <summary>
-        /// Gets the login username for the cluster.
+        /// Gets or sets the login username for the cluster.
         /// </summary>
-        public string HttpUserName { get; internal set; }
+        public string HttpUserName { get; set; }
 
         /// <summary>
-        /// Gets the password associated with Http requests to the cluster.
+        /// Gets or sets the password associated with Http requests to the cluster.
         /// </summary>
-        public string HttpPassword { get; internal set; }
+        public string HttpPassword { get; set; }
 
         /// <summary>
-        /// Gets the Rdp user name associated with the cluster.
+        /// Gets or sets the Rdp user name associated with the cluster.
         /// </summary>
-        public string RdpUserName { get; internal set; }
+        public string RdpUserName { get; set; }
 
         /// <summary>
-        /// Gets the Datacenter location of the cluster.
+        /// Gets or sets the Datacenter location of the cluster.
         /// </summary>
-        public string Location { get; internal set; }
+        public string Location { get; set; }
 
         /// <summary>
-        /// Gets the count of worker nodes.
+        /// Gets or sets the count of worker nodes.
         /// </summary>
-        public int ClusterSizeInNodes { get; internal set; }
+        public int ClusterSizeInNodes { get; set; }
 
         /// <summary>
-        /// Gets the default storage account registered with this cluster.
+        /// Gets or sets the default storage account registered with this cluster.
         /// </summary>
-        public WabStorageAccountConfiguration DefaultStorageAccount { get; internal set; }
+        public WabStorageAccountConfiguration DefaultStorageAccount { get; set; }
 
         /// <summary>
-        /// Gets the subscriptionid associated with this cluster.
+        /// Gets or sets the subscriptionid associated with this cluster.
         /// </summary>
-        public Guid SubscriptionId { get; internal set; }
+        public Guid SubscriptionId { get; set; }
 
         /// <summary>
-        /// Gets the additional storage accounts registered with this cluster.
+        /// Gets or sets the additional storage accounts registered with this cluster.
         /// </summary>
-        public IEnumerable<WabStorageAccountConfiguration> AdditionalStorageAccounts { get; internal set; }
+        public IEnumerable<WabStorageAccountConfiguration> AdditionalStorageAccounts { get; set; }
 
-        internal ClusterDetails()
+        /// <summary>
+        /// Initializes a new instance of the ClusterDetails class.
+        /// </summary>
+        public ClusterDetails()
         {
         }
 

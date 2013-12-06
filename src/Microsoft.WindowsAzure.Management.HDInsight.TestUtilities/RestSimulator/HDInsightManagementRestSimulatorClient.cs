@@ -34,6 +34,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
     using Microsoft.WindowsAzure.Management.HDInsight;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
     using Microsoft.WindowsAzure.Management.HDInsight.Logging;
     using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.ServerDataObjects;
@@ -129,11 +130,11 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
             public UserChangeOperationStatusResponse Response { get; private set; }
         }
 
-        private readonly IHDInsightCertificateCredential credentials;
+        private readonly IHDInsightSubscriptionCredentials credentials;
         private readonly IDictionary<string, X509Certificate2> certificates = new Dictionary<string, X509Certificate2>();
         private readonly List<Guid> subscriptions = new List<Guid>();
 
-        private readonly IList<string> SupportedConnectivityClusterVersions = new List<string> { "1.6.0.0.LargeSKU-amd64-134231", "1.6", "2.0", "default" };
+        private readonly IList<string> SupportedConnectivityClusterVersions = new List<string> { "1.6.0.0.LargeSKU-amd64-134231", "1.6", "2.0", "2.1", "default" };
 
         // List of Clusters stored.
         // Includes the expected 'tsthdx00hdxcibld02' cluster
@@ -377,7 +378,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
             }
         }
 
-        public HDInsightManagementRestSimulatorClient(IHDInsightCertificateCredential credentials, HDInsight.IAbstractionContext context)
+        public HDInsightManagementRestSimulatorClient(IHDInsightSubscriptionCredentials credentials, HDInsight.IAbstractionContext context)
         {
             this.context = context;
             var cert = new X509Certificate2(IntegrationTestBase.TestCredentials.Certificate);
@@ -459,7 +460,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
             this.ValidateConnection();
             this.LogMessage("Getting hdinsight clusters for subscriptionid : {0}", this.credentials.SubscriptionId.ToString());
             var resultClusters = ListCloudServicesInternal().Select(c => c.Cluster).ToList();
-            var value = ServerSerializer.SerializeListContainersResult(resultClusters, this.credentials.DeploymentNamespace);
+            var value = ServerSerializer.SerializeListContainersResult(resultClusters, this.credentials.DeploymentNamespace, true, false);
             return await Task.FromResult(new HttpResponseMessageAbstraction(HttpStatusCode.Accepted, null, value));
         }
 
@@ -529,7 +530,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
             {
                 var existingCluster = Clusters.FirstOrDefault(c => c.Cluster.Name == dnsName);
                 if (existingCluster != null)
-                    throw new HttpLayerException(HttpStatusCode.BadRequest, HDInsightClient.ClusterAlreadyExistsError);
+                    throw new HttpLayerException(HttpStatusCode.BadRequest, "<!DOCTYPE html><html>" + HDInsightClient.ClusterAlreadyExistsError + "</html>");
 
                 var resource = ServerSerializer.DeserializeClusterCreateRequestIntoResource(clusterPayload);
                 if (resource.SchemaVersion != "2.0")
@@ -962,8 +963,14 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
 
         private void ValidateConnection()
         {
-            if (this.credentials.Certificate == null || this.credentials.SubscriptionId.Equals(Guid.Empty) ||
-                !this.certificates.ContainsKey(this.credentials.Certificate.Thumbprint) || !this.subscriptions.Contains(this.credentials.SubscriptionId))
+            var asCertificateCreds = this.credentials as IHDInsightCertificateCredential;
+            var asTokenCreds = this.credentials as IHDInsightAccessTokenCredential;
+            if (asCertificateCreds.IsNotNull() && (!this.certificates.ContainsKey(asCertificateCreds.Certificate.Thumbprint) || !this.subscriptions.Contains(asCertificateCreds.SubscriptionId)))
+            {
+                throw new HttpLayerException(HttpStatusCode.Forbidden, string.Empty);
+            }
+
+            if (asTokenCreds.IsNotNull() && string.IsNullOrEmpty(asTokenCreds.AccessToken))
             {
                 throw new HttpLayerException(HttpStatusCode.Forbidden, string.Empty);
             }

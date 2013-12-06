@@ -12,30 +12,31 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects
 {
     /// <summary>
-    /// Enumeration of possible jobDetails output types.
+    ///     Enumeration of possible jobDetails output types.
     /// </summary>
     public enum JobOutputType
     {
         /// <summary>
-        /// Specifies that the jobDetails output file to download is the stdout file.
+        ///     Specifies that the jobDetails output file to download is the stdout file.
         /// </summary>
         StandardOutput,
 
         /// <summary>
-        /// Specifies that the jobDetails output file to download is the stderr file.
+        ///     Specifies that the jobDetails output file to download is the stderr file.
         /// </summary>
         StandardError,
 
         /// <summary>
-        /// Specifies that the jobDetails output file to download is the logs/list.txt file.
+        ///     Specifies that the jobDetails output file to download is the logs/list.txt file.
         /// </summary>
         TaskSummary,
 
         /// <summary>
-        /// Specifies that the jobDetails files under logs/ folder should be downloaded.
+        ///     Specifies that the jobDetails files under logs/ folder should be downloaded.
         /// </summary>
         TaskLogs
     }

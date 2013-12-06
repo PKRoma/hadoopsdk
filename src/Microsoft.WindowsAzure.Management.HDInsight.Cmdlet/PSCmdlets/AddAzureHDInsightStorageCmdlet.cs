@@ -12,41 +12,31 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using System.Management.Automation;
     using System.Reflection;
-    using System.Text;
     using System.Threading.Tasks;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.BaseCommandInterfaces;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandInterfaces;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters;
-    using Microsoft.WindowsAzure.Management.HDInsight;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
-    using Microsoft.WindowsAzure.Management.HDInsight.InversionOfControl;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.Extensions;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.ServiceLocation;
     using Microsoft.WindowsAzure.Management.HDInsight.Logging;
 
     /// <summary>
-    /// Adds an AzureHDInsight Storage Account to the current configuration.
+    ///     Adds an AzureHDInsight Storage Account to the current configuration.
     /// </summary>
     [Cmdlet(VerbsCommon.Add, AzureHdInsightPowerShellConstants.AzureHDInsightStorage)]
     public class AddAzureHDInsightStorageCmdlet : AzureHDInsightCmdlet, IAddAzureHDInsightStorageBase
     {
-        private IAddAzureHDInsightStorageCommand command;
-
-        /// <inheritdoc />
-        protected override void StopProcessing()
-        {
-            this.command.Cancel();
-        }
+        private readonly IAddAzureHDInsightStorageCommand command;
 
         /// <summary>
-        /// Initializes a new instance of the AddAzureHDInsightStorageCmdlet class.
+        ///     Initializes a new instance of the AddAzureHDInsightStorageCmdlet class.
         /// </summary>
         public AddAzureHDInsightStorageCmdlet()
         {
@@ -54,12 +44,11 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
         }
 
         /// <summary>
-        /// Gets or sets the Azure HDInsight Configuration for the Azure HDInsight cluster being constructed.
+        ///     Gets or sets the Azure HDInsight Configuration for the Azure HDInsight cluster being constructed.
         /// </summary>
         [Parameter(Position = 0, Mandatory = true,
-                   HelpMessage = "The HDInsight cluster configuration to use when creating the new cluster (created by New-AzureHDInsightConfig).",
-                   ValueFromPipeline = true,
-                   ParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetAddStorageAccount)]
+            HelpMessage = "The HDInsight cluster configuration to use when creating the new cluster (created by New-AzureHDInsightConfig).",
+            ValueFromPipeline = true, ParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetAddStorageAccount)]
         public AzureHDInsightConfig Config
         {
             get { return this.command.Config; }
@@ -67,8 +56,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
             {
                 if (value.IsNull())
                 {
-                    throw new ArgumentNullException("value",
-                                                    "The value for the configuration can not be null.");
+                    throw new ArgumentNullException("value", "The value for the configuration can not be null.");
                 }
                 this.command.Config.ClusterSizeInNodes = value.ClusterSizeInNodes;
                 this.command.Config.DefaultStorageAccount = value.DefaultStorageAccount;
@@ -79,35 +67,25 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
         }
 
         /// <summary>
-        /// Gets or sets the Storage Account Name for the storage account to be added to the cluster.
+        ///     Gets or sets the Storage Account key for the storage account to be added to the cluster.
         /// </summary>
-        [Parameter(Position = 1, Mandatory = true,
-            HelpMessage = "The storage account name for the storage account to be added to the new cluster.",
-            ValueFromPipeline = false,
-            ParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetAddStorageAccount)]
-        public string StorageAccountName
-        {
-            get { return this.command.StorageAccountName; }
-            set { this.command.StorageAccountName = value; }
-        }
-
-        /// <summary>
-        /// Gets or sets the Storage Account key for the storage account to be added to the cluster.
-        /// </summary>
-        [Parameter(Position = 2, Mandatory = true,
-            HelpMessage = "The storage account key for the storage account to be added to the new cluster.",
-            ValueFromPipeline = false,
-            ParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetAddStorageAccount)]
+        [Parameter(Position = 2, Mandatory = true, HelpMessage = "The storage account key for the storage account to be added to the new cluster.",
+            ValueFromPipeline = false, ParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetAddStorageAccount)]
         public string StorageAccountKey
         {
             get { return this.command.StorageAccountKey; }
             set { this.command.StorageAccountKey = value; }
         }
 
-        /// <inheritdoc />
-        protected override void ProcessRecord()
+        /// <summary>
+        ///     Gets or sets the Storage Account Name for the storage account to be added to the cluster.
+        /// </summary>
+        [Parameter(Position = 1, Mandatory = true, HelpMessage = "The storage account name for the storage account to be added to the new cluster.",
+            ValueFromPipeline = false, ParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetAddStorageAccount)]
+        public string StorageAccountName
         {
-            base.ProcessRecord();
+            get { return this.command.StorageAccountName; }
+            set { this.command.StorageAccountName = value; }
         }
 
         /// <inheritdoc />
@@ -116,14 +94,14 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
             try
             {
                 this.command.EndProcessing().Wait();
-                foreach (var output in this.command.Output)
+                foreach (AzureHDInsightConfig output in this.command.Output)
                 {
                     this.WriteObject(output);
                 }
             }
             catch (Exception ex)
             {
-                var type = ex.GetType();
+                Type type = ex.GetType();
                 this.Logger.Log(Severity.Error, Verbosity.Normal, this.FormatException(ex));
                 this.WriteDebugLog();
                 if (type == typeof(AggregateException) || type == typeof(TargetInvocationException) || type == typeof(TaskCanceledException))
@@ -136,6 +114,18 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
                 }
             }
             this.WriteDebugLog();
+        }
+
+        /// <inheritdoc />
+        protected override void ProcessRecord()
+        {
+            base.ProcessRecord();
+        }
+
+        /// <inheritdoc />
+        protected override void StopProcessing()
+        {
+            this.command.Cancel();
         }
     }
 }

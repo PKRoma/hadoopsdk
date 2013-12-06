@@ -234,20 +234,21 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
             Justification = "This is for logging the literal is acceptable. [TGS]")]
         internal static PollResult PollSignal(this IHDInsightManagementPocoClient client, ClusterDetails cluster, params ClusterState[] states)
         {
-            if (cluster != null)
-            {
-                client.RaiseClusterProvisioningEvent(client, new ClusterProvisioningStatusEventArgs(cluster, cluster.State));
-                var msg = string.Format(CultureInfo.CurrentCulture, "Current State {0} -> waiting for one state of {1}", cluster.State, string.Join(",", states.Select(s => s.ToString())));
-                client.Context.Logger.LogMessage(msg, Severity.Informational, Verbosity.Diagnostic);
-            }
-
-            if (cluster == null || cluster.State == ClusterState.Unknown)
+            if (cluster == null)
             {
                 return PollResult.PosibleError;
             }
+            client.RaiseClusterProvisioningEvent(client, new ClusterProvisioningStatusEventArgs(cluster, cluster.State));
+            var msg = string.Format(CultureInfo.CurrentCulture, "Current State {0} -> waiting for one state of {1}", cluster.State, string.Join(",", states.Select(s => s.ToString())));
+            client.Context.Logger.LogMessage(msg, Severity.Informational, Verbosity.Diagnostic);
+
             if (cluster.State == ClusterState.Error || cluster.Error != null || states.Contains(cluster.State))
             {
                 return PollResult.Stop;
+            }
+            if (cluster.State == ClusterState.Unknown)
+            {
+                return PollResult.PosibleError;
             }
             return PollResult.Continue;
         }

@@ -12,22 +12,21 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
 {
-    using System;
     using System.Collections;
-    using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using System.Management.Automation;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.BaseCommandInterfaces;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandInterfaces;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters;
-    using Microsoft.WindowsAzure.Management.HDInsight;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.Extensions;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.ServiceLocation;
 
     /// <summary>
-    /// Represents the New-AzureHDInsightConfig Power Shell Cmdlet.
+    ///     Represents the New-AzureHDInsightConfig Power Shell Cmdlet.
     /// </summary>
     [Cmdlet(VerbsCommon.New, AzureHdInsightPowerShellConstants.AzureHDInsightHiveJobDefinition)]
     public class NewAzureHDInsightHiveJobDefinitionCmdlet : AzureHDInsightCmdlet, INewAzureHDInsightHiveJobDefinitionBase
@@ -35,7 +34,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
         private readonly INewAzureHDInsightHiveJobDefinitionCommand command;
 
         /// <summary>
-        /// Initializes a new instance of the NewAzureHDInsightHiveJobDefinitionCmdlet class.
+        ///     Initializes a new instance of the NewAzureHDInsightHiveJobDefinitionCmdlet class.
         /// </summary>
         public NewAzureHDInsightHiveJobDefinitionCmdlet()
         {
@@ -43,9 +42,40 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
         }
 
         /// <inheritdoc />
-        protected override void StopProcessing()
+        [Parameter(Mandatory = false, HelpMessage = "The hive arguments for the jobDetails.")]
+        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "Need collections for input parameters")]
+        public string[] Arguments
         {
-            this.command.Cancel();
+            get { return this.command.Arguments; }
+            set { this.command.Arguments = value; }
+        }
+
+        /// <inheritdoc />
+        [Parameter(Mandatory = false, HelpMessage = "The parameters for the jobDetails.")]
+        [Alias(AzureHdInsightPowerShellConstants.AliasParameters)]
+        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "Need collections for input parameters")]
+        public Hashtable Defines
+        {
+            get { return this.command.Defines; }
+            set { this.command.Defines = value; }
+        }
+
+        /// <inheritdoc />
+        [Parameter(Mandatory = false, HelpMessage = "The query file to run in the jobDetails.")]
+        [Alias(AzureHdInsightPowerShellConstants.AliasQueryFile)]
+        public string File
+        {
+            get { return this.command.File; }
+            set { this.command.File = value; }
+        }
+
+        /// <inheritdoc />
+        [Parameter(Mandatory = false, HelpMessage = "The files for the jobDetails.")]
+        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "Need collections for input parameters")]
+        public string[] Files
+        {
+            get { return this.command.Files; }
+            set { this.command.Files = value; }
         }
 
         /// <inheritdoc />
@@ -58,8 +88,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
         }
 
         /// <inheritdoc />
-        [Parameter(Mandatory = false,
-                   HelpMessage = "The query to run in the jobDetails.")]
+        [Parameter(Mandatory = false, HelpMessage = "The query to run in the jobDetails.")]
         [Alias(AzureHdInsightPowerShellConstants.AliasQuery)]
         public string Query
         {
@@ -68,49 +97,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
         }
 
         /// <inheritdoc />
-        [Parameter(Mandatory = false,
-                   HelpMessage = "The query file to run in the jobDetails.")]
-        [Alias(AzureHdInsightPowerShellConstants.AliasQueryFile)]
-        public string File
-        {
-            get { return this.command.File; }
-            set { this.command.File = value; }
-        }
-
-        /// <inheritdoc />
-        [Parameter(Mandatory = false,
-                   HelpMessage = "The parameters for the jobDetails.")]
-        [Alias(AzureHdInsightPowerShellConstants.AliasParameters)]
-        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "Need collections for input parameters")]
-        public Hashtable Defines
-        {
-            get { return this.command.Defines; }
-            set { this.command.Defines = value; }
-        }
-
-        /// <inheritdoc />
-        [Parameter(Mandatory = false,
-                   HelpMessage = "The files for the jobDetails.")]
-        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "Need collections for input parameters")]
-        public string[] Files
-        {
-            get { return this.command.Files; }
-            set { this.command.Files = value; }
-        }
-
-        /// <inheritdoc />
-        [Parameter(Mandatory = false,
-                   HelpMessage = "The hive arguments for the jobDetails.")]
-        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "Need collections for input parameters")]
-        public string[] Arguments
-        {
-            get { return this.command.Arguments; }
-            set { this.command.Arguments = value; }
-        }
-
-        /// <inheritdoc />
-        [Parameter(Mandatory = false,
-                   HelpMessage = "The output location to use for the job.")]
+        [Parameter(Mandatory = false, HelpMessage = "The output location to use for the job.")]
         public string StatusFolder
         {
             get { return this.command.StatusFolder; }
@@ -118,7 +105,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
         }
 
         /// <summary>
-        /// Finishes the execution of the cmdlet by writing out the config object.
+        ///     Finishes the execution of the cmdlet by writing out the config object.
         /// </summary>
         protected override void EndProcessing()
         {
@@ -128,11 +115,17 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
             }
 
             this.command.EndProcessing().Wait();
-            foreach (var output in this.command.Output)
+            foreach (AzureHDInsightHiveJobDefinition output in this.command.Output)
             {
                 this.WriteObject(output);
             }
             this.WriteDebugLog();
+        }
+
+        /// <inheritdoc />
+        protected override void StopProcessing()
+        {
+            this.command.Cancel();
         }
     }
 }

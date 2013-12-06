@@ -12,6 +12,7 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImplementations
 {
     using System.Management.Automation;
@@ -22,11 +23,37 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImp
 
     internal class AddAzureHDInsightMetastoreCommand : AzureHDInsightCommand<AzureHDInsightConfig>, IAddAzureHDInsightMetastoreCommand
     {
-        private AzureHDInsightMetastore metastore = new AzureHDInsightMetastore();
+        private readonly AzureHDInsightMetastore metastore = new AzureHDInsightMetastore();
 
         public AddAzureHDInsightMetastoreCommand()
         {
             this.Config = new AzureHDInsightConfig();
+        }
+
+        public AzureHDInsightConfig Config { get; set; }
+
+        public PSCredential Credential
+        {
+            get { return this.metastore.Credential; }
+            set { this.metastore.Credential = value; }
+        }
+
+        public string DatabaseName
+        {
+            get { return this.metastore.DatabaseName; }
+            set { this.metastore.DatabaseName = value; }
+        }
+
+        public AzureHDInsightMetastoreType MetastoreType
+        {
+            get { return this.metastore.MetastoreType; }
+            set { this.metastore.MetastoreType = value; }
+        }
+
+        public string SqlAzureServerName
+        {
+            get { return this.metastore.SqlAzureServerName; }
+            set { this.metastore.SqlAzureServerName = value; }
         }
 
         public override Task EndProcessing()
@@ -41,32 +68,6 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImp
             }
             this.Output.Add(this.Config);
             return TaskEx.GetCompletedTask();
-        }
-
-        public AzureHDInsightConfig Config { get; set; }
-
-        public string SqlAzureServerName
-        {
-            get { return this.metastore.SqlAzureServerName; }
-            set { this.metastore.SqlAzureServerName = value; }
-        }
-        
-        public string DatabaseName
-        {
-            get { return this.metastore.DatabaseName; }
-            set { this.metastore.DatabaseName = value; }
-        }
-
-        public PSCredential Credential
-        {
-            get { return this.metastore.Credential; }
-            set { this.metastore.Credential = value; }
-        }
-        
-        public AzureHDInsightMetastoreType MetastoreType
-        {
-            get { return this.metastore.MetastoreType; }
-            set { this.metastore.MetastoreType = value; }
         }
     }
 }

@@ -35,17 +35,39 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission
         private const string TaskLogsFileName = "logs/list.txt";
         private const string TaskLogsDirectoryName = "logs";
 
-        private readonly BasicAuthCredential remoteCredentials;
-        private readonly ClusterDetails cluster;
+        private BasicAuthCredential remoteCredentials;
+        private ClusterDetails cluster;
 
-        internal HDInsightHadoopClient(JobSubmissionCertificateCredential credential)
+        internal HDInsightHadoopClient(IHDInsightSubscriptionCredentials credential)
         {
+            this.InitializeClient(credential);
+        }
+
+        internal void InitializeClient(IHDInsightSubscriptionCredentials credential)
+        {
+            var asCertCredentials = credential as JobSubmissionCertificateCredential;
+            var asTokenCredentials = credential as JobSubmissionAccessTokenCredential;
+            string clusterName;
+            if (asCertCredentials.IsNotNull())
+            {
+                clusterName = asCertCredentials.Cluster;
+            }
+            else if (asTokenCredentials.IsNotNull())
+            {
+                clusterName = asTokenCredentials.Cluster;
+            }
+            else
+            {
+                throw new NotSupportedException("Credential type '" + credential.GetType().FullName + "' is not supported.");
+            }
+
             var overrideHandlers = ServiceLocator.Instance.Locate<IHDInsightClusterOverrideManager>().GetHandlers(credential, this.Context);
             ServiceLocator.Instance.Locate<IHDInsightClientFactory>().Create(credential);
-            IHDInsightCertificateCredential actualCredentials = ServiceLocator.Instance.Locate<IHDInsightSubscriptionCertificateCredentialsFactory>().Create(credential);
+            IHDInsightSubscriptionCredentials actualCredentials = ServiceLocator.Instance.Locate<IHDInsightSubscriptionCredentialsFactory>()
+                                                                                .Create(credential);
             var hdinsight = ServiceLocator.Instance.Locate<IHDInsightClientFactory>().Create(actualCredentials);
-            this.cluster = hdinsight.GetCluster(credential.Cluster);
 
+            this.cluster = hdinsight.GetCluster(clusterName);
             var versionFinderClient = overrideHandlers.VersionFinder;
             this.AssertSupportedVersion(this.cluster.VersionNumber, versionFinderClient);
 

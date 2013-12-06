@@ -168,6 +168,10 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
             if (hiveJob.Query.IsNullOrEmpty())
             {
                 hiveJob.File.ArgumentNotNullOrEmpty("File");
+                if (hiveJob.File.Contains("://") && !hiveJob.File.StartsWith(Constants.WabsProtocol, StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new InvalidOperationException("Invalid file protocol : " + hiveJob.File);
+                }
             }
 
             var retval = this.CreateJobSuccessResult(new JobDetails()
@@ -251,7 +255,8 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
                         jobDetailsHistoryItem.StatusCode = JobStatusCode.Completed;
                         jobDetailsHistoryItem.PercentComplete = "map 100% reduce 100%";
                         jobDetailsHistoryItem.ExitCode = 0;
-                        if (string.Equals(jobDetailsHistoryItem.Query, "show tables", StringComparison.OrdinalIgnoreCase))
+                        if ((jobDetailsHistoryItem.Name.IsNotNullOrEmpty() && string.Equals(jobDetailsHistoryItem.Name, "show tables", StringComparison.OrdinalIgnoreCase)) ||
+                            string.Equals(jobDetailsHistoryItem.Query, "show tables", StringComparison.OrdinalIgnoreCase))
                         {
                             this.WriteJobOutput(jobDetailsHistoryItem.StatusDirectory, "hivesampletable");
                             this.WriteJobError(jobDetailsHistoryItem.StatusDirectory, JobSuccesful);

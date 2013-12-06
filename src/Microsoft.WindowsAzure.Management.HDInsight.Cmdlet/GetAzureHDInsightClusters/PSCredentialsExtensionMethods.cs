@@ -12,26 +12,21 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters
 {
+    using System;
     using System.Management.Automation;
     using System.Runtime.InteropServices;
     using System.Security;
-    using Microsoft.WindowsAzure.Management.HDInsight;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.Extensions;
 
     internal static class PsCredentialsExtensionMethods
     {
-        internal static string GetCleartextPassword(this PSCredential credentials)
-        {
-            credentials.ArgumentNotNull("credentials");
-            return GetCleartextFromSecureString(credentials.Password);
-        }
-
         internal static string GetCleartextFromSecureString(SecureString secureString)
         {
             secureString.ArgumentNotNull("secureString");
-            var bstr = Marshal.SecureStringToBSTR(secureString);
+            IntPtr bstr = Marshal.SecureStringToBSTR(secureString);
             string clearTextValue;
             try
             {
@@ -43,6 +38,12 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightCl
             }
 
             return clearTextValue;
+        }
+
+        internal static string GetCleartextPassword(this PSCredential credentials)
+        {
+            credentials.ArgumentNotNull("credentials");
+            return GetCleartextFromSecureString(credentials.Password);
         }
     }
 }

@@ -20,6 +20,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
     using Microsoft.WindowsAzure.Management.HDInsight.Framework;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest;
 
     internal class HttpAbstractionSimulatorFactory : DisposableObject, IHttpClientAbstractionFactory
     {
@@ -58,6 +59,32 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
             else
             {
                 return new HttpAbstractionSimulatorClient(this, this.underlying.Create(cert, context), null);
+            }
+        }
+
+        public IHttpClientAbstraction Create(string token)
+        {
+            var loc = this.AsyncMock;
+            if (loc.IsNotNull())
+            {
+                return new HttpAbstractionSimulatorClient(this, this.underlying.Create(token), loc);
+            }
+            else
+            {
+                return new HttpAbstractionSimulatorClient(this, this.underlying.Create(token), null);
+            }
+        }
+
+        public IHttpClientAbstraction Create(string token, HDInsight.IAbstractionContext context)
+        {
+            var loc = this.AsyncMock;
+            if (loc.IsNotNull())
+            {
+                return new HttpAbstractionSimulatorClient(this, this.underlying.Create(token, context), loc);
+            }
+            else
+            {
+                return new HttpAbstractionSimulatorClient(this, this.underlying.Create(token, context), null);
             }
         }
 

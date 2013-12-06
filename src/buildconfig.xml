@@ -16,7 +16,7 @@
   <Version>
     <Major>1</Major>
     <Minor>0</Minor>
-    <Patch>0</Patch>
+    <Patch>3</Patch>
   </Version>
   <Prepare>
     <CopyTree>
@@ -39,7 +39,6 @@
       <From>HadoopSdkLicense.rtf</From>
       <To>Cmdlet\HadoopSdkLicense.rtf</To>
     </Copy>
-
     <Zip folder="Cmdlet" name="Microsoft.WindowsAzure.Management.HDInsight.Cmdlets.zip" />
     <NuGet id="Microsoft.Hadoop.Client" outputFolder="HadoopClient">
       <Title>Microsoft .NET API for Hadoop</Title>
@@ -48,6 +47,9 @@
       <NoReferences>
         <NoReference targetFramework="net40" file="Microsoft.HDInsight.Threading.dll" />
       </NoReferences>
+      <Dependencies>
+        <Dependency id="WindowsAzure.Storage" version="2.0.5.1" exactversion="true" />
+      </Dependencies>
       <Authors>Microsoft Azure-sdk</Authors>
       <Owners>Microsoft Azure-sdk</Owners>
       <IconUrl>http://go.microsoft.com/fwlink/?LinkID=288890</IconUrl>

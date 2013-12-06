@@ -16,6 +16,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation
 {
     using System;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Logging;
     using Microsoft.WindowsAzure.Management.HDInsight.Logging;
 

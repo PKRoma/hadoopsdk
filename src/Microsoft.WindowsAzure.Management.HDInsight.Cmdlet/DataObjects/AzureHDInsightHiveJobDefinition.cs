@@ -12,17 +12,18 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects
 {
     using System.Collections.Generic;
 
     /// <summary>
-    /// Provides creation details for a new Hive jobDetails.
+    ///     Provides creation details for a new Hive jobDetails.
     /// </summary>
     public class AzureHDInsightHiveJobDefinition : AzureHDInsightJobDefinition
     {
         /// <summary>
-        /// Initializes a new instance of the AzureHDInsightHiveJobDefinition class.
+        ///     Initializes a new instance of the AzureHDInsightHiveJobDefinition class.
         /// </summary>
         public AzureHDInsightHiveJobDefinition()
         {
@@ -30,23 +31,23 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects
         }
 
         /// <summary>
-        /// Gets or sets the name of the jobDetails.
+        ///     Gets the parameters for the jobDetails.
         /// </summary>
-        public string JobName { get; set; }
+        public IDictionary<string, string> Defines { get; private set; }
 
         /// <summary>
-        /// Gets or sets the query to use for a hive jobDetails.
-        /// </summary>
-        public string Query { get; set; }
-
-        /// <summary>
-        /// Gets or sets the query file to use for a hive jobDetails.
+        ///     Gets or sets the query file to use for a hive jobDetails.
         /// </summary>
         public string File { get; set; }
 
         /// <summary>
-        /// Gets the parameters for the jobDetails.
+        ///     Gets or sets the name of the jobDetails.
         /// </summary>
-        public IDictionary<string, string> Defines { get; private set; }
+        public string JobName { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the query to use for a hive jobDetails.
+        /// </summary>
+        public string Query { get; set; }
     }
 }

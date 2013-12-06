@@ -12,15 +12,9 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
-#if Cmdlet
-namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImplementations
-#else
 namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission
-#endif
 {
     using System;
-    using System.Globalization;
-    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.VersionFinder;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
 
     /// <summary>
@@ -30,12 +24,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission
     {
         private static Version unknownVersion = new Version(0, 0, 0, 0);
         private static Version version20 = new Version(2, 0, 0, 0);
-        private const string OneBoxGatewayUri = "http://localhost:50111";
         private const int AzureGatewayUriPortNumberVersion15AndBelow = 563;
         private const int AzureGatewayUriPortNumberVersion16AndAbove = 443;
         private const string AzureWellKnownClusterSuffix = ".azurehdinsight.net";
-        private const string AzureGatewayUriTemplate = "https://{0}{1}:{2}";
-        private const string UriTemplateWithHostName = "https://{0}";
 
         /// <summary>
         /// Gets the Gateway Uri for Http Services accessible on an Azure HDInsight cluster.
@@ -47,15 +38,19 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission
         {
             clusterDnsNameOrEndpoint.ArgumentNotNullOrEmpty("clusterDnsNameOrUri");
             string computedEndpoint;
+            string originalScheme = string.Empty;
             var index = clusterDnsNameOrEndpoint.IndexOf("://", StringComparison.OrdinalIgnoreCase);
             if (index >= 0)
             {
                 computedEndpoint = "http://" + clusterDnsNameOrEndpoint.Substring(index + 3);
+                originalScheme = clusterDnsNameOrEndpoint.Substring(0, index);
             }
             else
             {
                 computedEndpoint = "http://" + clusterDnsNameOrEndpoint;
+                originalScheme = "http";
             }
+
             Uri tempUri;
 
             if (!Uri.TryCreate(computedEndpoint, UriKind.Absolute, out tempUri))
@@ -67,19 +62,21 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission
             {
                 if (tempUri.Host == "localhost")
                 {
-                    return new Uri("https://" + tempUri.Host + ":50111");
+                    return new Uri(originalScheme + "://" + tempUri.Host + ":50111");
                 }
+
                 tempUri = new Uri("https://" + tempUri.Host);
+            }
+
+            if (tempUri.Host == "localhost")
+            {
+                tempUri = new Uri(originalScheme + "://" + tempUri.Host + ":" + tempUri.Port);
+                return tempUri;
             }
 
             if (tempUri.Scheme != "https")
             {
                 tempUri = new Uri("https://" + tempUri.Host + ":" + tempUri.Port);
-            }
-
-            if (tempUri.Host == "localhost")
-            {
-                return tempUri;
             }
 
             if (!tempUri.Host.Contains("."))

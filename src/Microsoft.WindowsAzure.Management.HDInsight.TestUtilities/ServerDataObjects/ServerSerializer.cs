@@ -47,8 +47,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.ServerDataOb
         private const string CreatedDate = "CreatedDate";
         private const string Version = "Version";
         private const string BlobContainers = "BlobContainers";
+        private const string ExtendedErrorMessage = "ExtendedErrorMessage";
 
-        internal static string SerializeListContainersResult(IEnumerable<ClusterDetails> containers, string deploymentNamespace)
+        internal static string SerializeListContainersResult(IEnumerable<ClusterDetails> containers, string deploymentNamespace, bool writeError, bool writeExtendedError)
         {
             var serviceList = new CloudServiceList();
             foreach (var containerGroup in containers.GroupBy(container => container.Location))
@@ -57,7 +58,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.ServerDataOb
                 {
                     GeoRegion = containerGroup.Key,
                     Resources = new ResourceList(from container in containerGroup
-                                                 select ListClusterContainerResult_ToInternal(container, deploymentNamespace))
+                                                 select ListClusterContainerResult_ToInternal(container, deploymentNamespace, writeError, writeExtendedError))
                 });
             }
 
@@ -274,19 +275,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.ServerDataOb
             }
         }
 
-        private static Resource ListClusterContainerResult_ToInternal(ClusterDetails result, string nameSpace)
+        private static Resource ListClusterContainerResult_ToInternal(ClusterDetails result, string nameSpace, bool writeError, bool writeExtendedError)
         {
             var resource = new Resource { Name = result.Name, SubState = result.StateString, ResourceProviderNamespace = nameSpace, Type = "containers" };
-            if (result.Error != null)
-            {
-                resource.OperationStatus = new ResourceOperationStatus { Type = result.Error.OperationType };
-                resource.OperationStatus.Error = new ResourceErrorInfo
-                {
-                    HttpCode = result.Error.HttpCode,
-                    Message = result.Error.Message
-                };
-            }
-
             if (result.AdditionalStorageAccounts == null)
             {
                 result.AdditionalStorageAccounts = new List<WabStorageAccountConfiguration>();
@@ -298,9 +289,26 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.ServerDataOb
                 new OutputItem { Key = ConnectionUrl, Value = result.ConnectionUrl },
                 new OutputItem { Key = ClusterUserName, Value = result.HttpUserName },
                 new OutputItem { Key = Version, Value = result.Version },
-                new OutputItem { Key = BlobContainers, Value = SerializeStorageAccounts(result)  },
+                new OutputItem { Key = BlobContainers, Value = SerializeStorageAccounts(result) },
                 new OutputItem { Key = NodesCount, Value = result.ClusterSizeInNodes.ToString(CultureInfo.InvariantCulture) }
             };
+
+            if (result.Error != null)
+            {
+                if (writeError)
+                {
+                    resource.OperationStatus = new ResourceOperationStatus { Type = result.Error.OperationType };
+                    resource.OperationStatus.Error = new ResourceErrorInfo { HttpCode = result.Error.HttpCode, Message = result.Error.Message };
+                }
+
+                if (writeExtendedError)
+                {
+                    resource.OperationStatus = new ResourceOperationStatus { Type = result.Error.OperationType };
+                    resource.OperationStatus.Error = new ResourceErrorInfo { HttpCode = result.Error.HttpCode, Message = result.Error.Message };
+                    resource.OutputItems.Add(new OutputItem { Key = ExtendedErrorMessage, Value = result.Error.Message });
+                    resource.Type = result.Error.OperationType;
+                }
+            }
 
             var intrinsicSettings = new List<OutputItem> 
             {

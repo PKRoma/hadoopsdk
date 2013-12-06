@@ -12,6 +12,7 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters
 {
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.BaseInterfaces;
@@ -19,7 +20,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightCl
     internal interface IAzureHDInsightClusterCommandBase : IAzureHDInsightCommonCommandBase
     {
         /// <summary>
-        /// Gets or sets the Name for the cluster to return.
+        ///     Gets or sets the Name for the cluster to return.
         /// </summary>
         string Name { get; set; }
     }

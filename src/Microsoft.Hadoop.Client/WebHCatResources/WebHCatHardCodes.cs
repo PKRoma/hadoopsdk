@@ -31,6 +31,7 @@ namespace Microsoft.Hadoop.Client.WebHCatResources
         internal const string Files = "files";
         internal const string LibJars = "libjars";
         internal const string UserName = "user.name";
+        internal const string CmdEnv = "cmdenv";
         internal const string Define = "define";
         internal const string DefineJobName = "hdInsightJobName";
         internal const string FormUrlEncoded = "application/x-www-form-urlencoded";
@@ -38,5 +39,6 @@ namespace Microsoft.Hadoop.Client.WebHCatResources
         internal const string Output = "output";
         internal const string Mapper = "mapper";
         internal const string Reducer = "reducer";
+        internal const string Callback = "callback";
     }
 }

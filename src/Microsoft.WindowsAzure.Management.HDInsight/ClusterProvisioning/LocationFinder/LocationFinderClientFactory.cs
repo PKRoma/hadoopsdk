@@ -21,7 +21,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Locati
     {
         public ILocationFinderClient Create(IHDInsightSubscriptionCredentials credentials, IAbstractionContext context)
         {
-            return new LocationFinderClient(credentials.As<IHDInsightCertificateCredential>(), context);
+            return new LocationFinderClient(credentials, context);
         }
     }
 }

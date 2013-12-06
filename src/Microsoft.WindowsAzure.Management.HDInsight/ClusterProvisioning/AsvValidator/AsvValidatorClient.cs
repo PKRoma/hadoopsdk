@@ -32,7 +32,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Asv
                 var storageAbstraction = ServiceLocator.Instance.Locate<IWabStorageAbstractionFactory>().Create(storageAbstractionCreds);
                 var listContainersUri = new Uri(string.Format("{0}://{1}/", Constants.WabsProtocol, fullAccount));
                 await storageAbstraction.List(listContainersUri, false);
-                    }
+            }
             catch (Exception e)
             {
                 throw new ConfigurationErrorsException(string.Format(CultureInfo.InvariantCulture,
@@ -42,7 +42,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Asv
                                                        e);
             }
         }
-        
+
         public async Task CreateContainerIfNotExists(string fullAccount, string key, string container)
         {
             try
@@ -50,7 +50,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Asv
                 var storageAbstractionCreds = new WindowsAzureStorageAccountCredentials() { Key = key, Name = fullAccount };
                 var storageAbstraction = ServiceLocator.Instance.Locate<IWabStorageAbstractionFactory>().Create(storageAbstractionCreds);
                 await storageAbstraction.CreateContainerIfNotExists(container);
-                    }
+            }
             catch (Exception e)
             {
                 throw new ConfigurationErrorsException(string.Format(CultureInfo.InvariantCulture,
@@ -61,5 +61,5 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Asv
                                                        e);
             }
         }
-        }
-            }
+    }
+}

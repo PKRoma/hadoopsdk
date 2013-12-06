@@ -12,48 +12,31 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImplementations
 {
     using System;
     using System.Collections;
-    using System.Collections.Generic;
-    using System.Collections.ObjectModel;
     using System.Threading.Tasks;
     using Microsoft.Hadoop.Client;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandInterfaces;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters;
-    using Microsoft.WindowsAzure.Management.HDInsight;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.Extensions;
 
-    internal class NewAzureHDInsightPigJobDefinitionCommand : AzureHDInsightNewJobDefinitionCommand<AzureHDInsightPigJobDefinition>, INewAzureHDInsightPigJobDefinitionCommand
+    internal class NewAzureHDInsightPigJobDefinitionCommand
+        : AzureHDInsightNewJobDefinitionCommand<AzureHDInsightPigJobDefinition>, INewAzureHDInsightPigJobDefinitionCommand
     {
         private readonly PigJobCreateParameters pigJobDefinition = new PigJobCreateParameters();
         private Hashtable defines = new Hashtable();
         private string[] resources = new string[] { };
 
+        public string[] Arguments { get; set; }
+
         public override Hashtable Defines
         {
             get { return this.defines; }
             set { this.defines = value; }
-        }
-
-        public override string[] Files
-        {
-            get { return this.resources; }
-            set { this.resources = value; }
-        }
-
-        public override string StatusFolder
-        {
-            get { return this.pigJobDefinition.StatusFolder; }
-            set { this.pigJobDefinition.StatusFolder = value; }
-        }
-
-        public string Query
-        {
-            get { return this.pigJobDefinition.Query; }
-            set { this.pigJobDefinition.Query = value; }
         }
 
         public string File
@@ -62,7 +45,23 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImp
             set { this.pigJobDefinition.File = value; }
         }
 
-        public string[] Arguments { get; set; }
+        public override string[] Files
+        {
+            get { return this.resources; }
+            set { this.resources = value; }
+        }
+
+        public string Query
+        {
+            get { return this.pigJobDefinition.Query; }
+            set { this.pigJobDefinition.Query = value; }
+        }
+
+        public override string StatusFolder
+        {
+            get { return this.pigJobDefinition.StatusFolder; }
+            set { this.pigJobDefinition.StatusFolder = value; }
+        }
 
         public override Task EndProcessing()
         {

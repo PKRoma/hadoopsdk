@@ -21,7 +21,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.AzureM
     {
         public ISubscriptionRegistrationClient Create(IHDInsightSubscriptionCredentials creds, IAbstractionContext context)
         {
-            return new SubscriptionRegistrationClient(creds.As<IHDInsightCertificateCredential>(), context);
+            return new SubscriptionRegistrationClient(creds, context);
         }
     }
 }

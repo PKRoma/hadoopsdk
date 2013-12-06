@@ -12,21 +12,22 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects
 {
     /// <summary>
-    /// Provides creation details for a new Pig jobDetails.
+    ///     Provides creation details for a new Pig jobDetails.
     /// </summary>
     public class AzureHDInsightPigJobDefinition : AzureHDInsightJobDefinition
     {
         /// <summary>
-        /// Gets or sets the query to use for a pig jobDetails.
-        /// </summary>
-        public string Query { get; set; }
-
-        /// <summary>
-        /// Gets or sets the query file to use for a pig jobDetails.
+        ///     Gets or sets the query file to use for a pig jobDetails.
         /// </summary>
         public string File { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the query to use for a pig jobDetails.
+        /// </summary>
+        public string Query { get; set; }
     }
 }

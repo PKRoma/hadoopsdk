@@ -12,6 +12,7 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.BaseCommandInterfaces
 {
     using System.Management.Automation;
@@ -20,18 +21,18 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.BaseComman
     internal interface IManageAzureHDInsightHttpAccessBase : IAzureHDInsightClusterCommandBase
     {
         /// <summary>
-        /// Gets or sets the Location for the cluster to return.
+        ///     Gets or sets Credential to connect to the HDInsight cluster.
         /// </summary>
-        string Location { get; set; }
+        PSCredential Credential { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether to enable or disable Http services on this Azure HDInsight cluster.
+        ///     Gets or sets a value indicating whether to enable or disable Http services on this Azure HDInsight cluster.
         /// </summary>
         bool Enable { get; set; }
 
         /// <summary>
-        /// Gets or sets Credential to connect to the HDInsight cluster.
+        ///     Gets or sets the Location for the cluster to return.
         /// </summary>
-        PSCredential Credential { get; set; }
+        string Location { get; set; }
     }
 }

@@ -18,6 +18,7 @@ namespace Microsoft.Hadoop.Client.WebHCatRest
     using System.Threading.Tasks;
     using Microsoft.WindowsAzure.Management.HDInsight;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest;
 
     /// <summary>
     /// Provides REST implementation of a remote Hadoop client.

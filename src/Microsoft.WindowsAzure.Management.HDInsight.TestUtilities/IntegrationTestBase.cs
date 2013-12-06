@@ -28,27 +28,20 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities
     using Microsoft.Hadoop.Client.Storage;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Microsoft.WindowsAzure.Management.Configuration;
-    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning;
+    using Microsoft.WindowsAzure.Management.HDInsight;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Asv;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.AzureManagementClient;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoClient;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestClient;
-    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters;
-    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.BaseInterfaces;
-    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Logging;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
-    using Microsoft.WindowsAzure.Management.HDInsight;
     using Microsoft.WindowsAzure.Management.HDInsight.JobSubmission.PocoClient;
     using Microsoft.WindowsAzure.Management.HDInsight.Logging;
-    using Microsoft.WindowsAzure.Management.HDInsight.Tests;
     using Microsoft.WindowsAzure.Management.HDInsight.Tests.RestSimulator;
-    using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities;
-    using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.PowerShellTestAbstraction.Concreates;
-    using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.PowerShellTestAbstraction.Interfaces;
     using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulator;
 
     public class IntegrationTestBase : DisposableObject
@@ -66,7 +59,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities
         public virtual void Initialize()
         {
             HDInsightClient.DefaultPollingInterval = TimeSpan.FromSeconds(1);
-            IHadoopClientExtensions.GetPollingInterval = () => Constants.PollingInterval;
+            IHadoopClientExtensions.GetPollingInterval = () => 500;
             this.ApplyFullMocking();
             this.ResetIndividualMocks();
             this.httpSpyEnabled = false;
@@ -237,9 +230,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities
         }
 
         protected static string ClusterPrefix;
-        private static IHDInsightCertificateCredential validCredentials;
-        private static IHDInsightCertificateCredential invalidSubscriptionId;
-        private static IHDInsightCertificateCredential invalidCertificate;
+        private static IHDInsightSubscriptionCredentials validCredentials;
+        private static IHDInsightSubscriptionCredentials invalidSubscriptionId;
+        private static IHDInsightSubscriptionCredentials invalidCertificate;
         public TestContext TestContext { get; set; }
 
         public static class TestCredentialsNames
@@ -252,7 +245,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities
             // First get the simulator clusters.
             var runManager = ServiceLocator.Instance.Locate<IServiceLocationSimulationManager>();
             runManager.MockingLevel = ServiceLocationMockingLevel.ApplyTestRunMockingOnly;
-            var factory = ServiceLocator.Instance.Locate<IHDInsightClientFactory>();
+            var factory = ServiceLocator.Instance.Locate<ClusterProvisioning.IHDInsightClientFactory>();
             var creds = GetCredentials(TestCredentialsNames.Default);
             var client = factory.Create(new HDInsightCertificateCredential(creds.SubscriptionId, new X509Certificate2(creds.Certificate)));
             var clusters = client.ListClusters().ToList();
@@ -265,7 +258,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities
 
             // Next get the live clusters.
             runManager.MockingLevel = ServiceLocationMockingLevel.ApplyNoMocking;
-            factory = ServiceLocator.Instance.Locate<IHDInsightClientFactory>();
+            factory = ServiceLocator.Instance.Locate<ClusterProvisioning.IHDInsightClientFactory>();
             client = factory.Create(new HDInsightCertificateCredential(creds.SubscriptionId, new X509Certificate2(creds.Certificate)));
             clusters = client.ListClusters().ToList();
             var liveClusters = clusters.Where(c => c.Name.StartsWith(ClusterPrefix, StringComparison.OrdinalIgnoreCase));
@@ -280,24 +273,17 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities
 
         public static void TestRunSetup()
         {
-            // This is to ensure that all key assemblies are loaded before IOC registration is required.
-            // This is only necessary for the test system as load order is correct for a production run.
-            types.Add(typeof(NewAzureHDInsightClusterCmdlet));
             // Sets the simulator
             var runManager = ServiceLocator.Instance.Locate<IServiceLocationSimulationManager>();
             ServiceLocator.Instance.Locate<ILogger>().AddWriter(new ConsoleLogWriter(Severity.None, Verbosity.Diagnostic));
             runManager.RegisterType<IAsvValidatorClientFactory, AsvValidatorSimulatorClientFactory>();
             runManager.RegisterType<IHDInsightManagementRestClientFactory, HDInsightManagementRestSimulatorClientFactory>();
             runManager.RegisterType<IRdfeServiceRestClientFactory, RdfeServiceRestSimulatorClientFactory>();
-            runManager.RegisterType<ISubscriptionRegistrationClientFactory, SubscriptionRegistrationSimulatorClientFactory>();
             runManager.RegisterType<IAzureHDInsightClusterConfigurationAccessorFactory, AzureHDInsightClusterConfigurationAccessorSimulatorFactory>();
             runManager.RegisterInstance<IWabStorageAbstractionFactory>(StorageAccountSimulatorFactory.Instance);
-            runManager.RegisterType<IAzureHDInsightSubscriptionsFileManagerFactory, AzureHDInsightSubscriptionsFileManagerSimulatorFactory>();
             runManager.RegisterType<IRemoteHadoopJobSubmissionPocoClientFactory, HadoopJobSubmissionPocoSimulatorClientFactory>();
             runManager.RegisterType<IHDInsightJobSubmissionPocoClientFactory, HadoopJobSubmissionPocoSimulatorClientFactory>();
-            runManager.RegisterType<IAzureHDInsightConnectionSessionManagerFactory, AzureHDInsightConnectionSessionManagerSimulatorFactory>();
-            runManager.RegisterType<IBufferingLogWriterFactory, BufferingLogWriterFactory>();
-
+            runManager.RegisterType<ISubscriptionRegistrationClientFactory, SubscriptionRegistrationSimulatorClientFactory>();
             var testManager = new IntegrationTestManager();
             if (!testManager.RunAzureTests())
             {
@@ -323,11 +309,11 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities
                 Certificate = defaultCertificate
             };
             IntegrationTestBase.validCredentials = ServiceLocator.Instance
-                                                .Locate<IHDInsightSubscriptionCertificateCredentialsFactory>()
+                                                .Locate<IHDInsightSubscriptionCredentialsFactory>()
                                                 .Create(tempCredentials);
             tempCredentials = new HDInsightCertificateCredential() { SubscriptionId = Guid.NewGuid(), Certificate = defaultCertificate };
             IntegrationTestBase.invalidSubscriptionId = ServiceLocator.Instance
-                                                     .Locate<IHDInsightSubscriptionCertificateCredentialsFactory>()
+                                                     .Locate<IHDInsightSubscriptionCredentialsFactory>()
                                                      .Create(tempCredentials);
             tempCredentials = new HDInsightCertificateCredential()
             {
@@ -335,14 +321,14 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities
                 Certificate = new X509Certificate2(TestCredentials.InvalidCertificate)
             };
             IntegrationTestBase.invalidCertificate = ServiceLocator.Instance
-                                                  .Locate<IHDInsightSubscriptionCertificateCredentialsFactory>()
+                                                  .Locate<IHDInsightSubscriptionCredentialsFactory>()
                                                   .Create(tempCredentials);
 
             // Prepares the environment 
             IntegrationTestBase.CleanUpClusters();
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Need secure string for pscredential object.")]
+        [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "Need secure string for pscredential object.")]
         protected static PSCredential GetPSCredential(string userName, string password)
         {
             var securePassword = new SecureString();
@@ -353,22 +339,6 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities
             }
 
             return new PSCredential(userName, securePassword);
-        }
-
-        private IRunspace runspace;
-
-        protected IRunspace GetPowerShellRunspace()
-        {
-            if (this.runspace.IsNull())
-            {
-                var loc = typeof(GetAzureHDInsightClusterCmdlet).Assembly.Location;
-                this.runspace = Help.SafeCreate(() => RunspaceAbstraction.Create());
-                this.runspace.NewPipeline()
-                             .AddCommand("Import-Module")
-                             .WithParameter("Name", loc)
-                             .Invoke();
-            }
-            return this.runspace;
         }
 
         public void ApplyIndividualTestMockingOnly()
@@ -415,17 +385,17 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities
 
         public static IHDInsightCertificateCredential GetValidCredentials()
         {
-            return validCredentials;
+            return validCredentials as IHDInsightCertificateCredential;
         }
 
         protected static IHDInsightCertificateCredential GetInvalidSubscriptionIdCredentials()
         {
-            return invalidSubscriptionId;
+            return invalidSubscriptionId as IHDInsightCertificateCredential;
         }
 
         protected static IHDInsightCertificateCredential GetInvalidCertificateCredentials()
         {
-            return invalidCertificate;
+            return invalidCertificate as IHDInsightCertificateCredential;
         }
 
         [SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase", Justification = "Azure names must be lowercase.")]

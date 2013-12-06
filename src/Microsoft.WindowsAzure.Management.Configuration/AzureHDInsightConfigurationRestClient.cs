@@ -22,6 +22,7 @@ namespace Microsoft.WindowsAzure.Management.Configuration
     using Microsoft.WindowsAzure.Management.HDInsight;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
 
     internal class AzureHdInsightConfigurationRestClient : IAzureHdInsightConfigurationRestClient

@@ -21,7 +21,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestCl
     {
         public IHDInsightManagementRestClient Create(IHDInsightSubscriptionCredentials credentials, IAbstractionContext context)
         {
-            return new HDInsightManagementRestClient(credentials.As<IHDInsightCertificateCredential>(), context);
+            return new HDInsightManagementRestClient(credentials, context);
         }
     }
 }

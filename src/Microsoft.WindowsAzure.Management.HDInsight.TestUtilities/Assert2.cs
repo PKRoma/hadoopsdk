@@ -22,7 +22,6 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities
     using System.Text;
     using System.Xml;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using Microsoft.WindowsAzure.Management.HDInsight;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
 
     public static class Assert2

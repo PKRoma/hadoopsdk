@@ -12,32 +12,36 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImplementations
 {
-    using System;
     using System.Collections;
-    using System.Collections.Generic;
-    using System.Collections.ObjectModel;
     using System.Threading.Tasks;
     using Microsoft.Hadoop.Client;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandInterfaces;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters;
-    using Microsoft.WindowsAzure.Management.HDInsight;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.Extensions;
 
-    internal class NewAzureHDInsightMapReduceJobJobDefinitionCommand : AzureHDInsightNewJobDefinitionCommand<AzureHDInsightMapReduceJobDefinition>, INewAzureHDInsightMapReduceJobDefinitionCommand
+    internal class NewAzureHDInsightMapReduceJobJobDefinitionCommand
+        : AzureHDInsightNewJobDefinitionCommand<AzureHDInsightMapReduceJobDefinition>, INewAzureHDInsightMapReduceJobDefinitionCommand
     {
         private readonly MapReduceJobCreateParameters mapReduceJobDefinition = new MapReduceJobCreateParameters();
-        private Hashtable defines = new Hashtable();
-        private string[] resources = new string[] { };
-        private string[] libjars = new string[] { };
         private string[] arguments = new string[] { };
+        private Hashtable defines = new Hashtable();
+        private string[] libjars = new string[] { };
+        private string[] resources = new string[] { };
 
-        public string JobName
+        public string[] Arguments
         {
-            get { return this.mapReduceJobDefinition.JobName; }
-            set { this.mapReduceJobDefinition.JobName = value; }
+            get { return this.arguments; }
+            set { this.arguments = value; }
+        }
+
+        public string ClassName
+        {
+            get { return this.mapReduceJobDefinition.ClassName; }
+            set { this.mapReduceJobDefinition.ClassName = value; }
         }
 
         public override Hashtable Defines
@@ -52,6 +56,18 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImp
             set { this.resources = value; }
         }
 
+        public string JarFile
+        {
+            get { return this.mapReduceJobDefinition.JarFile; }
+            set { this.mapReduceJobDefinition.JarFile = value; }
+        }
+
+        public string JobName
+        {
+            get { return this.mapReduceJobDefinition.JobName; }
+            set { this.mapReduceJobDefinition.JobName = value; }
+        }
+
         public string[] LibJars
         {
             get { return this.libjars; }
@@ -62,24 +78,6 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImp
         {
             get { return this.mapReduceJobDefinition.StatusFolder; }
             set { this.mapReduceJobDefinition.StatusFolder = value; }
-        }
-
-        public string JarFile
-        {
-            get { return this.mapReduceJobDefinition.JarFile; }
-            set { this.mapReduceJobDefinition.JarFile = value; }
-        }
-
-        public string ClassName
-        {
-            get { return this.mapReduceJobDefinition.ClassName; }
-            set { this.mapReduceJobDefinition.ClassName = value; }
-        }
-
-        public string[] Arguments
-        {
-            get { return this.arguments; }
-            set { this.arguments = value; }
         }
 
         public override Task EndProcessing()

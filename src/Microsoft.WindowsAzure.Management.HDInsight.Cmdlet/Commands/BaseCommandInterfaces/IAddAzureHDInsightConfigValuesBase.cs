@@ -12,44 +12,44 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.BaseCommandInterfaces
 {
     using System.Collections;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects;
-    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters;
 
     /// <summary>
-    /// Represents a command to set custom configuration values for Hadoop services.
+    ///     Represents a command to set custom configuration values for Hadoop services.
     /// </summary>
     internal interface IAddAzureHDInsightConfigValuesBase
     {
         /// <summary>
-        /// Gets or sets the AzureHDInsightConfig.
+        ///     Gets or sets the AzureHDInsightConfig.
         /// </summary>
         AzureHDInsightConfig Config { get; set; }
 
         /// <summary>
-        /// Gets or sets a collection of configuration properties to customize the Core Hadoop service.
+        ///     Gets or sets a collection of configuration properties to customize the Core Hadoop service.
         /// </summary>
         Hashtable Core { get; set; }
 
         /// <summary>
-        /// Gets or sets a collection of configuration properties to customize the Hdfs Hadoop service.
+        ///     Gets or sets a collection of configuration properties to customize the Hdfs Hadoop service.
         /// </summary>
         Hashtable Hdfs { get; set; }
 
         /// <summary>
-        /// Gets or sets a collection of configuration properties to customize the MapReduce Hadoop service.
-        /// </summary>
-        AzureHDInsightMapReduceConfiguration MapReduce { get; set; }
-
-        /// <summary>
-        /// Gets or sets a collection of configuration properties to customize the Hive Hadoop service.
+        ///     Gets or sets a collection of configuration properties to customize the Hive Hadoop service.
         /// </summary>
         AzureHDInsightHiveConfiguration Hive { get; set; }
 
         /// <summary>
-        /// Gets or sets a collection of configuration properties to customize the Oozie Hadoop service.
+        ///     Gets or sets a collection of configuration properties to customize the MapReduce Hadoop service.
+        /// </summary>
+        AzureHDInsightMapReduceConfiguration MapReduce { get; set; }
+
+        /// <summary>
+        ///     Gets or sets a collection of configuration properties to customize the Oozie Hadoop service.
         /// </summary>
         AzureHDInsightOozieConfiguration Oozie { get; set; }
     }

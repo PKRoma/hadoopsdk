@@ -25,9 +25,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
         public int HttpCode { get; private set; }
 
         /// <summary>
-        /// Gets the message detailing the error status.
+        /// Gets or sets the message detailing the error status.
         /// </summary>
-        public string Message { get; private set; }
+        public string Message { get; set; }
 
         /// <summary>
         /// Gets the operation that triggered the error status.
@@ -39,6 +39,10 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
             this.HttpCode = httpCode;
             this.Message = message;
             this.OperationType = operationType;
+        }
+
+        internal ClusterErrorStatus()
+        {
         }
     }
 }

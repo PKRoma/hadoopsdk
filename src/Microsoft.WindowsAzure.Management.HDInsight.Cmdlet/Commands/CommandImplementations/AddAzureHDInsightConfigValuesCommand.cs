@@ -12,15 +12,15 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImplementations
 {
     using System.Collections;
     using System.Threading.Tasks;
-    using Microsoft.WindowsAzure.Management.HDInsight;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandInterfaces;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.Extensions;
 
     internal class AddAzureHDInsightConfigValuesCommand : AzureHDInsightCommand<AzureHDInsightConfig>, IAddAzureHDInsightConfigValuesCommand
     {
@@ -34,12 +34,25 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImp
             this.Oozie = new AzureHDInsightOozieConfiguration();
         }
 
+        public AzureHDInsightConfig Config { get; set; }
+
+        public Hashtable Core { get; set; }
+
+        public Hashtable Hdfs { get; set; }
+
+        public AzureHDInsightHiveConfiguration Hive { get; set; }
+
+        public AzureHDInsightMapReduceConfiguration MapReduce { get; set; }
+
+        public AzureHDInsightOozieConfiguration Oozie { get; set; }
+
         public override Task EndProcessing()
         {
             this.Config.CoreConfiguration.AddRange(this.Core.ToKeyValuePairs());
             this.Config.HdfsConfiguration.AddRange(this.Hdfs.ToKeyValuePairs());
             this.Config.MapReduceConfiguration.ConfigurationCollection.AddRange(this.MapReduce.Configuration.ToKeyValuePairs());
-            this.Config.MapReduceConfiguration.CapacitySchedulerConfigurationCollection.AddRange(this.MapReduce.CapacitySchedulerConfiguration.ToKeyValuePairs());
+            this.Config.MapReduceConfiguration.CapacitySchedulerConfigurationCollection.AddRange(
+                this.MapReduce.CapacitySchedulerConfiguration.ToKeyValuePairs());
             this.Config.HiveConfiguration.ConfigurationCollection.AddRange(this.Hive.Configuration.ToKeyValuePairs());
             this.Config.OozieConfiguration.ConfigurationCollection.AddRange(this.Oozie.Configuration.ToKeyValuePairs());
 
@@ -55,23 +68,12 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImp
 
             if (this.Oozie.AdditionalActionExecutorLibraries != null)
             {
-                this.Config.OozieConfiguration.AdditionalActionExecutorLibraries = this.Oozie.AdditionalActionExecutorLibraries.ToWabStorageAccountConfiguration();
+                this.Config.OozieConfiguration.AdditionalActionExecutorLibraries =
+                    this.Oozie.AdditionalActionExecutorLibraries.ToWabStorageAccountConfiguration();
             }
 
             this.Output.Add(this.Config);
             return TaskEx.GetCompletedTask();
         }
-
-        public AzureHDInsightConfig Config { get; set; }
-
-        public Hashtable Core { get; set; }
-
-        public Hashtable Hdfs { get; set; }
-
-        public AzureHDInsightMapReduceConfiguration MapReduce { get; set; }
-
-        public AzureHDInsightHiveConfiguration Hive { get; set; }
-
-        public AzureHDInsightOozieConfiguration Oozie { get; set; }
     }
 }

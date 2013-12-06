@@ -34,12 +34,17 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Net.Http, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="System.Net.Http.WebRequest, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AbstractionContext.cs" />
     <Compile Include="DisposableObject.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>
+    <Compile Include="IAbstractionContext.cs" />
     <Compile Include="Library\ExceptionExtensions.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>
@@ -176,8 +181,57 @@
     <Compile Include="Library\ValidatedNotNullAttribute.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>
+    <Compile Include="Logging\ConsoleLogWriter.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
+    <Compile Include="Logging\FileLogWriter.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
+    <Compile Include="Logging\ILogger.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
+    <Compile Include="Logging\ILogWriter.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
+    <Compile Include="Logging\Logger.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
+    <Compile Include="Logging\LogWriter.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
+    <Compile Include="Logging\NullLogWriter.cs" />
+    <Compile Include="Logging\StreamWriterLogWriter.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\AssemblyInternalsVisibleTo.cs" />
+    <Compile Include="Library\WebRequest\HttpClientAbstraction.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
+    <Compile Include="Library\WebRequest\HttpClientAbstractionFactory.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
+    <Compile Include="Library\WebRequest\HttpConstants.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
+    <Compile Include="Library\WebRequest\HttpResponseHeadersAbstraction.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
+    <Compile Include="Library\WebRequest\HttpResponseMessageAbstraction.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
+    <Compile Include="Library\WebRequest\IHttpClientAbstraction.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
+    <Compile Include="Library\WebRequest\IHttpClientAbstractionFactory.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
+    <Compile Include="Library\WebRequest\IHttpResponseHeadersAbstraction.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
+    <Compile Include="Library\WebRequest\IHttpResponseMessageAbstraction.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="CoreFrameworkSources.targets">
@@ -188,6 +242,12 @@
     <Content Include="Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Microsoft.HDInsight.Threading\Microsoft.HDInsight.Threading.csproj">
+      <Project>{dbffc131-e089-4173-9b9e-6826fe596faf}</Project>
+      <Name>Microsoft.HDInsight.Threading</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="..\..\build\targets\Project.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -17,6 +17,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission.RestClient
     using System;
     using System.Net;
     using System.Net.Http;
+    using System.Security.Authentication;
     using System.Threading.Tasks;
     using Microsoft.Hadoop.Client;
     using Microsoft.Hadoop.Client.WebHCatRest;
@@ -24,14 +25,15 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission.RestClient
     using Microsoft.WindowsAzure.Management.HDInsight;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
 
     internal class HDInsightJobSubmissionRestClient : DisposableObject, IHDInsightJobSubmissionRestClient
     {
-        private readonly IHDInsightCertificateCredential credentials;
+        private readonly IHDInsightSubscriptionCredentials credentials;
         private readonly HDInsight.IAbstractionContext context;
 
-        public HDInsightJobSubmissionRestClient(IHDInsightCertificateCredential credentials, HDInsight.IAbstractionContext context)
+        public HDInsightJobSubmissionRestClient(IHDInsightSubscriptionCredentials credentials, HDInsight.IAbstractionContext context)
         {
             this.context = context;
             this.credentials = credentials;
@@ -42,7 +44,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission.RestClient
         {
             // Creates an HTTP client
             var resolver = ServiceLocator.Instance.Locate<ICloudServiceNameResolver>();
-            using (IHttpClientAbstraction client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(this.credentials.Certificate, this.context))
+            using (var client = ServiceLocator.Instance.Locate<IHDInsightHttpClientAbstractionFactory>().Create(this.credentials, this.context))
             {
                 string regionCloudServicename = resolver.GetCloudServiceName(
                     this.credentials.SubscriptionId, this.credentials.DeploymentNamespace, location);
@@ -75,7 +77,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission.RestClient
             // Creates an HTTP client
             var resolver = ServiceLocator.Instance.Locate<ICloudServiceNameResolver>();
             using (
-                IHttpClientAbstraction client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(this.credentials.Certificate, this.context))
+                IHttpClientAbstraction client = ServiceLocator.Instance.Locate<IHDInsightHttpClientAbstractionFactory>().Create(this.credentials, this.context))
             {
                 string regionCloudServicename = resolver.GetCloudServiceName(
                     this.credentials.SubscriptionId, this.credentials.DeploymentNamespace, location);
@@ -108,7 +110,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission.RestClient
         {
             // Creates an HTTP client
             var resolver = ServiceLocator.Instance.Locate<ICloudServiceNameResolver>();
-            using (IHttpClientAbstraction client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(this.credentials.Certificate, this.context))
+            using (IHttpClientAbstraction client = ServiceLocator.Instance.Locate<IHDInsightHttpClientAbstractionFactory>().Create(this.credentials, this.context))
             {
                 string regionCloudServicename = resolver.GetCloudServiceName(
                     this.credentials.SubscriptionId, this.credentials.DeploymentNamespace, location);

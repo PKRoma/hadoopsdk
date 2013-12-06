@@ -18,6 +18,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission.RestClient
     using Microsoft.WindowsAzure.Management.HDInsight;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest;
 
     /// <summary>
     /// Represents a rest call to the server.

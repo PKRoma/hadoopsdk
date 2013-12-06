@@ -12,31 +12,31 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.BaseCommandInterfaces
 {
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects;
-    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.BaseInterfaces;
 
     internal interface IGetAzureHDInsightJobOutputBase : IAzureHDInsightCommonCommandBase
     {
         /// <summary>
-        /// Gets or sets the HDInsight cluster to connect to.
+        ///     Gets or sets the HDInsight cluster to connect to.
         /// </summary>
         string Cluster { get; set; }
 
         /// <summary>
-        /// Gets or sets the Id of the jobDetails to retrieve.
+        ///     Gets or sets the Id of the jobDetails to retrieve.
         /// </summary>
         string JobId { get; set; }
 
         /// <summary>
-        /// Gets or sets the type of jobDetails output to retrieve.
+        ///     Gets or sets the type of jobDetails output to retrieve.
         /// </summary>
         JobOutputType OutputType { get; set; }
 
         /// <summary>
-        /// Gets or sets the directory to download task logs to.
+        ///     Gets or sets the directory to download task logs to.
         /// </summary>
         string TaskLogsDirectory { get; set; }
     }

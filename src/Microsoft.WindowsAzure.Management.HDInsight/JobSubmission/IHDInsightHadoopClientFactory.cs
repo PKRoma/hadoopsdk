@@ -25,7 +25,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission
     /// <summary>
     /// Constructs new instances of the a Hadoop client.
     /// </summary>
-    internal interface IHDInsightHadoopClientFactory : IHadoopClientFactory<JobSubmissionCertificateCredential>
+    internal interface IHDInsightHadoopClientFactory : IHadoopClientFactory<IHDInsightSubscriptionCredentials>
     {
     }
 }

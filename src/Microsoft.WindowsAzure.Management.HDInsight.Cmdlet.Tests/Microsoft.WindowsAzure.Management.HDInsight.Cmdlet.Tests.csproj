@@ -1,0 +1,214 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{9CB3A580-E4DC-4DF8-BB4C-EB5729A6EBCD}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Tests</RootNamespace>
+    <AssemblyName>Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Tests</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
+    <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
+    <ReferencePath>$(ProgramFiles)\Common Files\microsoft shared\VSTT\$(VisualStudioVersion)\UITestExtensionPackages</ReferencePath>
+    <IsCodedUITest>False</IsCodedUITest>
+    <TestProjectType>UnitTest</TestProjectType>
+    <SpecFlowTasksPath>$(SolutionDir)\packages\SpecFlow.1.9.0\tools\specflow.exe</SpecFlowTasksPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.HDInsight.Management.Contracts">
+      <HintPath>externals\Microsoft.HDInsight.Management.Contracts.dll</HintPath>
+    </Reference>
+    <Reference Include="nunit.framework">
+      <HintPath>..\packages\NUnit.2.6.3\lib\nunit.framework.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Management.Automation, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="System.Net.Http, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="TechTalk.SpecFlow">
+      <HintPath>..\packages\SpecFlow.1.9.0\lib\net35\TechTalk.SpecFlow.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <Choose>
+    <When Condition="('$(VisualStudioVersion)' == '10.0' or '$(VisualStudioVersion)' == '') and '$(TargetFrameworkVersion)' == 'v3.5'">
+      <ItemGroup>
+        <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+      </ItemGroup>
+    </When>
+    <Otherwise>
+      <ItemGroup>
+        <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework" />
+      </ItemGroup>
+    </Otherwise>
+  </Choose>
+  <ItemGroup>
+    <Compile Include="CmdletAbstractionTests\AddHDInsightConfigValuesCommandTests.cs" />
+    <Compile Include="CmdletAbstractionTests\AzureHDInsightClusterCommandBaseTests.cs" />
+    <Compile Include="CmdletAbstractionTests\AzureHDInsightSubscriptionsManagerTests.cs" />
+    <Compile Include="CmdletAbstractionTests\ConnectClusterCommandTests.cs" />
+    <Compile Include="CmdletAbstractionTests\HadoopCustomJobCerationDetails.cs" />
+    <Compile Include="CmdletAbstractionTests\HDInsightGetCommandTests.cs" />
+    <Compile Include="CmdletAbstractionTests\HDInsightGetJobOutputCommandTests.cs" />
+    <Compile Include="CmdletAbstractionTests\HDInsightGetJobsCommandTests.cs" />
+    <Compile Include="CmdletAbstractionTests\HDInsightGetPropertiesCommandTests.cs" />
+    <Compile Include="CmdletAbstractionTests\InvokeHiveCommandTests.cs" />
+    <Compile Include="CmdletAbstractionTests\ManageAzureHDInsightHttpAccessCommandTests.cs" />
+    <Compile Include="CmdletAbstractionTests\NewHDInsightMapReduceJobCommandTests.cs" />
+    <Compile Include="CmdletAbstractionTests\NewHDInsightPigJobCommandTests.cs" />
+    <Compile Include="CmdletAbstractionTests\NewHDInsightSqoopJobCommandTests.cs" />
+    <Compile Include="CmdletAbstractionTests\NewHDInsightStreamingMapReduceJobCommandTests.cs" />
+    <Compile Include="CmdletAbstractionTests\StartAzureHDInsightJobCommandTests.cs" />
+    <Compile Include="CmdletAbstractionTests\StopAzureHDInsightJobCommandTests.cs" />
+    <Compile Include="CmdletAbstractionTests\StorageAbstractionTests.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="CmdLetTests\AddConfigValuesCmdletTests.cs" />
+    <Compile Include="CmdLetTests\CmdletHardCodes.cs" />
+    <Compile Include="CmdLetTests\CmdLetHelpFileTests.cs" />
+    <Compile Include="CmdLetTests\CmdLetIntegrationScenarioTests.cs" />
+    <Compile Include="CmdLetTests\CmdletScenariosTestCaseBase.cs" />
+    <Compile Include="CmdLetTests\CmdLetScenarioTests.cs" />
+    <Compile Include="CmdLetTests\ConnectClusterCommandCmdletTests.cs" />
+    <Compile Include="CmdLetTests\GetCommandCmdletTests.cs" />
+    <Compile Include="CmdLetTests\GetJobOutputCmdletTests.cs" />
+    <Compile Include="CmdLetTests\GetJobsCmdletTests.cs" />
+    <Compile Include="CmdLetTests\GetPropertiesCmdletTests.cs" />
+    <Compile Include="CmdLetTests\GrantHttpAccessCmdletTests.cs" />
+    <Compile Include="CmdLetTests\InvokeHiveCmdletTests.cs" />
+    <Compile Include="CmdLetTests\NewClusterCmdletTests.cs" />
+    <Compile Include="CmdLetTests\NewHiveJobCmdLetTests.cs" />
+    <Compile Include="CmdLetTests\NewMapReduceJobCmdLetTests.cs" />
+    <Compile Include="CmdLetTests\NewPigJobCmdLetTests.cs" />
+    <Compile Include="CmdLetTests\NewSqoopJobCmdLetTests.cs" />
+    <Compile Include="CmdLetTests\NewStreamingMapReduceJobCmdLetTests.cs" />
+    <Compile Include="CmdLetTests\SqoopJobDefinitionCmdletTests.cs" />
+    <Compile Include="CmdLetTests\StartJobsCmdletIntegrationTests.cs" />
+    <Compile Include="CmdLetTests\StartJobsCmdletTestCaseBase.cs" />
+    <Compile Include="CmdLetTests\StartJobsCmdletTests.cs" />
+    <Compile Include="CmdLetTests\WaitCmdletTest.cs" />
+    <Compile Include="PowerShellTestAbstraction\Concretes\CommandAbstraction.cs" />
+    <Compile Include="PowerShellTestAbstraction\Concretes\PipelineAbstraction.cs" />
+    <Compile Include="PowerShellTestAbstraction\Concretes\PipelineResultsAbstraction.cs" />
+    <Compile Include="PowerShellTestAbstraction\Concretes\RunspaceAbstraction.cs" />
+    <Compile Include="PowerShellTestAbstraction\Disposable\DisposableObject.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
+    <Compile Include="PowerShellTestAbstraction\Disposable\InterlockedBoolean.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
+    <Compile Include="PowerShellTestAbstraction\Disposable\IQueryDisposable.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
+    <Compile Include="PowerShellTestAbstraction\Interfaces\ICommand.cs" />
+    <Compile Include="PowerShellTestAbstraction\Interfaces\IPipeline.cs" />
+    <Compile Include="PowerShellTestAbstraction\Interfaces\IPipelineResult.cs" />
+    <Compile Include="PowerShellTestAbstraction\Interfaces\IRunspace.cs" />
+    <Compile Include="PowerShellTestAbstraction\Interfaces\IRunspaceBase.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Simulators\AzureHDInsightClusterManagementClientSimulator.cs" />
+    <Compile Include="Simulators\AzureHDInsightClusterManagementClientSimulatorFactory.cs" />
+    <Compile Include="Simulators\AzureHDInsightConnectionSessionManagerSimulator.cs" />
+    <Compile Include="Simulators\AzureHDInsightConnectionSessionManagerSimulatorFactory.cs" />
+    <Compile Include="Simulators\AzureHDInsightJobSubmissionClientSimulator.cs" />
+    <Compile Include="Simulators\AzureHDInsightJobSubmissionClientSimulatorFactory.cs" />
+    <Compile Include="Simulators\AzureHDInsightStorageHandlerSimulator.cs" />
+    <Compile Include="Simulators\AzureHDInsightStorageHandlerSimulatorFactory.cs" />
+    <Compile Include="Simulators\AzureHDInsightSubscriptionsFileManagerSimulator.cs" />
+    <Compile Include="Simulators\AzureHDInsightSubscriptionsFileManagerSimulatorFactory.cs" />
+    <Compile Include="Simulators\BufferingLogWriterFactory.cs" />
+    <Compile Include="Simulators\HDInsightSDKSupportedVersions.cs" />
+    <Compile Include="Simulators\Types\ErrorDetails.cs" />
+    <Compile Include="Simulators\Types\UserChangeOperationState.cs" />
+    <Compile Include="Simulators\Types\UserChangeOperationType.cs" />
+    <Compile Include="Simulators\Types\UserType.cs" />
+    <Compile Include="Utilities\AzureTestCredentials.cs" />
+    <Compile Include="Utilities\TestConstants.cs" />
+    <Compile Include="Utilities\IntegrationTestBase.cs" />
+    <Compile Include="Utilities\IntegrationTestManager.cs" />
+    <Compile Include="Utilities\Logger.cs" />
+    <Compile Include="Utilities\TaskExtensions.cs" />
+    <Compile Include="Utilities\TestSetupCleanup.cs" />
+    <Compile Include="Utilities\UserChangeOperationStatusResponse.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Microsoft.Hadoop.Client\Microsoft.Hadoop.Client.csproj">
+      <Project>{7c2e800c-09e5-484a-bb08-6c17578e7e45}</Project>
+      <Name>Microsoft.Hadoop.Client</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Microsoft.HDInsight.Threading\Microsoft.HDInsight.Threading.csproj">
+      <Project>{dbffc131-e089-4173-9b9e-6826fe596faf}</Project>
+      <Name>Microsoft.HDInsight.Threading</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Microsoft.WindowsAzure.Management.HDInsight.Cmdlet\Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.csproj">
+      <Project>{43333c08-29f5-4948-a8c6-4f486331cdc9}</Project>
+      <Name>Microsoft.WindowsAzure.Management.HDInsight.Cmdlet</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Microsoft.WindowsAzure.Management.HDInsight.Framework.Core\Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.csproj">
+      <Project>{55787775-8b25-436f-b9b9-c2b60ef80b20}</Project>
+      <Name>Microsoft.WindowsAzure.Management.HDInsight.Framework.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Microsoft.WindowsAzure.Management.HDinsight.Framework\Microsoft.WindowsAzure.Management.HDInsight.Framework.csproj">
+      <Project>{db09f70b-fd28-4cc8-86b3-883d71ca9a02}</Project>
+      <Name>Microsoft.WindowsAzure.Management.HDInsight.Framework</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Microsoft.WindowsAzure.Management.HDInsight\Microsoft.WindowsAzure.Management.HDInsight.csproj">
+      <Project>{cf2838ec-af11-477b-a7e6-f59a70a0e67f}</Project>
+      <Name>Microsoft.WindowsAzure.Management.HDInsight</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Choose>
+    <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
+      <ItemGroup>
+        <Reference Include="Microsoft.VisualStudio.QualityTools.CodedUITestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Microsoft.VisualStudio.TestTools.UITest.Common, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Microsoft.VisualStudio.TestTools.UITest.Extension, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+          <Private>False</Private>
+        </Reference>
+        <Reference Include="Microsoft.VisualStudio.TestTools.UITesting, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+          <Private>False</Private>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
+  <Import Project="..\..\build\targets\Project.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

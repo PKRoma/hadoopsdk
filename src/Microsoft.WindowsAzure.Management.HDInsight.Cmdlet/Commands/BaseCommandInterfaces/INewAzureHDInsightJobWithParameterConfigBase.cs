@@ -12,6 +12,7 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.BaseCommandInterfaces
 {
     using System.Collections;
@@ -19,13 +20,13 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.BaseComman
     internal interface INewAzureHDInsightJobWithDefinesConfigBase : INewAzureHDInsightJobConfigBase
     {
         /// <summary>
-        ///  Gets or sets the Mapper.
-        /// </summary>
-        string JobName { get; set; }
-
-        /// <summary>
-        /// Gets or sets the parameters for the jobDetails.
+        ///     Gets or sets the parameters for the jobDetails.
         /// </summary>
         Hashtable Defines { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the Mapper.
+        /// </summary>
+        string JobName { get; set; }
     }
 }

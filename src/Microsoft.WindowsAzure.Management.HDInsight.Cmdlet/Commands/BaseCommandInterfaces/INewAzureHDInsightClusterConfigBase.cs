@@ -12,12 +12,13 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.BaseCommandInterfaces
 {
     internal interface INewAzureHDInsightClusterConfigBase
     {
         /// <summary>
-        /// Gets or sets the size of the cluster in data nodes.
+        ///     Gets or sets the size of the cluster in data nodes.
         /// </summary>
         int ClusterSizeInNodes { get; set; }
     }

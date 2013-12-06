@@ -12,18 +12,19 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects
 {
     using System.Collections;
     using System.Diagnostics.CodeAnalysis;
 
     /// <summary>
-    /// Structure to contain Hadoop Map-Reduce service configuration.
+    ///     Structure to contain Hadoop Map-Reduce service configuration.
     /// </summary>
     public class AzureHDInsightMapReduceConfiguration
     {
         /// <summary>
-        /// Initializes a new instance of the AzureHDInsightMapReduceConfiguration class.
+        ///     Initializes a new instance of the AzureHDInsightMapReduceConfiguration class.
         /// </summary>
         public AzureHDInsightMapReduceConfiguration()
         {
@@ -32,15 +33,17 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects
         }
 
         /// <summary>
-        /// Gets or sets the configuration settings.
+        ///     Gets or sets the capacity scheduler settings.
         /// </summary>
-        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "Needed for ease of use in Powershell invocation.")]
-        public Hashtable Configuration { get; set; }
+        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly",
+            Justification = "Needed for ease of use in Powershell invocation.")]
+        public Hashtable CapacitySchedulerConfiguration { get; set; }
 
         /// <summary>
-        /// Gets or sets the capacity scheduler settings.
+        ///     Gets or sets the configuration settings.
         /// </summary>
-        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "Needed for ease of use in Powershell invocation.")]
-        public Hashtable CapacitySchedulerConfiguration { get; set; }
+        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly",
+            Justification = "Needed for ease of use in Powershell invocation.")]
+        public Hashtable Configuration { get; set; }
     }
 }

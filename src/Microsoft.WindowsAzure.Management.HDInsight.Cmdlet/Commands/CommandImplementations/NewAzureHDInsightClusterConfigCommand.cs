@@ -12,6 +12,7 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImplementations
 {
     using System.Threading.Tasks;
@@ -21,10 +22,10 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImp
 
     internal class NewAzureHDInsightClusterConfigCommand : AzureHDInsightCommand<AzureHDInsightConfig>, INewAzureHDInsightClusterConfigCommand
     {
-        private AzureHDInsightConfig config = new AzureHDInsightConfig();
+        private readonly AzureHDInsightConfig config = new AzureHDInsightConfig();
 
         /// <summary>
-        /// Gets or sets the size of the cluster in worker nodes.
+        ///     Gets or sets the size of the cluster in worker nodes.
         /// </summary>
         public int ClusterSizeInNodes
         {

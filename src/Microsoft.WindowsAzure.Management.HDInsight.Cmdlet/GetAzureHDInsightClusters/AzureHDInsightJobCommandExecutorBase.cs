@@ -12,6 +12,7 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters
 {
     using System;
@@ -20,16 +21,13 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightCl
     using System.Management.Automation;
     using System.Threading;
     using Microsoft.Hadoop.Client;
-    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.BaseInterfaces;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImplementations;
-    using Microsoft.WindowsAzure.Management.HDInsight;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
-    using Microsoft.WindowsAzure.Management.HDInsight.JobSubmission;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.BaseInterfaces;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.Extensions;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.ServiceLocation;
 
     internal abstract class AzureHDInsightJobCommandExecutorBase : AzureHDInsightCommandBase, IAzureHDInsightJobCommandCredentialsBase
     {
-        public PSCredential Credential { get; set; }
-
         protected CancellationTokenSource tokenSource = new CancellationTokenSource();
 
         public override CancellationToken CancellationToken
@@ -37,33 +35,40 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightCl
             get { return this.tokenSource.Token; }
         }
 
+        public PSCredential Credential { get; set; }
+
         public override void Cancel()
         {
             this.tokenSource.Cancel();
         }
 
-        [SuppressMessage("Microsoft.Usage", "CA2208:InstantiateArgumentExceptionsCorrectly", Justification = "Url resolution is done when the EndProcessing method is called.")]
+        [SuppressMessage("Microsoft.Usage", "CA2208:InstantiateArgumentExceptionsCorrectly",
+            Justification = "Url resolution is done when the EndProcessing method is called.")]
         internal IJobSubmissionClient GetClient(string cluster)
         {
             IJobSubmissionClient client = null;
+            IJobSubmissionClientCredential clientCredential = null;
             cluster.ArgumentNotNull("ClusterEndpoint");
             if (this.Credential != null)
             {
-                var remoteConnectionCredentials = new BasicAuthCredential()
+                clientCredential = new BasicAuthCredential
                 {
                     Server = GatewayUriResolver.GetGatewayUri(cluster),
                     UserName = this.Credential.UserName,
                     Password = this.Credential.GetCleartextPassword()
                 };
-
-                client = JobSubmissionClientFactory.Connect(remoteConnectionCredentials);
             }
 
             if (this.Subscription != null)
             {
-                var creds = new JobSubmissionCertificateCredential(this.GetSubscriptionCertificateCredentials(), cluster);
-                client = JobSubmissionClientFactory.Connect(creds);
+                clientCredential = new JobSubmissionCertificateCredential(this.GetSubscriptionCertificateCredentials(), cluster);
             }
+
+            if (clientCredential != null)
+            {
+                client = ServiceLocator.Instance.Locate<IAzureHDInsightJobSubmissionClientFactory>().Create(clientCredential);
+            }
+
             if (client.IsNotNull())
             {
                 client.SetCancellationSource(this.tokenSource);

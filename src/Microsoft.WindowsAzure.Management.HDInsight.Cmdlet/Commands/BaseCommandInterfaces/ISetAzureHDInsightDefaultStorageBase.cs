@@ -12,33 +12,33 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.BaseCommandInterfaces
 {
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects;
-    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters;
 
     /// <summary>
-    /// Represents a command to set a default storage account for an Azure HDInsight config.
+    ///     Represents a command to set a default storage account for an Azure HDInsight config.
     /// </summary>
     internal interface ISetAzureHDInsightDefaultStorageBase
     {
         /// <summary>
-        /// Gets or sets the AzureHDInsightConfig.
+        ///     Gets or sets the AzureHDInsightConfig.
         /// </summary>
         AzureHDInsightConfig Config { get; set; }
 
         /// <summary>
-        /// Gets or sets the Storage Account Name.
-        /// </summary>
-        string StorageAccountName { get; set; }
-
-        /// <summary>
-        /// Gets or sets the Storage Account Key.
+        ///     Gets or sets the Storage Account Key.
         /// </summary>
         string StorageAccountKey { get; set; }
 
         /// <summary>
-        /// Gets or sets the Storage Container Name.
+        ///     Gets or sets the Storage Account Name.
+        /// </summary>
+        string StorageAccountName { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the Storage Container Name.
         /// </summary>
         string StorageContainerName { get; set; }
     }

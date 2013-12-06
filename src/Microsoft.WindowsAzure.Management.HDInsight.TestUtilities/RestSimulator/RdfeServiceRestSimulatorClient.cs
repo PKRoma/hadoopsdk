@@ -31,8 +31,8 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
 
         public RdfeServiceRestSimulatorClient(IHDInsightCertificateCredential credentials, IAbstractionContext context)
         {
-            var validCreds = IntegrationTestBase.GetValidCredentials();
-            if (credentials.Certificate.SubjectName != validCreds.Certificate.SubjectName && credentials.SubscriptionId != validCreds.SubscriptionId)
+            var validCreds = IntegrationTestBase.GetValidCredentials() as IHDInsightCertificateCredential;
+            if (validCreds == null || (credentials.Certificate.SubjectName != validCreds.Certificate.SubjectName && credentials.SubscriptionId != validCreds.SubscriptionId))
             {
                 throw new HttpLayerException(HttpStatusCode.Unauthorized, "User " + validCreds.SubscriptionId + " is not authorized");
             }

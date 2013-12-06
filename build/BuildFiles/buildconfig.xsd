@@ -81,6 +81,7 @@
   <xs:complexType name="ctNuGetDependency">
     <xs:attribute name="id" type="xs:string" />
     <xs:attribute name="version" type="xs:string" />
+    <xs:attribute name="exactversion" type="xs:boolean" use="optional" />
   </xs:complexType>
 
   <xs:complexType name="ctNuGetDependencies">

@@ -22,7 +22,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
     {
         public IHDInsightManagementRestClient Create(IHDInsightSubscriptionCredentials credentials, IAbstractionContext context)
         {
-            return new HDInsightManagementRestSimulatorClient(credentials.As<HDInsightCertificateCredential>(), context);
+            return new HDInsightManagementRestSimulatorClient(credentials, context);
         }
     }
 }

@@ -32,10 +32,10 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestCl
 
     internal class RdfeServiceRestClient : IRdfeServiceRestClient
     {
-        private readonly IHDInsightCertificateCredential credentials;
+        private readonly IHDInsightSubscriptionCredentials credentials;
         private readonly HDInsight.IAbstractionContext context;
 
-        internal RdfeServiceRestClient(IHDInsightCertificateCredential credentials, HDInsight.IAbstractionContext context)
+        internal RdfeServiceRestClient(IHDInsightSubscriptionCredentials credentials, HDInsight.IAbstractionContext context)
         {
             this.context = context;
             this.credentials = credentials;
@@ -45,7 +45,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestCl
         public async Task<IEnumerable<KeyValuePair<string, string>>> GetResourceProviderProperties()
         {
             // Creates an HTTP client
-            using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(this.credentials.Certificate, this.context))
+            using (var client = ServiceLocator.Instance.Locate<IHDInsightHttpClientAbstractionFactory>().Create(this.credentials, this.context))
             {
                 Guid subscriptionId = this.credentials.SubscriptionId;
                 string cloudServiceName = this.credentials.DeploymentNamespace;

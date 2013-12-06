@@ -12,17 +12,18 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.BaseCommandInterfaces
 {
     internal interface INewAzureHDInsightJobConfigBase
     {
         /// <summary>
-        /// Gets or sets the resources for the jobDetails.
+        ///     Gets or sets the resources for the jobDetails.
         /// </summary>
         string[] Files { get; set; }
 
         /// <summary>
-        /// Gets or sets the output location to use for the jobDetails.
+        ///     Gets or sets the output location to use for the jobDetails.
         /// </summary>
         string StatusFolder { get; set; }
     }

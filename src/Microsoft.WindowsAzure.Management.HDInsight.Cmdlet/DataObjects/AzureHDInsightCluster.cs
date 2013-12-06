@@ -12,74 +12,42 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects
 {
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using System.Linq;
-    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning;
 
     /// <summary>
-    /// Represents an Azure HD Insight Cluster for the PowerShell Cmdlets.
+    ///     Represents an Azure HD Insight Cluster for the PowerShell Cmdlets.
     /// </summary>
     public class AzureHDInsightCluster
     {
+        private readonly ClusterDetails cluster;
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="AzureHDInsightCluster"/> class.
+        ///     Initializes a new instance of the <see cref="AzureHDInsightCluster" /> class.
         /// </summary>
         /// <param name="cluster">
-        /// The underlying SDK data object representing the cluster.
+        ///     The underlying SDK data object representing the cluster.
         /// </param>
         public AzureHDInsightCluster(ClusterDetails cluster)
         {
             this.cluster = cluster;
         }
 
-        private ClusterDetails cluster;
-
         /// <summary>
-        /// Gets the name of the Azure HD Insight Cluster.
+        ///     Gets the size of the Azure HD Insight cluster in units of worker nodes.
         /// </summary>
-        public string Name
+        public int ClusterSizeInNodes
         {
-            get { return this.cluster.Name; }
+            get { return this.cluster.ClusterSizeInNodes; }
         }
 
         /// <summary>
-        /// Gets the login username for the cluster.
-        /// </summary>
-        public string HttpUserName
-        {
-            get { return this.cluster.HttpUserName; }
-        }
-
-        /// <summary>
-        /// Gets the password associated with Http requests to the cluster.
-        /// </summary>
-        public string HttpPassword
-        {
-            get { return this.cluster.HttpPassword; }
-        }
-
-        /// <summary>
-        /// Gets the name of the Azure HD Insight Cluster.
-        /// </summary>
-        public string Version
-        {
-            get { return this.cluster.Version; }
-        }
-
-        /// <summary>
-        /// Gets the version status of the Azure HD Insight Cluster.
-        /// </summary>
-        public string VersionStatus
-        {
-            get { return this.cluster.VersionStatus.ToString(); }
-        }
-
-        /// <summary>
-        /// Gets the connection Url for the Azure HD Insight Cluster.
+        ///     Gets the connection Url for the Azure HD Insight Cluster.
         /// </summary>
         [SuppressMessage("Microsoft.Design", "CA1056:UriPropertiesShouldNotBeStrings",
             Justification = "this is a read only property coming from the server.  It is safer to leave as a string. [tgs]")]
@@ -89,15 +57,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects
         }
 
         /// <summary>
-        /// Gets the ClusterState for the Azure HD Insight Cluster.
-        /// </summary>
-        public ClusterState State
-        {
-            get { return this.cluster.State; }
-        }
-
-        /// <summary>
-        /// Gets the Date the Azure HD Insight Cluster was created.
+        ///     Gets the Date the Azure HD Insight Cluster was created.
         /// </summary>
         public DateTime CreateDate
         {
@@ -105,37 +65,13 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects
         }
 
         /// <summary>
-        /// Gets the username used when creating the Azure HD Insight Cluster.
-        /// </summary>
-        public string UserName
-        {
-            get { return this.cluster.HttpUserName; }
-        }
-
-        /// <summary>
-        /// Gets the Azure location where the Azure HD Insight Cluster is located.
-        /// </summary>
-        public string Location
-        {
-            get { return this.cluster.Location; }
-        }
-
-        /// <summary>
-        /// Gets the size of the Azure HD Insight cluster in units of worker nodes.
-        /// </summary>
-        public int ClusterSizeInNodes
-        {
-            get { return this.cluster.ClusterSizeInNodes; }
-        }
-
-        /// <summary>
-        /// Gets the default storage accounts associated with the Azure HDInsight cluster.
+        ///     Gets the default storage accounts associated with the Azure HDInsight cluster.
         /// </summary>
         public AzureHDInsightDefaultStorageAccount DefaultStorageAccount
         {
             get
             {
-                return new AzureHDInsightDefaultStorageAccount()
+                return new AzureHDInsightDefaultStorageAccount
                 {
                     StorageAccountName = this.cluster.DefaultStorageAccount.Name,
                     StorageAccountKey = this.cluster.DefaultStorageAccount.Key,
@@ -145,29 +81,88 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects
         }
 
         /// <summary>
-        /// Gets the subscriptionid associated with this cluster.
+        ///     Gets the password associated with Http requests to the cluster.
         /// </summary>
-        public Guid SubscriptionId
+        internal string HttpPassword
         {
-            get
-            {
-                return this.cluster.SubscriptionId;
-            }
+            get { return this.cluster.HttpPassword; }
         }
 
         /// <summary>
-        /// Gets any storage accounts associated with the Azure HDInsight cluster.
+        ///     Gets the login username for the cluster.
+        /// </summary>
+        public string HttpUserName
+        {
+            get { return this.cluster.HttpUserName; }
+        }
+
+        /// <summary>
+        ///     Gets the Azure location where the Azure HD Insight Cluster is located.
+        /// </summary>
+        public string Location
+        {
+            get { return this.cluster.Location; }
+        }
+
+        /// <summary>
+        ///     Gets the name of the Azure HD Insight Cluster.
+        /// </summary>
+        public string Name
+        {
+            get { return this.cluster.Name; }
+        }
+
+        /// <summary>
+        ///     Gets the ClusterState for the Azure HD Insight Cluster.
+        /// </summary>
+        public ClusterState State
+        {
+            get { return this.cluster.State; }
+        }
+
+        /// <summary>
+        ///     Gets any storage accounts associated with the Azure HDInsight cluster.
         /// </summary>
         public IEnumerable<AzureHDInsightStorageAccount> StorageAccounts
         {
             get
             {
-                return this.cluster.AdditionalStorageAccounts.Select(acc => new AzureHDInsightStorageAccount()
-                {
-                    StorageAccountName = acc.Name,
-                    StorageAccountKey = acc.Key
-                });
+                return
+                    this.cluster.AdditionalStorageAccounts.Select(
+                        acc => new AzureHDInsightStorageAccount { StorageAccountName = acc.Name, StorageAccountKey = acc.Key });
             }
+        }
+
+        /// <summary>
+        ///     Gets the subscriptionid associated with this cluster.
+        /// </summary>
+        public Guid SubscriptionId
+        {
+            get { return this.cluster.SubscriptionId; }
+        }
+
+        /// <summary>
+        ///     Gets the username used when creating the Azure HD Insight Cluster.
+        /// </summary>
+        public string UserName
+        {
+            get { return this.cluster.HttpUserName; }
+        }
+
+        /// <summary>
+        ///     Gets the name of the Azure HD Insight Cluster.
+        /// </summary>
+        public string Version
+        {
+            get { return this.cluster.Version; }
+        }
+
+        /// <summary>
+        ///     Gets the version status of the Azure HD Insight Cluster.
+        /// </summary>
+        public string VersionStatus
+        {
+            get { return this.cluster.VersionStatus.ToString(); }
         }
     }
 }

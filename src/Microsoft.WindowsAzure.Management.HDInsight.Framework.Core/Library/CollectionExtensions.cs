@@ -20,11 +20,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library
     /// <summary>
     /// Adds Extension methods to the ICollection(of T) objects.
     /// </summary>
-#if Non_Public_SDK
-    public static class CollectionExtensions
-#else
     internal static class CollectionExtensions
-#endif
     {
         /// <summary>
         /// Allows a range of objects IEnumerable(of T) to be added to the collection.

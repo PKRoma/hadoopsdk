@@ -12,6 +12,7 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters
 {
     using System.Management.Automation;
@@ -28,20 +29,20 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightCl
             this.sessionState = sessionState;
         }
 
-        public void SetCurrentCluster(AzureHDInsightClusterConnection cluster)
-        {
-            this.sessionState.PSVariable.Set(CurrentClusterVariableName, cluster);
-        }
-
         public AzureHDInsightClusterConnection GetCurrentCluster()
         {
-            var currentClusterVariable = this.sessionState.PSVariable.Get(CurrentClusterVariableName);
+            PSVariable currentClusterVariable = this.sessionState.PSVariable.Get(CurrentClusterVariableName);
             if (currentClusterVariable == null)
             {
                 return null;
             }
 
             return (AzureHDInsightClusterConnection)currentClusterVariable.Value;
+        }
+
+        public void SetCurrentCluster(AzureHDInsightClusterConnection cluster)
+        {
+            this.sessionState.PSVariable.Set(CurrentClusterVariableName, cluster);
         }
     }
 }

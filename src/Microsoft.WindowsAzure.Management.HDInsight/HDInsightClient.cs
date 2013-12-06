@@ -47,7 +47,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
 
         internal const string ClusterAlreadyExistsError = "The condition specified by the ETag is not satisfied.";
 
-        private IHDInsightCertificateCredential credentials;
+        private IHDInsightSubscriptionCredentials credentials;
 
         /// <summary>
         /// Gets the connection credential.
@@ -71,12 +71,12 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
         /// </param>
         internal HDInsightClient(IHDInsightSubscriptionCredentials credentials)
         {
-            var asCertificateCredentials = credentials.As<IHDInsightCertificateCredential>();
+            var asCertificateCredentials = credentials;
             if (asCertificateCredentials.IsNull())
             {
                 throw new InvalidOperationException("Unable to connect to the HDInsight subscription with the supplied type of credential");
             }
-            this.credentials = ServiceLocator.Instance.Locate<IHDInsightSubscriptionCertificateCredentialsFactory>().Create(asCertificateCredentials);
+            this.credentials = ServiceLocator.Instance.Locate<IHDInsightSubscriptionCredentialsFactory>().Create(asCertificateCredentials);
             this.PollingInterval = DefaultPollingInterval;
         }
 
@@ -141,15 +141,15 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
         }
 
         /// <inheritdoc />
-        public async Task<ClusterDetails> CreateClusterAsync(ClusterCreateParameters cluster)
+        public async Task<ClusterDetails> CreateClusterAsync(ClusterCreateParameters clusterCreateParameters)
         {
-            if (cluster == null)
+            if (clusterCreateParameters == null)
             {
-                throw new ArgumentNullException("cluster");
+                throw new ArgumentNullException("clusterCreateParameters");
             }
 
             var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(this.credentials, this.Context);
-            await this.ValidateClusterVersion(cluster);
+            await this.ValidateClusterVersion(clusterCreateParameters);
 
             // listen to cluster provisioning events on the POCO client.
             client.ClusterProvisioning += this.RaiseClusterProvisioningEvent;
@@ -157,17 +157,17 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
             // Creates a cluster and waits for it to complete
             try
             {
-                await client.CreateContainer(cluster);
+                await client.CreateContainer(clusterCreateParameters);
             }
             catch (HttpLayerException e)
             {
-                if (e.RequestContent.Equals(ClusterAlreadyExistsError) && e.RequestStatusCode == HttpStatusCode.BadRequest)
+                if (e.RequestContent.Contains(ClusterAlreadyExistsError) && e.RequestStatusCode == HttpStatusCode.BadRequest)
                 {
-                    throw new InvalidOperationException(string.Format("Cluster {0} already exists.", cluster.Name));
+                    throw new InvalidOperationException(string.Format("Cluster {0} already exists.", clusterCreateParameters.Name));
                 }
             }
             await client.WaitForClusterInConditionOrError(this.HandleClusterWaitNotifyEvent,
-                                                          cluster.Name,
+                                                          clusterCreateParameters.Name,
                                                           TimeSpan.FromMinutes(30),
                                                           this.PollingInterval,
                                                           this.Context,
@@ -175,7 +175,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
                                                           ClusterState.Running);
 
             // Validates that cluster didn't get on error state
-            var result = await this.GetClusterAsync(cluster.Name);
+            var result = await this.GetClusterAsync(clusterCreateParameters.Name);
             if (result.Error != null)
             {
                 throw new OperationCanceledException(

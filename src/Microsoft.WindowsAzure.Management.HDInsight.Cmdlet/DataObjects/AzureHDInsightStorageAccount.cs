@@ -12,25 +12,26 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects
 {
     /// <summary>
-    /// Represents a Storage Account for an HD Insight Configuration.
+    ///     Represents a Storage Account for an HD Insight Configuration.
     /// </summary>
     public class AzureHDInsightStorageAccount
     {
         /// <summary>
-        /// Gets or sets the Storage Account Name.
-        /// </summary>
-        public string StorageAccountName { get; set; }
-
-        /// <summary>
-        /// Gets or sets the Storage Account Key.
+        ///     Gets or sets the Storage Account Key.
         /// </summary>
         public string StorageAccountKey { get; set; }
 
         /// <summary>
-        /// Overrides the ToString() method to return the storage account name.
+        ///     Gets or sets the Storage Account Name.
+        /// </summary>
+        public string StorageAccountName { get; set; }
+
+        /// <summary>
+        ///     Overrides the ToString() method to return the storage account name.
         /// </summary>
         /// <returns>The string representation of this object.</returns>
         public override string ToString()

@@ -152,7 +152,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
             return Task.FromResult(result.IsNotNull());
         }
 
-        public Task Delete(Uri path)
+        public void Delete(Uri path)
         {
             var pathInfo = new PathInfo(path);
 
@@ -167,7 +167,6 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
             {
                 item.Items.Remove(pathInfo.PathParts[pathInfo.PathParts.Length - 1]);
             }
-            return Task.Delay(0);
         }
 
         public Task CreateContainerIfNotExists(string containerName)

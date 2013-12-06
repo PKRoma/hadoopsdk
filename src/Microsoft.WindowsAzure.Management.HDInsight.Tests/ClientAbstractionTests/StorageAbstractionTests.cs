@@ -16,6 +16,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
 {
     using System;
     using System.Linq;
+    using System.Text;
     using System.Threading.Tasks;
     using System.Globalization;
     using System.IO;
@@ -130,7 +131,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
                 Name = wellKnownStorageAccount.Name
             };
             var wabsStorageClient = new WabStorageAbstraction(storageCreds);
-            var testFilePath = new Uri(string.Format(CultureInfo.InvariantCulture, "{2}{1}@{0}/input", Constants.WabsProtocolSchemeName, wellKnownStorageAccount.Container, wellKnownStorageAccount.Name));
+            var testFilePath = new Uri(string.Format(CultureInfo.InvariantCulture, "{0}{1}@{2}/example", Constants.WabsProtocolSchemeName, wellKnownStorageAccount.Container, wellKnownStorageAccount.Name));
             var testFileStream = await wabsStorageClient.List(testFilePath, true);
             Assert.IsNotNull(testFileStream);
         }
@@ -143,7 +144,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             var asvPath = WabStorageAbstraction.ConvertToAsvPath(httpPath);
             var httpPathRoundTripped = WabStorageAbstraction.ConvertToHttpPath(asvPath);
             Assert.AreEqual(httpPath.OriginalString.TrimEnd('/'), httpPathRoundTripped.OriginalString.TrimEnd('/'));
-    }
+        }
 
         [TestMethod]
         [TestCategory("CheckIn")]
@@ -153,7 +154,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             var httpPath = WabStorageAbstraction.ConvertToHttpPath(asvPath);
             var expectedHttpPath = "http://storageaccounthost.blob.core.windows.net/containerName";
             Assert.AreEqual(expectedHttpPath, httpPath.OriginalString.TrimEnd('/'));
-}
+        }
 
         [TestMethod]
         [TestCategory("CheckIn")]

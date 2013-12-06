@@ -12,6 +12,7 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
 {
     using System;
@@ -23,16 +24,18 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
     using System.Linq;
     using System.Management.Automation;
     using System.Reflection;
+    using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.BaseCommandInterfaces;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandInterfaces;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.Extensions;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.ServiceLocation;
     using Microsoft.WindowsAzure.Management.HDInsight.Logging;
 
     /// <summary>
-    /// Cmdlet that lists submits a jobDetails to a running HDInsight cluster.
+    ///     Cmdlet that lists submits a jobDetails to a running HDInsight cluster.
     /// </summary>
     [Cmdlet(VerbsLifecycle.Invoke, AzureHdInsightPowerShellConstants.Hive)]
     [Alias(AzureHdInsightPowerShellConstants.HiveCmd)]
@@ -40,9 +43,10 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
     {
         private readonly IInvokeHiveCommand command;
         private readonly INewAzureHDInsightHiveJobDefinitionCommand hiveJobDefinitionCommand;
+        private readonly Queue<object> queue = new Queue<object>();
 
         /// <summary>
-        /// Initializes a new instance of the InvokeHiveCmdlet class.
+        ///     Initializes a new instance of the InvokeHiveCmdlet class.
         /// </summary>
         public InvokeHiveCmdlet()
         {
@@ -51,19 +55,40 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
         }
 
         /// <inheritdoc />
-        protected override void StopProcessing()
+        [Parameter(Mandatory = false, HelpMessage = "The hive arguments for the jobDetails.")]
+        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "Need collections for input parameters")]
+        public string[] Arguments
         {
-            this.command.Cancel();
+            get { return this.hiveJobDefinitionCommand.Arguments; }
+            set { this.hiveJobDefinitionCommand.Arguments = value; }
         }
 
         /// <inheritdoc />
-        [Parameter(Mandatory = false, Position = 1,
-                   HelpMessage = "The query to run in the jobDetails.")]
-        [Alias(AzureHdInsightPowerShellConstants.AliasQuery)]
-        public string Query
+        [Parameter(Mandatory = false, HelpMessage = "The parameters for the jobDetails.")]
+        [Alias(AzureHdInsightPowerShellConstants.AliasParameters)]
+        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "Need collections for input parameters")]
+        public Hashtable Defines
         {
-            get { return this.hiveJobDefinitionCommand.Query; }
-            set { this.hiveJobDefinitionCommand.Query = value; }
+            get { return this.hiveJobDefinitionCommand.Defines; }
+            set { this.hiveJobDefinitionCommand.Defines = value; }
+        }
+
+        /// <inheritdoc />
+        [Parameter(Mandatory = false, HelpMessage = "The query file to run in the jobDetails.")]
+        [Alias(AzureHdInsightPowerShellConstants.AliasQueryFile)]
+        public string File
+        {
+            get { return this.hiveJobDefinitionCommand.File; }
+            set { this.hiveJobDefinitionCommand.File = value; }
+        }
+
+        /// <inheritdoc />
+        [Parameter(Mandatory = false, HelpMessage = "The files for the jobDetails.")]
+        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "Need collections for input parameters")]
+        public string[] Files
+        {
+            get { return this.hiveJobDefinitionCommand.Files; }
+            set { this.hiveJobDefinitionCommand.Files = value; }
         }
 
         /// <inheritdoc />
@@ -76,49 +101,16 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
         }
 
         /// <inheritdoc />
-        [Parameter(Mandatory = false,
-                   HelpMessage = "The query file to run in the jobDetails.")]
-        [Alias(AzureHdInsightPowerShellConstants.AliasQueryFile)]
-        public string File
+        [Parameter(Mandatory = false, Position = 1, HelpMessage = "The query to run in the jobDetails.")]
+        [Alias(AzureHdInsightPowerShellConstants.AliasQuery)]
+        public string Query
         {
-            get { return this.hiveJobDefinitionCommand.File; }
-            set { this.hiveJobDefinitionCommand.File = value; }
+            get { return this.hiveJobDefinitionCommand.Query; }
+            set { this.hiveJobDefinitionCommand.Query = value; }
         }
 
         /// <inheritdoc />
-        [Parameter(Mandatory = false,
-                   HelpMessage = "The parameters for the jobDetails.")]
-        [Alias(AzureHdInsightPowerShellConstants.AliasParameters)]
-        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "Need collections for input parameters")]
-        public Hashtable Defines
-        {
-            get { return this.hiveJobDefinitionCommand.Defines; }
-            set { this.hiveJobDefinitionCommand.Defines = value; }
-        }
-
-        /// <inheritdoc />
-        [Parameter(Mandatory = false,
-                   HelpMessage = "The files for the jobDetails.")]
-        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "Need collections for input parameters")]
-        public string[] Files
-        {
-            get { return this.hiveJobDefinitionCommand.Files; }
-            set { this.hiveJobDefinitionCommand.Files = value; }
-        }
-
-        /// <inheritdoc />
-        [Parameter(Mandatory = false,
-                   HelpMessage = "The hive arguments for the jobDetails.")]
-        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "Need collections for input parameters")]
-        public string[] Arguments
-        {
-            get { return this.hiveJobDefinitionCommand.Arguments; }
-            set { this.hiveJobDefinitionCommand.Arguments = value; }
-        }
-
-        /// <inheritdoc />
-        [Parameter(Mandatory = false,
-                   HelpMessage = "The output location to use for the jobDetails.")]
+        [Parameter(Mandatory = false, HelpMessage = "The output location to use for the jobDetails.")]
         public string StatusFolder
         {
             get { return this.hiveJobDefinitionCommand.StatusFolder; }
@@ -128,25 +120,26 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
         /// <inheritdoc />
         protected override void EndProcessing()
         {
-            var currentConnection = this.AssertValidConnection();
+            AzureHDInsightClusterConnection currentConnection = this.AssertValidConnection();
             this.hiveJobDefinitionCommand.EndProcessing().Wait();
-            var hiveJob = this.hiveJobDefinitionCommand.Output.Last();
+            AzureHDInsightHiveJobDefinition hiveJob = this.hiveJobDefinitionCommand.Output.Last();
             this.command.JobDefinition = hiveJob;
             this.command.Output.CollectionChanged += this.OutputItemAdded;
             this.command.Connection = currentConnection;
             try
             {
                 this.command.Logger = this.Logger;
-                var task = this.command.EndProcessing();
-                var token = this.command.CancellationToken;
+                Task task = this.command.EndProcessing();
+                CancellationToken token = this.command.CancellationToken;
                 while (!task.IsCompleted)
                 {
                     this.WriteDebugLog();
                     task.Wait(1000, token);
                     if (this.command.JobDetailsStatus.IsNotNull())
                     {
-                        var msg = string.Format(CultureInfo.CurrentCulture, "Waiting for jobDetails : {0}", this.command.JobId);
-                        var record = new ProgressRecord(0, msg, this.command.JobDetailsStatus.StatusCode.ToString() + " : " + this.command.JobDetailsStatus.PercentComplete);
+                        string msg = string.Format(CultureInfo.CurrentCulture, "Waiting for jobDetails : {0}", this.command.JobId);
+                        var record = new ProgressRecord(
+                            0, msg, this.command.JobDetailsStatus.StatusCode.ToString() + " : " + this.command.JobDetailsStatus.PercentComplete);
                         this.WriteProgress(record);
                     }
                     while (this.queue.Count > 0)
@@ -165,7 +158,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
             }
             catch (Exception ex)
             {
-                var type = ex.GetType();
+                Type type = ex.GetType();
                 this.Logger.Log(Severity.Error, Verbosity.Normal, this.FormatException(ex));
                 this.WriteDebugLog();
                 if (type == typeof(AggregateException) || type == typeof(TargetInvocationException) || type == typeof(TaskCanceledException))
@@ -187,7 +180,11 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
             }
         }
 
-        private Queue<object> queue = new Queue<object>();
+        /// <inheritdoc />
+        protected override void StopProcessing()
+        {
+            this.command.Cancel();
+        }
 
         private void OutputItemAdded(object sender, NotifyCollectionChangedEventArgs e)
         {

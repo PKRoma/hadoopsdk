@@ -12,13 +12,15 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandInterfaces
 {
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.BaseCommandInterfaces;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters;
 
-    internal interface INewAzureHDInsightSqoopJobDefinitionCommand : IAzureHDInsightCommand<AzureHDInsightSqoopJobDefinition>, INewAzureHDInsightSqoopJobDefinitionBase
+    internal interface INewAzureHDInsightSqoopJobDefinitionCommand
+        : IAzureHDInsightCommand<AzureHDInsightSqoopJobDefinition>, INewAzureHDInsightSqoopJobDefinitionBase
     {
     }
 }

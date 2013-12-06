@@ -12,6 +12,7 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.BaseCommandInterfaces
 {
     using System.Management.Automation;
@@ -19,33 +20,33 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.BaseComman
     internal interface INewAzureHDInsightClusterBase : IRemoveAzureHDInsightClusterBase
     {
         /// <summary>
-        /// Gets or sets the Asv Account name to use for the cluster's default container.
+        ///     Gets or sets the number of data (worker) nodes to use in the cluster.
         /// </summary>
-        string DefaultStorageAccountName { get; set; }
+        int ClusterSizeInNodes { get; set; }
 
         /// <summary>
-        /// Gets or sets the Asv Account key to use for the cluster's default container.
-        /// </summary>
-        string DefaultStorageAccountKey { get; set; }
-
-        /// <summary>
-        /// Gets or sets the container to use for the cluster's default container.
-        /// </summary>
-        string DefaultStorageContainerName { get; set; }
-
-        /// <summary>
-        /// Gets or sets the user credentials (username and password).
+        ///     Gets or sets the user credentials (username and password).
         /// </summary>
         PSCredential Credential { get; set; }
 
         /// <summary>
-        /// Gets or sets the version to use for the cluster.
+        ///     Gets or sets the Asv Account key to use for the cluster's default container.
+        /// </summary>
+        string DefaultStorageAccountKey { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the Asv Account name to use for the cluster's default container.
+        /// </summary>
+        string DefaultStorageAccountName { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the container to use for the cluster's default container.
+        /// </summary>
+        string DefaultStorageContainerName { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the version to use for the cluster.
         /// </summary>
         string Version { get; set; }
-        
-        /// <summary>
-        /// Gets or sets the number of data (worker) nodes to use in the cluster.
-        /// </summary>
-        int ClusterSizeInNodes { get; set; }
     }
 }

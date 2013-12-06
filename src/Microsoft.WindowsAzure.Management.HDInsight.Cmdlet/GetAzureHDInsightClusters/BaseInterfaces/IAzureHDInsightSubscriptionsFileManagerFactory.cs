@@ -12,10 +12,9 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.BaseInterfaces
 {
-    using System.Collections.Generic;
-
     internal interface IAzureHDInsightSubscriptionsFileManagerFactory
     {
         IAzureHDInsightSubscriptionsFileManager Create();

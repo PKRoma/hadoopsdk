@@ -28,6 +28,7 @@ namespace Microsoft.Hadoop.Client
         protected JobCreateParameters()
         {
             this.Files = new List<string>();
+            this.EnableTaskLogs = false;
         }
 
         /// <summary>
@@ -39,5 +40,15 @@ namespace Microsoft.Hadoop.Client
         /// Gets or sets the status folder to use for the jobDetails.
         /// </summary>
         public string StatusFolder { get; set; }
+
+        /// <summary>
+        /// Gets or sets the callback URI to be called upon job completion.
+        /// </summary>
+        public string Callback { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the job executor should persist task logs.
+        /// </summary>
+        public bool EnableTaskLogs { get; set; }
     }
 }

@@ -12,49 +12,190 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
 {
     using System;
-    using System.Collections.Generic;
     using System.Globalization;
     using System.Management.Automation;
     using System.Reflection;
     using System.Security.Cryptography.X509Certificates;
+    using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.BaseCommandInterfaces;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandInterfaces;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.Extensions;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.ServiceLocation;
     using Microsoft.WindowsAzure.Management.HDInsight.Logging;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
 
     /// <summary>
-    /// Cmdlet that lists all the Jobs running on a HDInsight cluster.
+    ///     Cmdlet that lists all the Jobs running on a HDInsight cluster.
     /// </summary>
-    [Cmdlet(VerbsLifecycle.Wait, AzureHdInsightPowerShellConstants.AzureHDInsightJobs, DefaultParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetJobHistoryByName)]
+    [Cmdlet(VerbsLifecycle.Wait, AzureHdInsightPowerShellConstants.AzureHDInsightJobs,
+        DefaultParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetJobHistoryByName)]
     public class WaitAzureHDInsightJobCmdlet : AzureHDInsightCmdlet, IWaitAzureHDInsightJobBase
     {
         private readonly IWaitAzureHDInsightJobCommand command;
+
+        /// <summary>
+        ///     Initializes a new instance of the WaitAzureHDInsightJobCmdlet class.
+        /// </summary>
+        public WaitAzureHDInsightJobCmdlet()
+        {
+            this.command = ServiceLocator.Instance.Locate<IAzureHDInsightCommandFactory>().CreateWaitJobs();
+        }
+
+        /// <inheritdoc />
+        [Parameter(Mandatory = false, HelpMessage = "The management certificate used to manage the Azure subscription.",
+            ParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetJobHistoryByNameWithSpecificSubscriptionCredentials)]
+        [Alias(AzureHdInsightPowerShellConstants.AliasCert)]
+        public X509Certificate2 Certificate
+        {
+            get { return this.command.Certificate; }
+            set { this.command.Certificate = value; }
+        }
+
+        /// <inheritdoc />
+        [Parameter(Mandatory = false, HelpMessage = "The CloudServiceName to use when managing the HDInsight cluster.",
+            ParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetJobHistoryByNameWithSpecificSubscriptionCredentials)]
+        public string CloudServiceName
+        {
+            get { return this.command.CloudServiceName; }
+            set { this.command.CloudServiceName = value; }
+        }
+
+        /// <inheritdoc />
+        [Parameter(Mandatory = true, HelpMessage = "The name of the cluster the Job is running on", ValueFromPipelineByPropertyName = true,
+            ValueFromPipeline = true, ParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetWaitJobById)]
+        public string Cluster
+        {
+            get { return this.command.Cluster; }
+            set { this.command.Cluster = value; }
+        }
+
+        /// <inheritdoc />
+        [Parameter(Mandatory = true, Position = 1, HelpMessage = "The credentials to connect to Azure HDInsight cluster.", ValueFromPipeline = true,
+            ParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetJobHistoryByName)]
+        [Parameter(Mandatory = true, HelpMessage = "The credentials to connect to Azure HDInsight cluster.", ValueFromPipeline = true,
+            ParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetWaitJobByJob)]
+        [Parameter(Mandatory = true, HelpMessage = "The credentials to connect to Azure HDInsight cluster.", ValueFromPipeline = true,
+            ParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetWaitJobById)]
+        [Alias(AzureHdInsightPowerShellConstants.AliasCredentials)]
+        public PSCredential Credential
+        {
+            get { return this.command.Credential; }
+            set { this.command.Credential = value; }
+        }
+
+        /// <inheritdoc />
+        [Parameter(Mandatory = false, HelpMessage = "The Endpoint to use when connecting to Azure.",
+            ParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetJobHistoryByNameWithSpecificSubscriptionCredentials)]
+        public Uri EndPoint
+        {
+            get { return this.command.EndPoint; }
+            set { this.command.EndPoint = value; }
+        }
+
+        /// <inheritdoc />
+        [Parameter(Mandatory = true, HelpMessage = "The Jobs to wait for.", ValueFromPipeline = true,
+            ParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetWaitJobByJob)]
+        [Parameter(Mandatory = true, HelpMessage = "The Jobs to wait for.", ValueFromPipeline = true,
+            ParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetJobHistoryByNameWithSpecificSubscriptionCredentials)]
+        public AzureHDInsightJob Job
+        {
+            get { return this.command.Job; }
+            set
+            {
+                this.command.Job = value;
+                if (value.IsNotNull())
+                {
+                    this.command.JobId = this.command.Job.JobId;
+                    this.command.Cluster = this.command.Job.Cluster;
+                }
+            }
+        }
+
+        /// <inheritdoc />
+        [Parameter(Mandatory = true, HelpMessage = "The Id of the Job to wait for.", ValueFromPipelineByPropertyName = true, ValueFromPipeline = true,
+            ParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetWaitJobById)]
+        public string JobId
+        {
+            get { return this.command.JobId; }
+            set { this.command.JobId = value; }
+        }
+
+        /// <inheritdoc />
+        [Parameter(Position = 1, Mandatory = true, HelpMessage = "The subscription id for the Azure subscription.",
+            ParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetJobHistoryByNameWithSpecificSubscriptionCredentials)]
+        [Alias(AzureHdInsightPowerShellConstants.AliasSub)]
+        public string Subscription
+        {
+            get { return this.command.Subscription; }
+            set { this.command.Subscription = value; }
+        }
+
+        /// <inheritdoc />
+        [Parameter(Mandatory = false, HelpMessage = "The number of seconds to wait for completion, before cancelling waiting.",
+            ValueFromPipeline = true)]
+        public double WaitTimeoutInSeconds
+        {
+            get { return this.command.WaitTimeoutInSeconds; }
+            set { this.command.WaitTimeoutInSeconds = value; }
+        }
+
+        /// <inheritdoc />
+        protected override void EndProcessing()
+        {
+            try
+            {
+                this.command.Logger = this.Logger;
+                Task task = this.command.EndProcessing();
+                CancellationToken token = this.command.CancellationToken;
+                while (!task.IsCompleted)
+                {
+                    this.WriteDebugLog();
+                    task.Wait(1000, token);
+                }
+                if (task.IsFaulted)
+                {
+                    throw new AggregateException(task.Exception);
+                }
+                foreach (AzureHDInsightJob output in this.command.Output)
+                {
+                    this.WriteObject(output);
+                }
+                this.WriteDebugLog();
+            }
+            catch (AggregateException ex)
+            {
+                this.WriteObject(this.FormatException(ex));
+                this.Logger.Log(Severity.Error, Verbosity.Normal, this.FormatException(ex));
+                throw ex.InnerException;
+            }
+            this.WriteDebugLog();
+        }
 
         /// <inheritdoc />
         protected override void ProcessRecord()
         {
             DateTime start = DateTime.Now;
-            var msg = string.Format(CultureInfo.CurrentCulture, "Waiting for jobDetails Started : {0}", start.ToString(CultureInfo.CurrentCulture));
+            string msg = string.Format(CultureInfo.CurrentCulture, "Waiting for jobDetails Started : {0}", start.ToString(CultureInfo.CurrentCulture));
             this.Logger.Log(Severity.Informational, Verbosity.Detailed, msg);
             try
             {
                 this.command.Logger = this.Logger;
-                var task = this.command.ProcessRecord();
-                var token = this.command.CancellationToken;
+                Task task = this.command.ProcessRecord();
+                CancellationToken token = this.command.CancellationToken;
                 while (!task.IsCompleted)
                 {
                     this.WriteDebugLog();
                     if (this.command.JobDetailsStatus.IsNotNull())
                     {
-                        msg = string.Format(CultureInfo.CurrentCulture, "Waiting for jobDetails : {0}", this.Job.JobId);
-                        var record = new ProgressRecord(0, msg, this.command.JobDetailsStatus.StatusCode.ToString() + " : " + this.command.JobDetailsStatus.PercentComplete);
+                        msg = string.Format(CultureInfo.CurrentCulture, "Waiting for jobDetails : {0}", this.JobId);
+                        var record = new ProgressRecord(
+                            0, msg, this.command.JobDetailsStatus.StatusCode.ToString() + " : " + this.command.JobDetailsStatus.PercentComplete);
                         this.WriteProgress(record);
                     }
                     task.Wait(1000, token);
@@ -63,7 +204,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
             }
             catch (Exception ex)
             {
-                var type = ex.GetType();
+                Type type = ex.GetType();
                 this.Logger.Log(Severity.Error, Verbosity.Normal, this.FormatException(ex));
                 this.WriteDebugLog();
                 if (type == typeof(AggregateException) || type == typeof(TargetInvocationException) || type == typeof(TaskCanceledException))
@@ -77,7 +218,10 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
             }
             msg = string.Format(CultureInfo.CurrentCulture, "Waiting for jobDetails Stopped : {0}", DateTime.Now.ToString(CultureInfo.CurrentCulture));
             this.Logger.Log(Severity.Informational, Verbosity.Detailed, msg);
-            msg = string.Format(CultureInfo.CurrentCulture, "Waiting for jobDetails Executed for {0} minutes", (DateTime.Now - start).TotalMinutes.ToString(CultureInfo.CurrentCulture));
+            msg = string.Format(
+                CultureInfo.CurrentCulture,
+                "Waiting for jobDetails Executed for {0} minutes",
+                (DateTime.Now - start).TotalMinutes.ToString(CultureInfo.CurrentCulture));
             this.Logger.Log(Severity.Informational, Verbosity.Detailed, msg);
             this.WriteDebugLog();
         }
@@ -86,121 +230,6 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
         protected override void StopProcessing()
         {
             this.command.Cancel();
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the WaitAzureHDInsightJobCmdlet class.
-        /// </summary>
-        public WaitAzureHDInsightJobCmdlet()
-        {
-            this.command = ServiceLocator.Instance.Locate<IAzureHDInsightCommandFactory>().CreateWaitJobs();
-        }
-
-        /// <inheritdoc />
-        [Parameter(Mandatory = true,
-                  HelpMessage = "The Jobs to wait for.",
-                  ValueFromPipeline = true)]
-        public AzureHDInsightJob Job
-        {
-            get { return this.command.Job; }
-            set { this.command.Job = value; }
-        }
-
-        /// <inheritdoc />
-        [Parameter(Mandatory = false,
-            HelpMessage = "The number of seconds to wait for completion, before cancelling waiting.",
-            ValueFromPipeline = true)]
-        public double WaitTimeoutInSeconds
-        {
-            get { return this.command.WaitTimeoutInSeconds; }
-            set { this.command.WaitTimeoutInSeconds = value; }
-        }
-
-        /// <inheritdoc />
-        [Parameter(Mandatory = true,
-                  Position = 1,
-                  HelpMessage = "The credentials to connect to Azure HDInsight cluster.",
-                  ValueFromPipeline = true,
-                  ParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetJobHistoryByName)]
-        [Alias(AzureHdInsightPowerShellConstants.AliasCredentials)]
-        public PSCredential Credential
-        {
-            get { return this.command.Credential; }
-            set { this.command.Credential = value; }
-        }
-
-        /// <inheritdoc />
-        [Parameter(Position = 1, Mandatory = true,
-                   HelpMessage = "The subscription id for the Azure subscription.",
-                   ParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetJobHistoryByNameWithSpecificSubscriptionCredentials)]
-        [Alias(AzureHdInsightPowerShellConstants.AliasSub)]
-        public string Subscription
-        {
-            get { return this.command.Subscription; }
-            set { this.command.Subscription = value; }
-        }
-
-        /// <inheritdoc />
-        [Parameter(Mandatory = false,
-                   HelpMessage = "The management certificate used to manage the Azure subscription.",
-                   ParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetJobHistoryByNameWithSpecificSubscriptionCredentials)]
-        [Alias(AzureHdInsightPowerShellConstants.AliasCert)]
-        public X509Certificate2 Certificate
-        {
-            get { return this.command.Certificate; }
-            set { this.command.Certificate = value; }
-        }
-
-        /// <inheritdoc />
-        [Parameter(Mandatory = false,
-                   HelpMessage = "The Endpoint to use when connecting to Azure.",
-                   ParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetJobHistoryByNameWithSpecificSubscriptionCredentials)]
-        public Uri EndPoint
-        {
-            get { return this.command.EndPoint; }
-            set { this.command.EndPoint = value; }
-        }
-
-        /// <inheritdoc />
-        [Parameter(Mandatory = false,
-                   HelpMessage = "The CloudServiceName to use when managing the HDInsight cluster.",
-                   ParameterSetName = AzureHdInsightPowerShellConstants.ParameterSetJobHistoryByNameWithSpecificSubscriptionCredentials)]
-        public string CloudServiceName
-        {
-            get { return this.command.CloudServiceName; }
-            set { this.command.CloudServiceName = value; }
-        }
-
-        /// <inheritdoc />
-        protected override void EndProcessing()
-        {
-            try
-            {
-                this.command.Logger = this.Logger;
-                var task = this.command.EndProcessing();
-                var token = this.command.CancellationToken;
-                while (!task.IsCompleted)
-                {
-                    this.WriteDebugLog();
-                    task.Wait(1000, token);
-                }
-                if (task.IsFaulted)
-                {
-                    throw new AggregateException(task.Exception);
-                }
-                foreach (var output in this.command.Output)
-                {
-                    this.WriteObject(output);
-                }
-                this.WriteDebugLog();
-            }
-            catch (AggregateException ex)
-            {
-                this.WriteObject(this.FormatException(ex));
-                this.Logger.Log(Severity.Error, Verbosity.Normal, this.FormatException(ex));
-                throw ex.InnerException;
-            }
-            this.WriteDebugLog();
         }
     }
 }

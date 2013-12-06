@@ -71,9 +71,14 @@
     <Compile Include="ClusterProvisioning\Data\MapReduceConfiguration.cs" />
     <Compile Include="ClusterProvisioning\PocoClient\IUserChangeRequestManager.cs" />
     <Compile Include="ClusterProvisioning\PocoClient\UserChangeRequestManager.cs" />
+    <Compile Include="JobSubmissionAccessTokenCredential.cs" />
+    <Compile Include="HDInsightHttpClientAbstractionFactory.cs" />
+    <Compile Include="IHDInsightHttpClientAbstractionFactory.cs" />
+    <Compile Include="ConnectionContext\IHDInsightAccessTokenCredentials.cs" />
     <Compile Include="ConnectionContext\HDInsightSubscriptionAbstractionContext.cs" />
     <Compile Include="ConnectionContext\IHDInsightCertificateCredential.cs" />
     <Compile Include="ConnectionContext\IHDInsightSubscriptionAbstractionContext.cs" />
+    <Compile Include="HDInsightAccessTokenCredential.cs" />
     <Compile Include="HDInsightCertificateCredential.cs" />
     <Compile Include="HDInsightClient.cs" />
     <Compile Include="IHDInsightClient.cs" />
@@ -115,7 +120,7 @@
     <Compile Include="ClusterProvisioning\SubscriptionRegistration\ISubscriptionRegistrationClient.cs" />
     <Compile Include="ConnectionContext\IHDInsightSubscriptionCredentials.cs" />
     <Compile Include="ConnectionContext\ProductionIHDInsightSubscriptionCertificateCredentialsFactory.cs" />
-    <Compile Include="ConnectionContext\IHDInsightSubscriptionCertificateCredentialsFactory.cs" />
+    <Compile Include="ConnectionContext\IHDInsightSubscriptionCredentialsFactory.cs" />
     <Compile Include="ClusterProvisioning\Data\HDInsightMetastore.cs" />
     <Compile Include="ClusterProvisioning\Data\ClusterState.cs" />
     <Compile Include="ClusterProvisioning\Data\ClusterErrorStatus.cs" />

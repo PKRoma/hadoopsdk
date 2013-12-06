@@ -15,6 +15,7 @@
 namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
 {
     using System;
+    using System.Collections.Generic;
     using System.Globalization;
     using System.IO;
     using System.Linq;
@@ -25,10 +26,12 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
     using Microsoft.Hadoop.Client;
     using Microsoft.Hadoop.Client.ClientLayer;
     using Microsoft.Hadoop.Client.HadoopJobSubmissionPocoClient;
+    using Microsoft.Hadoop.Client.Storage;
     using Microsoft.Hadoop.Client.WebHCatRest;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
     using Microsoft.WindowsAzure.Management.HDInsight.JobSubmission;
     using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities;
@@ -55,10 +58,34 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
         [TestMethod]
         [TestCategory("Integration")]
         [TestCategory("Nightly")]
-        public void CanCreateMapReduceJob_AgainstAzure()
+        public void CanCreateMapReduceJob_PiJob_AgainstAzure()
         {
             this.ApplyIndividualTestMockingOnly();
-            this.CanCreateMapReduceJob();
+            this.CanCreateMapReduceJob_PiJob();
+            string[] filesToBeDeleted = { "piresults" };
+            DeleteFiles(filesToBeDeleted).WaitForResult();
+        }
+
+        [TestMethod]
+        [TestCategory("Integration")]
+        [TestCategory("Nightly")]
+        public void CanCreateMapReduceJob_WordCount_AgainstAzure()
+        {
+            this.ApplyIndividualTestMockingOnly();
+            this.CanCreateMapReduceJob_WordCountJob();
+            string[] filesToBeDeleted = { "wordcountresults" };
+            DeleteFiles(filesToBeDeleted).WaitForResult();
+        }
+
+        [TestMethod]
+        [TestCategory("Integration")]
+        [TestCategory("Nightly")]
+        public void CanCreateMapReduceJob_Terasort_AgainstAzure()
+        {
+            this.ApplyIndividualTestMockingOnly();
+            this.CanCreateMapReduceJob_TerasortJob();
+            string[] filesToBeDeleted = { "teragenresults", "terasortresults", "teravalidateresults", "example/data/terasort-input", "example/data/terasort-output", "example/data/terasort-validate" };
+            DeleteFiles(filesToBeDeleted).WaitForResult();
         }
 
         [TestMethod]
@@ -68,6 +95,8 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
         {
             this.ApplyIndividualTestMockingOnly();
             this.CanCreateStreamingMapReduceJob();
+            string[] filesToBeDeleted = { "example/data/gutenberg/wc.out", string.Format("user/{0}/mrstreamingoutput", IntegrationTestBase.TestCredentials.AzureUserName) };
+            DeleteFiles(filesToBeDeleted).WaitForResult();
         }
 
         [TestMethod]
@@ -77,6 +106,41 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
         {
             this.ApplyIndividualTestMockingOnly();
             this.CanCreateHiveJobs();
+            string[] filesToBeDeleted = { "tables" };
+            DeleteFiles(filesToBeDeleted).WaitForResult();
+        }
+
+        [TestMethod]
+        [TestCategory("Integration")]
+        [TestCategory("Nightly")]
+        public void CanCreateHiveJobWithQueryFile_AgainstAzure()
+        {
+            this.ApplyIndividualTestMockingOnly();
+            this.CanCreateHiveJobsWithQueryFile();
+            string[] filesToBeDeleted = { "hivequeryfileresultsfolder" };
+            DeleteFiles(filesToBeDeleted).WaitForResult();
+        }
+
+        [TestMethod]
+        [TestCategory("Integration")]
+        [TestCategory("Nightly")]
+        public void CanCreateSerdeHiveJob_AgainstAzure()
+        {
+            this.ApplyIndividualTestMockingOnly();
+            this.CanCreateSerdeHiveJobs();
+            string[] filesToBeDeleted = { "hiveserderesultsfolder" };
+            DeleteFiles(filesToBeDeleted).WaitForResult();
+        }
+
+        [TestMethod]
+        [TestCategory("Integration")]
+        [TestCategory("Nightly")]
+        public void CanCreatePigJob_AgainstAzure()
+        {
+            this.ApplyIndividualTestMockingOnly();
+            this.CanCreatePigJobs();
+            string[] filesToBeDeleted = { "pigresultsfolder" };
+            DeleteFiles(filesToBeDeleted).WaitForResult();
         }
 
         [TestMethod]
@@ -312,7 +376,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
 
         [TestMethod]
         [TestCategory("CheckIn")]
-        public void CanCreateMapReduceJob()
+        public void CanCreateMapReduceJob_PiJob()
         {
             var remoteConnectionCredentials = GetRemoteConnectionCredentials();
 
@@ -320,14 +384,94 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             var mapReduceJob = new MapReduceJobCreateParameters()
             {
                 ClassName = "pi",
-                JobName = "pi estimation jobDetails",
-                JarFile = "/example/hadoop-examples.jar",
+                JobName = "pi estimation job",
+                JarFile = "/example/jars/hadoop-examples.jar",
                 StatusFolder = "/piresults"
             };
 
             mapReduceJob.Arguments.Add("16");
             mapReduceJob.Arguments.Add("10000");
             var jobCreationDetails = hadoopClient.CreateMapReduceJob(mapReduceJob);
+            WaitForJobCompletion(jobCreationDetails, hadoopClient);
+            Assert.IsNull(jobCreationDetails.ErrorCode, "Should not fail mr jobDetails submission");
+            Assert.IsNotNull(jobCreationDetails.JobId, "Should have a non-null jobDetails id");
+        }
+
+        [TestMethod]
+        [TestCategory("CheckIn")]
+        public void CanCreateMapReduceJob_WordCountJob()
+        {
+            var remoteConnectionCredentials = GetRemoteConnectionCredentials();
+            var hadoopClient = JobSubmissionClientFactory.Connect(remoteConnectionCredentials);
+            var mapReduceJob = new MapReduceJobCreateParameters()
+            {
+                ClassName = "wordcount",
+                JobName = "word count job",
+                JarFile = "/example/jars/hadoop-examples.jar",
+                StatusFolder = "/wordcountresults"
+            };
+            mapReduceJob.Arguments.Add("/example/data/gutenberg/davinci.txt");
+            mapReduceJob.Arguments.Add("wordcountresultsfolder");
+            var jobCreationDetails = hadoopClient.CreateMapReduceJob(mapReduceJob);
+            WaitForJobCompletion(jobCreationDetails, hadoopClient);
+            Assert.IsNull(jobCreationDetails.ErrorCode, "Should not fail mr jobDetails submission");
+            Assert.IsNotNull(jobCreationDetails.JobId, "Should have a non-null jobDetails id");
+        }
+
+        [TestMethod]
+        [TestCategory("CheckIn")]
+        public void CanCreateMapReduceJob_TerasortJob()
+        {
+            var remoteConnectionCredentials = GetRemoteConnectionCredentials();
+
+            var hadoopClient = JobSubmissionClientFactory.Connect(remoteConnectionCredentials);
+
+            //teragen
+            var mapReduceJob = new MapReduceJobCreateParameters()
+            {
+                ClassName = "teragen",
+                JarFile = "/example/jars/hadoop-examples.jar",
+                JobName = "teragenjob",
+                StatusFolder = "/teragenresults"
+            };
+            mapReduceJob.Arguments.Add("-Dmapred.map.tasks=50");
+            mapReduceJob.Arguments.Add("100000000");
+            mapReduceJob.Arguments.Add("/example/data/terasort-input");
+            var jobCreationDetails = hadoopClient.CreateMapReduceJob(mapReduceJob);
+            WaitForJobCompletion(jobCreationDetails, hadoopClient);
+            Assert.IsNull(jobCreationDetails.ErrorCode, "Should not fail mr jobDetails submission");
+            Assert.IsNotNull(jobCreationDetails.JobId, "Should have a non-null jobDetails id");
+
+            //terasort
+            mapReduceJob = new MapReduceJobCreateParameters()
+            {
+                ClassName = "terasort",
+                JarFile = "/example/jars/hadoop-examples.jar",
+                JobName = "terasortjob",
+                StatusFolder = "/terasortresults"
+            };
+            mapReduceJob.Arguments.Add("-Dmapred.map.tasks=50");
+            mapReduceJob.Arguments.Add("-Dmapred.reduce.tasks=25");
+            mapReduceJob.Arguments.Add("/example/data/terasort-input");
+            mapReduceJob.Arguments.Add("/example/data/terasort-output");
+            jobCreationDetails = hadoopClient.CreateMapReduceJob(mapReduceJob);
+            WaitForJobCompletion(jobCreationDetails, hadoopClient);
+            Assert.IsNull(jobCreationDetails.ErrorCode, "Should not fail mr jobDetails submission");
+            Assert.IsNotNull(jobCreationDetails.JobId, "Should have a non-null jobDetails id");
+
+            //teravalidate
+            mapReduceJob = new MapReduceJobCreateParameters()
+            {
+                ClassName = "teravalidate",
+                JarFile = "/example/jars/hadoop-examples.jar",
+                JobName = "teravalidatejob",
+                StatusFolder = "/teravalidateresults"
+            };
+            mapReduceJob.Arguments.Add("-Dmapred.map.tasks=50");
+            mapReduceJob.Arguments.Add("-Dmapred.reduce.tasks=25");
+            mapReduceJob.Arguments.Add("/example/data/terasort-output");
+            mapReduceJob.Arguments.Add("/example/data/terasort-validate");
+            jobCreationDetails = hadoopClient.CreateMapReduceJob(mapReduceJob);
             WaitForJobCompletion(jobCreationDetails, hadoopClient);
             Assert.IsNull(jobCreationDetails.ErrorCode, "Should not fail mr jobDetails submission");
             Assert.IsNotNull(jobCreationDetails.JobId, "Should have a non-null jobDetails id");
@@ -342,13 +486,16 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             var hadoopClient = JobSubmissionClientFactory.Connect(remoteConnectionCredentials);
             var mapReduceJob = new StreamingMapReduceJobCreateParameters()
             {
-                JobName = "englebert jobDetails",
-                StatusFolder = "/engoutput",
-                Mapper = "/example/engleert.exe",
-                Input = "/example/engleert.exe",
-                Output = Guid.NewGuid().ToString()
+                Mapper = "cat.exe",
+                Reducer = "wc.exe",
+                Input = "/example/data/gutenberg/davinci.txt",
+                Output = "/example/data/gutenberg/wc.out",
+                StatusFolder = "mrstreamingoutput"
             };
-
+            mapReduceJob.Files.Add("/example/apps/cat.exe");
+            mapReduceJob.Files.Add("/example/apps/wc.exe");
+            mapReduceJob.Defines.Add("mapred.map.tasks", "5");
+            mapReduceJob.Defines.Add("mapred.reduce.tasks", "5");
             var jobCreationDetails = hadoopClient.CreateStreamingJob(mapReduceJob);
             WaitForJobCompletion(jobCreationDetails, hadoopClient);
             Assert.IsNull(jobCreationDetails.ErrorCode, "Should not fail streaming mr jobDetails submission");
@@ -370,6 +517,70 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             };
 
             var jobCreationDetails = hadoopClient.CreateHiveJob(hiveJob);
+            WaitForJobCompletion(jobCreationDetails, hadoopClient);
+            Assert.IsNull(jobCreationDetails.ErrorCode, "Should not fail hive jobDetails submission");
+            Assert.IsNotNull(jobCreationDetails.JobId, "Should have a non-null jobDetails id");
+        }
+
+        [TestMethod]
+        [TestCategory("CheckIn")]
+        public void CanCreateHiveJobsWithQueryFile()
+        {
+            var remoteConnectionCredentials = GetRemoteConnectionCredentials();
+
+            var hadoopClient = JobSubmissionClientFactory.Connect(remoteConnectionCredentials);
+            var hiveJob = new HiveJobCreateParameters()
+            {
+                File = "/example/data/hivesampletablequery.hql",
+                StatusFolder = "/hivequeryfileresultsfolder"
+            };
+
+            var jobCreationDetails = hadoopClient.CreateHiveJob(hiveJob);
+            WaitForJobCompletion(jobCreationDetails, hadoopClient);
+            Assert.IsNull(jobCreationDetails.ErrorCode, "Should not fail hive jobDetails submission");
+            Assert.IsNotNull(jobCreationDetails.JobId, "Should have a non-null jobDetails id");
+        }
+
+        [TestMethod]
+        [TestCategory("CheckIn")]
+        public void CanCreateSerdeHiveJobs()
+        {
+            var accounts = new List<WabStorageAccountConfiguration>();
+            accounts.AddRange(IntegrationTestBase.TestCredentials.Environments.Select(env => new WabStorageAccountConfiguration(env.DefaultStorageAccount.Name, env.DefaultStorageAccount.Key, env.DefaultStorageAccount.Container)));
+            var wellKnownStorageAccount = accounts.First();
+            var remoteConnectionCredentials = GetRemoteConnectionCredentials();
+
+            var hadoopClient = JobSubmissionClientFactory.Connect(remoteConnectionCredentials);
+            var hiveJob = new HiveJobCreateParameters()
+            {
+                Query = string.Format("ADD JAR {0}{1}@{2}/example/jars/hive-json-serde-0.2.jar; CREATE EXTERNAL TABLE IF NOT EXISTS json_table(employeeId int, firstName string, lastName string) ROW FORMAT SERDE 'org.apache.hadoop.hive.contrib.serde2.JsonSerde' LOCATION '{0}{1}@{2}/example/serdes/'; SELECT employeeId, firstName, lastName FROM json_table WHERE employeeId < 10 LIMIT 10;", Constants.WabsProtocolSchemeName, wellKnownStorageAccount.Container, wellKnownStorageAccount.Name),
+                JobName = "HiveSerDe",
+                StatusFolder = "/hiveserderesultsfolder"
+            };
+
+            var jobCreationDetails = hadoopClient.CreateHiveJob(hiveJob);
+            WaitForJobCompletion(jobCreationDetails, hadoopClient);
+            Assert.IsNull(jobCreationDetails.ErrorCode, "Should not fail hive jobDetails submission");
+            Assert.IsNotNull(jobCreationDetails.JobId, "Should have a non-null jobDetails id");
+        }
+
+        [TestMethod]
+        [TestCategory("CheckIn")]
+        public void CanCreatePigJobs()
+        {
+            var remoteConnectionCredentials = GetRemoteConnectionCredentials();
+
+            var hadoopClient = JobSubmissionClientFactory.Connect(remoteConnectionCredentials);
+            var pigJob = new PigJobCreateParameters()
+            {
+                Query = "records = LOAD '/example/pig/sahara-paleo-fauna.txt' AS (DateBP:int, Loc:chararray, Coordinates:chararray, Samples:chararray, Country:chararray, Laboratory:chararray);" +
+                       "filtered_records = FILTER records by Country == 'Egypt' OR Country == 'Morocco';" +
+                       "grouped_records = GROUP filtered_records BY Country;" +
+                       "DUMP grouped_records;",
+                StatusFolder = "/pigresultsfolder"
+            };
+
+            var jobCreationDetails = hadoopClient.CreatePigJob(pigJob);
             WaitForJobCompletion(jobCreationDetails, hadoopClient);
             Assert.IsNull(jobCreationDetails.ErrorCode, "Should not fail hive jobDetails submission");
             Assert.IsNotNull(jobCreationDetails.JobId, "Should have a non-null jobDetails id");
@@ -415,11 +626,31 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
 
         [TestMethod]
         [TestCategory("CheckIn")]
+        public void CanCreateSqoopJob_TokenCreds()
+        {
+            var certificateCredentials = GetHDInsightTokenCredentials();
+
+            var hadoopClient = JobSubmissionClientFactory.Connect(certificateCredentials);
+            var sqoopJob = new SqoopJobCreateParameters()
+            {
+                StatusFolder = "/tables",
+                Command = "show tables"
+            };
+
+            var jobCreationDetails = hadoopClient.CreateSqoopJob(sqoopJob);
+            WaitForJobCompletion(jobCreationDetails, hadoopClient);
+            Assert.IsNull(jobCreationDetails.ErrorCode, "Should not fail sqoop jobDetails submission");
+            Assert.IsNotNull(jobCreationDetails.JobId, "Should have a non-null jobDetails id");
+        }
+
+        [TestMethod]
+        [TestCategory("CheckIn")]
         public void CanListFullyDetailedJobs()
         {
             var remoteConnectionCredentials = GetRemoteConnectionCredentials();
 
             var hadoopClient = JobSubmissionClientFactory.Connect(remoteConnectionCredentials);
+            Assert.IsInstanceOfType(hadoopClient, typeof(RemoteHadoopClient));
             var jobs = hadoopClient.ListJobs();
             foreach (var job in jobs.Jobs)
             {
@@ -434,6 +665,22 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             var certificateCredentials = GetHDInsightCertificateCredentials();
 
             var hadoopClient = JobSubmissionClientFactory.Connect(certificateCredentials);
+            Assert.IsInstanceOfType(hadoopClient, typeof(HDInsightHadoopClient));
+            var jobs = hadoopClient.ListJobs();
+            var job = jobs.Jobs.First(j => !string.IsNullOrEmpty(j.StatusDirectory));
+            var output = hadoopClient.GetJobOutput(job.JobId);
+            var content = new StreamReader(output).ReadToEnd();
+            Assert.IsTrue(content.Length >= 0);
+        }
+
+        [TestMethod]
+        [TestCategory("CheckIn")]
+        public void CanGetJobOutput_TokenCreds()
+        {
+            var certificateCredentials = GetHDInsightTokenCredentials();
+
+            var hadoopClient = JobSubmissionClientFactory.Connect(certificateCredentials);
+            Assert.IsInstanceOfType(hadoopClient, typeof(HDInsightHadoopClient));
             var jobs = hadoopClient.ListJobs();
             var job = jobs.Jobs.First(j => !string.IsNullOrEmpty(j.StatusDirectory));
             var output = hadoopClient.GetJobOutput(job.JobId);
@@ -484,7 +731,6 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             var downloadedFilesCount = Directory.EnumerateFiles(logsDirectory.Name).ToList();
             Assert.IsTrue(downloadedFilesCount.Count > 0);
         }
-
 
         [TestMethod]
         [TestCategory("CheckIn")]
@@ -716,6 +962,16 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             return remoteConnectionCredentials;
         }
 
+        private static JobSubmissionAccessTokenCredential GetHDInsightTokenCredentials()
+        {
+            var creds = IntegrationTestBase.GetValidCredentials();
+            var remoteConnectionCredentials =
+                new JobSubmissionAccessTokenCredential(
+                    new HDInsightAccessTokenCredential() { SubscriptionId = creds.SubscriptionId, AccessToken = Guid.NewGuid().ToString("N") },
+                    IntegrationTestBase.TestCredentials.WellKnownCluster.DnsName);
+            return remoteConnectionCredentials;
+        }
+
         private static void WaitForJobCompletion(JobCreationResults jobDetails, IJobSubmissionClient client)
         {
             var jobInProgress = client.GetJob(jobDetails.JobId);
@@ -766,6 +1022,28 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             catch (NotSupportedException notSupported)
             {
                 Assert.AreEqual(notSupported.Message, "Access to cluster resources requires Subscription details.");
+            }
+        }
+
+        private static async Task DeleteFiles(string[] filesToBeDeleted)
+        {
+            var wellKnownStorageAccount = IntegrationTestBase.TestCredentials.Environments.Select(env => new WabStorageAccountConfiguration(env.DefaultStorageAccount.Name, env.DefaultStorageAccount.Key, env.DefaultStorageAccount.Container)).First();
+            var storageCreds = new WindowsAzureStorageAccountCredentials()
+            {
+                Key = wellKnownStorageAccount.Key,
+                Name = wellKnownStorageAccount.Name,
+                ContainerName = wellKnownStorageAccount.Container
+            };
+
+            var wabsStorageClient = ServiceLocator.Instance.Locate<IWabStorageAbstractionFactory>().Create(storageCreds);
+            foreach (string file in filesToBeDeleted)
+            {
+                var filePath = new Uri(string.Format(CultureInfo.InvariantCulture, "{0}{1}@{2}/{3}", Constants.WabsProtocolSchemeName, wellKnownStorageAccount.Container, wellKnownStorageAccount.Name, file));
+                var fileStreamBefore = await wabsStorageClient.List(filePath, true);
+                Assert.AreNotEqual(fileStreamBefore.Count(), 0);
+                wabsStorageClient.Delete(filePath);
+                var fileStreamAfter = await wabsStorageClient.List(filePath, true);
+                Assert.AreEqual(fileStreamAfter.Count(), 0);
             }
         }
     }

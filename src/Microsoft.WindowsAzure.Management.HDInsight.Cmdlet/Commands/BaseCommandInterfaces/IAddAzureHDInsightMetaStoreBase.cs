@@ -12,37 +12,37 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.BaseCommandInterfaces
 {
     using System.Management.Automation;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects;
-    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters;
 
     internal interface IAddAzureHDInsightMetastoreBase
     {
         /// <summary>
-        /// Gets or sets the AzureHDInsightConfig.
+        ///     Gets or sets the AzureHDInsightConfig.
         /// </summary>
         AzureHDInsightConfig Config { get; set; }
 
         /// <summary>
-        /// Gets or sets the Azure SQL Server for the metastore.
-        /// </summary>
-        string SqlAzureServerName { get; set; }
-
-        /// <summary>
-        /// Gets or sets the Azure SQL Server database name.
-        /// </summary>
-        string DatabaseName { get; set; }
-
-        /// <summary>
-        /// Gets or sets the Azure SQL Server user credentials.
+        ///     Gets or sets the Azure SQL Server user credentials.
         /// </summary>
         PSCredential Credential { get; set; }
 
         /// <summary>
-        /// Gets or sets the type of metastore represented by this object.
+        ///     Gets or sets the Azure SQL Server database name.
+        /// </summary>
+        string DatabaseName { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the type of metastore represented by this object.
         /// </summary>
         AzureHDInsightMetastoreType MetastoreType { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the Azure SQL Server for the metastore.
+        /// </summary>
+        string SqlAzureServerName { get; set; }
     }
 }

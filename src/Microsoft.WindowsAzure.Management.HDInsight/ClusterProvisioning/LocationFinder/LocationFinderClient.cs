@@ -27,10 +27,10 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Locati
     internal class LocationFinderClient : ILocationFinderClient
     {
         private const string RegionPrefix = "CAPABILITY_REGION_";
-        private readonly IHDInsightCertificateCredential credentials;
+        private readonly IHDInsightSubscriptionCredentials credentials;
         private readonly IAbstractionContext context;
 
-        internal LocationFinderClient(IHDInsightCertificateCredential credentials, IAbstractionContext context)
+        internal LocationFinderClient(IHDInsightSubscriptionCredentials credentials, IAbstractionContext context)
         {
             this.context = context;
             this.credentials = credentials;

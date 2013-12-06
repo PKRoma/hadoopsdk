@@ -32,6 +32,6 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission.RestClient
         /// <returns>
         /// A new IHDInsightJobSubmissionRestClient class.
         /// </returns>
-        IHDInsightJobSubmissionRestClient Create(IHDInsightCertificateCredential credentials, IAbstractionContext context);
+        IHDInsightJobSubmissionRestClient Create(IHDInsightSubscriptionCredentials credentials, IAbstractionContext context);
     }
 }

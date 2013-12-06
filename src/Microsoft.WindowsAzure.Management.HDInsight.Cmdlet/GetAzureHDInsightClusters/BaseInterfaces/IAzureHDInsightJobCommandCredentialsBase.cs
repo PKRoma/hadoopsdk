@@ -12,16 +12,15 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.BaseInterfaces
 {
-    using System;
     using System.Management.Automation;
-    using System.Security.Cryptography.X509Certificates;
 
     internal interface IAzureHDInsightJobCommandCredentialsBase : IAzureHDInsightCommonCommandBase
     {
         /// <summary>
-        /// Gets or sets Credential to connect to the HDInsight cluster.
+        ///     Gets or sets Credential to connect to the HDInsight cluster.
         /// </summary>
         PSCredential Credential { get; set; }
     }

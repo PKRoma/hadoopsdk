@@ -23,6 +23,9 @@
       <Word>MyWord</Word>
       -->
       <Recognized>
+		<Word>Dyna</Word>
+		<Word>Ioc</Word>
+		<Word>Awaiter</Word>
 		<Word>Hardcode</Word>
 		<Word>Hardcodes</Word>
 		<Word>Param</Word>

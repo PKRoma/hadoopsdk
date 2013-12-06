@@ -28,5 +28,10 @@ namespace Microsoft.Hadoop.Client
         /// Gets or sets the Key for the Storage Account.
         /// </summary>
         public string Key { get; set; }
+
+        /// <summary>
+        /// Gets or sets the ContainerName being used in the Storage Account.
+        /// </summary>
+        public string ContainerName { get; set; }
     }
 }

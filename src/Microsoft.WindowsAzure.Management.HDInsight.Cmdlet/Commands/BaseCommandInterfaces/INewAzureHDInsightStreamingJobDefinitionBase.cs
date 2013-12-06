@@ -12,45 +12,44 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.BaseCommandInterfaces
 {
-    using System.Collections.Generic;
-
     internal interface INewAzureHDInsightStreamingJobDefinitionBase : INewAzureHDInsightJobWithDefinesConfigBase
     {
         /// <summary>
-        ///  Gets or sets the Mapper.
-        /// </summary>
-        string Mapper { get; set; }
-
-        /// <summary>
-        ///  Gets or sets the Reducer.
-        /// </summary>
-        string Reducer { get; set; }
-
-        /// <summary>
-        ///  Gets or sets the Combiner.
-        /// </summary>
-        string Combiner { get; set; }
-
-        /// <summary>
-        /// Gets or sets the location of the input data in Hadoop.
-        /// </summary>
-        string InputPath { get; set; }
-
-        /// <summary>
-        /// Gets or sets the Location in which to store the output data.
-        /// </summary>
-        string OutputPath { get; set; }
-
-        /// <summary>
-        /// Gets or sets the arguments for the jobDetails.
+        ///     Gets or sets the arguments for the jobDetails.
         /// </summary>
         string[] Arguments { get; set; }
 
         /// <summary>
-        /// Gets or sets the command line environment for the mappers or the reducers.
+        ///     Gets or sets the command line environment for the mappers or the reducers.
         /// </summary>
         string[] CmdEnv { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the Combiner.
+        /// </summary>
+        string Combiner { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the location of the input data in Hadoop.
+        /// </summary>
+        string InputPath { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the Mapper.
+        /// </summary>
+        string Mapper { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the Location in which to store the output data.
+        /// </summary>
+        string OutputPath { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the Reducer.
+        /// </summary>
+        string Reducer { get; set; }
     }
 }

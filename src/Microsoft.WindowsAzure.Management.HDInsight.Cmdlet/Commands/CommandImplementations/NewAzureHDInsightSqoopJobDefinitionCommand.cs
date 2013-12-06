@@ -12,6 +12,7 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImplementations
 {
     using System;
@@ -21,20 +22,13 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImp
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandInterfaces;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.Extensions;
 
-    internal class NewAzureHDInsightSqoopJobDefinitionCommand : AzureHDInsightNewJobDefinitionCommand<AzureHDInsightSqoopJobDefinition>, INewAzureHDInsightSqoopJobDefinitionCommand
+    internal class NewAzureHDInsightSqoopJobDefinitionCommand
+        : AzureHDInsightNewJobDefinitionCommand<AzureHDInsightSqoopJobDefinition>, INewAzureHDInsightSqoopJobDefinitionCommand
     {
         private readonly SqoopJobCreateParameters sqoopJobDefinition = new SqoopJobCreateParameters();
         private string[] resources = new string[] { };
-
-        public override Hashtable Defines { get; set; }
-
-        public override string[] Files
-        {
-            get { return this.resources; }
-            set { this.resources = value; }
-        }
 
         public string Command
         {
@@ -42,10 +36,18 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImp
             set { this.sqoopJobDefinition.Command = value; }
         }
 
+        public override Hashtable Defines { get; set; }
+
         public string File
         {
             get { return this.sqoopJobDefinition.File; }
             set { this.sqoopJobDefinition.File = value; }
+        }
+
+        public override string[] Files
+        {
+            get { return this.resources; }
+            set { this.resources = value; }
         }
 
         public override string StatusFolder

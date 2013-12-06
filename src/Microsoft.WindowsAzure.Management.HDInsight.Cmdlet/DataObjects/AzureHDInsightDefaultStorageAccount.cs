@@ -12,20 +12,21 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects
 {
     /// <summary>
-    /// Represents a Default Storage Account used for an HDInsight cluster.
+    ///     Represents a Default Storage Account used for an HDInsight cluster.
     /// </summary>
     public class AzureHDInsightDefaultStorageAccount : AzureHDInsightStorageAccount
     {
         /// <summary>
-        /// Gets or sets the Storage Container for the Default Storage Account.
+        ///     Gets or sets the Storage Container for the Default Storage Account.
         /// </summary>
         public string StorageContainerName { get; set; }
 
         /// <summary>
-        /// Creates an SDK object from this Powershell object type.
+        ///     Creates an SDK object from this Powershell object type.
         /// </summary>
         /// <returns>A storage account configuration.</returns>
         public WabStorageAccountConfiguration ToWabStorageAccountConfiguration()

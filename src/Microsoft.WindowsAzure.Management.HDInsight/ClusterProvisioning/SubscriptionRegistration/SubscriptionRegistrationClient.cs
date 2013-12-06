@@ -32,10 +32,10 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.AzureM
 
     internal class SubscriptionRegistrationClient : ISubscriptionRegistrationClient
     {
-        private readonly IHDInsightCertificateCredential credentials;
+        private readonly IHDInsightSubscriptionCredentials credentials;
         private readonly HDInsight.IAbstractionContext context;
 
-        internal SubscriptionRegistrationClient(IHDInsightCertificateCredential credentials, HDInsight.IAbstractionContext context)
+        internal SubscriptionRegistrationClient(IHDInsightSubscriptionCredentials credentials, HDInsight.IAbstractionContext context)
         {
             this.context = context;
             this.credentials = credentials;
@@ -45,7 +45,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.AzureM
         public async Task RegisterSubscription()
         {
             // Creates an HTTP client
-            using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(this.credentials.Certificate, this.context))
+            using (var client = ServiceLocator.Instance.Locate<IHDInsightHttpClientAbstractionFactory>().Create(this.credentials, this.context))
             {
                 // Creates the request
                 string relativeUri = string.Format(
@@ -144,7 +144,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.AzureM
                                                                          location);
 
             // Creates an HTTP client
-            using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(this.credentials.Certificate, this.context))
+            using (var client = ServiceLocator.Instance.Locate<IHDInsightHttpClientAbstractionFactory>().Create(this.credentials, this.context))
             {
                 // Creates the request
                 string relativeUri = string.Format("{0}/cloudservices/{1}", this.credentials.SubscriptionId, regionCloudServicename);

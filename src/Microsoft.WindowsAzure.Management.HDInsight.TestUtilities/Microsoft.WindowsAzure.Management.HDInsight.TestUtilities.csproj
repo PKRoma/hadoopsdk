@@ -53,7 +53,6 @@
   <ItemGroup>
     <Compile Include="Assert2.cs" />
     <Compile Include="AzureTestCredentials.cs" />
-    <Compile Include="BufferingLogWriterFactory.cs" />
     <Compile Include="IntegrationTestBase.cs" />
     <Compile Include="IntegrationTestManager.cs" />
     <Compile Include="PowerShellTestAbstraction\Concreates\CommandAbstraction.cs" />
@@ -80,10 +79,6 @@
     <Compile Include="RestSimulator\AsvValidatorSimulatorClientFactory.cs" />
     <Compile Include="RestSimulator\AzureHDInsightClusterConfigurationAccessorSimulator.cs" />
     <Compile Include="RestSimulator\AzureHDInsightClusterConfigurationAccessorSimulatorFactory.cs" />
-    <Compile Include="RestSimulator\AzureHDInsightConnectionSessionManagerSimulator.cs" />
-    <Compile Include="RestSimulator\AzureHDInsightConnectionSessionManagerSimulatorFactory.cs" />
-    <Compile Include="RestSimulator\AzureHDInsightSubscriptionsFileManagerSimulator.cs" />
-    <Compile Include="RestSimulator\AzureHDInsightSubscriptionsFileManagerSimulatorFactory.cs" />
     <Compile Include="RestSimulator\HadoopJobSubmissionPocoSimulatorClient.cs" />
     <Compile Include="RestSimulator\HadoopJobSubmissionPocoSimulatorClientFactory.cs" />
     <Compile Include="RestSimulator\HDInsightManagementRestSimulatorClient.cs" />
@@ -140,10 +135,6 @@
     <ProjectReference Include="..\Microsoft.WindowsAzure.Management.Configuration\Microsoft.WindowsAzure.Management.Configuration.csproj">
       <Project>{65A36203-FF6A-46A7-AC05-300DEE22589D}</Project>
       <Name>Microsoft.WindowsAzure.Management.Configuration</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Microsoft.WindowsAzure.Management.HDInsight.Cmdlet\Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.csproj">
-      <Project>{43333c08-29f5-4948-a8c6-4f486331cdc9}</Project>
-      <Name>Microsoft.WindowsAzure.Management.HDInsight.Cmdlet</Name>
     </ProjectReference>
     <ProjectReference Include="..\Microsoft.WindowsAzure.Management.HDInsight.Framework.Core\Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.csproj">
       <Project>{55787775-8b25-436f-b9b9-c2b60ef80b20}</Project>

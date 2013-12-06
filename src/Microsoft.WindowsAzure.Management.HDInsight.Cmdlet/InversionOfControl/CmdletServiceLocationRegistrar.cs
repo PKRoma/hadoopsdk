@@ -12,19 +12,21 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet
 {
     using System;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.BaseCommandInterfaces;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImplementations;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.BaseInterfaces;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.Extensions;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Logging;
-    using Microsoft.WindowsAzure.Management.HDInsight;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.ServiceLocation;
     using Microsoft.WindowsAzure.Management.HDInsight.Logging;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
 
     /// <summary>
-    /// Registers Cmdlet services with the IoC system.
+    ///     Registers Cmdlet services with the IoC system.
     /// </summary>
     internal class CmdletServiceLocationRegistrar : IServiceLocationRegistrar
     {
@@ -41,6 +43,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet
             manager.RegisterType<IAzureHDInsightSubscriptionsManagerFactory, AzureHDInsightSubscriptionsManagerFactory>();
             manager.RegisterType<IAzureHDInsightConnectionSessionManagerFactory, AzureHDInsightConnectionSessionManagerFactory>();
             manager.RegisterType<IBufferingLogWriterFactory, PowershellLogWriterFactory>();
+            manager.RegisterType<IAzureHDInsightStorageHandlerFactory, AzureHDInsightStorageHandlerFactory>();
+            manager.RegisterType<IAzureHDInsightClusterManagementClientFactory, AzureHDInsightClusterManagementClientFactory>();
+            manager.RegisterType<IAzureHDInsightJobSubmissionClientFactory, AzureHDInsightJobSubmissionClientFactory>();
         }
     }
 }

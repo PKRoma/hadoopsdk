@@ -12,20 +12,21 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects
 {
     /// <summary>
-    /// Defines the type of an AzureHDInsight cluster metastore.
+    ///     Defines the type of an AzureHDInsight cluster metastore.
     /// </summary>
     public enum AzureHDInsightMetastoreType
     {
         /// <summary>
-        /// A Hive metastore.
+        ///     A Hive metastore.
         /// </summary>
         HiveMetastore,
 
         /// <summary>
-        /// An Oozie metastore.
+        ///     An Oozie metastore.
         /// </summary>
         OozieMetastore,
     }

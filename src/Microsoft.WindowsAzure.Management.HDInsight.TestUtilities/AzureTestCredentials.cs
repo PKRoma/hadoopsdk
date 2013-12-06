@@ -96,6 +96,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities
         public string HadoopUserName { get; set; }
         public string Endpoint { get; set; }
         public string CloudServiceName { get; set; }
+        public string AccessToken { get; set; }
 
         public KnownCluster WellKnownCluster { get; set; }
         public EnvironmentType EnvironmentType { get; set; }

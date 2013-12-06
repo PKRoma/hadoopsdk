@@ -12,30 +12,28 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.BaseCommandInterfaces
 {
-    using System;
-    using System.Collections.Generic;
-
     internal interface INewAzureHDInsightMapReduceJobDefinitionBase : INewAzureHDInsightJobWithDefinesConfigBase
     {
         /// <summary>
-        /// Gets or sets the jar file to use for the job.
-        /// </summary>
-        string JarFile { get; set; }
-
-        /// <summary>
-        /// Gets or sets the class name to use for the jobDetails.
-        /// </summary>
-        string ClassName { get; set; }
-
-        /// <summary>
-        /// Gets or sets the arguments for the jobDetails.
+        ///     Gets or sets the arguments for the jobDetails.
         /// </summary>
         string[] Arguments { get; set; }
 
         /// <summary>
-        /// Gets or sets the lib jars for the jobDetails.
+        ///     Gets or sets the class name to use for the jobDetails.
+        /// </summary>
+        string ClassName { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the jar file to use for the job.
+        /// </summary>
+        string JarFile { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the lib jars for the jobDetails.
         /// </summary>
         string[] LibJars { get; set; }
     }

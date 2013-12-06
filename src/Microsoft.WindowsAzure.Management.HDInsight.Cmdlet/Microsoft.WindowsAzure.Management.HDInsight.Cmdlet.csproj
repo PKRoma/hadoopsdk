@@ -29,22 +29,44 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.Data.Edm, Version=5.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.Data.Edm.5.2.0\lib\net40\Microsoft.Data.Edm.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Data.OData, Version=5.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.Data.OData.5.2.0\lib\net40\Microsoft.Data.OData.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAzure.Configuration, Version=1.8.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.WindowsAzure.ConfigurationManager.1.8.0.0\lib\net35-full\Microsoft.WindowsAzure.Configuration.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.WindowsAzure.Storage, Version=2.1.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\WindowsAzure.Storage.2.0.5.1\lib\net40\Microsoft.WindowsAzure.Storage.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Management.Automation, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Windows\Microsoft.NET\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0__31bf3856ad364e35\System.Management.Automation.dll</HintPath>
     </Reference>
+    <Reference Include="System.Spatial, Version=5.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\System.Spatial.5.2.0\lib\net40\System.Spatial.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\Microsoft.WindowsAzure.Management.HDInsight\JobSubmission\GatewayUriResolver.cs">
-      <Link>Commands\CommandImplementations\GatewayUriResolver.cs</Link>
-    </Compile>
+    <Compile Include="Commands\BaseCommandInterfaces\IAzureHDInsightStorageHandlerFactory.cs" />
+    <Compile Include="Commands\BaseCommandInterfaces\IAzureHDInsightStorageHandler.cs" />
     <Compile Include="Commands\BaseCommandInterfaces\INewAzureHDInsightSqoopJobDefinitionBase.cs" />
     <Compile Include="Commands\CommandImplementations\AddAzureHDInsightMetastoreCommand.cs" />
     <Compile Include="Commands\CommandImplementations\AddAzureHDInsightStorageCommand.cs" />
+    <Compile Include="Commands\CommandImplementations\AzureHDInsightStorageHandler.cs" />
+    <Compile Include="Commands\CommandImplementations\AzureHDInsightStorageHandlerFactory.cs" />
+    <Compile Include="Commands\CommandImplementations\GatewayUriResolver.cs" />
     <Compile Include="Commands\CommandImplementations\NewAzureHDInsightSqoopJobDefinitionCommand.cs" />
     <Compile Include="Commands\CommandInterfaces\INewAzureHDInsightSqoopJobDefinitionCommand.cs" />
     <Compile Include="DataObjects\AzureHDInsightCapabilities.cs" />
@@ -64,6 +86,7 @@
     <Compile Include="DataObjects\AzureHDInsightMapReduceJobDefinition.cs" />
     <Compile Include="DataObjects\AzureHDInsightMetastore.cs" />
     <Compile Include="DataObjects\AzureHDInsightMetastoreType.cs" />
+    <Compile Include="GetAzureHDInsightClusters\AzureHDInsightJobSubmissionClientFactory.cs" />
     <Compile Include="GetAzureHDInsightClusters\AzureHDInsightNewJobDefinitionCommand.cs" />
     <Compile Include="GetAzureHDInsightClusters\AzureHDInsightNewJobDefinitionCommandBase.cs" />
     <Compile Include="DataObjects\AzureHDInsightPigJobDefinition.cs" />
@@ -74,6 +97,7 @@
     <Compile Include="GetAzureHDInsightClusters\AzureHDInsightSubscriptionsManager.cs" />
     <Compile Include="GetAzureHDInsightClusters\AzureHDInsightSubscriptionsManagerFactory.cs" />
     <Compile Include="GetAzureHDInsightClusters\BaseInterfaces\IAzureHDInsightJobCommandBase.cs" />
+    <Compile Include="GetAzureHDInsightClusters\BaseInterfaces\IAzureHDInsightJobSubmissionClientFactory.cs" />
     <Compile Include="GetAzureHDInsightClusters\BaseInterfaces\IAzureHDInsightSubscriptionsFileManagerFactory.cs" />
     <Compile Include="GetAzureHDInsightClusters\BaseInterfaces\IAzureHDInsightCommonCommandBase.cs" />
     <Compile Include="GetAzureHDInsightClusters\BaseInterfaces\IAzureHDInsightSubscriptionsFileManager.cs" />
@@ -86,11 +110,39 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="GetAzureHDInsightClusters\BaseInterfaces\IAzureHDInsightSubscriptionsManager.cs" />
+    <Compile Include="GetAzureHDInsightClusters\Extensions\CollectionExtensions.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
+    <Compile Include="GetAzureHDInsightClusters\Extensions\ExceptionExtensions.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
+    <Compile Include="GetAzureHDInsightClusters\Extensions\Help.cs" />
+    <Compile Include="GetAzureHDInsightClusters\Extensions\NullLogWriter.cs" />
+    <Compile Include="GetAzureHDInsightClusters\Extensions\ObjectExtensions.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
+    <Compile Include="GetAzureHDInsightClusters\BaseInterfaces\IAzureHDInsightClusterManagementClientFactory.cs" />
     <Compile Include="GetAzureHDInsightClusters\BaseInterfaces\SubscriptionData.cs" />
     <Compile Include="DataObjects\AzureHDInsightHiveConfiguration.cs" />
     <Compile Include="DataObjects\AzureHDInsightOozieConfiguration.cs" />
     <Compile Include="DataObjects\AzureHDInsightClusterConnection.cs" />
     <Compile Include="Commands\CommandImplementations\UseAzureHDInsightClusterCommand.cs" />
+    <Compile Include="GetAzureHDInsightClusters\Extensions\QueueExtensions.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
+    <Compile Include="GetAzureHDInsightClusters\Extensions\StackExtensions.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
+    <Compile Include="GetAzureHDInsightClusters\Extensions\StringExtensions.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
+    <Compile Include="GetAzureHDInsightClusters\Extensions\TaskExtensions.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
+    <Compile Include="GetAzureHDInsightClusters\Extensions\ValidatedNotNullAttribute.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
+    <Compile Include="GetAzureHDInsightClusters\AzureHDInsightClientFactory.cs" />
     <Compile Include="GetAzureHDInsightClusters\InvokeAzureHDInsightJobCommandBase.cs" />
     <Compile Include="Commands\CommandImplementations\InvokeHiveCommand.cs" />
     <Compile Include="Commands\CommandImplementations\GetAzureHDInsightJobOutputCommand.cs" />
@@ -103,7 +155,7 @@
     <Compile Include="Commands\CommandInterfaces\IGetAzureHDInsightJobOutputCommand.cs" />
     <Compile Include="GetAzureHDInsightClusters\AzureHDInsightJobExecutorCommand.cs" />
     <Compile Include="DataObjects\JobOutputType.cs" />
-    <Compile Include="GetAzureHDInsightClusters\PsCmdletExtensions.cs" />
+    <Compile Include="GetAzureHDInsightClusters\Extensions\PsCmdletExtensions.cs" />
     <Compile Include="Commands\CommandImplementations\WaitAzureHDInsightJobCommand.cs" />
     <Compile Include="Commands\BaseCommandInterfaces\IWaitAzureHDInsightJobBase.cs" />
     <Compile Include="Commands\CommandInterfaces\IWaitAzureHDInsightJobCommand.cs" />
@@ -203,14 +255,32 @@
     <Compile Include="Properties\AssemblyInternalsVisibleTo.cs" />
     <Compile Include="PSCmdlets\SetAzureHDInsightDefaultStorageCmdlet.cs" />
     <Compile Include="PSCmdlets\StartAzureHDInsightJobCmdlet.cs" />
+    <Compile Include="GetAzureHDInsightClusters\ServiceLocation\IRegisteringService.cs" />
+    <Compile Include="GetAzureHDInsightClusters\ServiceLocation\IServiceLocationAssemblySweep.cs" />
+    <Compile Include="GetAzureHDInsightClusters\ServiceLocation\IServiceLocationIndividualTestManager.cs" />
+    <Compile Include="GetAzureHDInsightClusters\ServiceLocation\IServiceLocationManager.cs" />
+    <Compile Include="GetAzureHDInsightClusters\ServiceLocation\IServiceLocationRegistrar.cs" />
+    <Compile Include="GetAzureHDInsightClusters\ServiceLocation\IServiceLocationRegistrarProxyFactory.cs" />
+    <Compile Include="GetAzureHDInsightClusters\ServiceLocation\IServiceLocationRuntimeManager.cs" />
+    <Compile Include="GetAzureHDInsightClusters\ServiceLocation\IServiceLocationSimulationManager.cs" />
+    <Compile Include="GetAzureHDInsightClusters\ServiceLocation\IServiceLocator.cs" />
+    <Compile Include="GetAzureHDInsightClusters\ServiceLocation\ServiceLocationAssemblySweep.cs" />
+    <Compile Include="GetAzureHDInsightClusters\ServiceLocation\ServiceLocationMockingLevel.cs" />
+    <Compile Include="GetAzureHDInsightClusters\ServiceLocation\ServiceLocationRegistrarProxyFactory.cs" />
+    <Compile Include="GetAzureHDInsightClusters\ServiceLocation\ServiceLocator.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.dll-help.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Microsoft.Hadoop.Client\Microsoft.Hadoop.Client.csproj">
-      <Project>{7C2E800C-09E5-484A-BB08-6C17578E7E45}</Project>
+      <Project>{7c2e800c-09e5-484a-bb08-6c17578e7e45}</Project>
       <Name>Microsoft.Hadoop.Client</Name>
     </ProjectReference>
     <ProjectReference Include="..\Microsoft.HDInsight.Threading\Microsoft.HDInsight.Threading.csproj">
-      <Project>{DBFFC131-E089-4173-9B9E-6826FE596FAF}</Project>
+      <Project>{dbffc131-e089-4173-9b9e-6826fe596faf}</Project>
       <Name>Microsoft.HDInsight.Threading</Name>
     </ProjectReference>
     <ProjectReference Include="..\Microsoft.WindowsAzure.Management.HDInsight.Framework.Core\Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.csproj">
@@ -227,9 +297,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.dll-help.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="..\..\build\targets\Project.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

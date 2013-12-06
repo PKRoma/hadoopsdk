@@ -47,7 +47,26 @@ namespace Microsoft.Hadoop.Client
         {
             client.ArgumentNotNull("client");
             job.ArgumentNotNull("jobDetails");
-            JobDetails jobDetailsResults = new JobDetails() { JobId = job.JobId, StatusCode = JobStatusCode.Unknown };
+
+            return await client.WaitForJobCompletionAsync(job.JobId, duration, cancellationToken);
+        }
+
+        /// <summary>
+        /// Method that waits for a jobDetails to complete.
+        /// </summary>
+        /// <param name="client">The Hadoop client to use.</param>
+        /// <param name="jobId">The id of the job to wait for.</param>
+        /// <param name="duration">The duration to wait before timing out.</param>
+        /// <param name="cancellationToken">
+        /// The Cancellation Token for the request.
+        /// </param>
+        /// <returns>An awaitable task that represents the action.</returns>
+        public static async Task<JobDetails> WaitForJobCompletionAsync(
+            this IJobSubmissionClient client, string jobId, TimeSpan duration, CancellationToken cancellationToken)
+        {
+            client.ArgumentNotNull("client");
+            jobId.ArgumentNotNull("jobId");
+            JobDetails jobDetailsResults = new JobDetails() { JobId = jobId, StatusCode = JobStatusCode.Unknown };
             var pollingInterval = GetPollingInterval();
             var startTime = DateTime.UtcNow;
             var endTime = DateTime.UtcNow;
@@ -62,7 +81,7 @@ namespace Microsoft.Hadoop.Client
                     break;
                 }
                 Thread.Sleep(pollingInterval);
-                jobDetailsResults = await GetJobWithRetry(client, job, cancellationToken);
+                jobDetailsResults = await GetJobWithRetry(client, jobId, cancellationToken);
             }
 
             if (jobDetailsResults.StatusCode != JobStatusCode.Completed && jobDetailsResults.StatusCode != JobStatusCode.Failed &&
@@ -104,7 +123,7 @@ namespace Microsoft.Hadoop.Client
             }
         }
 
-        private static async Task<JobDetails> GetJobWithRetry(IJobSubmissionClient client, JobCreationResults job, CancellationToken cancellationToken)
+        private static async Task<JobDetails> GetJobWithRetry(IJobSubmissionClient client, string jobId, CancellationToken cancellationToken)
         {
             JobDetails jobDetailsResults = null;
             var pollingInterval = GetPollingInterval();
@@ -113,7 +132,7 @@ namespace Microsoft.Hadoop.Client
             {
                 try
                 {
-                    jobDetailsResults = await client.GetJobAsync(job.JobId);
+                    jobDetailsResults = await client.GetJobAsync(jobId);
                     break;
                 }
                 catch (HttpLayerException)

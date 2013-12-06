@@ -12,21 +12,27 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImplementations
 {
     using System.Collections;
-    using System.Collections.Generic;
     using System.Threading.Tasks;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandInterfaces;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters;
-    using Microsoft.WindowsAzure.Management.HDInsight;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.Extensions;
 
-    internal class NewAzureHDInsightStreamingJobDefinitionCommand : AzureHDInsightNewJobDefinitionCommand<AzureHDInsightStreamingMapReduceJobDefinition>, INewAzureHDInsightStreamingJobDefinitionCommand
+    internal class NewAzureHDInsightStreamingJobDefinitionCommand
+        : AzureHDInsightNewJobDefinitionCommand<AzureHDInsightStreamingMapReduceJobDefinition>, INewAzureHDInsightStreamingJobDefinitionCommand
     {
         /// <inheritdoc />
-        public string JobName { get; set; }
+        public string[] Arguments { get; set; }
+
+        /// <inheritdoc />
+        public string[] CmdEnv { get; set; }
+
+        /// <inheritdoc />
+        public string Combiner { get; set; }
 
         /// <inheritdoc />
         public override Hashtable Defines { get; set; }
@@ -35,28 +41,22 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImp
         public override string[] Files { get; set; }
 
         /// <inheritdoc />
-        public string Mapper { get; set; }
-
-        /// <inheritdoc />
-        public string Reducer { get; set; }
-
-        /// <inheritdoc />
-        public string Combiner { get; set; }
-
-        /// <inheritdoc />
         public string InputPath { get; set; }
+
+        /// <inheritdoc />
+        public string JobName { get; set; }
+
+        /// <inheritdoc />
+        public string Mapper { get; set; }
 
         /// <inheritdoc />
         public string OutputPath { get; set; }
 
         /// <inheritdoc />
+        public string Reducer { get; set; }
+
+        /// <inheritdoc />
         public override string StatusFolder { get; set; }
-
-        /// <inheritdoc />
-        public string[] Arguments { get; set; }
-
-        /// <inheritdoc />
-        public string[] CmdEnv { get; set; }
 
         public override Task EndProcessing()
         {

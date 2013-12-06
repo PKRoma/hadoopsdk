@@ -39,28 +39,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Logging\ConsoleLogWriter.cs">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Compile>
-    <Compile Include="Logging\FileLogWriter.cs">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Compile>
-    <Compile Include="Logging\ILogger.cs">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Compile>
-    <Compile Include="Logging\ILogWriter.cs">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Compile>
-    <Compile Include="Logging\Logger.cs">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Compile>
-    <Compile Include="Logging\LogWriter.cs">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Compile>
-    <Compile Include="Logging\NullLogWriter.cs" />
-    <Compile Include="Logging\StreamWriterLogWriter.cs">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Compile>
     <Compile Include="ServiceLocation\IRegisteringService.cs" />
     <Compile Include="ServiceLocation\IServiceLocationAssemblySweep.cs" />
     <Compile Include="ServiceLocation\IServiceLocationRegistrarProxyFactory.cs" />
@@ -77,17 +55,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\AssemblyInternalsVisibleTo.cs" />
     <Compile Include="ServiceLocation\FrameworkServiceLocationRegistrar.cs" />
-    <Compile Include="AbstractionContext.cs" />
-    <Compile Include="WebRequest\HttpClientAbstraction.cs" />
-    <Compile Include="WebRequest\HttpClientAbstractionFactory.cs" />
-    <Compile Include="WebRequest\HttpHardcodes.cs" />
-    <Compile Include="WebRequest\HttpResponseHeadersAbstraction.cs" />
-    <Compile Include="WebRequest\HttpResponseMessageAbstraction.cs" />
-    <Compile Include="IAbstractionContext.cs" />
-    <Compile Include="WebRequest\IHttpClientAbstraction.cs" />
-    <Compile Include="WebRequest\IHttpClientAbstractionFactory.cs" />
-    <Compile Include="WebRequest\IHttpResponseHeadersAbstraction.cs" />
-    <Compile Include="WebRequest\IHttpResponseMessageAbstraction.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Microsoft.WindowsAzure.Management.HDInsight.Framework.xml">

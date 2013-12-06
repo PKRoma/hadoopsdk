@@ -12,17 +12,18 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Logging
 {
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Logging;
 
     /// <summary>
-    /// Factory interface to create LogWriters.
+    ///     Factory interface to create LogWriters.
     /// </summary>
     internal interface IBufferingLogWriterFactory
     {
         /// <summary>
-        /// Creates a Log Writer.
+        ///     Creates a Log Writer.
         /// </summary>
         /// <returns>A Logwriter instance.</returns>
         IBufferingLogWriter Create();

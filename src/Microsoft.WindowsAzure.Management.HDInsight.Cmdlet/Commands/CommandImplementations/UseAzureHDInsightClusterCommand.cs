@@ -12,21 +12,16 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImplementations
 {
     using System;
-    using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
-    using System.Linq;
-    using System.Management.Automation;
     using System.Threading.Tasks;
-    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandInterfaces;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters;
-    using Microsoft.WindowsAzure.Management.HDInsight;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.Extensions;
 
     internal class UseAzureHDInsightClusterCommand : AzureHDInsightClusterCommand<AzureHDInsightClusterConnection>, IUseAzureHDInsightClusterCommand
     {
@@ -35,15 +30,14 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImp
         public override async Task EndProcessing()
         {
             this.Name.ArgumentNotNullOrEmpty("Name");
-            var client = this.GetClient();
+            IHDInsightClient client = this.GetClient();
             var cluster = await client.GetClusterAsync(this.Name);
             var connection = new AzureHDInsightClusterConnection();
             connection.Credential = this.GetSubscriptionCertificateCredentials();
 
             if (cluster == null)
             {
-                throw new NotSupportedException(
-                    string.Format(CultureInfo.InvariantCulture, "Failed to connect to cluster :{0}", this.Name));
+                throw new NotSupportedException(string.Format(CultureInfo.InvariantCulture, "Failed to connect to cluster :{0}", this.Name));
             }
 
             connection.Cluster = new AzureHDInsightCluster(cluster);
@@ -57,7 +51,11 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImp
             if (string.IsNullOrEmpty(cluster.HttpUserName))
             {
                 throw new NotSupportedException(
-                    string.Format(CultureInfo.InvariantCulture, "Cluster {0} is not configured for Http Services access.\r\nPlease use the {1} cmdlet to enable Http Services access.", this.Name, GrantHttpAccessCmdletName));
+                    string.Format(
+                        CultureInfo.InvariantCulture,
+                        "Cluster {0} is not configured for Http Services access.\r\nPlease use the {1} cmdlet to enable Http Services access.",
+                        this.Name,
+                        GrantHttpAccessCmdletName));
             }
 
             this.Output.Add(connection);

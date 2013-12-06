@@ -12,6 +12,7 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters
 {
     using System.Collections.ObjectModel;
@@ -22,20 +23,20 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightCl
 
     internal interface IInvokeAzureHDInsightJobCommand
     {
-        AzureHDInsightHiveJobDefinition JobDefinition { get; set; }
+        CancellationToken CancellationToken { get; }
 
         AzureHDInsightClusterConnection Connection { get; set; }
 
-        ObservableCollection<string> Output { get; }
-
-        Task EndProcessing();
-
-        CancellationToken CancellationToken { get; }
-
-        void Cancel();
+        AzureHDInsightHiveJobDefinition JobDefinition { get; set; }
 
         string JobId { get; }
 
         ILogWriter Logger { get; set; }
+
+        ObservableCollection<string> Output { get; }
+
+        void Cancel();
+
+        Task EndProcessing();
     }
 }

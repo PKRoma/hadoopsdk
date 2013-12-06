@@ -12,6 +12,7 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImplementations
 {
     using System.Threading.Tasks;
@@ -25,7 +26,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImp
 
         public override async Task EndProcessing()
         {
-            var client = this.GetClient();
+            IHDInsightClient client = this.GetClient();
 
             if (!string.IsNullOrWhiteSpace(this.Location))
             {

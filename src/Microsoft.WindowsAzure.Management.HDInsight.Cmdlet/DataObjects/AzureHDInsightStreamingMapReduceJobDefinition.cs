@@ -12,20 +12,21 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects
 {
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using Microsoft.Hadoop.Client;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.Extensions;
 
     /// <summary>
-    /// Provides creation details for a new Streaming jobDetails.
+    ///     Provides creation details for a new Streaming jobDetails.
     /// </summary>
     public class AzureHDInsightStreamingMapReduceJobDefinition : AzureHDInsightJobDefinition
     {
         /// <summary>
-        /// Initializes a new instance of the AzureHDInsightStreamingMapReduceJobDefinition class.
+        ///     Initializes a new instance of the AzureHDInsightStreamingMapReduceJobDefinition class.
         /// </summary>
         public AzureHDInsightStreamingMapReduceJobDefinition()
         {
@@ -34,48 +35,48 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects
         }
 
         /// <summary>
-        /// Gets or sets the name of the jobDetails.
-        /// </summary>
-        public string JobName { get; set; }
-
-        /// <summary>
-        ///  Gets or sets the Mapper.
-        /// </summary>
-        public string Mapper { get; set; }
-
-        /// <summary>
-        ///  Gets or sets the Reducer.
-        /// </summary>
-        public string Reducer { get; set; }
-
-        /// <summary>
-        ///  Gets or sets the Combiner.
+        ///     Gets or sets the Combiner.
         /// </summary>
         public string Combiner { get; set; }
 
         /// <summary>
-        /// Gets or sets the location of the input data in Hadoop.
-        /// </summary>
-        public string Input { get; set; }
-
-        /// <summary>
-        /// Gets or sets the Location in which to store the output data.
-        /// </summary>
-        public string Output { get; set; }
-
-        /// <summary>
-        /// Gets the command line environment for the mappers or the reducers.
+        ///     Gets the command line environment for the mappers or the reducers.
         /// </summary>
         public ICollection<string> CommandEnvironment { get; private set; }
 
         /// <summary>
-        /// Gets the parameters for the jobDetails.
+        ///     Gets the parameters for the jobDetails.
         /// </summary>
         public IDictionary<string, string> Defines { get; private set; }
 
+        /// <summary>
+        ///     Gets or sets the location of the input data in Hadoop.
+        /// </summary>
+        public string Input { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the name of the jobDetails.
+        /// </summary>
+        public string JobName { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the Mapper.
+        /// </summary>
+        public string Mapper { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the Location in which to store the output data.
+        /// </summary>
+        public string Output { get; set; }
+
+        /// <summary>
+        ///     Gets or sets the Reducer.
+        /// </summary>
+        public string Reducer { get; set; }
+
         internal StreamingMapReduceJobCreateParameters ToStreamingMapReduceJobCreateParameters()
         {
-            var streamingJobDefinition = new StreamingMapReduceJobCreateParameters()
+            var streamingJobDefinition = new StreamingMapReduceJobCreateParameters
             {
                 JobName = this.JobName,
                 Input = this.Input,

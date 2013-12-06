@@ -12,19 +12,17 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImplementations
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Management.Automation;
     using System.Threading.Tasks;
-    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandInterfaces;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters;
-    using Microsoft.WindowsAzure.Management.HDInsight;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.Extensions;
 
     internal class NewAzureHDInsightClusterCommand : AzureHDInsightClusterCommand<AzureHDInsightCluster>, INewAzureHDInsightClusterCommand
     {
@@ -38,23 +36,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImp
             this.OozieConfiguration = new OozieConfiguration();
         }
 
-        /// <inheritdoc />
-        public string Location { get; set; }
-
-        /// <inheritdoc />
-        public string DefaultStorageAccountName { get; set; }
-
-        /// <inheritdoc />
-        public string DefaultStorageAccountKey { get; set; }
-
-        /// <inheritdoc />
-        public string DefaultStorageContainerName { get; set; }
-
-        /// <inheritdoc />
-        public PSCredential Credential { get; set; }
-
-        /// <inheritdoc />
-        public string Version { get; set; }
+        public ICollection<AzureHDInsightStorageAccount> AdditionalStorageAccounts { get; private set; }
 
         /// <inheritdoc />
         public int ClusterSizeInNodes { get; set; }
@@ -63,21 +45,52 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImp
         public ConfigValuesCollection CoreConfiguration { get; set; }
 
         /// <inheritdoc />
+        public PSCredential Credential { get; set; }
+
+        /// <inheritdoc />
+        public string DefaultStorageAccountKey { get; set; }
+
+        /// <inheritdoc />
+        public string DefaultStorageAccountName { get; set; }
+
+        /// <inheritdoc />
+        public string DefaultStorageContainerName { get; set; }
+
+        /// <inheritdoc />
         public ConfigValuesCollection HdfsConfiguration { get; set; }
+
+        /// <inheritdoc />
+        public HiveConfiguration HiveConfiguration { get; set; }
+
+        public AzureHDInsightMetastore HiveMetastore { get; set; }
+
+        /// <inheritdoc />
+        public string Location { get; set; }
 
         /// <inheritdoc />
         public MapReduceConfiguration MapReduceConfiguration { get; set; }
 
         /// <inheritdoc />
-        public HiveConfiguration HiveConfiguration { get; set; }
+        public OozieConfiguration OozieConfiguration { get; set; }
+
+        public AzureHDInsightMetastore OozieMetastore { get; set; }
+
+        public ClusterState State { get; private set; }
 
         /// <inheritdoc />
-        public OozieConfiguration OozieConfiguration { get; set; }
+        public string Version { get; set; }
 
         public override async Task EndProcessing()
         {
-            var client = this.GetClient();
+            IHDInsightClient client = this.GetClient();
             client.ClusterProvisioning += this.ClientOnClusterProvisioning;
+            ClusterCreateParameters createClusterRequest = this.GetClusterCreateParameters();
+            var cluster = await client.CreateClusterAsync(createClusterRequest);
+            this.Output.Add(new AzureHDInsightCluster(cluster));
+        }
+
+        internal ClusterCreateParameters GetClusterCreateParameters()
+        {
             var createClusterRequest = new ClusterCreateParameters();
             createClusterRequest.Name = this.Name;
             createClusterRequest.Version = this.Version;
@@ -86,10 +99,13 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImp
             createClusterRequest.CoreConfiguration.AddRange(this.CoreConfiguration);
             createClusterRequest.HdfsConfiguration.AddRange(this.HdfsConfiguration);
             createClusterRequest.MapReduceConfiguration.ConfigurationCollection.AddRange(this.MapReduceConfiguration.ConfigurationCollection);
-            createClusterRequest.MapReduceConfiguration.CapacitySchedulerConfigurationCollection.AddRange(this.MapReduceConfiguration.CapacitySchedulerConfigurationCollection);
+            createClusterRequest.MapReduceConfiguration.CapacitySchedulerConfigurationCollection.AddRange(
+                this.MapReduceConfiguration.CapacitySchedulerConfigurationCollection);
             createClusterRequest.HiveConfiguration.AdditionalLibraries = this.HiveConfiguration.AdditionalLibraries;
             createClusterRequest.HiveConfiguration.ConfigurationCollection.AddRange(this.HiveConfiguration.ConfigurationCollection);
             createClusterRequest.OozieConfiguration.ConfigurationCollection.AddRange(this.OozieConfiguration.ConfigurationCollection);
+            createClusterRequest.OozieConfiguration.AdditionalSharedLibraries = this.OozieConfiguration.AdditionalSharedLibraries;
+            createClusterRequest.OozieConfiguration.AdditionalActionExecutorLibraries = this.OozieConfiguration.AdditionalActionExecutorLibraries;
 
             createClusterRequest.DefaultStorageAccountName = this.DefaultStorageAccountName;
             createClusterRequest.DefaultStorageAccountKey = this.DefaultStorageAccountKey;
@@ -97,36 +113,30 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImp
             createClusterRequest.UserName = this.Credential.UserName;
             createClusterRequest.Password = this.Credential.GetCleartextPassword();
             createClusterRequest.ClusterSizeInNodes = this.ClusterSizeInNodes;
-            createClusterRequest.AdditionalStorageAccounts.AddRange(this.AdditionalStorageAccounts.Select(act => new WabStorageAccountConfiguration(act.StorageAccountName, act.StorageAccountKey)));
+            createClusterRequest.AdditionalStorageAccounts.AddRange(
+                this.AdditionalStorageAccounts.Select(act => new WabStorageAccountConfiguration(act.StorageAccountName, act.StorageAccountKey)));
             if (this.HiveMetastore.IsNotNull())
             {
-                createClusterRequest.HiveMetastore = new Metastore(this.HiveMetastore.SqlAzureServerName,
-                                                                            this.HiveMetastore.DatabaseName,
-                                                                            this.HiveMetastore.Credential.UserName,
-                                                                            this.HiveMetastore.Credential.GetCleartextPassword());
+                createClusterRequest.HiveMetastore = new Metastore(
+                    this.HiveMetastore.SqlAzureServerName,
+                    this.HiveMetastore.DatabaseName,
+                    this.HiveMetastore.Credential.UserName,
+                    this.HiveMetastore.Credential.GetCleartextPassword());
             }
             if (this.OozieMetastore.IsNotNull())
             {
-                createClusterRequest.OozieMetastore = new Metastore(this.OozieMetastore.SqlAzureServerName,
-                                                                             this.OozieMetastore.DatabaseName,
-                                                                             this.OozieMetastore.Credential.UserName,
-                                                                             this.OozieMetastore.Credential.GetCleartextPassword());
+                createClusterRequest.OozieMetastore = new Metastore(
+                    this.OozieMetastore.SqlAzureServerName,
+                    this.OozieMetastore.DatabaseName,
+                    this.OozieMetastore.Credential.UserName,
+                    this.OozieMetastore.Credential.GetCleartextPassword());
             }
-            var cluster = await client.CreateClusterAsync(createClusterRequest);
-            this.Output.Add(new AzureHDInsightCluster(cluster));
+            return createClusterRequest;
         }
 
         private void ClientOnClusterProvisioning(object sender, ClusterProvisioningStatusEventArgs clusterProvisioningStatusEventArgs)
         {
             this.State = clusterProvisioningStatusEventArgs.State;
         }
-
-        public ClusterState State { get; private set; }
-
-        public ICollection<AzureHDInsightStorageAccount> AdditionalStorageAccounts { get; private set; }
-
-        public AzureHDInsightMetastore HiveMetastore { get; set; }
-
-        public AzureHDInsightMetastore OozieMetastore { get; set; }
     }
 }

@@ -12,10 +12,12 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
 {
     using System;
     using System.Collections;
+    using System.Diagnostics.CodeAnalysis;
     using System.Management.Automation;
     using System.Reflection;
     using System.Threading.Tasks;
@@ -23,27 +25,20 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandInterfaces;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.DataObjects;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters;
-    using Microsoft.WindowsAzure.Management.HDInsight;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.Extensions;
+    using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.ServiceLocation;
     using Microsoft.WindowsAzure.Management.HDInsight.Logging;
 
     /// <summary>
-    /// Sets the Default Storage Container for the HDInsight cluster configuration.
+    ///     Sets the Default Storage Container for the HDInsight cluster configuration.
     /// </summary>
     [Cmdlet(VerbsCommon.Add, AzureHdInsightPowerShellConstants.AzureHDInsightConfigValues)]
     public class AddAzureHDInsightConfigValuesCmdlet : AzureHDInsightCmdlet, IAddAzureHDInsightConfigValuesBase
     {
         private readonly IAddAzureHDInsightConfigValuesCommand command;
 
-        /// <inheritdoc />
-        protected override void StopProcessing()
-        {
-            this.command.Cancel();
-        }
-
         /// <summary>
-        /// Initializes a new instance of the AddAzureHDInsightConfigValuesCmdlet class.
+        ///     Initializes a new instance of the AddAzureHDInsightConfigValuesCmdlet class.
         /// </summary>
         public AddAzureHDInsightConfigValuesCmdlet()
         {
@@ -51,7 +46,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
         }
 
         /// <summary>
-        /// Gets or sets the Azure HDInsight Configuration for the Azure HDInsight cluster being constructed.
+        ///     Gets or sets the Azure HDInsight Configuration for the Azure HDInsight cluster being constructed.
         /// </summary>
         [Parameter(Position = 0, Mandatory = true,
             HelpMessage = "The HDInsight cluster configuration to use when creating the new cluster (created by New-AzureHDInsightConfig).",
@@ -75,9 +70,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
         }
 
         /// <summary>
-        /// Gets or sets a collection of configuration properties to customize the Core Hadoop service.
+        ///     Gets or sets a collection of configuration properties to customize the Core Hadoop service.
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "Ease of use in Powershell")]
+        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "Ease of use in Powershell")]
         [Parameter(Mandatory = false, HelpMessage = "a collection of configuration properties to customize the Core Hadoop service.")]
         public Hashtable Core
         {
@@ -86,9 +81,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
         }
 
         /// <summary>
-        /// Gets or sets a collection of configuration properties to customize the Hdfs Hadoop service.
+        ///     Gets or sets a collection of configuration properties to customize the Hdfs Hadoop service.
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "Ease of use in Powershell")]
+        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "Ease of use in Powershell")]
         [Parameter(Mandatory = false, HelpMessage = "a collection of configuration properties to customize Hdfs Core Hadoop service.")]
         public Hashtable Hdfs
         {
@@ -97,20 +92,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
         }
 
         /// <summary>
-        /// Gets or sets a collection of configuration properties to customize the MapReduce Hadoop service.
+        ///     Gets or sets a collection of configuration properties to customize the Hive Hadoop service.
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "Ease of use in Powershell")]
-        [Parameter(Mandatory = false, HelpMessage = "a collection of configuration properties to customize the MapReduce Hadoop service.")]
-        public AzureHDInsightMapReduceConfiguration MapReduce
-        {
-            get { return this.command.MapReduce; }
-            set { this.command.MapReduce = value; }
-        }
-
-        /// <summary>
-        /// Gets or sets a collection of configuration properties to customize the Hive Hadoop service.
-        /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "Ease of use in Powershell")]
+        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "Ease of use in Powershell")]
         [Parameter(Mandatory = false, HelpMessage = "a collection of configuration properties to customize the Hive Hadoop service.")]
         public AzureHDInsightHiveConfiguration Hive
         {
@@ -119,9 +103,20 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
         }
 
         /// <summary>
-        /// Gets or sets a collection of configuration properties to customize the Oozie Hadoop service.
+        ///     Gets or sets a collection of configuration properties to customize the MapReduce Hadoop service.
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "Ease of use in Powershell")]
+        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "Ease of use in Powershell")]
+        [Parameter(Mandatory = false, HelpMessage = "a collection of configuration properties to customize the MapReduce Hadoop service.")]
+        public AzureHDInsightMapReduceConfiguration MapReduce
+        {
+            get { return this.command.MapReduce; }
+            set { this.command.MapReduce = value; }
+        }
+
+        /// <summary>
+        ///     Gets or sets a collection of configuration properties to customize the Oozie Hadoop service.
+        /// </summary>
+        [SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly", Justification = "Ease of use in Powershell")]
         [Parameter(Mandatory = false, HelpMessage = "a collection of configuration properties to customize the Oozie Hadoop service.")]
         public AzureHDInsightOozieConfiguration Oozie
         {
@@ -135,14 +130,14 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
             try
             {
                 this.command.EndProcessing().Wait();
-                foreach (var output in this.command.Output)
+                foreach (AzureHDInsightConfig output in this.command.Output)
                 {
                     this.WriteObject(output);
                 }
             }
             catch (Exception ex)
             {
-                var type = ex.GetType();
+                Type type = ex.GetType();
                 this.Logger.Log(Severity.Error, Verbosity.Normal, this.FormatException(ex));
                 this.WriteDebugLog();
                 if (type == typeof(AggregateException) || type == typeof(TargetInvocationException) || type == typeof(TaskCanceledException))
@@ -155,6 +150,12 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.PSCmdlets
                 }
             }
             this.WriteDebugLog();
+        }
+
+        /// <inheritdoc />
+        protected override void StopProcessing()
+        {
+            this.command.Cancel();
         }
     }
 }

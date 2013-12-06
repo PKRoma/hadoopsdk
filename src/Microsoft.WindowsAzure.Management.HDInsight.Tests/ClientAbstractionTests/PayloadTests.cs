@@ -156,7 +156,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
 
             // Roundtrip serialize\deserialize
             Guid subscriptionId = new Guid();
-            var payload = ServerSerializer.SerializeListContainersResult(originalContainers, "namespace");
+            var payload = ServerSerializer.SerializeListContainersResult(originalContainers, "namespace", true, false);
             var finalContainers = new PayloadConverter().DeserializeListContainersResult(payload, "namespace", subscriptionId);
 
             // Compares the lists
@@ -168,6 +168,159 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
                 Assert.AreEqual(deserializedCluster.SubscriptionId, subscriptionId);
                 Assert.IsTrue(Equals(expectedCluster, deserializedCluster), "Failed to deserialize cluster pigJobCreateParameters {0}", expectedCluster.Name);
             }
+        }
+
+        [TestMethod]
+        [TestCategory("Integration")]
+        [TestCategory("CheckIn")]
+        [TestCategory("Payload")]
+        public void InternalValidation_PayloadConverter_SerializationListContainersResult_WithErrorWithoutExtendedError()
+        {
+            var storageAccount = new WabStorageAccountConfiguration(Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString());
+            var container1 = new ClusterDetails(base.GetRandomClusterName(), "ClusterStorageProvisioned")
+            {
+                CreatedDate = DateTime.Now,
+                ConnectionUrl = @"https://some/long/uri/",
+                HttpUserName = "username",
+                Location = "West US",
+                ClusterSizeInNodes = 10,
+                Error = new ClusterErrorStatus(10, "error", "create"),
+                Version = IntegrationTestBase.TestCredentials.WellKnownCluster.Version,
+            };
+            container1.DefaultStorageAccount = storageAccount;
+            container1.AdditionalStorageAccounts = new List<WabStorageAccountConfiguration>() 
+            { 
+                new WabStorageAccountConfiguration(Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString()),
+                new WabStorageAccountConfiguration(Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString()) 
+            };
+
+            var originalContainers = new Collection<ClusterDetails> { container1 };
+
+            Guid subscriptionId = new Guid();
+            var payload = ServerSerializer.SerializeListContainersResult(originalContainers, "namespace", true, false);
+            var finalContainers = new PayloadConverter().DeserializeListContainersResult(payload, "namespace", subscriptionId);
+
+            Assert.AreEqual(originalContainers.Count, finalContainers.Count);
+            var deserializedCluster = finalContainers.FirstOrDefault(cluster => cluster.Name == container1.Name);
+            Assert.IsNotNull(deserializedCluster);
+            Assert.AreEqual(deserializedCluster.SubscriptionId, subscriptionId);
+            Assert.AreEqual(deserializedCluster.Error.Message, "error");
+            Assert.AreEqual(deserializedCluster.Error.HttpCode, 10);
+            Assert.AreEqual(deserializedCluster.Error.OperationType, "create");
+        }
+
+        [TestMethod]
+        [TestCategory("Integration")]
+        [TestCategory("CheckIn")]
+        [TestCategory("Payload")]
+        public void InternalValidation_PayloadConverter_SerializationListContainersResult_WithErrorWithExtendedError()
+        {
+            var storageAccount = new WabStorageAccountConfiguration(Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString());
+            var container1 = new ClusterDetails(base.GetRandomClusterName(), "ClusterStorageProvisioned")
+            {
+                CreatedDate = DateTime.Now,
+                ConnectionUrl = @"https://some/long/uri/",
+                HttpUserName = "username",
+                Location = "West US",
+                ClusterSizeInNodes = 10,
+                Error = new ClusterErrorStatus(10, "error", "create"),
+                Version = IntegrationTestBase.TestCredentials.WellKnownCluster.Version,
+            };
+            container1.DefaultStorageAccount = storageAccount;
+            container1.AdditionalStorageAccounts = new List<WabStorageAccountConfiguration>() 
+            { 
+                new WabStorageAccountConfiguration(Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString()),
+                new WabStorageAccountConfiguration(Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString()) 
+            };
+
+            var originalContainers = new Collection<ClusterDetails> { container1 };
+
+            Guid subscriptionId = new Guid();
+            var payload = ServerSerializer.SerializeListContainersResult(originalContainers, "namespace", true, true);
+            var finalContainers = new PayloadConverter().DeserializeListContainersResult(payload, "namespace", subscriptionId);
+
+            Assert.AreEqual(originalContainers.Count, finalContainers.Count);
+            var deserializedCluster = finalContainers.FirstOrDefault(cluster => cluster.Name == container1.Name);
+            Assert.IsNotNull(deserializedCluster);
+            Assert.AreEqual(deserializedCluster.SubscriptionId, subscriptionId);
+            Assert.AreEqual(deserializedCluster.Error.Message, "error");
+            Assert.AreEqual(deserializedCluster.Error.HttpCode, 10);
+            Assert.AreEqual(deserializedCluster.Error.OperationType, "create");
+        }
+
+        [TestMethod]
+        [TestCategory("Integration")]
+        [TestCategory("CheckIn")]
+        [TestCategory("Payload")]
+        public void InternalValidation_PayloadConverter_SerializationListContainersResult_WithoutErrorWithoutExtendedError()
+        {
+            var storageAccount = new WabStorageAccountConfiguration(Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString());
+            var container1 = new ClusterDetails(base.GetRandomClusterName(), "ClusterStorageProvisioned")
+            {
+                CreatedDate = DateTime.Now,
+                ConnectionUrl = @"https://some/long/uri/",
+                HttpUserName = "username",
+                Location = "West US",
+                ClusterSizeInNodes = 10,
+                Version = IntegrationTestBase.TestCredentials.WellKnownCluster.Version,
+            };
+            container1.DefaultStorageAccount = storageAccount;
+            container1.AdditionalStorageAccounts = new List<WabStorageAccountConfiguration>() 
+            { 
+                new WabStorageAccountConfiguration(Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString()),
+                new WabStorageAccountConfiguration(Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString()) 
+            };
+
+            var originalContainers = new Collection<ClusterDetails> { container1 };
+
+            Guid subscriptionId = new Guid();
+            var payload = ServerSerializer.SerializeListContainersResult(originalContainers, "namespace", false, false);
+            var finalContainers = new PayloadConverter().DeserializeListContainersResult(payload, "namespace", subscriptionId);
+
+            Assert.AreEqual(originalContainers.Count, finalContainers.Count);
+            var deserializedCluster = finalContainers.FirstOrDefault(cluster => cluster.Name == container1.Name);
+            Assert.IsNotNull(deserializedCluster);
+            Assert.AreEqual(deserializedCluster.SubscriptionId, subscriptionId);
+            Assert.IsNull(deserializedCluster.Error);
+        }
+
+        [TestMethod]
+        [TestCategory("Integration")]
+        [TestCategory("CheckIn")]
+        [TestCategory("Payload")]
+        public void InternalValidation_PayloadConverter_SerializationListContainersResult_WithoutErrorWithExtendedError()
+        {
+            var storageAccount = new WabStorageAccountConfiguration(Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString());
+            var container1 = new ClusterDetails(base.GetRandomClusterName(), "ClusterStorageProvisioned")
+            {
+                CreatedDate = DateTime.Now,
+                ConnectionUrl = @"https://some/long/uri/",
+                HttpUserName = "username",
+                Location = "West US",
+                ClusterSizeInNodes = 10,
+                Error = new ClusterErrorStatus(10, "error", "create"),
+                Version = IntegrationTestBase.TestCredentials.WellKnownCluster.Version,
+            };
+            container1.DefaultStorageAccount = storageAccount;
+            container1.AdditionalStorageAccounts = new List<WabStorageAccountConfiguration>() 
+            { 
+                new WabStorageAccountConfiguration(Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString()),
+                new WabStorageAccountConfiguration(Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString()) 
+            };
+
+            var originalContainers = new Collection<ClusterDetails> { container1 };
+
+            Guid subscriptionId = new Guid();
+            var payload = ServerSerializer.SerializeListContainersResult(originalContainers, "namespace", false, true);
+            var finalContainers = new PayloadConverter().DeserializeListContainersResult(payload, "namespace", subscriptionId);
+
+            Assert.AreEqual(originalContainers.Count, finalContainers.Count);
+            var deserializedCluster = finalContainers.FirstOrDefault(cluster => cluster.Name == container1.Name);
+            Assert.IsNotNull(deserializedCluster);
+            Assert.AreEqual(deserializedCluster.SubscriptionId, subscriptionId);
+            Assert.AreEqual(deserializedCluster.Error.Message, "error");
+            Assert.AreEqual(deserializedCluster.Error.HttpCode, 10);
+            Assert.AreEqual(deserializedCluster.Error.OperationType, "create");
         }
 
         private static bool Equals(ClusterDetails expectedCluster, ClusterDetails deserializedCluster)

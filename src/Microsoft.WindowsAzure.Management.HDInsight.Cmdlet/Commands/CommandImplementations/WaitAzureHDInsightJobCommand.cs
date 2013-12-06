@@ -12,6 +12,7 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImplementations
 {
     using System;
@@ -23,41 +24,67 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImp
 
     internal class WaitAzureHDInsightJobCommand : AzureHDInsightJobExecutorCommand<AzureHDInsightJob>, IWaitAzureHDInsightJobCommand
     {
+        internal static bool ReduceWaitTime = false;
+
         public WaitAzureHDInsightJobCommand()
         {
             this.WaitTimeoutInSeconds = 30 * 60;
         }
 
-        public async Task ProcessRecord()
-        {
-            var client = this.GetClient(this.Job.Cluster);
-            client.JobStatusEvent += this.ClientOnJobStatus;
-            var job = new JobDetails() { JobId = this.Job.JobId };
-            var jobDetail = await client.WaitForJobCompletionAsync(job, TimeSpan.FromSeconds(this.WaitTimeoutInSeconds), this.tokenSource.Token);
-            this.Output.Add(new AzureHDInsightJob(jobDetail, this.Job.Cluster));
-        }
-
         public event EventHandler<WaitJobStatusEventArgs> JobStatusEvent;
+
+        public string Cluster { get; set; }
+
+        public AzureHDInsightJob Job { get; set; }
 
         public JobDetails JobDetailsStatus { get; private set; }
 
-        private void ClientOnJobStatus(object sender, WaitJobStatusEventArgs waitJobStatusEventArgs)
-        {
-            this.JobDetailsStatus = waitJobStatusEventArgs.JobDetails;
-            var handler = this.JobStatusEvent;
-            if (handler != null)
-            {
-                handler(sender, waitJobStatusEventArgs);
-            }
-        }
+        public string JobId { get; set; }
+
+        public double WaitTimeoutInSeconds { get; set; }
 
         public override Task EndProcessing()
         {
             return TaskEx.GetCompletedTask();
         }
 
-        public AzureHDInsightJob Job { get; set; }
+        public async Task ProcessRecord()
+        {
+            if (string.IsNullOrWhiteSpace(this.JobId) || string.IsNullOrWhiteSpace(this.Cluster))
+            {
+                this.JobId = this.Job.JobId;
+                this.Cluster = this.Job.Cluster;
+            }
 
-        public double WaitTimeoutInSeconds { get; set; }
+            IJobSubmissionClient client = this.GetClient(this.Cluster);
+            client.JobStatusEvent += this.ClientOnJobStatus;
+            JobDetails jobDetail = null;
+            if (ReduceWaitTime)
+            {
+                jobDetail = await client.GetJobAsync(this.JobId);
+                while (jobDetail.StatusCode != JobStatusCode.Completed && jobDetail.StatusCode != JobStatusCode.Failed &&
+                       jobDetail.StatusCode != JobStatusCode.Canceled)
+                {
+                    jobDetail = await client.GetJobAsync(this.JobId);
+                }
+            }
+            else
+            {
+                var job = new JobCreationResults { JobId = this.JobId };
+                await client.WaitForJobCompletionAsync(job, TimeSpan.FromSeconds(this.WaitTimeoutInSeconds), this.tokenSource.Token);
+            }
+
+            this.Output.Add(new AzureHDInsightJob(jobDetail, this.Cluster));
+        }
+
+        private void ClientOnJobStatus(object sender, WaitJobStatusEventArgs waitJobStatusEventArgs)
+        {
+            this.JobDetailsStatus = waitJobStatusEventArgs.JobDetails;
+            EventHandler<WaitJobStatusEventArgs> handler = this.JobStatusEvent;
+            if (handler != null)
+            {
+                handler(sender, waitJobStatusEventArgs);
+            }
+        }
     }
 }
