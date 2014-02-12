@@ -193,7 +193,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.ServerDataOb
                 }
             }
 
-            cluster.ClusterSizeInNodes = payloadObject.Deployment.TotalNodeCount;
+            cluster.ClusterSizeInNodes = payloadObject.Deployment.Roles.Sum(role => role.Count);
             return cluster;
         }
 
@@ -204,6 +204,12 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.ServerDataOb
             {
                 cluster.CoreConfiguration.AddRange(
                     payloadObject.Settings.Core.Configuration.Select(config => new KeyValuePair<string, string>(config.Name, config.Value)));
+            }
+
+            if (payloadObject.Settings.Yarn != null && payloadObject.Settings.Yarn.Configuration != null)
+            {
+                cluster.YarnConfiguration.AddRange(
+                    payloadObject.Settings.Yarn.Configuration.Select(config => new KeyValuePair<string, string>(config.Name, config.Value)));
             }
 
             if (payloadObject.Settings.Hive != null)

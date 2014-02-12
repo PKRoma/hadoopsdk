@@ -36,6 +36,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
             if (pocoSimulators.ContainsKey(clusterKey))
             {
                 var simulator = pocoSimulators[clusterKey];
+                simulator.credentials = remoteCredentials;
                 simulator.context = context;
                 return simulator;
             }

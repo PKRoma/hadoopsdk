@@ -28,6 +28,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
     using Microsoft.Hadoop.Client.Storage;
     using Microsoft.WindowsAzure.Management.HDInsight;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
     using Microsoft.WindowsAzure.Management.HDInsight.Logging;
 
@@ -35,7 +36,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
     {
         internal const string JobSuccesful = "jobDetails succeeded";
         internal const string JobFailed = "jobDetails failed";
-        private readonly BasicAuthCredential credentials;
+        internal BasicAuthCredential credentials;
         private readonly HDInsightManagementRestSimulatorClient.SimulatorClusterContainer cluster;
         internal IAbstractionContext context;
 

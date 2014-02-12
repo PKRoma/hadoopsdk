@@ -17,7 +17,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Tests.Utilities
 {
     using System;
     using System.Runtime.Serialization;
-    using Microsoft.HDInsight.Management.Contracts;
+//    using Microsoft.HDInsight.Management.Contracts;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Tests.Simulators.Types;
 
     [DataContract(Namespace = Microsoft.HDInsight.Management.Contracts.May2013.Constants.XsdNamespace)]

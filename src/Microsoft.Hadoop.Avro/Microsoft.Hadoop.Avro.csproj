@@ -1,0 +1,213 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{EAB38A14-211F-4361-A06E-3EC1E07ABE33}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Microsoft.Hadoop.Avro</RootNamespace>
+    <AssemblyName>Microsoft.Hadoop.Avro</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <CodeContractsAssemblyMode>0</CodeContractsAssemblyMode>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
+    <CodeContractsEnableRuntimeChecking>True</CodeContractsEnableRuntimeChecking>
+    <CodeContractsRuntimeOnlyPublicSurface>False</CodeContractsRuntimeOnlyPublicSurface>
+    <CodeContractsRuntimeThrowOnFailure>True</CodeContractsRuntimeThrowOnFailure>
+    <CodeContractsRuntimeCallSiteRequires>False</CodeContractsRuntimeCallSiteRequires>
+    <CodeContractsRuntimeSkipQuantifiers>False</CodeContractsRuntimeSkipQuantifiers>
+    <CodeContractsRunCodeAnalysis>True</CodeContractsRunCodeAnalysis>
+    <CodeContractsNonNullObligations>True</CodeContractsNonNullObligations>
+    <CodeContractsBoundsObligations>True</CodeContractsBoundsObligations>
+    <CodeContractsArithmeticObligations>True</CodeContractsArithmeticObligations>
+    <CodeContractsEnumObligations>True</CodeContractsEnumObligations>
+    <CodeContractsRedundantAssumptions>True</CodeContractsRedundantAssumptions>
+    <CodeContractsMissingPublicRequiresAsWarnings>True</CodeContractsMissingPublicRequiresAsWarnings>
+    <CodeContractsInferRequires>True</CodeContractsInferRequires>
+    <CodeContractsInferEnsures>True</CodeContractsInferEnsures>
+    <CodeContractsInferObjectInvariants>True</CodeContractsInferObjectInvariants>
+    <CodeContractsSuggestAssumptions>True</CodeContractsSuggestAssumptions>
+    <CodeContractsSuggestRequires>True</CodeContractsSuggestRequires>
+    <CodeContractsSuggestObjectInvariants>True</CodeContractsSuggestObjectInvariants>
+    <CodeContractsRunInBackground>True</CodeContractsRunInBackground>
+    <CodeContractsShowSquigglies>True</CodeContractsShowSquigglies>
+    <CodeContractsUseBaseLine>False</CodeContractsUseBaseLine>
+    <CodeContractsEmitXMLDocs>False</CodeContractsEmitXMLDocs>
+    <CodeContractsCustomRewriterAssembly />
+    <CodeContractsCustomRewriterClass />
+    <CodeContractsLibPaths />
+    <CodeContractsExtraRewriteOptions />
+    <CodeContractsExtraAnalysisOptions />
+    <CodeContractsSQLServerOption />
+    <CodeContractsBaseLineFile />
+    <CodeContractsCacheAnalysisResults>True</CodeContractsCacheAnalysisResults>
+    <CodeContractsFailBuildOnWarnings>False</CodeContractsFailBuildOnWarnings>
+    <CodeContractsRuntimeCheckingLevel>Full</CodeContractsRuntimeCheckingLevel>
+    <CodeContractsReferenceAssembly>%28none%29</CodeContractsReferenceAssembly>
+    <CodeContractsAnalysisWarningLevel>0</CodeContractsAnalysisWarningLevel>
+    <DocumentationFile>..\..\Bin\Unsigned\Debug\Microsoft.Hadoop.Avro\Microsoft.Hadoop.Avro.XML</DocumentationFile>
+    <CheckForOverflowUnderflow>true</CheckForOverflowUnderflow>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <DocumentationFile>..\..\Bin\Unsigned\Release\Microsoft.Hadoop.Avro\Microsoft.Hadoop.Avro.XML</DocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.5.0.5\lib\net40\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AvroEnum.cs" />
+    <Compile Include="AvroRecord.cs" />
+    <Compile Include="AvroSerializer.cs" />
+    <Compile Include="AvroSerializer.Static.cs" />
+    <Compile Include="AvroSerializerSettings.cs" />
+    <Compile Include="Container\CodecFactory.cs" />
+    <Compile Include="Encoders\ISkipper.cs" />
+    <Compile Include="Encoders\BinaryDecoder.cs" />
+    <Compile Include="Encoders\BinaryEncoder.cs" />
+    <Compile Include="Encoders\IDecoder.cs" />
+    <Compile Include="Encoders\IEncoder.cs" />
+    <Compile Include="Encoders\BufferedBinaryDecoder.cs" />
+    <Compile Include="Encoders\BufferedBinaryEncoder.cs" />
+    <Compile Include="GeneratedSerializer.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="IAvroSerializer.cs" />
+    <Compile Include="IAvroSurrogate.cs" />
+    <Compile Include="MemberSerializationInfo.cs" />
+    <Compile Include="Container\AvroBufferReaderBlock.cs" />
+    <Compile Include="Container\AvroBufferWriterBlock.cs" />
+    <Compile Include="Container\Codec.cs" />
+    <Compile Include="Container\DecompressionStream.cs" />
+    <Compile Include="Container\DeflateCodec.cs" />
+    <Compile Include="Container\CompressionStream.cs" />
+    <Compile Include="Container\IAvroReader.cs" />
+    <Compile Include="Container\IAvroReaderBlock.cs" />
+    <Compile Include="Container\IAvroWriter.cs" />
+    <Compile Include="Container\IAvroWriterBlock.cs" />
+    <Compile Include="Container\NullCodec.cs" />
+    <Compile Include="Container\AvroContainer.Static.cs" />
+    <Compile Include="Container\ObjectContainerHeader.cs" />
+    <Compile Include="Container\SequentialReader.cs" />
+    <Compile Include="Container\SequentialWriter.cs" />
+    <Compile Include="Container\StreamReader.cs" />
+    <Compile Include="Container\StreamWriter.cs" />
+    <Compile Include="NullableSchemaAttribute.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\AssemblyInternalsVisibleTo.cs" />
+    <Compile Include="Resources\StringResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>StringResources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Schema\ArraySchema.cs" />
+    <Compile Include="Schema\BooleanSchema.cs" />
+    <Compile Include="Schema\BytesSchema.cs" />
+    <Compile Include="Schema\DoubleSchema.cs" />
+    <Compile Include="Schema\EnumSchema.cs" />
+    <Compile Include="Schema\EvolutionSchemaBuilder.cs" />
+    <Compile Include="Schema\FixedSchema.cs" />
+    <Compile Include="Schema\FloatSchema.cs" />
+    <Compile Include="Schema\IntSchema.cs" />
+    <Compile Include="Schema\JsonExtensions.cs" />
+    <Compile Include="Schema\JsonObjectParser.cs" />
+    <Compile Include="Schema\JsonSchemaBuilder.cs" />
+    <Compile Include="Schema\LongSchema.cs" />
+    <Compile Include="Schema\MapSchema.cs" />
+    <Compile Include="Schema\NamedEntityAttributes.cs" />
+    <Compile Include="Schema\NamedSchema.cs" />
+    <Compile Include="Schema\NullableSchema.cs" />
+    <Compile Include="Schema\NullSchema.cs" />
+    <Compile Include="Schema\PrimitiveTypeSchema.cs" />
+    <Compile Include="Schema\RecordField.cs" />
+    <Compile Include="Schema\RecordSchema.cs" />
+    <Compile Include="Schema\ReflectionSchemaBuilder.cs" />
+    <Compile Include="Schema\Schema.cs" />
+    <Compile Include="Schema\SchemaName.cs" />
+    <Compile Include="Schema\StandardProperties.cs" />
+    <Compile Include="Schema\StringSchema.cs" />
+    <Compile Include="Schema\SurrogateSchema.cs" />
+    <Compile Include="Schema\Token.cs" />
+    <Compile Include="Schema\TypeSchema.cs" />
+    <Compile Include="Schema\UnionSchema.cs" />
+    <Compile Include="AvroContractResolver.cs" />
+    <Compile Include="Serializers\ArraySerializer.cs" />
+    <Compile Include="Serializers\AsStringSerializer.cs" />
+    <Compile Include="Serializers\BooleanSerializer.cs" />
+    <Compile Include="Serializers\NullableSerializer.cs" />
+    <Compile Include="Serializers\SerializerAssigningVisitor.cs" />
+    <Compile Include="Serializers\ByteArraySerializer.cs" />
+    <Compile Include="Serializers\ClassSerializer.cs" />
+    <Compile Include="Serializers\DateTimeOffsetSerializer.cs" />
+    <Compile Include="Serializers\DateTimeSerializer.cs" />
+    <Compile Include="Serializers\DictionarySerializer.cs" />
+    <Compile Include="Serializers\DoubleSerializer.cs" />
+    <Compile Include="Serializers\EnumerableSerializer.cs" />
+    <Compile Include="Serializers\EnumSerializer.cs" />
+    <Compile Include="Serializers\FixedSerializer.cs" />
+    <Compile Include="Serializers\FloatSerializer.cs" />
+    <Compile Include="Serializers\GuidSerializer.cs" />
+    <Compile Include="Serializers\IObjectSerializer.cs" />
+    <Compile Include="Serializers\IFieldSerializer.cs" />
+    <Compile Include="Serializers\IntSerializer.cs" />
+    <Compile Include="Serializers\ListSerializer.cs" />
+    <Compile Include="Serializers\LongSerializer.cs" />
+    <Compile Include="Serializers\MultidimensionalArraySerializer.cs" />
+    <Compile Include="Serializers\NullSerializer.cs" />
+    <Compile Include="Serializers\ObjectSerializerBase.cs" />
+    <Compile Include="Serializers\RecordFieldSerializer.cs" />
+    <Compile Include="Serializers\StringSerializer.cs" />
+    <Compile Include="Serializers\SurrogateSerializer.cs" />
+    <Compile Include="Serializers\UnionSerializer.cs" />
+    <Compile Include="Serializers\UriSerializer.cs" />
+    <Compile Include="Cache.cs" />
+    <Compile Include="SerializerGenerator.cs" />
+    <Compile Include="Resolvers\AvroDataContractResolver.cs" />
+    <Compile Include="Resolvers\AvroPublicMemberContractResolver.cs" />
+    <Compile Include="TypeExtensions.cs" />
+    <Compile Include="TypeSerializationInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\StringResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>StringResources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <Import Project="..\..\build\targets\Project.CSharp.targets" />
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+</Project>

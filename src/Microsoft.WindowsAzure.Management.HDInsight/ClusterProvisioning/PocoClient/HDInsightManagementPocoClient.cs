@@ -17,6 +17,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.Linq;
     using System.Threading;
@@ -35,7 +36,8 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
 
     internal class HDInsightManagementPocoClient : DisposableObject, IHDInsightManagementPocoClient
     {
-        private const string ClusterCrudCapabilitityName = "CAPABILITY_FEATURE_CUSTOM_ACTIONS_V2";
+        internal const string ClusterCrudCapabilitityName = "CAPABILITY_FEATURE_CUSTOM_ACTIONS_V2";
+        internal const string HighAvailabilityCapabilitityName = "CAPABILITY_FEATURE_HIGH_AVAILABILITY";
 
         private readonly IHDInsightSubscriptionCredentials credentials;
 
@@ -142,6 +144,8 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
                         string.Join(",", availableLocations)));
             }
 
+            AssertHighAvailibityCapabilityEnabled(capabilities, details);
+
             // Validates whether the subscription\location needs to be initialized
             var registrationClient = ServiceLocator.Instance.Locate<ISubscriptionRegistrationClientFactory>().Create(this.credentials, this.Context);
             if (!await registrationClient.ValidateSubscriptionLocation(details.Location))
@@ -187,6 +191,26 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
             var pocoHelper = new HDInsightManagementPocoHelper();
             pocoHelper.ValidateResponse(resultId);
             return resultId.Data;
+        }
+
+        [SuppressMessage("Microsoft.Usage", "CA1806:DoNotIgnoreMethodResults", MessageId = "System.Boolean.TryParse(System.String,System.Boolean@)", Justification = "Need to do a non-throwing parse of the boolean value.")]
+        [SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "EnsureHighAvailability", Justification = "Needed to show proper error message.")]
+        internal static void AssertHighAvailibityCapabilityEnabled(IEnumerable<KeyValuePair<string, string>> capabilities, ClusterCreateParameters details)
+        {
+            if (details.EnsureHighAvailability)
+            {
+                var headNodeHACapability = capabilities.FirstOrDefault(capability => capability.Key == HighAvailabilityCapabilitityName);
+                var canSetHeadNodeHA = false;
+                if (headNodeHACapability.Key == HighAvailabilityCapabilitityName)
+                {
+                    bool.TryParse(headNodeHACapability.Value, out canSetHeadNodeHA);
+                }
+
+                if (!canSetHeadNodeHA)
+                {
+                    throw new InvalidOperationException("Your subscription cannot create clusters with EnsureHighAvailability set to true, please contact Support.");
+                }
+            }
         }
 
         // This method is used by the NonPublic SDK.  Be aware of braking changes to that project when you alter it.

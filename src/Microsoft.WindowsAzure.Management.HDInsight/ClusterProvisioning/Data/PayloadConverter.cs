@@ -245,6 +245,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
         {
             dynamic dynaXml = DynaXmlBuilder.Create(false, Formatting.None);
 
+            var headNodeCount = cluster.EnsureHighAvailability ? 2 : 1;
             dynaXml.xmlns("http://schemas.microsoft.com/windowsazure")
                    .Resource
                    .b
@@ -265,7 +266,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
                            .b
                              .ClusterRole
                              .b
-                               .Count(1)
+                               .Count(headNodeCount)
                                .RoleType(ClusterRoleType.HeadNode)
                                .VMSize(NodeVMSize.ExtraLarge)
                              .d
@@ -323,9 +324,13 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
                               .sp("oozieadditionalsharedlibraries")
                               .sp("ooziesharedexecutables")
                            .d
+                           .Yarn
+                           .b
+                              .sp("yarnsettings")
                          .d
                        .d
                      .d
+                   .d
                    .d
                    .End();
 
@@ -337,6 +342,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
 
             this.AddConfigurationOptions(dynaXml, cluster.CoreConfiguration, "coresettings");
             this.AddConfigurationOptions(dynaXml, cluster.HdfsConfiguration, "hdfssettings");
+            this.AddConfigurationOptions(dynaXml, cluster.YarnConfiguration, "yarnsettings");
             if (cluster.MapReduceConfiguration != null)
             {
                 this.AddConfigurationOptions(dynaXml, cluster.MapReduceConfiguration.ConfigurationCollection, "mapreduceconfiguration");
@@ -438,13 +444,13 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
         {
             if (configProperties.Any())
             {
-                var coreConfigurationElement = dynaXml.rp(sectionName).Configuration.b;
-                foreach (var coreConfigPropety in configProperties)
+                var configurationElement = dynaXml.rp(sectionName).Configuration.b;
+                foreach (var configPropety in configProperties)
                 {
-                    coreConfigurationElement.Property.b.Name(coreConfigPropety.Key).Value(coreConfigPropety.Value).d.End();
+                    configurationElement.Property.b.Name(configPropety.Key).Value(configPropety.Value).d.End();
                 }
 
-                coreConfigurationElement.d.End();
+                configurationElement.d.End();
             }
         }
 

@@ -21,6 +21,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
     using System.Globalization;
     using System.Linq;
     using System.Net;
+    using System.Net.Http;
     using System.Threading.Tasks;
     using Microsoft.Hadoop.Client;
     using Microsoft.Hadoop.Client.WebHCatRest;
@@ -31,6 +32,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestClient;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.VersionFinder;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
     using Microsoft.WindowsAzure.Management.HDInsight.Logging;
 
@@ -153,22 +155,39 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
 
             // listen to cluster provisioning events on the POCO client.
             client.ClusterProvisioning += this.RaiseClusterProvisioningEvent;
+            Exception requestException = null;
 
             // Creates a cluster and waits for it to complete
             try
             {
                 await client.CreateContainer(clusterCreateParameters);
             }
+            catch (AggregateException aex)
+            {
+                var ex = aex.GetInnerException();
+                var layerException = ex as HttpLayerException;
+                if (layerException != null)
+                {
+                    requestException = layerException;
+                    HandleCreateHttpLayerException(clusterCreateParameters, layerException);
+                }
+                else
+                {
+                    requestException = ex as HttpRequestException;
+                }
+            }
             catch (HttpLayerException e)
             {
-                if (e.RequestContent.Contains(ClusterAlreadyExistsError) && e.RequestStatusCode == HttpStatusCode.BadRequest)
-                {
-                    throw new InvalidOperationException(string.Format("Cluster {0} already exists.", clusterCreateParameters.Name));
-                }
+                requestException = e;
+                HandleCreateHttpLayerException(clusterCreateParameters, e);
+            }
+            catch (HttpRequestException rex)
+            {
+                requestException = rex;
             }
             await client.WaitForClusterInConditionOrError(this.HandleClusterWaitNotifyEvent,
                                                           clusterCreateParameters.Name,
-                                                          TimeSpan.FromMinutes(30),
+                                                          clusterCreateParameters.CreateTimeout,
                                                           this.PollingInterval,
                                                           this.Context,
                                                           ClusterState.Operational,
@@ -176,6 +195,14 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
 
             // Validates that cluster didn't get on error state
             var result = await this.GetClusterAsync(clusterCreateParameters.Name);
+            if (result == null)
+            {
+                if (requestException != null)
+                {
+                    throw requestException;
+                }
+                throw new OperationCanceledException("Attempting to return the newly created cluster returned no cluster.  The cluster could not be found.");
+            }
             if (result.Error != null)
             {
                 throw new OperationCanceledException(
@@ -189,6 +216,14 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
             }
 
             return result;
+        }
+
+        private static void HandleCreateHttpLayerException(ClusterCreateParameters clusterCreateParameters, HttpLayerException e)
+        {
+            if (e.RequestContent.Contains(ClusterAlreadyExistsError) && e.RequestStatusCode == HttpStatusCode.BadRequest)
+            {
+                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Cluster {0} already exists.", clusterCreateParameters.Name));
+            }
         }
 
         /// <summary>

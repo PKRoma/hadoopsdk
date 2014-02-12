@@ -58,6 +58,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.InversionOfControl
                                                                                      new HDInsightManagementRdfeUriBuilderFactory(),
                                                                                      new PayloadConverter());
 
+            manager.RegisterType<IRetryTimingManager, RetryTimingManager>();
             manager.RegisterInstance<IHDInsightClusterOverrideManager>(overrideManager);
             manager.RegisterType<ICloudServiceNameResolver, CloudServiceNameResolver>();
             manager.RegisterType<IHDInsightManagementRestClientFactory, HDInsightManagementRestClientFactory>();
@@ -71,6 +72,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.InversionOfControl
             manager.RegisterType<IRdfeServiceRestClientFactory, RdfeServiceRestClientFactory>();
             manager.RegisterType<IHDInsightJobSubmissionPocoClientFactory, HDInsightJobSubmissionPocoClientFactory>();
             manager.RegisterType<IHDInsightHttpClientAbstractionFactory, HDInsightHttpClientAbstractionFactory>();
+            manager.RegisterType<IJobSubmissionCache, JobSubmissionCache>();
             var changeManager = new UserChangeRequestManager();
             changeManager.RegisterUserChangeRequestHandler(typeof(HDInsightCertificateCredential), UserChangeRequestUserType.Http, HttpChangeRequestUriBuilder, PayloadConverter.SerializeConnectivityRequest);
             manager.RegisterInstance<IUserChangeRequestManager>(changeManager);

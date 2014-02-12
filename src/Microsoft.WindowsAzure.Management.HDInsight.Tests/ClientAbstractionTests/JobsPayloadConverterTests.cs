@@ -224,7 +224,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             piJob.Arguments.Add("16");
             piJob.Arguments.Add("10000");
             piJob.Defines.Add("map.red.tasks", "1000");
-            piJob.Defines.Add("red.map.tasks", "1000");
+            piJob.Defines.Add("other.tasks", "1000");
 
             var payloadConverter = new PayloadConverterBase();
             var payload = payloadConverter.SerializeMapReduceRequest("hadoop", piJob);

@@ -21,6 +21,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
     using System.Globalization;
     using System.Linq;
     using System.Net;
+    using System.Net.Http;
     using System.Security.Cryptography.X509Certificates;
     using System.Threading.Tasks;
     using Microsoft.HDInsight.Management.Contracts;
@@ -557,6 +558,14 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
 
                 var simCluster = new SimulatorClusterContainer() { Cluster = createCluster, Configuration = azureClusterConfig };
                 Clusters.Add(simCluster);
+                if (createCluster.Name.Contains("NetworkExceptionButCreateSucceeds"))
+                {
+                    throw new HttpRequestException("An error occurred while sending the request.");
+                }
+                if (createCluster.Name.Contains("HttpErrorButCreateSucceeds"))
+                {
+                    return new HttpResponseMessageAbstraction(HttpStatusCode.BadGateway, null, "BadGateway");
+                }
             }
             return new HttpResponseMessageAbstraction(HttpStatusCode.Accepted, null, string.Empty);
         }
@@ -724,6 +733,13 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
                 return this.EnableDisableRdp(dnsName, location, payload);
             }
             throw new NotSupportedException("The change operation is not supported.");
+        }
+
+        public static void SetHttpUserNameAndPassword(string dnsName, string userName, string password)
+        {
+            var cluster = GetCloudServiceInternal(dnsName);
+            cluster.Cluster.HttpUserName = userName;
+            cluster.Cluster.HttpPassword = password;
         }
 
         public Task<IHttpResponseMessageAbstraction> EnableDisableUserChangeRequest(string dnsName, string location, string payload)

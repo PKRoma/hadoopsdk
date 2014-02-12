@@ -16,6 +16,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Linq;
     using System.Net;
     using System.Threading;
@@ -59,6 +60,67 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
         {
             this.ApplyIndividualTestMockingOnly();
             ListAvailableLocations();
+        }
+
+        [TestMethod]
+        [TestCategory(TestRunMode.CheckIn)]
+        [TestCategory("Scenario")]
+        [TestCategory("Defect(2, 1829869)")]
+        public void CreatingAClusterThatDoesNotReturn200ButContinuesDoesNotEnterPolling()
+        {
+            var credentals = GetValidCredentials();
+            var createClient = HDInsightClient.Connect(credentals);
+            var createRequest = GetRandomCluster();
+            createRequest.Name += "HttpErrorButCreateSucceeds";
+            var createTask = createClient.CreateClusterAsync(createRequest);
+            var result = createTask.WaitForResult();
+        }
+
+        [TestMethod]
+        [TestCategory(TestRunMode.CheckIn)]
+        [TestCategory("Scenario")]
+        [TestCategory("Defect(2, 1829869)")]
+        public void CreatingAClusterThatExceptsButContinuesDoesNotEnterPolling()
+        {
+            var credentals = GetValidCredentials();
+            var createClient = HDInsightClient.Connect(credentals);
+            var createRequest = GetRandomCluster();
+            createRequest.Name += "NetworkExceptionButCreateSucceeds";
+            var createTask = createClient.CreateClusterAsync(createRequest);
+            var result = createTask.WaitForResult();
+        }
+
+        [TestMethod]
+        [TestCategory(TestRunMode.CheckIn)]
+        [TestCategory("Scenario")]
+        [TestCategory("Defect(3, 1829645)")]
+        public void DeleteAClusterWhileCreateIsPolling()
+        {
+            HDInsightManagementRestSimulatorClient.OperationTimeToCompletionInMilliseconds = 20000;
+            var credentals = GetValidCredentials();
+            var createClient = HDInsightClient.Connect(credentals);
+            var deleteClient = HDInsightClient.Connect(credentals);
+            var createRequest = GetRandomCluster();
+            ClusterDetails cluster = null;
+            createClient.ClusterProvisioning += (s, e) => cluster = e.Cluster;
+            try
+            {
+                var createTask = createClient.CreateClusterAsync(createRequest);
+                while (cluster == null)
+                {
+                    createTask.Wait(100);
+                }
+                deleteClient.DeleteCluster(createRequest.Name);
+                createTask.WaitForResult();
+            }
+            catch (OperationCanceledException ex)
+            {
+                Assert.IsTrue(ex.Message.Contains("The cluster could not be found"), "The expected exception did not contain the correct string.");
+            }
+            finally
+            {
+                HDInsightManagementRestSimulatorClient.ResetConnectivityDefaultsAllClusters();
+            }
         }
 
         [TestMethod]
@@ -116,7 +178,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
         [TestCategory(TestRunMode.CheckIn)]
         public void EnableHttpServices_GetJobHistory()
         {
-            var testCluster = GetHttpAccessEnabledCluster(true);
+            var testCluster = GetHttpAccessEnabledCluster(false);
             var connectionCredentials = new BasicAuthCredential()
             {
                 Server = new Uri(testCluster.ConnectionUrl),
@@ -243,7 +305,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
             var client = HDInsightClient.Connect(new HDInsightCertificateCredential(credentials.SubscriptionId, credentials.Certificate));
             client.PollingInterval = TimeSpan.FromMilliseconds(100);
 
-            ClusterCreateParameters cluster = base.GetRandomCluster();
+            ClusterCreateParameters cluster = GetRandomCluster();
             cluster.DefaultStorageContainer = "thiscontainerdoesnotexist";
             client.CreateClusterAsync(cluster).WaitForResult();
 
@@ -270,7 +332,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
             client.PollingInterval = TimeSpan.FromMilliseconds(100);
 
             TestClusterEndToEnd(
-                base.GetRandomCluster(),
+                GetRandomCluster(),
                 () => client.ListClustersAsync().WaitForResult(),
                 dnsName => client.GetClusterAsync(dnsName).WaitForResult(),
                 cluster => client.CreateClusterAsync(cluster).WaitForResult(),
@@ -326,7 +388,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
         [Timeout(30 * 1000)] // ms
         public void ValidCreateDeleteContainerWithOnlyHiveMetastore_WorksOnSdk()
         {
-            var clusterRequest = base.GetRandomCluster();
+            var clusterRequest = GetRandomCluster();
             clusterRequest.HiveMetastore = new Metastore(TestCredentials.Environments[0].HiveStores[0].SqlServer,
                                                            TestCredentials.Environments[0].HiveStores[0].Database,
                                                            TestCredentials.AzureUserName,
@@ -370,7 +432,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
         [Timeout(30 * 1000)] // ms
         public void InvalidCreateDeleteContainer_FailsOnServer()
         {
-            var clusterRequest = base.GetRandomCluster();
+            var clusterRequest = GetRandomCluster();
             clusterRequest.AdditionalStorageAccounts.Add(new WabStorageAccountConfiguration("invalid", null));
 
             IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
@@ -401,7 +463,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
         [Timeout(30 * 1000)] // ms
         public void InvalidCreateDeleteContainer_UnknownState()
         {
-            var clusterRequest = base.GetRandomCluster();
+            var clusterRequest = GetRandomCluster();
             clusterRequest.Name = "unknownclustername";
             clusterRequest.AdditionalStorageAccounts.Add(new WabStorageAccountConfiguration(TestCredentials.Environments[0].AdditionalStorageAccounts[0].Name, TestCredentials.Environments[0].AdditionalStorageAccounts[0].Key));
 
@@ -562,7 +624,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
         [TestCategory("CheckIn")]
         public void CreateCluster_VersionTooLow()
         {
-            var clusterRequest = base.GetRandomCluster();
+            var clusterRequest = GetRandomCluster();
             Version version = new Version(HDInsightSDKSupportedVersions.MinVersion.Major, HDInsightSDKSupportedVersions.MinVersion.Minor - 1);
             clusterRequest.Version = version.ToString();
             clusterRequest.AdditionalStorageAccounts.Add(new WabStorageAccountConfiguration("invalid", TestCredentials.Environments[0].AdditionalStorageAccounts[0].Key));
@@ -582,7 +644,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
         [TestCategory("CheckIn")]
         public void SubmitJobs_ClusterVersionTooLow()
         {
-            var clusterRequest = base.GetRandomCluster();
+            var clusterRequest = GetRandomCluster();
             Version version = new Version(HDInsightSDKSupportedVersions.MinVersion.Major, HDInsightSDKSupportedVersions.MinVersion.Minor - 1);
             clusterRequest.Version = version.ToString();
             IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
@@ -601,7 +663,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
         [TestCategory("CheckIn")]
         public void CreateCluster_VersionTooHigh()
         {
-            var clusterRequest = base.GetRandomCluster();
+            var clusterRequest = GetRandomCluster();
             Version version = new Version(HDInsightSDKSupportedVersions.MaxVersion.Major, HDInsightSDKSupportedVersions.MaxVersion.Minor + 1);
             clusterRequest.Version = version.ToString();
             clusterRequest.AdditionalStorageAccounts.Add(new WabStorageAccountConfiguration("invalid", TestCredentials.Environments[0].AdditionalStorageAccounts[0].Key));
@@ -621,7 +683,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
         [TestCategory("CheckIn")]
         public void CreateCluster_VersionValid()
         {
-            var clusterRequest = base.GetRandomCluster();
+            var clusterRequest = GetRandomCluster();
             IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
             var client = HDInsightClient.Connect(new HDInsightCertificateCredential(credentials.SubscriptionId, credentials.Certificate));
             client.CreateCluster(clusterRequest);
@@ -631,7 +693,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
         [TestCategory("CheckIn")]
         public void CreateCluster_RaisesEvents()
         {
-            var clusterRequest = base.GetRandomCluster();
+            var clusterRequest = GetRandomCluster();
             IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
             var client = HDInsightClient.Connect(new HDInsightCertificateCredential(credentials.SubscriptionId, credentials.Certificate));
             bool acceptedEventFired = false;
@@ -661,7 +723,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
         [TestCategory("CheckIn")]
         public void CreateCluster_DoesnotRaisesInvalidEvents()
         {
-            var clusterRequest = base.GetRandomCluster();
+            var clusterRequest = GetRandomCluster();
             IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
             var client = HDInsightClient.Connect(new HDInsightCertificateCredential(credentials.SubscriptionId, credentials.Certificate));
             bool otherEventsRaised = false;
@@ -723,7 +785,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
         private void TestValidAdvancedCluster(Func<ICollection<ClusterDetails>> getClusters, Func<string, ClusterDetails> getCluster, Func<ClusterCreateParameters, ClusterDetails> createCluster, Action<string> deleteCluster)
         {
             // ClusterName
-            var cluster = base.GetRandomCluster();
+            var cluster = GetRandomCluster();
             cluster.AdditionalStorageAccounts.Add(new WabStorageAccountConfiguration(TestCredentials.Environments[0].AdditionalStorageAccounts[0].Name,
                                                                                   TestCredentials.Environments[0].AdditionalStorageAccounts[0].Key));
             cluster.OozieMetastore = new Metastore(TestCredentials.Environments[0].OozieStores[0].SqlServer,
@@ -743,52 +805,90 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
             return GetHttpAccessEnabledCluster(true);
         }
 
+        private static volatile ClusterDetails httpEnabledCluster = null;
+        private static object lockObject = new object();
+
         internal static ClusterDetails GetHttpAccessEnabledCluster(bool reEnable)
         {
             // creates the client
-            var credentials = IntegrationTestBase.GetValidCredentials();
-            ClusterDetails testCluster;
-            var client = HDInsightClient.Connect(new HDInsightCertificateCredential(credentials.SubscriptionId, credentials.Certificate));
-            var clusters = client.ListClusters();
-            if (reEnable)
+            if (httpEnabledCluster == null)
             {
-                var clusterWithHttpAccessDisabled = clusters.FirstOrDefault(cluster => string.IsNullOrEmpty(cluster.HttpUserName));
-                if (clusterWithHttpAccessDisabled == null)
+                lock (lockObject)
                 {
-                    // if http access is enabled, disable it on the last cluster in the list.
-                    clusterWithHttpAccessDisabled = clusters.Last();
-                    client.DisableHttp(clusterWithHttpAccessDisabled.Name, clusterWithHttpAccessDisabled.Location);
-                }
-
-                client.EnableHttp(
-                    clusterWithHttpAccessDisabled.Name,
-                    clusterWithHttpAccessDisabled.Location,
-                    IntegrationTestBase.TestCredentials.AzureUserName,
-                    IntegrationTestBase.TestCredentials.AzurePassword);
-
-                testCluster = client.GetCluster(clusterWithHttpAccessDisabled.Name);
-            }
-            else
-            {
-                testCluster = clusters.FirstOrDefault(cluster => !string.IsNullOrEmpty(cluster.HttpUserName));
-                if (testCluster == null)
-                {
-                    testCluster = GetHttpAccessEnabledCluster(true);
+                    if (httpEnabledCluster == null)
+                    {
+                        var credentials = IntegrationTestBase.GetValidCredentials();
+                        var client = HDInsightClient.Connect(new HDInsightCertificateCredential(credentials.SubscriptionId, credentials.Certificate));
+                        var randomCluster = GetRandomCluster();
+                        randomCluster.UserName = IntegrationTestBase.TestCredentials.AzureUserName;
+                        randomCluster.Password = IntegrationTestBase.TestCredentials.AzurePassword;
+                        httpEnabledCluster = client.CreateCluster(randomCluster);
+                    }
                 }
             }
+            return httpEnabledCluster;
+            //var clusters = client.ListClusters();
+            //if (reEnable)
+            //{
+            //    var clusterWithHttpAccessDisabled = clusters.FirstOrDefault(cluster => string.IsNullOrEmpty(cluster.HttpUserName));
+            //    if (clusterWithHttpAccessDisabled == null)
+            //    {
+            //        // if http access is enabled, disable it on the last cluster in the list.
+            //        clusterWithHttpAccessDisabled = clusters.Last();
+            //        client.DisableHttp(clusterWithHttpAccessDisabled.Name, clusterWithHttpAccessDisabled.Location);
+            //    }
 
-            testCluster.ConnectionUrl = GatewayUriResolver.GetGatewayUri(testCluster.ConnectionUrl).AbsoluteUri;
-            return testCluster;
+            //    client.EnableHttp(
+            //        clusterWithHttpAccessDisabled.Name,
+            //        clusterWithHttpAccessDisabled.Location,
+            //        IntegrationTestBase.TestCredentials.AzureUserName,
+            //        IntegrationTestBase.TestCredentials.AzurePassword);
+
+            //    testCluster = client.GetCluster(clusterWithHttpAccessDisabled.Name);
+            //}
+            //else
+            //{
+            //    testCluster = clusters.FirstOrDefault(cluster => !string.IsNullOrEmpty(cluster.HttpUserName));
+            //    if (testCluster == null)
+            //    {
+            //        testCluster = GetHttpAccessEnabledCluster(true);
+            //    }
+            //}
+
+            //testCluster.ConnectionUrl = GatewayUriResolver.GetGatewayUri(testCluster.ConnectionUrl).AbsoluteUri;
+            //Debug.WriteLine(string.Format("Searched for Http Enabled Cluster, Returning '{0}'", testCluster.Name));
+            //return testCluster;
         }
+
+        private static volatile ClusterDetails httpDisabledCluster = null;
 
         internal static ClusterDetails GetHttpAccessDisabledCluster()
         {
+            if (httpDisabledCluster == null)
+            {
+                lock (lockObject)
+                {
+                    if (httpDisabledCluster == null)
+                    {
+                        var credentials = IntegrationTestBase.GetValidCredentials();
+                        var client = HDInsightClient.Connect(new HDInsightCertificateCredential(credentials.SubscriptionId, credentials.Certificate));
+                        var randomCluster = GetRandomCluster();
+                        randomCluster.UserName = IntegrationTestBase.TestCredentials.AzureUserName;
+                        randomCluster.Password = IntegrationTestBase.TestCredentials.AzurePassword;
+                        var cluster = client.CreateCluster(randomCluster);
+                        client.DisableHttp(cluster.Name, cluster.Location);
+                        cluster = client.GetCluster(cluster.Name);
+                        httpDisabledCluster = cluster;
+                    }
+                }
+            }
+            return httpDisabledCluster;
             // Creates the client
-            var credentials = IntegrationTestBase.GetValidCredentials();
-            var client = HDInsightClient.Connect(new HDInsightCertificateCredential(credentials.SubscriptionId, credentials.Certificate));
-            client.DisableHttp(IntegrationTestBase.TestCredentials.WellKnownCluster.DnsName, IntegrationTestBase.TestCredentials.Environments[0].Location);
-            var testCluster = client.GetCluster(IntegrationTestBase.TestCredentials.WellKnownCluster.DnsName);
-            return testCluster;
+            //var credentials = IntegrationTestBase.GetValidCredentials();
+            //var client = HDInsightClient.Connect(new HDInsightCertificateCredential(credentials.SubscriptionId, credentials.Certificate));
+            //client.DisableHttp(IntegrationTestBase.TestCredentials.WellKnownCluster.DnsName, IntegrationTestBase.TestCredentials.Environments[0].Location);
+            //var testCluster = client.GetCluster(IntegrationTestBase.TestCredentials.WellKnownCluster.DnsName);
+            //return testCluster;
         }
 
         private void TestClusterEndToEnd(ClusterCreateParameters cluster, Func<ICollection<ClusterDetails>> getClusters, Func<string, ClusterDetails> getCluster, Func<ClusterCreateParameters, ClusterDetails> createCluster, Action<string> deleteCluster)

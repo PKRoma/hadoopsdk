@@ -82,7 +82,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             var manager = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>();
             var pocoClient = manager.Create(hdInsightCredentials, GetAbstractionContext());
 
-            var clusterDetails = this.GetRandomCluster();
+            var clusterDetails = GetRandomCluster();
             client.CreateCluster(clusterDetails);
 
             try
@@ -117,7 +117,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
 
                 // now add a user
                 string userName = "hdinsightuser";
-                string password = this.GetRandomValidPassword();
+                string password = GetRandomValidPassword();
                 id = pocoClient.EnableHttp(clusterDetails.Name, clusterDetails.Location, userName, password).WaitForResult();
                 while (!pocoClient.IsComplete(cluster.Name, cluster.Location, id).WaitForResult())
                 {

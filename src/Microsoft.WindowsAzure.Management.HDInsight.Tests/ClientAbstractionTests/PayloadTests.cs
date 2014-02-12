@@ -126,7 +126,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         {
             var storageAccount = new WabStorageAccountConfiguration(Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString());
             // Creates two random containers
-            var container1 = new ClusterDetails(base.GetRandomClusterName(), "Running")
+            var container1 = new ClusterDetails(GetRandomClusterName(), "Running")
             {
                 CreatedDate = DateTime.Now,
                 ConnectionUrl = @"https://some/long/uri/",
@@ -141,7 +141,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
                 new WabStorageAccountConfiguration(Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString()),
                 new WabStorageAccountConfiguration(Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString()) 
             };
-            var container2 = new ClusterDetails(base.GetRandomClusterName(), "ClusterStorageProvisioned")
+            var container2 = new ClusterDetails(GetRandomClusterName(), "ClusterStorageProvisioned")
             {
                 CreatedDate = DateTime.Now,
                 ConnectionUrl = @"https://some/long/uri/",
@@ -177,7 +177,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         public void InternalValidation_PayloadConverter_SerializationListContainersResult_WithErrorWithoutExtendedError()
         {
             var storageAccount = new WabStorageAccountConfiguration(Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString());
-            var container1 = new ClusterDetails(base.GetRandomClusterName(), "ClusterStorageProvisioned")
+            var container1 = new ClusterDetails(GetRandomClusterName(), "ClusterStorageProvisioned")
             {
                 CreatedDate = DateTime.Now,
                 ConnectionUrl = @"https://some/long/uri/",
@@ -216,7 +216,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         public void InternalValidation_PayloadConverter_SerializationListContainersResult_WithErrorWithExtendedError()
         {
             var storageAccount = new WabStorageAccountConfiguration(Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString());
-            var container1 = new ClusterDetails(base.GetRandomClusterName(), "ClusterStorageProvisioned")
+            var container1 = new ClusterDetails(GetRandomClusterName(), "ClusterStorageProvisioned")
             {
                 CreatedDate = DateTime.Now,
                 ConnectionUrl = @"https://some/long/uri/",
@@ -255,7 +255,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         public void InternalValidation_PayloadConverter_SerializationListContainersResult_WithoutErrorWithoutExtendedError()
         {
             var storageAccount = new WabStorageAccountConfiguration(Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString());
-            var container1 = new ClusterDetails(base.GetRandomClusterName(), "ClusterStorageProvisioned")
+            var container1 = new ClusterDetails(GetRandomClusterName(), "ClusterStorageProvisioned")
             {
                 CreatedDate = DateTime.Now,
                 ConnectionUrl = @"https://some/long/uri/",
@@ -291,7 +291,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         public void InternalValidation_PayloadConverter_SerializationListContainersResult_WithoutErrorWithExtendedError()
         {
             var storageAccount = new WabStorageAccountConfiguration(Guid.NewGuid().ToString(), Guid.NewGuid().ToString(), Guid.NewGuid().ToString());
-            var container1 = new ClusterDetails(base.GetRandomClusterName(), "ClusterStorageProvisioned")
+            var container1 = new ClusterDetails(GetRandomClusterName(), "ClusterStorageProvisioned")
             {
                 CreatedDate = DateTime.Now,
                 ConnectionUrl = @"https://some/long/uri/",
@@ -387,7 +387,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
                 DefaultStorageAccountKey = Guid.NewGuid().ToString("N"),
                 DefaultStorageAccountName = Guid.NewGuid().ToString("N"),
                 DefaultStorageContainer = Guid.NewGuid().ToString("N"),
-                Name = base.GetRandomClusterName(),
+                Name = GetRandomClusterName(),
                 Location = "East US",
                 Version = IntegrationTestBase.TestCredentials.WellKnownCluster.Version,
                 ClusterSizeInNodes = new Random().Next()
@@ -444,8 +444,45 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
                 DefaultStorageAccountKey = Guid.NewGuid().ToString("N"),
                 DefaultStorageAccountName = Guid.NewGuid().ToString("N"),
                 DefaultStorageContainer = Guid.NewGuid().ToString("N"),
-                Name = base.GetRandomClusterName(),
+                Name = GetRandomClusterName(),
                 Location = "East US",
+                ClusterSizeInNodes = new Random().Next()
+            };
+            expected.AdditionalStorageAccounts.Add(new WabStorageAccountConfiguration(Guid.NewGuid().ToString("N"),
+                                                                 Guid.NewGuid().ToString("N")));
+            expected.AdditionalStorageAccounts.Add(new WabStorageAccountConfiguration(Guid.NewGuid().ToString("N"),
+                                                                 Guid.NewGuid().ToString("N")));
+            expected.OozieMetastore = new Metastore(Guid.NewGuid().ToString("N"),
+                                                             Guid.NewGuid().ToString("N"),
+                                                             Guid.NewGuid().ToString("N"),
+                                                             Guid.NewGuid().ToString("N"));
+            expected.HiveMetastore = new Metastore(Guid.NewGuid().ToString("N"),
+                                                            Guid.NewGuid().ToString("N"),
+                                                            Guid.NewGuid().ToString("N"),
+                                                            Guid.NewGuid().ToString("N"));
+
+            string payload = new PayloadConverter().SerializeClusterCreateRequest(expected);
+            var actual = ServerSerializer.DeserializeClusterCreateRequest(payload);
+            Assert.IsTrue(Equals(expected, actual));
+        }
+
+        [TestMethod]
+        [TestCategory("Integration")]
+        [TestCategory("CheckIn")]
+        [TestCategory("Payload")]
+        public void InternalValidation_PayloadConverter_SerializationCreateRequestWithHeadNodeHA()
+        {
+            var expected = new ClusterCreateParameters
+            {
+                UserName = Guid.NewGuid().ToString("N"),
+                Password = Guid.NewGuid().ToString("N"),
+                Version = IntegrationTestBase.TestCredentials.WellKnownCluster.Version,
+                DefaultStorageAccountKey = Guid.NewGuid().ToString("N"),
+                DefaultStorageAccountName = Guid.NewGuid().ToString("N"),
+                DefaultStorageContainer = Guid.NewGuid().ToString("N"),
+                Name = GetRandomClusterName(),
+                Location = "East US",
+                EnsureHighAvailability = true,
                 ClusterSizeInNodes = new Random().Next()
             };
             expected.AdditionalStorageAccounts.Add(new WabStorageAccountConfiguration(Guid.NewGuid().ToString("N"),
@@ -510,7 +547,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
                 DefaultStorageAccountKey = Guid.NewGuid().ToString("N"),
                 DefaultStorageAccountName = Guid.NewGuid().ToString("N"),
                 DefaultStorageContainer = Guid.NewGuid().ToString("N"),
-                Name = base.GetRandomClusterName(),
+                Name = GetRandomClusterName(),
                 Location = "East US",
                 ClusterSizeInNodes = new Random().Next()
             };
@@ -537,7 +574,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
                 DefaultStorageAccountKey = Guid.NewGuid().ToString("N"),
                 DefaultStorageAccountName = Guid.NewGuid().ToString("N"),
                 DefaultStorageContainer = Guid.NewGuid().ToString("N"),
-                Name = base.GetRandomClusterName(),
+                Name = GetRandomClusterName(),
                 Location = "East US",
                 ClusterSizeInNodes = new Random().Next()
             };
@@ -564,7 +601,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
                 DefaultStorageAccountKey = Guid.NewGuid().ToString("N"),
                 DefaultStorageAccountName = Guid.NewGuid().ToString("N"),
                 DefaultStorageContainer = Guid.NewGuid().ToString("N"),
-                Name = base.GetRandomClusterName(),
+                Name = GetRandomClusterName(),
                 Location = "East US",
                 ClusterSizeInNodes = new Random().Next()
             };
@@ -596,7 +633,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
                 DefaultStorageAccountKey = Guid.NewGuid().ToString("N"),
                 DefaultStorageAccountName = Guid.NewGuid().ToString("N"),
                 DefaultStorageContainer = Guid.NewGuid().ToString("N"),
-                Name = base.GetRandomClusterName(),
+                Name = GetRandomClusterName(),
                 Location = "East US",
                 ClusterSizeInNodes = new Random().Next()
             };
@@ -622,7 +659,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
                 DefaultStorageAccountKey = Guid.NewGuid().ToString("N"),
                 DefaultStorageAccountName = Guid.NewGuid().ToString("N"),
                 DefaultStorageContainer = Guid.NewGuid().ToString("N"),
-                Name = base.GetRandomClusterName(),
+                Name = GetRandomClusterName(),
                 Location = "East US",
                 ClusterSizeInNodes = new Random().Next()
             };
@@ -651,7 +688,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
                 DefaultStorageAccountKey = Guid.NewGuid().ToString("N"),
                 DefaultStorageAccountName = Guid.NewGuid().ToString("N"),
                 DefaultStorageContainer = Guid.NewGuid().ToString("N"),
-                Name = base.GetRandomClusterName(),
+                Name = GetRandomClusterName(),
                 Location = "East US",
                 ClusterSizeInNodes = new Random().Next()
             };
@@ -678,7 +715,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
                 DefaultStorageAccountKey = Guid.NewGuid().ToString("N"),
                 DefaultStorageAccountName = Guid.NewGuid().ToString("N"),
                 DefaultStorageContainer = Guid.NewGuid().ToString("N"),
-                Name = base.GetRandomClusterName(),
+                Name = GetRandomClusterName(),
                 Location = "East US",
                 ClusterSizeInNodes = new Random().Next()
             };
@@ -690,6 +727,34 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             var actual = ServerSerializer.DeserializeClusterCreateRequest(payload);
             Assert.IsTrue(Equals(expected, actual));
         }
+
+        [TestMethod]
+        [TestCategory("Integration")]
+        [TestCategory("CheckIn")]
+        [TestCategory("Payload")]
+        public void InternalValidation_PayloadConverter_SerializationCreateRequestWithYarnConfiguration()
+        {
+            var expected = new ClusterCreateParameters
+            {
+                UserName = Guid.NewGuid().ToString("N"),
+                Password = Guid.NewGuid().ToString("N"),
+                Version = IntegrationTestBase.TestCredentials.WellKnownCluster.Version,
+                DefaultStorageAccountKey = Guid.NewGuid().ToString("N"),
+                DefaultStorageAccountName = Guid.NewGuid().ToString("N"),
+                DefaultStorageContainer = Guid.NewGuid().ToString("N"),
+                Name = GetRandomClusterName(),
+                Location = "East US",
+                ClusterSizeInNodes = new Random().Next()
+            };
+
+            expected.YarnConfiguration.Add(new KeyValuePair<string, string>("my setting 1", "my value 1"));
+            expected.YarnConfiguration.Add(new KeyValuePair<string, string>("my setting 2", "my value 2"));
+
+            string payload = new PayloadConverter().SerializeClusterCreateRequest(expected);
+            var actual = ServerSerializer.DeserializeClusterCreateRequest(payload);
+            Assert.IsTrue(Equals(expected, actual));
+        }
+
 
         private static bool Equals(ClusterCreateParameters expected, ClusterCreateParameters actual)
         {
@@ -703,7 +768,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             }
 
             // Compares the properties and fails if there is a mismatch
-            int headNodeCount = 1;
+            int headNodeCount = expected.EnsureHighAvailability ? 2 : 1;
             var comparisonTuples = new List<Tuple<object, object>>
             {
                 new Tuple<object, object>(expected.UserName, actual.UserName),
@@ -767,6 +832,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             AssertConfiguration(expected.HiveConfiguration, actual.HiveConfiguration);
             AssertConfiguration(expected.MapReduceConfiguration.ConfigurationCollection, actual.MapReduceConfiguration.ConfigurationCollection);
             AssertConfiguration(expected.HdfsConfiguration, actual.HdfsConfiguration);
+            AssertConfiguration(expected.YarnConfiguration, actual.YarnConfiguration);
 
             return true;
         }

@@ -59,7 +59,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities
         public virtual void Initialize()
         {
             HDInsightClient.DefaultPollingInterval = TimeSpan.FromSeconds(1);
-            IHadoopClientExtensions.GetPollingInterval = () => 500;
+            IHadoopClientExtensions.GetPollingInterval = () => 50;
             this.ApplyFullMocking();
             this.ResetIndividualMocks();
             this.httpSpyEnabled = false;
@@ -69,7 +69,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities
         public virtual void TestCleanup()
         {
             HDInsightClient.DefaultPollingInterval = TimeSpan.FromSeconds(1);
-            IHadoopClientExtensions.GetPollingInterval = () => Constants.PollingInterval;
+            IHadoopClientExtensions.GetPollingInterval = () => 50;
             this.ApplyFullMocking();
             this.ResetIndividualMocks();
             this.httpSpyEnabled = false;
@@ -284,6 +284,10 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities
             runManager.RegisterType<IRemoteHadoopJobSubmissionPocoClientFactory, HadoopJobSubmissionPocoSimulatorClientFactory>();
             runManager.RegisterType<IHDInsightJobSubmissionPocoClientFactory, HadoopJobSubmissionPocoSimulatorClientFactory>();
             runManager.RegisterType<ISubscriptionRegistrationClientFactory, SubscriptionRegistrationSimulatorClientFactory>();
+            var timeManager = new RetryTimingManager();
+            timeManager.TimeOut = TimeSpan.FromSeconds(1);
+            timeManager.PollInterval = TimeSpan.FromMilliseconds(250);
+            runManager.RegisterInstance<IRetryTimingManager>(timeManager);
             var testManager = new IntegrationTestManager();
             if (!testManager.RunAzureTests())
             {
@@ -399,7 +403,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities
         }
 
         [SuppressMessage("Microsoft.Globalization", "CA1308:NormalizeStringsToUppercase", Justification = "Azure names must be lowercase.")]
-        public string GetRandomClusterName()
+        public static string GetRandomClusterName()
         {
             // Random DNS name.
             var time = DateTime.UtcNow;
@@ -414,20 +418,20 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities
             return retval;
         }
 
-        public string GetRandomValidPassword()
+        public static string GetRandomValidPassword()
         {
             return Guid.NewGuid().ToString().ToUpperInvariant().Replace('A', 'a').Replace('B', 'b').Replace('C', 'c') + "forTest!";
         }
 
-        public ClusterCreateParameters GetRandomCluster()
+        public static ClusterCreateParameters GetRandomCluster()
         {
             // Creates the cluster
             return new ClusterCreateParameters
             {
-                Name = this.GetRandomClusterName(),
+                Name = GetRandomClusterName(),
                 UserName = TestCredentials.AzureUserName,
-                Password = this.GetRandomValidPassword(),
-                Location = "East US 2",
+                Password = GetRandomValidPassword(),
+                Location = "West US",
                 Version = "default",
                 DefaultStorageAccountName = TestCredentials.Environments[0].DefaultStorageAccount.Name,
                 DefaultStorageAccountKey = TestCredentials.Environments[0].DefaultStorageAccount.Key,

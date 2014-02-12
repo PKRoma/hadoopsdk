@@ -16,6 +16,7 @@ namespace Microsoft.Hadoop.Client
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Net;
     using System.Text;
@@ -24,6 +25,7 @@ namespace Microsoft.Hadoop.Client
     using Microsoft.Hadoop.Client.WebHCatRest;
     using Microsoft.WindowsAzure.Management.HDInsight;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest;
 
     /// <summary>
     /// Extends an instance of Hadoop against which jobs can be submitted.
@@ -87,7 +89,7 @@ namespace Microsoft.Hadoop.Client
             if (jobDetailsResults.StatusCode != JobStatusCode.Completed && jobDetailsResults.StatusCode != JobStatusCode.Failed &&
                 jobDetailsResults.StatusCode != JobStatusCode.Canceled && (endTime - startTime) >= duration)
             {
-                throw new TimeoutException("Timeout waiting for jobDetails completion");
+                throw new TimeoutException(string.Format(CultureInfo.InvariantCulture, "The requested task failed to complete in the allotted time ({0}).", duration));
             }
 
             return jobDetailsResults;
@@ -109,20 +111,6 @@ namespace Microsoft.Hadoop.Client
             return WaitForJobCompletionAsync(client, job, duration, cancellationToken).WaitForResult();
         }
 
-        internal static void WaitForInterval(TimeSpan interval, CancellationToken token)
-        {
-            var start = DateTime.Now;
-            var waitFor = Math.Min((int)interval.TotalMilliseconds, 1000);
-            while (DateTime.Now - start < interval)
-            {
-                if (token.IsCancellationRequested)
-                {
-                    throw new OperationCanceledException("The operation was canceled by user request.");
-                }
-                Thread.Sleep(waitFor);
-            }
-        }
-
         private static async Task<JobDetails> GetJobWithRetry(IJobSubmissionClient client, string jobId, CancellationToken cancellationToken)
         {
             JobDetails jobDetailsResults = null;
@@ -141,7 +129,7 @@ namespace Microsoft.Hadoop.Client
                     {
                         throw;
                     }
-                    WaitForInterval(TimeSpan.FromMilliseconds(pollingInterval), cancellationToken);
+                    cancellationToken.WaitForInterval(TimeSpan.FromMilliseconds(pollingInterval));
                     retryCount++;
                 }
             }

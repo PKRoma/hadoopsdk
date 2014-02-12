@@ -18,8 +18,10 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission
     using System.Globalization;
     using System.IO;
     using System.Linq;
+    using System.Text;
     using System.Threading.Tasks;
     using Microsoft.Hadoop.Client;
+    using Microsoft.Hadoop.Client.HadoopJobSubmissionPocoClient;
     using Microsoft.Hadoop.Client.Storage;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.ClusterManager;
@@ -34,19 +36,19 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission
         private const string StandardOutputFileName = "stdout";
         private const string TaskLogsFileName = "logs/list.txt";
         private const string TaskLogsDirectoryName = "logs";
+        private const string QueryFilesDirectoryName = "queries";
 
-        private BasicAuthCredential remoteCredentials;
-        private ClusterDetails cluster;
+        private IHDInsightSubscriptionCredentials subscriptionCredentials;
 
         internal HDInsightHadoopClient(IHDInsightSubscriptionCredentials credential)
         {
-            this.InitializeClient(credential);
+            this.subscriptionCredentials = credential;
         }
 
-        internal void InitializeClient(IHDInsightSubscriptionCredentials credential)
+        internal JobSubmissionClusterDetails GetJobSubmissionClusterDetails(bool ignoreCache = false)
         {
-            var asCertCredentials = credential as JobSubmissionCertificateCredential;
-            var asTokenCredentials = credential as JobSubmissionAccessTokenCredential;
+            var asCertCredentials = this.subscriptionCredentials as JobSubmissionCertificateCredential;
+            var asTokenCredentials = this.subscriptionCredentials as JobSubmissionAccessTokenCredential;
             string clusterName;
             if (asCertCredentials.IsNotNull())
             {
@@ -58,25 +60,39 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission
             }
             else
             {
-                throw new NotSupportedException("Credential type '" + credential.GetType().FullName + "' is not supported.");
+                throw new NotSupportedException("Credential type '" + this.subscriptionCredentials.GetType().FullName + "' is not supported.");
             }
 
-            var overrideHandlers = ServiceLocator.Instance.Locate<IHDInsightClusterOverrideManager>().GetHandlers(credential, this.Context);
-            ServiceLocator.Instance.Locate<IHDInsightClientFactory>().Create(credential);
-            IHDInsightSubscriptionCredentials actualCredentials = ServiceLocator.Instance.Locate<IHDInsightSubscriptionCredentialsFactory>()
-                                                                                .Create(credential);
-            var hdinsight = ServiceLocator.Instance.Locate<IHDInsightClientFactory>().Create(actualCredentials);
+            var credentialCache = ServiceLocator.Instance.Locate<IJobSubmissionCache>();
 
-            this.cluster = hdinsight.GetCluster(clusterName);
-            var versionFinderClient = overrideHandlers.VersionFinder;
-            this.AssertSupportedVersion(this.cluster.VersionNumber, versionFinderClient);
+            var retval = credentialCache.GetCredentails(this.subscriptionCredentials.SubscriptionId, clusterName);
 
-            this.remoteCredentials = new BasicAuthCredential()
+            if (retval.IsNull() || ignoreCache)
             {
-                Server = GatewayUriResolver.GetGatewayUri(this.cluster.ConnectionUrl, this.cluster.VersionNumber),
-                UserName = this.cluster.HttpUserName,
-                Password = this.cluster.HttpPassword
-            };
+                var overrideHandlers = ServiceLocator.Instance.Locate<IHDInsightClusterOverrideManager>().GetHandlers(this.subscriptionCredentials, this.Context);
+                ServiceLocator.Instance.Locate<IHDInsightClientFactory>().Create(this.subscriptionCredentials);
+                IHDInsightSubscriptionCredentials actualCredentials = ServiceLocator.Instance.Locate<IHDInsightSubscriptionCredentialsFactory>()
+                                                                                    .Create(this.subscriptionCredentials);
+                var hdinsight = ServiceLocator.Instance.Locate<IHDInsightClientFactory>().Create(actualCredentials);
+
+                var cluster = hdinsight.GetCluster(clusterName);
+                var versionFinderClient = overrideHandlers.VersionFinder;
+                this.AssertSupportedVersion(cluster.VersionNumber, versionFinderClient);
+
+                var remoteCredentials = new BasicAuthCredential()
+                {
+                    Server = GatewayUriResolver.GetGatewayUri(cluster.ConnectionUrl, cluster.VersionNumber),
+                    UserName = cluster.HttpUserName,
+                    Password = cluster.HttpPassword
+                };
+                retval = new JobSubmissionClusterDetails()
+                {
+                    Cluster = cluster,
+                    RemoteCredentials = remoteCredentials
+                };
+                credentialCache.StoreCredentails(this.subscriptionCredentials.SubscriptionId, clusterName, retval);
+            }
+            return retval;
         }
 
         /// <inheritdoc/>
@@ -166,56 +182,130 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission
         /// <inheritdoc/>
         public async Task<JobList> ListJobsAsync()
         {
-            var pocoClient = ServiceLocator.Instance.Locate<IHDInsightJobSubmissionPocoClientFactory>().Create(this.remoteCredentials, this.Context);
+            var pocoClient = this.GetPocoClient();
+            try
+            {
+                return await pocoClient.ListJobs();
+            }
+            catch (UnauthorizedAccessException)
+            {
+                pocoClient = this.GetPocoClient(true);
+            }
             return await pocoClient.ListJobs();
+        }
+
+        private IHadoopJobSubmissionPocoClient GetPocoClient(bool ignoreCache = false)
+        {
+            var details = this.GetJobSubmissionClusterDetails(ignoreCache);
+            var pocoClient = ServiceLocator.Instance.Locate<IHDInsightJobSubmissionPocoClientFactory>().Create(details.RemoteCredentials, this.Context);
+            return pocoClient;
         }
 
         /// <inheritdoc/>
         public async Task<JobDetails> GetJobAsync(string jobId)
         {
-            var pocoClient = ServiceLocator.Instance.Locate<IHDInsightJobSubmissionPocoClientFactory>().Create(this.remoteCredentials, this.Context);
+            var pocoClient = this.GetPocoClient();
+            try
+            {
+                return await pocoClient.GetJob(jobId);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                pocoClient = this.GetPocoClient(true);
+            }
             return await pocoClient.GetJob(jobId);
         }
 
         /// <inheritdoc/>
         public async Task<JobCreationResults> CreateMapReduceJobAsync(MapReduceJobCreateParameters mapReduceJobCreateParameters)
         {
-            var pocoClient = ServiceLocator.Instance.Locate<IHDInsightJobSubmissionPocoClientFactory>().Create(this.remoteCredentials, this.Context);
+            var pocoClient = this.GetPocoClient();
+            try
+            {
+                return await pocoClient.SubmitMapReduceJob(mapReduceJobCreateParameters);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                pocoClient = this.GetPocoClient(true);
+            }
             return await pocoClient.SubmitMapReduceJob(mapReduceJobCreateParameters);
         }
 
         /// <inheritdoc/>
         public async Task<JobCreationResults> CreateStreamingJobAsync(StreamingMapReduceJobCreateParameters streamingMapReduceJobCreateParameters)
         {
-            var pocoClient = ServiceLocator.Instance.Locate<IHDInsightJobSubmissionPocoClientFactory>().Create(this.remoteCredentials, this.Context);
+            var pocoClient = this.GetPocoClient();
+            try
+            {
+                return await pocoClient.SubmitStreamingJob(streamingMapReduceJobCreateParameters);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                pocoClient = this.GetPocoClient(true);
+            }
             return await pocoClient.SubmitStreamingJob(streamingMapReduceJobCreateParameters);
         }
 
         /// <inheritdoc/>
         public async Task<JobCreationResults> CreateHiveJobAsync(HiveJobCreateParameters hiveJobCreateParameters)
         {
-            var pocoClient = ServiceLocator.Instance.Locate<IHDInsightJobSubmissionPocoClientFactory>().Create(this.remoteCredentials, this.Context);
+            hiveJobCreateParameters = this.PrepareQueryJob(hiveJobCreateParameters);
+            var pocoClient = this.GetPocoClient();
+            try
+            {
+                return await pocoClient.SubmitHiveJob(hiveJobCreateParameters);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                pocoClient = this.GetPocoClient(true);
+            }
             return await pocoClient.SubmitHiveJob(hiveJobCreateParameters);
         }
 
         /// <inheritdoc/>
         public async Task<JobCreationResults> CreatePigJobAsync(PigJobCreateParameters pigJobCreateParameters)
         {
-            var pocoClient = ServiceLocator.Instance.Locate<IHDInsightJobSubmissionPocoClientFactory>().Create(this.remoteCredentials, this.Context);
+            pigJobCreateParameters = this.PrepareQueryJob(pigJobCreateParameters);
+            var pocoClient = this.GetPocoClient();
+            try
+            {
+                return await pocoClient.SubmitPigJob(pigJobCreateParameters);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                pocoClient = this.GetPocoClient(true);
+            }
             return await pocoClient.SubmitPigJob(pigJobCreateParameters);
         }
 
         /// <inheritdoc/>
         public async Task<JobCreationResults> CreateSqoopJobAsync(SqoopJobCreateParameters sqoopJobCreateParameters)
         {
-            var pocoClient = ServiceLocator.Instance.Locate<IHDInsightJobSubmissionPocoClientFactory>().Create(this.remoteCredentials, this.Context);
+            sqoopJobCreateParameters = this.PrepareQueryJob(sqoopJobCreateParameters);
+            var pocoClient = this.GetPocoClient();
+            try
+            {
+                return await pocoClient.SubmitSqoopJob(sqoopJobCreateParameters);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                pocoClient = this.GetPocoClient(true);
+            }
             return await pocoClient.SubmitSqoopJob(sqoopJobCreateParameters);
         }
 
         /// <inheritdoc/>
         public async Task<JobDetails> StopJobAsync(string jobId)
         {
-            var pocoClient = ServiceLocator.Instance.Locate<IHDInsightJobSubmissionPocoClientFactory>().Create(this.remoteCredentials, this.Context);
+            var pocoClient = this.GetPocoClient();
+            try
+            {
+                return await pocoClient.StopJob(jobId);
+            }
+            catch (UnauthorizedAccessException)
+            {
+                pocoClient = this.GetPocoClient(true);
+            }
             return await pocoClient.StopJob(jobId);
         }
 
@@ -240,13 +330,14 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission
         /// <inheritdoc/>
         public async Task DownloadJobTaskLogsAsync(string jobId, string targetDirectory)
         {
+            var details = this.GetJobSubmissionClusterDetails();
             jobId.ArgumentNotNullOrEmpty("jobId");
             targetDirectory.ArgumentNotNullOrEmpty("targetDirectory");
 
             var job = await this.GetJobAsync(jobId);
             var storageClient = this.GetStorageClient();
-            var storageAccount = this.cluster.DefaultStorageAccount;
-            var taskLogsDirectoryPath = GetStatusDirectoryPath(job.StatusDirectory, storageAccount, this.remoteCredentials.UserName, TaskLogsDirectoryName);
+            var storageAccount = details.Cluster.DefaultStorageAccount;
+            var taskLogsDirectoryPath = GetStatusDirectoryPath(job.StatusDirectory, storageAccount, details.RemoteCredentials.UserName, TaskLogsDirectoryName);
             var taskLogDirectoryContents = await storageClient.List(taskLogsDirectoryPath, true);
 
             // List also returns the directory we're looking into, 
@@ -275,14 +366,15 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission
 
         private async Task<Stream> GetJobResultFile(string jobId, string fileName)
         {
+            var details = this.GetJobSubmissionClusterDetails();
             var job = await this.GetJobAsync(jobId);
             if (job == null || string.IsNullOrEmpty(job.StatusDirectory))
             {
                 return new MemoryStream();
             }
 
-            var storageAccount = this.cluster.DefaultStorageAccount;
-            var statusDirectoryPath = GetStatusDirectoryPath(job.StatusDirectory, storageAccount, this.remoteCredentials.UserName, fileName);
+            var storageAccount = details.Cluster.DefaultStorageAccount;
+            var statusDirectoryPath = GetStatusDirectoryPath(job.StatusDirectory, storageAccount, details.RemoteCredentials.UserName, fileName);
 
             var storageClient = this.GetStorageClient();
             return await storageClient.Read(statusDirectoryPath);
@@ -290,10 +382,12 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission
 
         private IStorageAbstraction GetStorageClient()
         {
+            var details = this.GetJobSubmissionClusterDetails();
             var storageCredentials = new WindowsAzureStorageAccountCredentials()
             {
-                Name = GetAsvRootDirectory(this.cluster.DefaultStorageAccount.Name),
-                Key = this.cluster.DefaultStorageAccount.Key
+                Name = GetAsvRootDirectory(details.Cluster.DefaultStorageAccount.Name),
+                Key = details.Cluster.DefaultStorageAccount.Key,
+                ContainerName = details.Cluster.DefaultStorageAccount.Name
             };
 
             var storageClient = ServiceLocator.Instance.Locate<IWabStorageAbstractionFactory>().Create(storageCredentials);
@@ -342,6 +436,35 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission
             }
 
             return statusDirectoryPath;
+        }
+
+        internal override TJobType UploadQueryFile<TJobType>(TJobType queryJob, string queryText)
+        {
+            var details = this.GetJobSubmissionClusterDetails();
+            queryJob.ArgumentNotNull("queryJob");
+            queryText.ArgumentNotNullOrEmpty("queryText");
+            var storageClient = this.GetStorageClient();
+            string fileName = Guid.NewGuid().ToString("N");
+            var wabStorageAccount = details.Cluster.DefaultStorageAccount;
+            var queryFilePath = new Uri(
+                      string.Format(
+                          CultureInfo.InvariantCulture,
+                          "{0}{1}@{2}/user/{3}/{4}/{5}",
+                          Constants.WabsProtocolSchemeName,
+                          wabStorageAccount.Container,
+                          wabStorageAccount.Name,
+                          details.RemoteCredentials.UserName,
+                          QueryFilesDirectoryName,
+                          fileName));
+            var bytes = Encoding.UTF8.GetBytes(queryText);
+            using (var memoryStream = new MemoryStream(bytes))
+            {
+                storageClient.Write(queryFilePath, memoryStream);
+            }
+
+            queryJob.SetQuery(string.Empty);
+            queryJob.File = queryFilePath.OriginalString;
+            return queryJob;
         }
     }
 }

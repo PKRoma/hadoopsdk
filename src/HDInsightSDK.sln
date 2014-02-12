@@ -41,6 +41,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mana
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Tests", "Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Tests\Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Tests.csproj", "{9CB3A580-E4DC-4DF8-BB4C-EB5729A6EBCD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureLogTool", "Tools\AzureStorageLogAnalysis\AzureLogTool.csproj", "{1A818046-55B5-4D6E-9506-A527B7A9A3DB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Hadoop.Avro", "Microsoft.Hadoop.Avro\Microsoft.Hadoop.Avro.csproj", "{EAB38A14-211F-4361-A06E-3EC1E07ABE33}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Hadoop.Avro.Specifications", "Microsoft.Hadoop.Avro.Specifications\Microsoft.Hadoop.Avro.Specifications.csproj", "{1ED444F4-A5ED-43B7-87E1-4BBE111511C9}"
+EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = HDInsightSDK.vsmdi
@@ -135,6 +141,24 @@ Global
 		{9CB3A580-E4DC-4DF8-BB4C-EB5729A6EBCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9CB3A580-E4DC-4DF8-BB4C-EB5729A6EBCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9CB3A580-E4DC-4DF8-BB4C-EB5729A6EBCD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A818046-55B5-4D6E-9506-A527B7A9A3DB}.Coverage|Any CPU.ActiveCfg = Coverage|Any CPU
+		{1A818046-55B5-4D6E-9506-A527B7A9A3DB}.Coverage|Any CPU.Build.0 = Coverage|Any CPU
+		{1A818046-55B5-4D6E-9506-A527B7A9A3DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A818046-55B5-4D6E-9506-A527B7A9A3DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A818046-55B5-4D6E-9506-A527B7A9A3DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A818046-55B5-4D6E-9506-A527B7A9A3DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EAB38A14-211F-4361-A06E-3EC1E07ABE33}.Coverage|Any CPU.ActiveCfg = Coverage|Any CPU
+		{EAB38A14-211F-4361-A06E-3EC1E07ABE33}.Coverage|Any CPU.Build.0 = Coverage|Any CPU
+		{EAB38A14-211F-4361-A06E-3EC1E07ABE33}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EAB38A14-211F-4361-A06E-3EC1E07ABE33}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EAB38A14-211F-4361-A06E-3EC1E07ABE33}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EAB38A14-211F-4361-A06E-3EC1E07ABE33}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1ED444F4-A5ED-43B7-87E1-4BBE111511C9}.Coverage|Any CPU.ActiveCfg = Coverage|Any CPU
+		{1ED444F4-A5ED-43B7-87E1-4BBE111511C9}.Coverage|Any CPU.Build.0 = Coverage|Any CPU
+		{1ED444F4-A5ED-43B7-87E1-4BBE111511C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1ED444F4-A5ED-43B7-87E1-4BBE111511C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1ED444F4-A5ED-43B7-87E1-4BBE111511C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1ED444F4-A5ED-43B7-87E1-4BBE111511C9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -154,6 +178,9 @@ Global
 		{2222745D-7800-4D1C-8F60-77F9FE3EC956} = {2F9569F2-5EA1-4E69-8829-CD5688AC14AA}
 		{43333C08-29F5-4948-A8C6-4F486331CDC9} = {2F9569F2-5EA1-4E69-8829-CD5688AC14AA}
 		{9CB3A580-E4DC-4DF8-BB4C-EB5729A6EBCD} = {2F9569F2-5EA1-4E69-8829-CD5688AC14AA}
+		{1A818046-55B5-4D6E-9506-A527B7A9A3DB} = {2F9569F2-5EA1-4E69-8829-CD5688AC14AA}
+		{EAB38A14-211F-4361-A06E-3EC1E07ABE33} = {2F9569F2-5EA1-4E69-8829-CD5688AC14AA}
+		{1ED444F4-A5ED-43B7-87E1-4BBE111511C9} = {2F9569F2-5EA1-4E69-8829-CD5688AC14AA}
 	EndGlobalSection
 	GlobalSection(SpecExplorer.ActivityCompletionStatus) = preSolution
 		SpecExplorer.ActivityCompletionStatus = TestExisting: ;ModelFromScratch: 

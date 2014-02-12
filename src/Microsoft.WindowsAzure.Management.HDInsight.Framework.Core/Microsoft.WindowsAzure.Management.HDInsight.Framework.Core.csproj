@@ -45,6 +45,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>
     <Compile Include="IAbstractionContext.cs" />
+    <Compile Include="Library\CancellationTokenExtensions.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
     <Compile Include="Library\ExceptionExtensions.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>
@@ -181,6 +184,10 @@
     <Compile Include="Library\ValidatedNotNullAttribute.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>
+    <Compile Include="Library\WebRequest\HttpClientAbstractionFactoryBase.cs">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Compile>
+    <Compile Include="HttpLayerException.cs" />
     <Compile Include="Logging\ConsoleLogWriter.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>

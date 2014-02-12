@@ -89,15 +89,6 @@
     <Compile Include="RestSimulator\RdfeServiceRestSimulatorClientFactory.cs" />
     <Compile Include="RestSimulator\StorageAccountSimulator.cs" />
     <Compile Include="RestSimulator\StorageAccountSimulatorFactory.cs" />
-    <Compile Include="ServerDataObjects\ChangeRequest\ErrorDetails.cs" />
-    <Compile Include="ServerDataObjects\ChangeRequest\HttpUserChangeRequest.cs" />
-    <Compile Include="ServerDataObjects\ChangeRequest\PassthroughResponse.cs" />
-    <Compile Include="ServerDataObjects\ChangeRequest\RdpUserChangeRequest.cs" />
-    <Compile Include="ServerDataObjects\ChangeRequest\UserChangeOperationState.cs" />
-    <Compile Include="ServerDataObjects\ChangeRequest\UserChangeOperationStatusResponse.cs" />
-    <Compile Include="ServerDataObjects\ChangeRequest\UserChangeOperationType.cs" />
-    <Compile Include="ServerDataObjects\ChangeRequest\UserChangeRequest.cs" />
-    <Compile Include="ServerDataObjects\ChangeRequest\UserType.cs" />
     <Compile Include="ServerDataObjects\ClusterProvisioningServerPayloadConverter.cs" />
     <Compile Include="ServerDataObjects\ClusterUserChangeRequest.cs" />
     <Compile Include="ServerDataObjects\Common\Models\PassthroughErrorResponse.cs" />

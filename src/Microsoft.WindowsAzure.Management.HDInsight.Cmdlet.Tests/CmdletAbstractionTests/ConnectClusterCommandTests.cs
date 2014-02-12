@@ -126,24 +126,23 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Tests.CmdletAbstrac
         {
             string errorMessage = string.Empty;
             string invalidCluster = "NoHttpAccessCluster";
+            string expectedErrorMessage = string.Format(
+                CultureInfo.InvariantCulture,
+                "Cluster {0} is not configured for Http Services access.\r\nPlease use the Grant Azure HDInsight Http Services Access cmdlet to enable Http Services access.",
+                invalidCluster);
             try
             {
                 IUseAzureHDInsightClusterCommand connectCommand = ServiceLocator.Instance.Locate<IAzureHDInsightCommandFactory>().CreateUseCluster();
                 connectCommand.Subscription = TestCredentials.SubscriptionId.ToString();
                 connectCommand.Name = invalidCluster;
                 connectCommand.EndProcessing().Wait();
+                Assert.Fail();
             }
             catch (AggregateException aex)
             {
-                errorMessage = aex.InnerExceptions.FirstOrDefault().Message;
+                errorMessage = aex.GetBaseException().Message;
+                Assert.AreEqual(expectedErrorMessage, errorMessage);
             }
-
-            string expectedErrorMessage = string.Format(
-                CultureInfo.InvariantCulture,
-                "Cluster {0} is not configured for Http Services access.\r\nPlease use the Grant Azure HDInsight Http Services Access cmdlet to enable Http Services access.",
-                invalidCluster);
-
-            Assert.AreEqual(expectedErrorMessage, errorMessage);
         }
 
         [TestInitialize]

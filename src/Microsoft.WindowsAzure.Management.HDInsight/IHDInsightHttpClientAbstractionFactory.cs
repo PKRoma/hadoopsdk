@@ -14,7 +14,9 @@
 // permissions and limitations under the License.
 namespace Microsoft.WindowsAzure.Management.HDInsight
 {
+    using System;
     using System.Security.Cryptography.X509Certificates;
+    using System.Threading.Tasks;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest;
 
@@ -66,5 +68,97 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
         ///     A new instance of the HttpClientAbstraction.
         /// </returns>
         IHttpClientAbstraction Create();
+
+        /// <summary>
+        /// Performs a retry of an HDInsightHttpClient Operation.
+        /// </summary>
+        /// <param name="credentials">
+        /// The connection credentials to use.
+        /// </param>
+        /// <param name="context">
+        /// The abstraction context to use.
+        /// </param>
+        /// <param name="operation">
+        /// The Operation to perform.
+        /// </param>
+        /// <param name="shouldRetry">
+        /// A method that determines if the operation should be retried.
+        /// </param>
+        /// <param name="timeout">
+        /// The timeout interval that should be used.
+        /// </param>
+        /// <param name="pollInterval">
+        /// The polling interval that should be used.
+        /// </param>
+        /// <returns>
+        /// A task representing the Http Response.
+        /// </returns>
+        Task<IHttpResponseMessageAbstraction> Retry(IHDInsightSubscriptionCredentials credentials, IAbstractionContext context, Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation, Func<IHttpResponseMessageAbstraction, bool> shouldRetry, TimeSpan timeout, TimeSpan pollInterval);
+
+        /// <summary>
+        /// Performs a retry of an HDInsightHttpClient Operation.
+        /// </summary>
+        /// <param name="credentials">
+        /// The connection credentials to use.
+        /// </param>
+        /// <param name="operation">
+        /// The Operation to perform.
+        /// </param>
+        /// <param name="shouldRetry">
+        /// A method that determines if the operation should be retried.
+        /// </param>
+        /// <param name="timeout">
+        /// The timeout interval that should be used.
+        /// </param>
+        /// <param name="pollInterval">
+        /// The polling interval that should be used.
+        /// </param>
+        /// <returns>
+        /// A task representing the Http Response.
+        /// </returns>
+        Task<IHttpResponseMessageAbstraction> Retry(IHDInsightSubscriptionCredentials credentials, Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation, Func<IHttpResponseMessageAbstraction, bool> shouldRetry, TimeSpan timeout, TimeSpan pollInterval);
+
+        /// <summary>
+        /// Performs a retry of an HDInsightHttpClient Operation.
+        /// </summary>
+        /// <param name="context">
+        /// The abstraction context to use.
+        /// </param>
+        /// <param name="operation">
+        /// The Operation to perform.
+        /// </param>
+        /// <param name="shouldRetry">
+        /// A method that determines if the operation should be retried.
+        /// </param>
+        /// <param name="timeout">
+        /// The timeout interval that should be used.
+        /// </param>
+        /// <param name="pollInterval">
+        /// The polling interval that should be used.
+        /// </param>
+        /// <returns>
+        /// A task representing the Http Response.
+        /// </returns>
+        Task<IHttpResponseMessageAbstraction> Retry(IAbstractionContext context, Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation, Func<IHttpResponseMessageAbstraction, bool> shouldRetry, TimeSpan timeout, TimeSpan pollInterval);
+
+        /// <summary>
+        /// Performs a retry of an HDInsightHttpClient Operation.
+        /// </summary>
+        /// <param name="operation">
+        /// The Operation to perform.
+        /// </param>
+        /// <param name="shouldRetry">
+        /// A method that determines if the operation should be retried.
+        /// </param>
+        /// <param name="timeout">
+        /// The timeout interval that should be used.
+        /// </param>
+        /// <param name="pollInterval">
+        /// The polling interval that should be used.
+        /// </param>
+        /// <returns>
+        /// A task representing the Http Response.
+        /// </returns>
+        Task<IHttpResponseMessageAbstraction> Retry(Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation, Func<IHttpResponseMessageAbstraction, bool> shouldRetry, TimeSpan timeout, TimeSpan pollInterval);
     }
 }

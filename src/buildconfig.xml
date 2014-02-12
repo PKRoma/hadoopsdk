@@ -3,20 +3,20 @@
 <BuildConfig xmlns="http://microsoft.com/sat/buildconfig.xsd">
   <Product>
     <Group>Microsoft HDInsight</Group>
-    <ShortName>Windows Azure HDInsight PowerShell</ShortName>
-    <Name>Windows Azure HDInsight PowerShell</Name>
-    <Description>Powershell tools for Windows Azure HDInsight</Description>
+    <ShortName>HDInsight Log Analysis Toolkit</ShortName>
+    <Name>Windows Azure HDInsight Log Analysis Toolkit</Name>
+    <Description>Tools to assist analysis of Azure Storage for HDInsight</Description>
     <Url>https://www.hadooponazure.com/</Url>
     <Eula>HadoopSdkLicense.rtf</Eula>
   </Product>
   <Engineering>
     <CodeReviewAlias>hdxci</CodeReviewAlias>
   </Engineering>
-
+ 
   <Version>
     <Major>1</Major>
-    <Minor>0</Minor>
-    <Patch>3</Patch>
+    <Minor>1</Minor>
+    <Patch>0</Patch>
   </Version>
   <Prepare>
     <CopyTree>
@@ -37,9 +37,14 @@
     </CopyTree>
     <Copy>
       <From>HadoopSdkLicense.rtf</From>
-      <To>Cmdlet\HadoopSdkLicense.rtf</To>
+      <To>Lat\HadoopSdkLicense.rtf</To>
     </Copy>
+    <CopyTree>
+      <From>Lat</From>
+      <To>Lat</To>
+    </CopyTree>
     <Zip folder="Cmdlet" name="Microsoft.WindowsAzure.Management.HDInsight.Cmdlets.zip" />
+    <Zip folder="Lat" name="Microsoft.WindowsAzure.HDInsight.LogAnalysisTool.zip" />
     <NuGet id="Microsoft.Hadoop.Client" outputFolder="HadoopClient">
       <Title>Microsoft .NET API for Hadoop</Title>
       <ProjectUrl>http://hadoopsdk.codeplex.com</ProjectUrl>
@@ -48,9 +53,9 @@
         <NoReference targetFramework="net40" file="Microsoft.HDInsight.Threading.dll" />
       </NoReferences>
       <Dependencies>
-        <Dependency id="WindowsAzure.Storage" version="2.0.5.1" exactversion="true" />
+        <Dependency id="WindowsAzure.Storage" version="3.0.2.0"/>
       </Dependencies>
-      <Authors>Microsoft Azure-sdk</Authors>
+      <Authors>Microsoft</Authors>
       <Owners>Microsoft Azure-sdk</Owners>
       <IconUrl>http://go.microsoft.com/fwlink/?LinkID=288890</IconUrl>
       <LicenseUrl>http://go.microsoft.com/fwlink/?LinkId=235170</LicenseUrl>
@@ -67,7 +72,7 @@
       <Dependencies>
         <Dependency id="Microsoft.Hadoop.Client" />
       </Dependencies>
-      <Authors>Microsoft Azure-sdk</Authors>
+      <Authors>Microsoft</Authors>
       <Owners>Microsoft Azure-sdk</Owners>
       <IconUrl>http://go.microsoft.com/fwlink/?LinkID=288890</IconUrl>
       <LicenseUrl>http://go.microsoft.com/fwlink/?LinkId=235170</LicenseUrl>
@@ -96,17 +101,20 @@
       <From>Microsoft.WindowsAzure.Management.HDInsight.Cmdlets.zip</From>
       <To>Microsoft.WindowsAzure.Management.HDInsight.Cmdlets.zip</To>
     </Copy>
-    <XCopy ProductGuid="D1B62378-806E-4916-877B-E2EB83CBE22B" SourceFolder="Cmdlet">
+    <Copy>
+      <From>Microsoft.WindowsAzure.HDInsight.LogAnalysisTool.zip</From>
+      <To>Microsoft.WindowsAzure.HDInsight.LogAnalysisTool.zip</To>
+    </Copy>
+    <XCopy ProductGuid="F99A06B5-8ACC-4D99-AE6B-5A9CF9269F68" SourceFolder="Lat">
       <GuiStyle>
         <SAT />
       </GuiStyle>
-      <PowerShell />
     </XCopy>
   </Package>
   <Release push="HDInsight.SDK">
     <Public>
       <ApiScan name="HDInsight DevEx" />
-      <PoliCheck workspace=".\HDInsight\Sdk" />
+      <PoliCheck workspace=".\HDInsight\Hdx.Sdk" />
     </Public>
   </Release>
 </BuildConfig>

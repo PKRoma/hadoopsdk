@@ -20,6 +20,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
     using System.Text;
     using System.Threading;
     using Microsoft.WindowsAzure.Management.HDInsight;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core;
 
     /// <summary>
     /// Represents an Abstraction Context for a Hadoop Subscription.

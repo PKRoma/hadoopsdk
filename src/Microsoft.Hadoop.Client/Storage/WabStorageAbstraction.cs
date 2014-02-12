@@ -112,7 +112,13 @@ namespace Microsoft.Hadoop.Client.Storage
 
         public Task Write(Uri path, Stream stream)
         {
-            throw new NotImplementedException();
+            var httpPath = ConvertToHttpPath(path);
+            this.AssertPathRootedToThisAccount(httpPath);
+            var client = this.GetStorageClient();
+            var container = client.GetContainerReference(this.credentials.ContainerName);
+            var blobReference = container.GetBlockBlobReference(httpPath.OriginalString);
+            blobReference.UploadFromStream(stream);
+            return TaskEx.GetCompletedTask();
         }
 
         public async Task<Stream> Read(Uri path)

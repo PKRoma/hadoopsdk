@@ -20,7 +20,7 @@ namespace Microsoft.Hadoop.Client
     /// <summary>
     /// Provides creation details for a new Pig jobDetails.
     /// </summary>
-    public sealed class PigJobCreateParameters : JobCreateParameters
+    public sealed class PigJobCreateParameters : QueryJobCreateParameters
     {
         /// <summary>
         /// Initializes a new instance of the PigJobCreateParameters class.
@@ -36,13 +36,18 @@ namespace Microsoft.Hadoop.Client
         public string Query { get; set; }
 
         /// <summary>
-        /// Gets or sets the query file to use for a pig jobDetails.
-        /// </summary>
-        public string File { get; set; }
-
-        /// <summary>
         /// Gets the arguments for the jobDetails.
         /// </summary>
         public ICollection<string> Arguments { get; private set; }
+
+        internal override string GetQuery()
+        {
+            return this.Query;
+        }
+
+        internal override void SetQuery(string queryText)
+        {
+            this.Query = queryText;
+        }
     }
 }

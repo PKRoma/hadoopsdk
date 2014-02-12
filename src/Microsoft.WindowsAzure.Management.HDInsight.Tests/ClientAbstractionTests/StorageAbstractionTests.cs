@@ -112,7 +112,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
                 Name = wellKnownStorageAccount.Name
             };
             var wabsStorageClient = new WabStorageAbstraction(storageCreds);
-            var testFilePath = new Uri(string.Format(CultureInfo.InvariantCulture, "{0}{1}@{2}/input/test.txt", Constants.WabsProtocolSchemeName, wellKnownStorageAccount.Container, wellKnownStorageAccount.Name));
+            var testFilePath = new Uri(string.Format(CultureInfo.InvariantCulture, "{0}{1}@{2}/hive/warehouse/hivesampletable/HiveSampleData.txt", Constants.WabsProtocolSchemeName, wellKnownStorageAccount.Container, wellKnownStorageAccount.Name));
             var testFileStream = await wabsStorageClient.Read(testFilePath);
             Assert.IsNotNull(testFileStream);
             var contents = new StreamReader(testFileStream).ReadToEnd();

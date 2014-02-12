@@ -29,12 +29,16 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
     using Microsoft.Hadoop.Client.Storage;
     using Microsoft.Hadoop.Client.WebHCatRest;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestClient;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
     using Microsoft.WindowsAzure.Management.HDInsight.JobSubmission;
     using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities;
+    using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulator;
     using Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTests;
     using Microsoft.WindowsAzure.Management.HDInsight.Tests.RestSimulator;
     using Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario;
@@ -155,6 +159,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
         [TestMethod]
         [TestCategory("Integration")]
         [TestCategory("Nightly")]
+        [ExpectedException(typeof(HttpLayerException))]
         public void CanStopJobs_AgainstAzure()
         {
             this.ApplyIndividualTestMockingOnly();
@@ -189,7 +194,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             var subscriptionCreds = new HDInsightCertificateCredential(creds.SubscriptionId, creds.Certificate);
             var hdInsightClient = HDInsightClient.Connect(subscriptionCreds);
             hdInsightClient.AddLogWriter(stringLogWriter);
-            var firstCluster = this.GetRandomCluster();
+            var firstCluster = GetRandomCluster();
 
             await hdInsightClient.CreateClusterAsync(firstCluster);
             var firstClusterFromServer = hdInsightClient.GetCluster(firstCluster.Name);
@@ -268,7 +273,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             }
             catch (TimeoutException ex)
             {
-                Assert.IsTrue(ex.Message.Contains("Timeout waiting for jobDetails completion"), "The expected exception was not of the right type.");
+                Assert.IsTrue(ex.Message.Contains("The requested task failed to complete in the allotted time"), "The expected exception was not of the right type.");
             }
         }
 
@@ -291,7 +296,6 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             Assert.AreEqual("Failed", jobCreationDetails.StatusCode.ToString());
         }
 
-
         [TestMethod]
         [TestCategory("CheckIn")]
         public async Task CanCreateClustersInParallel()
@@ -301,8 +305,8 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             var subscriptionCreds = new HDInsightCertificateCredential(creds.SubscriptionId, creds.Certificate);
             var hadoopClient = HDInsightClient.Connect(subscriptionCreds);
 
-            var firstCluster = this.GetRandomCluster();
-            var secondCluster = this.GetRandomCluster();
+            var firstCluster = GetRandomCluster();
+            var secondCluster = GetRandomCluster();
 
             await hadoopClient.CreateClusterAsync(firstCluster);
             await hadoopClient.CreateClusterAsync(secondCluster);
@@ -674,6 +678,367 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
         }
 
         [TestMethod]
+        [TestCategory("Nightly")]
+        public void CanWriteHiveQueryToFile_AgainstAzure()
+        {
+            this.ApplyIndividualTestMockingOnly();
+            this.CanWriteHiveQueryToFile();
+        }
+
+        [TestMethod]
+        [TestCategory("Nightly")]
+        public void CanWritePigQueryToFile_AgainstAzure()
+        {
+            this.ApplyIndividualTestMockingOnly();
+            this.CanWritePigQueryToFile();
+        }
+
+        [TestMethod]
+        [TestCategory("Nightly")]
+        public void CanWriteSqoopCommandToFile_AgainstAzure()
+        {
+            this.ApplyIndividualTestMockingOnly();
+            this.CanWriteSqoopCommandToFile();
+        }
+
+        [TestMethod]
+        [TestCategory("CheckIn")]
+        public void CanWriteHiveQueryToFile()
+        {
+            var certificateCredentials = GetHDInsightCertificateCredentials();
+
+            var hadoopClient = JobSubmissionClientFactory.Connect(certificateCredentials);
+            var hiveJob = new HiveJobCreateParameters()
+            {
+                JobName = "show tables jobDetails",
+                StatusFolder = "/tables",
+                Query = "show tables",
+                RunAsFileJob = true
+            };
+
+            var startedHiveJob = hadoopClient.CreateHiveJob(hiveJob);
+            var hiveJobInQueue = hadoopClient.GetJob(startedHiveJob.JobId);
+            Assert.IsTrue(hiveJobInQueue.Query.IsNullOrEmpty());
+        }
+
+        [TestMethod]
+        [TestCategory(TestRunMode.CheckIn)]
+        public void IfCredentialsChangeWeMakeFollowupCallsToRDFEToGetCredentials()
+        {
+            var simManager = ServiceLocator.Instance.Locate<IServiceLocationSimulationManager>();
+            simManager.MockingLevel = ServiceLocationMockingLevel.ApplyFullMocking;
+
+            var certificateCredentials = GetRandomClusterCertificateCredentails();
+            var factory = ServiceLocator.Instance.Locate<IHDInsightManagementRestClientFactory>();
+            using (var context = new AbstractionContext(CancellationToken.None))
+            {
+                var underlying = factory.Create(certificateCredentials, context);
+
+                var mockClient = new Mock<IHDInsightManagementRestClient>();
+                var callCount = 0;
+                mockClient.Setup(x => x.ListCloudServices()).Returns(
+                    () =>
+                    {
+                        callCount++;
+                        return underlying.ListCloudServices();
+                    });
+
+                var mockFactory = new Mock<IHDInsightManagementRestClientFactory>();
+                mockFactory.Setup(x => x.Create(It.IsAny<IHDInsightSubscriptionCredentials>(), It.IsAny<IAbstractionContext>()))
+                           .Returns(() => mockClient.Object);
+
+                var manager = ServiceLocator.Instance.Locate<IServiceLocationIndividualTestManager>();
+                manager.Override<IHDInsightManagementRestClientFactory>(mockFactory.Object);
+
+                var hadoopClient = JobSubmissionClientFactory.Connect(certificateCredentials);
+                var hiveJob = new HiveJobCreateParameters()
+                {
+                    JobName = "show tables jobDetails",
+                    StatusFolder = "/tables",
+                    Query = "show tables",
+                    RunAsFileJob = true
+                };
+
+                var startedHiveJob = hadoopClient.CreateHiveJob(hiveJob);
+                var hiveJobInQueue = hadoopClient.GetJob(startedHiveJob.JobId);
+                Assert.IsTrue(hiveJobInQueue.Query.IsNullOrEmpty());
+
+                HDInsightManagementRestSimulatorClient.SetHttpUserNameAndPassword(certificateCredentials.Cluster, "userName", "newPassword");
+
+                hadoopClient = JobSubmissionClientFactory.Connect(certificateCredentials);
+                hiveJob = new HiveJobCreateParameters()
+                {
+                    JobName = "show tables jobDetails",
+                    StatusFolder = "/tables",
+                    Query = "show tables",
+                    RunAsFileJob = true
+                };
+
+                startedHiveJob = hadoopClient.CreateHiveJob(hiveJob);
+                hiveJobInQueue = hadoopClient.GetJob(startedHiveJob.JobId);
+                Assert.IsTrue(hiveJobInQueue.Query.IsNullOrEmpty());
+
+                Assert.AreEqual(2, callCount);
+            }
+        }
+
+        [TestMethod]
+        [TestCategory(TestRunMode.CheckIn)]
+        public void WeOnlyCallRDFEOnceToGetCredentialsIfThereAreNoErrors()
+        {
+            var simManager = ServiceLocator.Instance.Locate<IServiceLocationSimulationManager>();
+            simManager.MockingLevel = ServiceLocationMockingLevel.ApplyFullMocking;
+
+            var certificateCredentials = GetRandomClusterCertificateCredentails();
+            var factory = ServiceLocator.Instance.Locate<IHDInsightManagementRestClientFactory>();
+            using (var context = new AbstractionContext(CancellationToken.None))
+            {
+                var underlying = factory.Create(certificateCredentials, context);
+
+                var mockClient = new Mock<IHDInsightManagementRestClient>();
+                var callCount = 0;
+                mockClient.Setup(x => x.ListCloudServices())
+                          .Returns(() => 
+                          {
+                              callCount++;
+                              return underlying.ListCloudServices();
+                          });
+
+                var mockFactory = new Mock<IHDInsightManagementRestClientFactory>();
+                mockFactory.Setup(x => x.Create(It.IsAny<IHDInsightSubscriptionCredentials>(), It.IsAny<IAbstractionContext>()))
+                           .Returns(() => mockClient.Object);
+
+                var manager = ServiceLocator.Instance.Locate<IServiceLocationIndividualTestManager>();
+                manager.Override<IHDInsightManagementRestClientFactory>(mockFactory.Object);
+
+                var hadoopClient = JobSubmissionClientFactory.Connect(certificateCredentials);
+                var hiveJob = new HiveJobCreateParameters()
+                {
+                    JobName = "show tables jobDetails",
+                    StatusFolder = "/tables",
+                    Query = "show tables",
+                    RunAsFileJob = true
+                };
+
+                var startedHiveJob = hadoopClient.CreateHiveJob(hiveJob);
+                var hiveJobInQueue = hadoopClient.GetJob(startedHiveJob.JobId);
+                Assert.IsTrue(hiveJobInQueue.Query.IsNullOrEmpty());
+
+                hadoopClient = JobSubmissionClientFactory.Connect(certificateCredentials);
+                hiveJob = new HiveJobCreateParameters()
+                {
+                    JobName = "show tables jobDetails",
+                    StatusFolder = "/tables",
+                    Query = "show tables",
+                    RunAsFileJob = true
+                };
+
+                startedHiveJob = hadoopClient.CreateHiveJob(hiveJob);
+                hiveJobInQueue = hadoopClient.GetJob(startedHiveJob.JobId);
+                Assert.IsTrue(hiveJobInQueue.Query.IsNullOrEmpty());
+
+                Assert.AreEqual(1, callCount);
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("CheckIn")]
+        public void CanWritePigQueryToFile()
+        {
+            var certificateCredentials = GetHDInsightCertificateCredentials();
+
+            var hadoopClient = JobSubmissionClientFactory.Connect(certificateCredentials);
+            var pigJob = new PigJobCreateParameters()
+            {
+                Query = "records = LOAD '/example/pig/sahara-paleo-fauna.txt' AS (DateBP:int, Loc:chararray, Coordinates:chararray, Samples:chararray, Country:chararray, Laboratory:chararray);" +
+                       "filtered_records = FILTER records by Country == 'Egypt' OR Country == 'Morocco';" +
+                       "grouped_records = GROUP filtered_records BY Country;" +
+                       "DUMP grouped_records;",
+                StatusFolder = "/pigresultsfolder",
+                RunAsFileJob = true
+            };
+
+            var startedPigJob = hadoopClient.CreatePigJob(pigJob);
+            var pigJobInQueue = hadoopClient.GetJob(startedPigJob.JobId);
+            Assert.IsTrue(pigJobInQueue.Query.IsNullOrEmpty());
+        }
+
+        [TestMethod]
+        [TestCategory("CheckIn")]
+        public void CanWriteSqoopCommandToFile()
+        {
+            var certificateCredentials = GetHDInsightCertificateCredentials();
+
+            var hadoopClient = JobSubmissionClientFactory.Connect(certificateCredentials);
+            var sqoopJob = new SqoopJobCreateParameters()
+            {
+                StatusFolder = "/tables",
+                Command = "show tables",
+                RunAsFileJob = true
+            };
+
+            var startedSqoopJob = hadoopClient.CreateSqoopJob(sqoopJob);
+            var sqoopJobInQueue = hadoopClient.GetJob(startedSqoopJob.JobId);
+            Assert.IsTrue(sqoopJobInQueue.Query.IsNullOrEmpty());
+        }
+
+        [TestMethod]
+        [TestCategory("CheckIn")]
+        public void CannotWriteHiveQueryToFile()
+        {
+            var certificateCredentials = GetRemoteConnectionCredentials();
+
+            var hadoopClient = JobSubmissionClientFactory.Connect(certificateCredentials);
+            var hiveJob = new HiveJobCreateParameters()
+            {
+                JobName = "show tables jobDetails",
+                StatusFolder = "/tables",
+                Query = "show tables",
+                RunAsFileJob = true
+            };
+
+            try
+            {
+                hadoopClient.CreateHiveJob(hiveJob);
+                Assert.Fail();
+            }
+            catch (NotSupportedException notSupportedException)
+            {
+                Assert.AreEqual("Cannot upload query file, access to cluster resources requires Subscription details.", notSupportedException.Message);
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("CheckIn")]
+        public void CannotWritePigQueryToFile()
+        {
+            var certificateCredentials = GetRemoteConnectionCredentials();
+
+            var hadoopClient = JobSubmissionClientFactory.Connect(certificateCredentials);
+            var pigJob = new PigJobCreateParameters()
+            {
+                Query = "records = LOAD '/example/pig/sahara-paleo-fauna.txt' AS (DateBP:int, Loc:chararray, Coordinates:chararray, Samples:chararray, Country:chararray, Laboratory:chararray);" +
+                       "filtered_records = FILTER records by Country == 'Egypt' OR Country == 'Morocco';" +
+                       "grouped_records = GROUP filtered_records BY Country;" +
+                       "DUMP grouped_records;",
+                StatusFolder = "/pigresultsfolder",
+                RunAsFileJob = true
+            };
+
+            try
+            {
+                hadoopClient.CreatePigJob(pigJob);
+                Assert.Fail();
+            }
+            catch (NotSupportedException notSupportedException)
+            {
+                Assert.AreEqual("Cannot upload query file, access to cluster resources requires Subscription details.", notSupportedException.Message);
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("CheckIn")]
+        public void CannotWriteSqoopCommandToFile()
+        {
+            var certificateCredentials = GetRemoteConnectionCredentials();
+
+            var hadoopClient = JobSubmissionClientFactory.Connect(certificateCredentials);
+            var sqoopJob = new SqoopJobCreateParameters()
+            {
+                StatusFolder = "/tables",
+                Command = "show tables",
+                RunAsFileJob = true
+            };
+
+            try
+            {
+                hadoopClient.CreateSqoopJob(sqoopJob);
+                Assert.Fail();
+            }
+            catch (NotSupportedException notSupportedException)
+            {
+                Assert.AreEqual("Cannot upload query file, access to cluster resources requires Subscription details.", notSupportedException.Message);
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("CheckIn")]
+        public void CannotRunHiveJobWithRestrictedCharacters()
+        {
+            var certificateCredentials = GetRemoteConnectionCredentials();
+
+            var hadoopClient = JobSubmissionClientFactory.Connect(certificateCredentials);
+            var hiveJob = new HiveJobCreateParameters()
+            {
+                JobName = "show tables jobDetails",
+                StatusFolder = "/tables",
+                Query = "show tables %",
+
+            };
+
+            try
+            {
+                hadoopClient.CreateHiveJob(hiveJob);
+                Assert.Fail();
+            }
+            catch (InvalidOperationException invalidOperationException)
+            {
+                Assert.AreEqual("Query contains restricted character :'%'.\r\nPlease submit job as a File job or set RunAsFileJob to true.", invalidOperationException.Message);
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("CheckIn")]
+        public void CannotRunPigJobWithRestrictedCharacters()
+        {
+            var certificateCredentials = GetRemoteConnectionCredentials();
+
+            var hadoopClient = JobSubmissionClientFactory.Connect(certificateCredentials);
+            var pigJob = new PigJobCreateParameters()
+            {
+                Query = "% records = LOAD '/example/pig/sahara-paleo-fauna.txt' AS (DateBP:int, Loc:chararray, Coordinates:chararray, Samples:chararray, Country:chararray, Laboratory:chararray);" +
+                       "filtered_records = FILTER records by Country == 'Egypt' OR Country == 'Morocco';" +
+                       "grouped_records = GROUP filtered_records BY Country;" +
+                       "DUMP grouped_records;",
+                StatusFolder = "/pigresultsfolder"
+            };
+
+            try
+            {
+                hadoopClient.CreatePigJob(pigJob);
+                Assert.Fail();
+            }
+            catch (InvalidOperationException invalidOperationException)
+            {
+                Assert.AreEqual("Query contains restricted character :'%'.\r\nPlease submit job as a File job or set RunAsFileJob to true.", invalidOperationException.Message);
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("CheckIn")]
+        public void CannotRunSqoopJobWithRestrictedCharacters()
+        {
+            var certificateCredentials = GetRemoteConnectionCredentials();
+
+            var hadoopClient = JobSubmissionClientFactory.Connect(certificateCredentials);
+            var sqoopJob = new SqoopJobCreateParameters()
+            {
+                StatusFolder = "/tables",
+                Command = "show tables %"
+            };
+
+            try
+            {
+                hadoopClient.CreateSqoopJob(sqoopJob);
+                Assert.Fail();
+            }
+            catch (InvalidOperationException invalidOperationException)
+            {
+                Assert.AreEqual("Query contains restricted character :'%'.\r\nPlease submit job as a File job or set RunAsFileJob to true.", invalidOperationException.Message);
+            }
+        }
+
+        [TestMethod]
         [TestCategory("CheckIn")]
         public void CanGetJobOutput_TokenCreds()
         {
@@ -952,6 +1317,19 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             }
         }
 
+        private static JobSubmissionCertificateCredential GetRandomClusterCertificateCredentails()
+        {
+            var creds = IntegrationTestBase.GetValidCredentials();
+            var createReq = GetRandomCluster();
+            var client = ServiceLocator.Instance.Locate<IHDInsightClientFactory>().Create(creds);
+            var cluster = client.CreateCluster(createReq);
+            var retval =
+                new JobSubmissionCertificateCredential(
+                    new HDInsightCertificateCredential() { SubscriptionId = creds.SubscriptionId, Certificate = creds.Certificate },
+                    cluster.Name);
+            return retval;
+        }
+
         private static JobSubmissionCertificateCredential GetHDInsightCertificateCredentials()
         {
             var creds = IntegrationTestBase.GetValidCredentials();
@@ -978,7 +1356,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             while (jobInProgress.StatusCode != Hadoop.Client.JobStatusCode.Completed && jobInProgress.StatusCode != Hadoop.Client.JobStatusCode.Failed)
             {
                 jobInProgress = client.GetJob(jobInProgress.JobId);
-                Thread.Sleep(TimeSpan.FromSeconds(10));
+                Thread.Sleep(TimeSpan.FromMilliseconds(IHadoopClientExtensions.GetPollingInterval()));
             }
         }
 

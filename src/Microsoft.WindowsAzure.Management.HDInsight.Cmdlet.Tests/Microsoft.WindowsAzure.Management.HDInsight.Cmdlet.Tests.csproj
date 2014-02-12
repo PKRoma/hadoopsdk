@@ -8,7 +8,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Tests</RootNamespace>
     <AssemblyName>Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Tests</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
@@ -17,6 +17,7 @@
     <IsCodedUITest>False</IsCodedUITest>
     <TestProjectType>UnitTest</TestProjectType>
     <SpecFlowTasksPath>$(SolutionDir)\packages\SpecFlow.1.9.0\tools\specflow.exe</SpecFlowTasksPath>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -26,6 +27,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -34,6 +36,10 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Coverage|AnyCPU'">
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.HDInsight.Management.Contracts">
@@ -159,10 +165,6 @@
       <Project>{7c2e800c-09e5-484a-bb08-6c17578e7e45}</Project>
       <Name>Microsoft.Hadoop.Client</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Microsoft.HDInsight.Threading\Microsoft.HDInsight.Threading.csproj">
-      <Project>{dbffc131-e089-4173-9b9e-6826fe596faf}</Project>
-      <Name>Microsoft.HDInsight.Threading</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Microsoft.WindowsAzure.Management.HDInsight.Cmdlet\Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.csproj">
       <Project>{43333c08-29f5-4948-a8c6-4f486331cdc9}</Project>
       <Name>Microsoft.WindowsAzure.Management.HDInsight.Cmdlet</Name>
@@ -174,6 +176,10 @@
     <ProjectReference Include="..\Microsoft.WindowsAzure.Management.HDinsight.Framework\Microsoft.WindowsAzure.Management.HDInsight.Framework.csproj">
       <Project>{db09f70b-fd28-4cc8-86b3-883d71ca9a02}</Project>
       <Name>Microsoft.WindowsAzure.Management.HDInsight.Framework</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Microsoft.WindowsAzure.Management.HDInsight.TestUtilities\Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.csproj">
+      <Project>{7dd88c8b-37ea-4353-8ed7-6971118d5fc3}</Project>
+      <Name>Microsoft.WindowsAzure.Management.HDInsight.TestUtilities</Name>
     </ProjectReference>
     <ProjectReference Include="..\Microsoft.WindowsAzure.Management.HDInsight\Microsoft.WindowsAzure.Management.HDInsight.csproj">
       <Project>{cf2838ec-af11-477b-a7e6-f59a70a0e67f}</Project>

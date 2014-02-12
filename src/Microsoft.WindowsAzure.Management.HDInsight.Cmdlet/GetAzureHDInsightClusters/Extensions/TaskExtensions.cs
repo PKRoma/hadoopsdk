@@ -16,6 +16,7 @@
 namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.Extensions
 {
     using System;
+    using System.Globalization;
     using System.Threading.Tasks;
 
     /// <summary>
@@ -102,7 +103,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightCl
             }
             if (task.Status != TaskStatus.RanToCompletion && task.Status != TaskStatus.Faulted && task.Status != TaskStatus.Canceled)
             {
-                throw new TimeoutException("The requested task failed to complete in the allotted time.");
+                throw new TimeoutException(string.Format(CultureInfo.InvariantCulture, "The requested task failed to complete in the allotted time ({0}).", timeout));
             }
         }
 
@@ -168,7 +169,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightCl
             }
             if (task.Status != TaskStatus.RanToCompletion && task.Status != TaskStatus.Faulted && task.Status != TaskStatus.Canceled)
             {
-                throw new TimeoutException("The requested task failed to complete in the allotted time.");
+                throw new TimeoutException(string.Format(CultureInfo.InvariantCulture, "The requested task failed to complete in the allotted time ({0}).", timeout));
             }
             return task.Result;
         }

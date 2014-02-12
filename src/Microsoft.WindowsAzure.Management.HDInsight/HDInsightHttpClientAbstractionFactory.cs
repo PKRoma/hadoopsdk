@@ -18,6 +18,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
     using System.Globalization;
     using System.Security.Authentication;
     using System.Security.Cryptography.X509Certificates;
+    using System.Threading.Tasks;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
@@ -111,6 +112,61 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
         {
             return ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>()
                               .Create();
+        }
+
+        /// <inheritdoc />
+        public async Task<IHttpResponseMessageAbstraction> Retry(IHDInsightSubscriptionCredentials credentials,
+                                                                 IAbstractionContext context,
+                                                                 Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation,
+                                                                 Func<IHttpResponseMessageAbstraction, bool> shouldRetry,
+                                                                 TimeSpan timeout,
+                                                                 TimeSpan pollInterval)
+        {
+            IHDInsightCertificateCredential certCreds = credentials as IHDInsightCertificateCredential;
+            IHDInsightAccessTokenCredential tokenCreds = credentials as IHDInsightAccessTokenCredential;
+            if (certCreds != null)
+            {
+                return await ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>()
+                                                    .Retry(certCreds.Certificate, context, operation, shouldRetry, timeout, pollInterval);
+            }
+            if (tokenCreds != null)
+            {
+                return await ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>()
+                                                    .Retry(tokenCreds.AccessToken, context, operation, shouldRetry, timeout, pollInterval);
+            }
+            throw new NotSupportedException("Credential Type is not supported");
+        }
+
+        /// <inheritdoc />
+        public async Task<IHttpResponseMessageAbstraction> Retry(IHDInsightSubscriptionCredentials credentials, Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation, Func<IHttpResponseMessageAbstraction, bool> shouldRetry, TimeSpan timeout, TimeSpan pollInterval)
+        {
+            IHDInsightCertificateCredential certCreds = credentials as IHDInsightCertificateCredential;
+            IHDInsightAccessTokenCredential tokenCreds = credentials as IHDInsightAccessTokenCredential;
+            if (certCreds != null)
+            {
+                return await ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>()
+                                                    .Retry(certCreds.Certificate, operation, shouldRetry, timeout, pollInterval);
+            }
+            if (tokenCreds != null)
+            {
+                return await ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>()
+                                                    .Retry(tokenCreds.AccessToken, operation, shouldRetry, timeout, pollInterval);
+            }
+            throw new NotSupportedException("Credential Type is not supported");
+        }
+
+        /// <inheritdoc />
+        public async Task<IHttpResponseMessageAbstraction> Retry(IAbstractionContext context, Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation, Func<IHttpResponseMessageAbstraction, bool> shouldRetry, TimeSpan timeout, TimeSpan pollInterval)
+        {
+            return await ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>()
+                                                .Retry(context, operation, shouldRetry, timeout, pollInterval);
+        }
+
+        /// <inheritdoc />
+        public async Task<IHttpResponseMessageAbstraction> Retry(Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation, Func<IHttpResponseMessageAbstraction, bool> shouldRetry, TimeSpan timeout, TimeSpan pollInterval)
+        {
+            return await ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>()
+                                                .Retry(operation, shouldRetry, timeout, pollInterval);
         }
     }
 }

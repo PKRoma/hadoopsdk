@@ -15,6 +15,8 @@
 namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library
 {
     using System;
+    using System.Globalization;
+    using System.Reflection;
     using System.Threading.Tasks;
 
     /// <summary>
@@ -26,7 +28,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library
     internal static class TaskExtensions
 #endif
     {
-        private static Exception GetInnerException(AggregateException aggregateException)
+        internal static Exception GetInnerException(this AggregateException aggregateException)
         {
             Exception innerExcception = aggregateException;
             while (aggregateException is AggregateException)
@@ -65,11 +67,13 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library
             }
             catch (AggregateException aggregateException)
             {
-                throw GetInnerException(aggregateException);
+                var ie = GetInnerException(aggregateException);
+                typeof(Exception).GetMethod("PrepForRemoting", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(ie, new object[0]);
+                throw ie;
             }
             if (task.Status != TaskStatus.RanToCompletion && task.Status != TaskStatus.Faulted && task.Status != TaskStatus.Canceled)
             {
-                throw new TimeoutException("The requested task failed to complete in the allotted time.");
+                throw new TimeoutException(string.Format(CultureInfo.InvariantCulture, "The requested task failed to complete in the allotted time ({0}).", timeout));
             }
         }
 
@@ -131,11 +135,13 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library
             }
             catch (AggregateException aggregateException)
             {
-                throw GetInnerException(aggregateException);
+                var ie = GetInnerException(aggregateException);
+                typeof(Exception).GetMethod("PrepForRemoting", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(ie, new object[0]);
+                throw ie;
             }
             if (task.Status != TaskStatus.RanToCompletion && task.Status != TaskStatus.Faulted && task.Status != TaskStatus.Canceled)
             {
-                throw new TimeoutException("The requested task failed to complete in the allotted time.");
+                throw new TimeoutException(string.Format(CultureInfo.InvariantCulture, "The requested task failed to complete in the allotted time ({0}).", timeout));
             }
             return task.Result;
         }

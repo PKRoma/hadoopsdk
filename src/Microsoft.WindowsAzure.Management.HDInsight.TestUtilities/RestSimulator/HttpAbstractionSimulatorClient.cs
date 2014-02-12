@@ -22,6 +22,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest;
+    using Microsoft.WindowsAzure.Management.HDInsight.Logging;
 
     internal class HttpAbstractionSimulatorClient : DisposableObject, IHttpClientAbstraction
     {
@@ -85,6 +86,10 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
 
             this.factory.Clients.Add(new Tuple<IHttpClientAbstraction, IHttpResponseMessageAbstraction>(this, responseMessage));
             return responseMessage;
+        }
+
+        public void Log(Severity severity, Verbosity verbosity, string message)
+        {
         }
     }
 }

@@ -33,6 +33,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
     using Microsoft.WindowsAzure.Management.HDInsight;
     using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities;
+    using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulator;
     using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.ServerDataObjects;
 
     [TestClass]
@@ -92,7 +93,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             var containers = await pocoClient.ListContainers();
             ClusterDetails clusterDetails = containers.Last();
 
-            var clusterCreationDetails = this.GetRandomCluster();
+            var clusterCreationDetails = GetRandomCluster();
             clusterDetails = client.CreateCluster(clusterCreationDetails);
 
             var operationId = await pocoClient.DisableHttp(clusterDetails.Name, clusterDetails.Location);
@@ -106,7 +107,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
 
             // now add a user
             string userName = "hdinsightuser";
-            string password = this.GetRandomValidPassword();
+            string password = GetRandomValidPassword();
             operationId = await pocoClient.EnableHttp(clusterDetails.Name, clusterDetails.Location, userName, password);
 
             await WaitforCompletion(pocoClient, clusterDetails.Name, clusterDetails.Location, operationId);
@@ -133,7 +134,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
 
         private static async Task WaitforCompletion(IHDInsightManagementPocoClient pocoClient, string dnsName, string location, Guid operationId)
         {
-            await pocoClient.WaitForOperationCompleteOrError(dnsName, location, operationId, TimeSpan.FromSeconds(1), CancellationToken.None);
+            await pocoClient.WaitForOperationCompleteOrError(dnsName, location, operationId, TimeSpan.FromMilliseconds(IHadoopClientExtensions.GetPollingInterval()), CancellationToken.None);
         }
 
         [TestMethod]
@@ -150,7 +151,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             var clusterDetails = containers.Last();
             if (clusterDetails == null)
             {
-                var clusterCreationDetails = this.GetRandomCluster();
+                var clusterCreationDetails = GetRandomCluster();
                 clusterDetails = client.CreateCluster(clusterCreationDetails);
             }
 
@@ -203,7 +204,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             var pocoClient = manager.Create(credentials, GetAbstractionContext());
             var containers = await pocoClient.ListContainers();
             ClusterDetails clusterDetails = containers.Last();
-            var clusterCreationDetails = this.GetRandomCluster();
+            var clusterCreationDetails = GetRandomCluster();
             clusterDetails = client.CreateCluster(clusterCreationDetails);
 
             var operationId = await pocoClient.DisableHttp(clusterDetails.Name, clusterDetails.Location);
@@ -211,14 +212,14 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
 
             // now add a user
             string userName = "hdinsightuser";
-            string password = this.GetRandomValidPassword();
+            string password = GetRandomValidPassword();
             operationId = await pocoClient.EnableHttp(clusterDetails.Name, clusterDetails.Location, userName, password);
             await WaitforCompletion(pocoClient, clusterDetails.Name, clusterDetails.Location, operationId);
 
             try
             {
                 userName = "anotheruser";
-                password = this.GetRandomValidPassword();
+                password = GetRandomValidPassword();
                 await pocoClient.EnableHttp(clusterDetails.Name, clusterDetails.Location, userName, password);
             }
             catch (HttpLayerException ex)
@@ -252,7 +253,8 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
         [TestCategory(TestRunMode.CheckIn)]
         public async Task ICannotSubmitAChangeHttpUserOperationWhileAnotherIsInProgress()
         {
-            this.SetHDInsightManagementRestSimulatorClientOperationTime(1000);
+            IHadoopClientExtensions.GetPollingInterval = () => 5;
+            this.SetHDInsightManagementRestSimulatorClientOperationTime(100);
             IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
             var client = ServiceLocator.Instance.Locate<IHDInsightClientFactory>().Create(new HDInsightCertificateCredential(credentials.SubscriptionId, credentials.Certificate));
 
@@ -260,12 +262,12 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             var pocoClient = manager.Create(credentials, GetAbstractionContext());
             var containers = await pocoClient.ListContainers();
             ClusterDetails clusterDetails = containers.Last();
-            var clusterCreationDetails = this.GetRandomCluster();
+            var clusterCreationDetails = GetRandomCluster();
             clusterDetails = client.CreateCluster(clusterCreationDetails);
 
             var operationId = Guid.Empty;
             var userName = "hdinsightuser";
-            var password = this.GetRandomValidPassword();
+            var password = GetRandomValidPassword();
 
             try
             {
@@ -283,6 +285,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
                 if (operationId != Guid.Empty)
                 {
                     WaitforCompletion(pocoClient, clusterDetails.Name, clusterDetails.Location, operationId).WaitForResult();
+                    Thread.Sleep(HDInsightManagementRestSimulatorClient.OperationTimeToCompletionInMilliseconds * 2);
                     operationId = pocoClient.EnableHttp(clusterDetails.Name, clusterDetails.Location, userName, password).WaitForResult();
                     WaitforCompletion(pocoClient, clusterDetails.Name, clusterDetails.Location, operationId).WaitForResult();
                 }
@@ -312,7 +315,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
             var client = ServiceLocator.Instance.Locate<IHDInsightClientFactory>()
                                         .Create(new HDInsightCertificateCredential(credentials.SubscriptionId, credentials.Certificate));
-            var clusterDetails = this.GetRandomCluster();
+            var clusterDetails = GetRandomCluster();
             try
             {
 
@@ -323,7 +326,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
                 client.CreateCluster(clusterDetails);
 
                 // Try disabling first
-                var opId = await pocoClient.EnableHttp(clusterDetails.Name, clusterDetails.Location, "user name", this.GetRandomValidPassword());
+                var opId = await pocoClient.EnableHttp(clusterDetails.Name, clusterDetails.Location, "user name", GetRandomValidPassword());
             }
             catch (HttpLayerException clientEx)
             {
@@ -351,7 +354,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
             var client = ServiceLocator.Instance.Locate<IHDInsightClientFactory>()
                                         .Create(new HDInsightCertificateCredential(credentials.SubscriptionId, credentials.Certificate));
-            var clusterDetails = this.GetRandomCluster();
+            var clusterDetails = GetRandomCluster();
             try
             {
 
@@ -390,7 +393,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
         public void ICanSerializeAndDeserializeAHttpUserChangeRequest()
         {
             string username = "hdinsightuser";
-            string password = this.GetRandomValidPassword();
+            string password = GetRandomValidPassword();
             var payload = PayloadConverter.SerializeConnectivityRequest(UserChangeRequestOperationType.Enable, username, password, DateTimeOffset.MinValue);
 
             var serverConverter = new ClusterProvisioningServerPayloadConverter();
@@ -513,24 +516,6 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             Assert.AreEqual(deserialized.ErrorDetails.ErrorId, "INVALID_PASSTHROUGHREQUEST");
             Assert.AreEqual(deserialized.ErrorDetails.ErrorMessage, "INVALID_PASSTHROUGHREQUEST");
         }
-
-        [TestMethod]
-        [TestCategory(TestRunMode.CheckIn)]
-        public void ICanSerializeAndDeserializeAStatusPassthroughWithNullFields()
-        {
-            var responseObject = new PassthroughResponse()
-            {
-                Data = null,
-                Error = null
-            };
-            // SERIALIZE THE RESPONSE
-            var serializedPassthroughResponse = new ClusterProvisioningServerPayloadConverter();
-            var serializedOpResponse = serializedPassthroughResponse.SerailizeChangeRequestResponse(responseObject);
-
-            // now deseialize it
-            var deserialized = new PayloadConverter().DeserializeConnectivityStatus(serializedOpResponse);
-        }
-
 
         [TestMethod]
         [TestCategory(TestRunMode.CheckIn)]

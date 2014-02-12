@@ -200,6 +200,7 @@ namespace Microsoft.Hadoop.Client.WebHCatRest
                 httpClient.RequestHeaders.Add(HadoopRemoteRestConstants.Authorization, "Basic " + Convert.ToBase64String(byteArray));
             }
             httpClient.RequestHeaders.Add("accept", "application/json");
+            httpClient.RequestHeaders.Add("useragent", "HDInsight .NET SDK");
         }
 
         /// <summary>

@@ -12,7 +12,7 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
-namespace Microsoft.Hadoop.Client
+namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest
 {
     using System;
     using System.Globalization;
@@ -38,11 +38,16 @@ namespace Microsoft.Hadoop.Client
         public string RequestContent { get; private set; }
 
         /// <summary>
+        /// Gets the number of attempts tha .
+        /// </summary>
+        public int AttemptsMade { get; private set; }
+
+        /// <summary>
         /// Initializes a new instance of the HttpLayerException class.
         /// </summary>
-        public HttpLayerException() :
-            base()
+        public HttpLayerException() : base()
         {
+            this.AttemptsMade = 1;
         }
 
         /// <summary>
@@ -52,6 +57,7 @@ namespace Microsoft.Hadoop.Client
         public HttpLayerException(string message) :
             base(message)
         {
+            this.AttemptsMade = 1;
         }
 
         /// <summary>
@@ -62,22 +68,41 @@ namespace Microsoft.Hadoop.Client
         public HttpLayerException(string message, Exception innerException) :
             base(message, innerException)
         {
+            this.AttemptsMade = 1;
         }
 
         /// <summary>
         /// Initializes a new instance of the HttpLayerException class.
         /// </summary>
-        /// <param name="statusCode">Status code recieved from the failed request.</param>
+        /// <param name="statusCode">Status code received from the failed request.</param>
         /// <param name="content">Content of the failed request.</param>
-        public HttpLayerException(System.Net.HttpStatusCode statusCode, string content) :
-            base(string.Format(
-                               CultureInfo.InvariantCulture,
-                               "Request failed with code:{0}\r\nContent:{1}",
-                                statusCode,
-                                content ?? "(null)"))
+        public HttpLayerException(System.Net.HttpStatusCode statusCode, string content) : base(string.Format(CultureInfo.InvariantCulture,
+                                                                                                             "Request failed with code:{0}\r\nContent:{1}",
+                                                                                                             statusCode,
+                                                                                                             content ?? "(null)"))
         {
             this.RequestStatusCode = statusCode;
             this.RequestContent = content;
+            this.AttemptsMade = 1;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the HttpLayerException class.
+        /// </summary>
+        /// <param name="statusCode">Status code received from the failed request.</param>
+        /// <param name="content">Content of the failed request.</param>
+        /// <param name="attemptsMade">The number of retry attempts used when attempting the operation.</param>
+        /// <param name="period">The time period spent attempting the request.</param>
+        public HttpLayerException(HttpStatusCode statusCode, string content, int attemptsMade, TimeSpan period) : base(string.Format(CultureInfo.InvariantCulture,
+                                                                                                                       "Request failed after ({0}) attempts over a period of ({1}) with code: {2}\r\nContent:{3}",
+                                                                                                                       attemptsMade,
+                                                                                                                       period,
+                                                                                                                       statusCode,
+                                                                                                                       content ?? "(null)"))
+        {
+            this.RequestStatusCode = statusCode;
+            this.RequestContent = content;
+            this.AttemptsMade = attemptsMade;
         }
 
         /// <summary>

@@ -71,7 +71,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
             continuePolling.ArgumentNotNull("continuePolling");
             var start = DateTime.Now;
             int pollingFailures = 0;
-            const int MaxPollingFailuresCount = 10;
+            const int MaxPollingFailuresCount = 2;
             T pollingResult = default(T);
             PollResult result = PollResult.Continue;
             do
@@ -88,12 +88,12 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
                     if (result == PollResult.PosibleError)
                     {
                         pollingFailures++;
-                        IHadoopClientExtensions.WaitForInterval(interval, cancellationToken);
+                        cancellationToken.WaitForInterval(interval);
                     }
                     else if (result == PollResult.Continue)
                     {
                         pollingFailures = 0;
-                        IHadoopClientExtensions.WaitForInterval(interval, cancellationToken);
+                        cancellationToken.WaitForInterval(interval);
                     }
                 }
                 catch (WebException pollingException)

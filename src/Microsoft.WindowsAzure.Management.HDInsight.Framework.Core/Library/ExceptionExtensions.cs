@@ -77,7 +77,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library
         /// </param>
         public static void Rethrow(this Exception ex)
         {
-            throw ex.GetFirstException();
+            var newEx = ex.GetFirstException();
+            typeof(Exception).GetMethod("PrepForRemoting", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(newEx, new object[0]);
+            throw newEx;
         }
     }
 }

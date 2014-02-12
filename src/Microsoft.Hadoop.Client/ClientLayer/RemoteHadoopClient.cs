@@ -169,18 +169,21 @@ namespace Microsoft.Hadoop.Client
         /// <inheritdoc />
         public JobCreationResults CreateHiveJob(HiveJobCreateParameters hiveJobCreateParameters)
         {
+            hiveJobCreateParameters = this.PrepareQueryJob(hiveJobCreateParameters);
             return this.CreateHiveJobAsync(hiveJobCreateParameters).WaitForResult();
         }
 
         /// <inheritdoc />
         public JobCreationResults CreatePigJob(PigJobCreateParameters pigJobCreateParameters)
         {
+            this.PrepareQueryJob(pigJobCreateParameters);
             return this.CreatePigJobAsync(pigJobCreateParameters).WaitForResult();
         }
 
         /// <inheritdoc />
         public JobCreationResults CreateSqoopJob(SqoopJobCreateParameters sqoopJobCreateParameters)
         {
+            this.PrepareQueryJob(sqoopJobCreateParameters);
             return this.CreateSqoopJobAsync(sqoopJobCreateParameters).WaitForResult();
         }
 
@@ -212,6 +215,12 @@ namespace Microsoft.Hadoop.Client
         public void DownloadJobTaskLogs(string jobId, string targetDirectory)
         {
             this.DownloadJobTaskLogsAsync(jobId, targetDirectory).WaitForResult();
+        }
+
+        /// <inheritdoc />
+        internal override TJobType UploadQueryFile<TJobType>(TJobType queryJob, string queryText)
+        {
+            throw new NotSupportedException("Cannot upload query file, access to cluster resources requires Subscription details.");
         }
     }
 }

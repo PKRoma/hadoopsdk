@@ -22,7 +22,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest;
 
-    internal class HttpAbstractionSimulatorFactory : DisposableObject, IHttpClientAbstractionFactory
+    internal class HttpAbstractionSimulatorFactory : HttpClientAbstractionFactoryBase, IHttpClientAbstractionFactory
     {
         public HttpAbstractionSimulatorFactory(IHttpClientAbstractionFactory underlying)
         {
@@ -36,7 +36,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
 
         public ICollection<Tuple<IHttpClientAbstraction, IHttpResponseMessageAbstraction>> Clients { get; private set; }
 
-        public IHttpClientAbstraction Create(X509Certificate2 cert)
+        public override IHttpClientAbstraction Create(X509Certificate2 cert)
         {
             var loc = this.AsyncMock;
             if (loc.IsNotNull())
@@ -49,7 +49,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
             }
         }
 
-        public IHttpClientAbstraction Create(X509Certificate2 cert, HDInsight.IAbstractionContext context)
+        public override IHttpClientAbstraction Create(X509Certificate2 cert, HDInsight.IAbstractionContext context)
         {
             var loc = this.AsyncMock;
             if (loc.IsNotNull())
@@ -62,7 +62,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
             }
         }
 
-        public IHttpClientAbstraction Create(string token)
+        public override IHttpClientAbstraction Create(string token)
         {
             var loc = this.AsyncMock;
             if (loc.IsNotNull())
@@ -75,7 +75,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
             }
         }
 
-        public IHttpClientAbstraction Create(string token, HDInsight.IAbstractionContext context)
+        public override IHttpClientAbstraction Create(string token, HDInsight.IAbstractionContext context)
         {
             var loc = this.AsyncMock;
             if (loc.IsNotNull())
@@ -88,7 +88,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
             }
         }
 
-        public IHttpClientAbstraction Create()
+        public override IHttpClientAbstraction Create()
         {
             var loc = this.AsyncMock;
             if (loc.IsNotNull())
@@ -101,7 +101,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
             }
         }
 
-        public IHttpClientAbstraction Create(HDInsight.IAbstractionContext context)
+        public override IHttpClientAbstraction Create(HDInsight.IAbstractionContext context)
         {
             var loc = this.AsyncMock;
             if (loc.IsNotNull())

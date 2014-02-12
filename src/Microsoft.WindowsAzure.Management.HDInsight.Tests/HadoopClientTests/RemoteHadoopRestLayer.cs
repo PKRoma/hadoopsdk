@@ -157,8 +157,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             Assert.AreEqual(HttpMethod.Get, mockResults.Method);
             Assert.AreEqual("/templeton/v1/jobs", mockResults.RequestUri.AbsolutePath);
             Assert.AreEqual("?user.name=" + cred.UserName + "&" + HadoopRemoteRestConstants.ShowAllFields, mockResults.RequestUri.Query);
-            Assert.AreEqual(2, mockResults.Headers.Count);
+            Assert.AreEqual(3, mockResults.Headers.Count);
             Assert.IsTrue(mockResults.Headers.ContainsKey("accept"));
+            Assert.IsTrue(mockResults.Headers.ContainsKey("useragent"));
             Assert.AreEqual("application/json",mockResults.Headers["accept"]);
             Assert.IsTrue(mockResults.Headers.ContainsKey("Authorization"));
             Assert.IsTrue(mockResults.Headers["Authorization"].StartsWith("Basic "));
@@ -188,8 +189,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             Assert.AreEqual(HttpMethod.Get, mockResults.Method);
             Assert.AreEqual("/templeton/v1/jobs", mockResults.RequestUri.AbsolutePath);
             Assert.AreEqual("?user.name=" + encodedUserName + "&" + HadoopRemoteRestConstants.ShowAllFields, mockResults.RequestUri.Query);
-            Assert.AreEqual(2, mockResults.Headers.Count);
+            Assert.AreEqual(3, mockResults.Headers.Count);
             Assert.IsTrue(mockResults.Headers.ContainsKey("accept"));
+            Assert.IsTrue(mockResults.Headers.ContainsKey("useragent"));
             Assert.AreEqual("application/json", mockResults.Headers["accept"]);
             Assert.IsTrue(mockResults.Headers.ContainsKey("Authorization"));
             Assert.IsTrue(mockResults.Headers["Authorization"].StartsWith("Basic "));
@@ -217,8 +219,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             Assert.AreEqual(HttpMethod.Get, mockResults.Method);
             Assert.AreEqual("/templeton/v1/jobs/" + jobId, mockResults.RequestUri.AbsolutePath);
             Assert.AreEqual("?user.name=" + cred.UserName, mockResults.RequestUri.Query);
-            Assert.AreEqual(2, mockResults.Headers.Count);
+            Assert.AreEqual(3, mockResults.Headers.Count);
             Assert.IsTrue(mockResults.Headers.ContainsKey("accept"));
+            Assert.IsTrue(mockResults.Headers.ContainsKey("useragent"));
             Assert.AreEqual("application/json", mockResults.Headers["accept"]);
             Assert.IsTrue(mockResults.Headers.ContainsKey("Authorization"));
             Assert.IsTrue(mockResults.Headers["Authorization"].StartsWith("Basic "));
@@ -249,8 +252,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             Assert.AreEqual(HttpMethod.Get, mockResults.Method);
             Assert.AreEqual("/templeton/v1/jobs/" +jobId, mockResults.RequestUri.AbsolutePath);
             Assert.AreEqual("?user.name=" + encodedUserName, mockResults.RequestUri.Query);
-            Assert.AreEqual(2, mockResults.Headers.Count);
+            Assert.AreEqual(3, mockResults.Headers.Count);
             Assert.IsTrue(mockResults.Headers.ContainsKey("accept"));
+            Assert.IsTrue(mockResults.Headers.ContainsKey("useragent"));
             Assert.AreEqual("application/json", mockResults.Headers["accept"]);
             Assert.IsTrue(mockResults.Headers.ContainsKey("Authorization"));
             Assert.IsTrue(mockResults.Headers["Authorization"].StartsWith("Basic "));
@@ -280,8 +284,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             Assert.AreEqual(HttpMethod.Get, mockResults.Method);
             Assert.AreEqual("/templeton/v1/jobs/" + encodedJobId, mockResults.RequestUri.AbsolutePath);
             Assert.AreEqual("?user.name=" + cred.UserName, mockResults.RequestUri.Query);
-            Assert.AreEqual(2, mockResults.Headers.Count);
+            Assert.AreEqual(3, mockResults.Headers.Count);
             Assert.IsTrue(mockResults.Headers.ContainsKey("accept"));
+            Assert.IsTrue(mockResults.Headers.ContainsKey("useragent"));
             Assert.AreEqual("application/json", mockResults.Headers["accept"]);
             Assert.IsTrue(mockResults.Headers.ContainsKey("Authorization"));
             Assert.IsTrue(mockResults.Headers["Authorization"].StartsWith("Basic "));
@@ -309,8 +314,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             Assert.AreEqual(HttpMethod.Post, mockResults.Method);
             Assert.AreEqual("/templeton/v1/hive", mockResults.RequestUri.AbsolutePath);
             Assert.AreEqual("?user.name=" + cred.UserName , mockResults.RequestUri.Query);
-            Assert.AreEqual(2, mockResults.Headers.Count);
+            Assert.AreEqual(3, mockResults.Headers.Count);
             Assert.IsTrue(mockResults.Headers.ContainsKey("accept"));
+            Assert.IsTrue(mockResults.Headers.ContainsKey("useragent"));
             Assert.AreEqual("application/json", mockResults.Headers["accept"]);
             Assert.IsTrue(mockResults.Headers.ContainsKey("Authorization"));
             Assert.IsTrue(mockResults.Headers["Authorization"].StartsWith("Basic "));
@@ -342,7 +348,8 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             Assert.AreEqual(HttpMethod.Post, mockResults.Method);
             Assert.AreEqual("/templeton/v1/hive", mockResults.RequestUri.AbsolutePath);
             Assert.AreEqual("?user.name=" + encodedUserName, mockResults.RequestUri.Query);
-            Assert.AreEqual(2, mockResults.Headers.Count);
+            Assert.AreEqual(3, mockResults.Headers.Count);
+            Assert.IsTrue(mockResults.Headers.ContainsKey("useragent"));
             Assert.IsTrue(mockResults.Headers.ContainsKey("accept"));
             Assert.AreEqual("application/json", mockResults.Headers["accept"]);
             Assert.IsTrue(mockResults.Headers.ContainsKey("Authorization"));
@@ -372,8 +379,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             Assert.AreEqual(HttpMethod.Post, mockResults.Method);
             Assert.AreEqual("/templeton/v1/mapreduce/jar", mockResults.RequestUri.AbsolutePath);
             Assert.AreEqual("?user.name=" + cred.UserName, mockResults.RequestUri.Query);
-            Assert.AreEqual(2, mockResults.Headers.Count);
+            Assert.AreEqual(3, mockResults.Headers.Count);
             Assert.IsTrue(mockResults.Headers.ContainsKey("accept"));
+            Assert.IsTrue(mockResults.Headers.ContainsKey("useragent"));
             Assert.AreEqual("application/json", mockResults.Headers["accept"]);
             Assert.IsTrue(mockResults.Headers.ContainsKey("Authorization"));
             Assert.IsTrue(mockResults.Headers["Authorization"].StartsWith("Basic "));
@@ -405,8 +413,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             Assert.AreEqual(HttpMethod.Post, mockResults.Method);
             Assert.AreEqual("/templeton/v1/mapreduce/jar", mockResults.RequestUri.AbsolutePath);
             Assert.AreEqual("?user.name=" + encodedUserName, mockResults.RequestUri.Query);
-            Assert.AreEqual(2, mockResults.Headers.Count);
+            Assert.AreEqual(3, mockResults.Headers.Count);
             Assert.IsTrue(mockResults.Headers.ContainsKey("accept"));
+            Assert.IsTrue(mockResults.Headers.ContainsKey("useragent"));
             Assert.AreEqual("application/json", mockResults.Headers["accept"]);
             Assert.IsTrue(mockResults.Headers.ContainsKey("Authorization"));
             Assert.IsTrue(mockResults.Headers["Authorization"].StartsWith("Basic "));

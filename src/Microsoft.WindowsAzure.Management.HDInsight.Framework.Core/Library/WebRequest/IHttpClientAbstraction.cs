@@ -18,6 +18,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.Web
     using System.Collections.Generic;
     using System.Net.Http;
     using System.Threading.Tasks;
+    using Microsoft.WindowsAzure.Management.HDInsight.Logging;
 
     /// <summary>
     ///     Abstracts Http client requests.
@@ -65,5 +66,19 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.Web
         ///     A task representing the response (once it has completed).
         /// </returns>
         Task<IHttpResponseMessageAbstraction> SendAsync();
+
+        /// <summary>
+        /// Logs a message to the instance logger of this HttpClient.
+        /// </summary>
+        /// <param name="severity">
+        /// The Severity of the message to log.
+        /// </param>
+        /// <param name="verbosity">
+        /// The verbosity of the message to log.
+        /// </param>
+        /// <param name="message">
+        /// The message to log.
+        /// </param>
+        void Log(Severity severity, Verbosity verbosity, string message);
     }
 }

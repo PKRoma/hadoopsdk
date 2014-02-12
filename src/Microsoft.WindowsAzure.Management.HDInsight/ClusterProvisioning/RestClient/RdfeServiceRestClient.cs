@@ -27,6 +27,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestCl
     using Microsoft.Hadoop.Client.HadoopJobSubmissionRestCleint;
     using Microsoft.Hadoop.Client.WebHCatRest;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
     using Microsoft.WindowsAzure.Management.HDInsight;
 
@@ -41,33 +42,72 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestCl
             this.credentials = credentials;
         }
 
+        internal async Task<IHttpResponseMessageAbstraction> ProcessGetResourceProviderPropertiesRequest(IHttpClientAbstraction client)
+        {
+            Guid subscriptionId = this.credentials.SubscriptionId;
+            string relativeUri = string.Format(CultureInfo.InvariantCulture,
+                                                "{0}/resourceproviders/{1}/Properties?resourceType={2}",
+                                                subscriptionId,
+                                                this.credentials.DeploymentNamespace,
+                                                "containers");
+            client.RequestUri = new Uri(this.credentials.Endpoint, new Uri(relativeUri, UriKind.Relative));
+
+            client.Method = HttpMethod.Get;
+            client.RequestHeaders.Add(HDInsightRestConstants.XMsVersion);
+            client.RequestHeaders.Add(HDInsightRestConstants.Accept);
+
+            var httpResponse = await client.SendAsync();
+            return httpResponse;
+        }
+
         // Method = "GET", UriTemplate = "UriTemplate = "{subscriptionId}/resourceproviders/{resourceProviderNamespace}/Properties?resourceType={resourceType}"
         public async Task<IEnumerable<KeyValuePair<string, string>>> GetResourceProviderProperties()
         {
-            // Creates an HTTP client
-            using (var client = ServiceLocator.Instance.Locate<IHDInsightHttpClientAbstractionFactory>().Create(this.credentials, this.context))
+            int i = 0;
+            var start = DateTime.UtcNow;
+            var timingManager = ServiceLocator.Instance.Locate<IRetryTimingManager>();
+            var factory = ServiceLocator.Instance.Locate<IHDInsightHttpClientAbstractionFactory>();
+            var result = await factory.Retry(this.credentials,
+                                             this.context,
+                                             this.ProcessGetResourceProviderPropertiesRequest,
+                                             r => 
+                                             { 
+                                                 i++;
+                                                 return r.StatusCode != HttpStatusCode.Accepted && r.StatusCode != HttpStatusCode.OK;
+                                             },
+                                             timingManager.TimeOut,
+                                             timingManager.PollInterval);
+
+            if (result.StatusCode != HttpStatusCode.Accepted && result.StatusCode != HttpStatusCode.OK)
             {
-                Guid subscriptionId = this.credentials.SubscriptionId;
-                string cloudServiceName = this.credentials.DeploymentNamespace;
-                string relativeUri = string.Format(CultureInfo.InvariantCulture,
-                                                    "{0}/resourceproviders/{1}/Properties?resourceType={2}",
-                                                    subscriptionId,
-                                                    this.credentials.DeploymentNamespace,
-                                                    "containers");
-                client.RequestUri = new Uri(this.credentials.Endpoint, new Uri(relativeUri, UriKind.Relative));
-
-                client.Method = HttpMethod.Get;
-                client.RequestHeaders.Add(HDInsightRestConstants.XMsVersion);
-                client.RequestHeaders.Add(HDInsightRestConstants.Accept);
-
-                var httpResponse = await client.SendAsync();
-                if (httpResponse.StatusCode != HttpStatusCode.OK)
-                {
-                    throw new HttpLayerException(httpResponse.StatusCode, httpResponse.Content);
-                }
-
-                return this.ParseCapabilities(httpResponse.Content);
+                throw new HttpLayerException(result.StatusCode, result.Content, i, DateTime.UtcNow - start);
             }
+
+            return this.ParseCapabilities(result.Content);
+            // Creates an HTTP client
+            //using (var client = ServiceLocator.Instance.Locate<IHDInsightHttpClientAbstractionFactory>().Create(this.credentials, this.context))
+            //{
+            //    Guid subscriptionId = this.credentials.SubscriptionId;
+            //    string cloudServiceName = this.credentials.DeploymentNamespace;
+            //    string relativeUri = string.Format(CultureInfo.InvariantCulture,
+            //                                        "{0}/resourceproviders/{1}/Properties?resourceType={2}",
+            //                                        subscriptionId,
+            //                                        this.credentials.DeploymentNamespace,
+            //                                        "containers");
+            //    client.RequestUri = new Uri(this.credentials.Endpoint, new Uri(relativeUri, UriKind.Relative));
+
+            //    client.Method = HttpMethod.Get;
+            //    client.RequestHeaders.Add(HDInsightRestConstants.XMsVersion);
+            //    client.RequestHeaders.Add(HDInsightRestConstants.Accept);
+
+            //    var httpResponse = await client.SendAsync();
+            //    if (httpResponse.StatusCode != HttpStatusCode.OK)
+            //    {
+            //        throw new HttpLayerException(httpResponse.StatusCode, httpResponse.Content);
+            //    }
+
+            //    return this.ParseCapabilities(httpResponse.Content);
+            //}
         }
 
         public IEnumerable<KeyValuePair<string, string>> ParseCapabilities(string payload)

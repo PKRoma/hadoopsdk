@@ -27,7 +27,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
     using Microsoft.Hadoop.Client.WebHCatRest;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestClient;
-    
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
     using Microsoft.WindowsAzure.Management.HDInsight.InversionOfControl;
     using System.Net;
@@ -145,7 +145,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         {
             IHDInsightSubscriptionCredentials credentials = IntegrationTestBase.GetValidCredentials();
             var client = new HDInsightManagementRestClient(credentials, GetAbstractionContext());
-            var dnsName = base.GetRandomClusterName();
+            var dnsName = GetRandomClusterName();
             var location = "East US 2";
             var subscriptionId = credentials.SubscriptionId;
 
@@ -212,7 +212,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             IHDInsightSubscriptionCredentials credentials = new AlternativeEnvironmentIHDInsightSubscriptionCertificateCredentialsFactory().Create(tempCredentials);
             
             var client = new HDInsightManagementRestClient(credentials, GetAbstractionContext());
-            var dnsName = base.GetRandomClusterName();
+            var dnsName = GetRandomClusterName();
             var location = "East US";
             var subscriptionId = credentials.SubscriptionId;
 

@@ -12,12 +12,10 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
-namespace Microsoft.WindowsAzure.Management.HDInsight
+namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core
 {
     using System;
     using System.Threading;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Logging;
     using Microsoft.WindowsAzure.Management.HDInsight.Logging;

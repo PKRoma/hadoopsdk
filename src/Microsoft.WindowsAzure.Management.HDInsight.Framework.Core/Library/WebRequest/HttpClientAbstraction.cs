@@ -33,8 +33,11 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.Web
 
     internal class HttpClientAbstraction : DisposableObject, IHttpClientAbstraction
     {
-        private const string LogFormat =
+        private const string ResponseLogFormat =
             " HTTP Request:\r\n          Uri: {0}\r\n       Method: {1}\r\n Content Type: {2}\r\n      Headers: {3}\r\n      Content:\r\n{4}\r\n\r\nHTTP Response:\r\n  Status Code: {5}\r\n      Headers: {6}\r\n      Content:\r\n{7}\r\n\r\n";
+
+        private const string ExceptionLogFormat =
+            " HTTP Request:\r\n          Uri: {0}\r\n       Method: {1}\r\n Content Type: {2}\r\n      Headers: {3}\r\n      Content:\r\n{4}\r\n\r\n    Exception:\r\n{5}\r\n\r\n";
 
         private const string BearerAuthenticationType = "Bearer";
         private const string AuthorizationHeader = "Authorization";
@@ -103,38 +106,31 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.Web
                 this.LogRequestResponseDetails(retval);
                 return retval;
             }
-            catch (TaskCanceledException tcex)
+            catch (Exception ex)
             {
-                if (this.cancellationToken.IsCancellationRequested)
+                this.LogRequestException(ex);
+                var tcex = ex as TaskCanceledException;
+                if (tcex.IsNotNull())
                 {
-                    throw new OperationCanceledException("The operation was canceled at the users request.", tcex, this.cancellationToken);
-                }
-                else if (DateTime.Now - start > this.Timeout)
-                {
-                    throw new TimeoutException("The operation timed out.", tcex);
+                    if (this.cancellationToken.IsCancellationRequested)
+                    {
+                        throw new OperationCanceledException("The operation was canceled at the users request.", tcex, this.cancellationToken);
+                    }
+                    else if (DateTime.Now - start > this.Timeout)
+                    {
+                        throw new TimeoutException(string.Format(CultureInfo.InvariantCulture, "The requested task failed to complete in the allotted time ({0}).", this.Timeout));
+                    }
                 }
                 throw;
             }
         }
 
-        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "Microsoft.WindowsAzure.Management.HDInsight.Logging.ILogger.LogMessage(System.String,Microsoft.WindowsAzure.Management.HDInsight.Logging.Severity,Microsoft.WindowsAzure.Management.HDInsight.Logging.Verbosity)",
-            Justification = "Strictly a logging format string.")]
+        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest.HttpClientAbstraction.Log(Microsoft.WindowsAzure.Management.HDInsight.Logging.Severity,Microsoft.WindowsAzure.Management.HDInsight.Logging.Verbosity,System.String)",
+            Justification = "Strictly log formatting string.")]
         private void LogRequestResponseDetails(HttpResponseMessageAbstraction response)
         {
-            bool isFirst = true;
-            StringBuilder requestHeaders = new StringBuilder();
-
-            foreach (var header in this.RequestHeaders)
-            {
-                if (!isFirst)
-                {
-                    requestHeaders.Append(string.Empty.PadLeft(15));
-                }
-                requestHeaders.Append(header.Key);
-                requestHeaders.Append(" = ");
-                requestHeaders.AppendLine(header.Value);
-                isFirst = false;
-            }
+            bool isFirst;
+            var requestHeaders = this.GetFormatedRequestHeaders();
 
             isFirst = true;
             StringBuilder responseHeaders = new StringBuilder();
@@ -167,20 +163,19 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.Web
             }
 
             var formattedRequestContent = this.Content;
-            var formattedResponseContent = response.Content;
-
             if (this.ContentType == HttpConstants.ApplicationXml)
             {
                 TryPrettyPrintXml(formattedRequestContent, out formattedRequestContent);
             }
 
+            var formattedResponseContent = response.Content;
             if (responseContentType == HttpConstants.ApplicationXml)
             {
                 TryPrettyPrintXml(formattedResponseContent, out formattedResponseContent);
             }
 
             string message = string.Format(CultureInfo.InvariantCulture,
-                                           LogFormat,
+                                           ResponseLogFormat,
                                            this.RequestUri,
                                            this.Method,
                                            this.ContentType,
@@ -190,9 +185,57 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.Web
                                            responseHeaders,
                                            formattedResponseContent);
 
+            this.Log(Severity.Informational, Verbosity.Detailed, message);
+        }
+
+        private StringBuilder GetFormatedRequestHeaders()
+        {
+            bool isFirst = true;
+            StringBuilder requestHeaders = new StringBuilder();
+
+            foreach (var header in this.RequestHeaders)
+            {
+                if (!isFirst)
+                {
+                    requestHeaders.Append(string.Empty.PadLeft(15));
+                }
+                requestHeaders.Append(header.Key);
+                requestHeaders.Append(" = ");
+                requestHeaders.AppendLine(header.Value);
+                isFirst = false;
+            }
+            return requestHeaders;
+        }
+
+        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest.HttpClientAbstraction.Log(Microsoft.WindowsAzure.Management.HDInsight.Logging.Severity,Microsoft.WindowsAzure.Management.HDInsight.Logging.Verbosity,System.String)",
+            Justification = "Strictly log formatting string.")]
+        private void LogRequestException(Exception ex)
+        {
+            var requestHeaders = this.GetFormatedRequestHeaders();
+
+            var formattedRequestContent = this.Content;
+            if (this.ContentType == HttpConstants.ApplicationXml)
+            {
+                TryPrettyPrintXml(formattedRequestContent, out formattedRequestContent);
+            }
+
+            string message = string.Format(CultureInfo.InvariantCulture,
+                                           ExceptionLogFormat,
+                                           this.RequestUri,
+                                           this.Method,
+                                           this.ContentType,
+                                           requestHeaders,
+                                           formattedRequestContent,
+                                           ex);
+
+            this.Log(Severity.Error, Verbosity.Normal, message);
+        }
+
+        public void Log(Severity severity, Verbosity verbosity, string message)
+        {
             if (this.instanceLogger.IsNotNull())
             {
-                this.instanceLogger.LogMessage(message, Severity.Informational, Verbosity.Detailed);
+                this.instanceLogger.LogMessage(message, severity, verbosity);
             }
         }
 

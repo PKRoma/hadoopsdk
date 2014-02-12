@@ -40,5 +40,13 @@ namespace Microsoft.Hadoop.Client.WebHCatResources
         internal const string Mapper = "mapper";
         internal const string Reducer = "reducer";
         internal const string Callback = "callback";
+
+        internal static string[] GetRestrictedCharactersInQuery()
+        {
+            return new string[]
+            {
+                "%"
+            };
+        }
     }
 }

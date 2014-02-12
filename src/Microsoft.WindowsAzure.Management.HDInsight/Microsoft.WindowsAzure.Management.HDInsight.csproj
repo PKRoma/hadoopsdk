@@ -51,6 +51,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ClusterProvisioning\RestClient\IRetryTimingManager.cs" />
+    <Compile Include="ClusterProvisioning\RestClient\RetryTimingManager.cs" />
+    <Compile Include="JobSubmission\JobSubmissionCache.cs" />
     <Compile Include="ClusterProvisioning\AsvValidator\AsvValidatorClientFactory.cs" />
     <Compile Include="ClusterProvisioning\AsvValidator\IAsvValidatorClientFactory.cs" />
     <Compile Include="ClusterProvisioning\AsvValidator\IAsvValidatorClient.cs" />
@@ -71,6 +74,7 @@
     <Compile Include="ClusterProvisioning\Data\MapReduceConfiguration.cs" />
     <Compile Include="ClusterProvisioning\PocoClient\IUserChangeRequestManager.cs" />
     <Compile Include="ClusterProvisioning\PocoClient\UserChangeRequestManager.cs" />
+    <Compile Include="JobSubmission\IJobSubmissionCache.cs" />
     <Compile Include="JobSubmissionAccessTokenCredential.cs" />
     <Compile Include="HDInsightHttpClientAbstractionFactory.cs" />
     <Compile Include="IHDInsightHttpClientAbstractionFactory.cs" />
@@ -143,6 +147,7 @@
     <Compile Include="JobSubmission\HDInsightHadoopClient.cs" />
     <Compile Include="JobSubmission\HDInsightHadoopClientFactory.cs" />
     <Compile Include="JobSubmission\IHDInsightHadoopClientFactory.cs" />
+    <Compile Include="JobSubmission\JobSubmissionClusterDetails.cs" />
     <Compile Include="JobSubmission\PocoClient\HDInsightJobSubmissionPocoClient.cs" />
     <Compile Include="JobSubmission\PocoClient\HDInsightJobSubmissionPocoClientFactory.cs" />
     <None Include="JobSubmission\PocoClient\RDFE\HDInsightRdfeJobSubmissionPocoClient.cs" />

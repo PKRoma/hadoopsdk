@@ -22,7 +22,7 @@ namespace Microsoft.Hadoop.Client
     /// <summary>
     /// Provides creation details for a new Hive jobDetails.
     /// </summary>
-    public sealed class HiveJobCreateParameters : JobCreateParameters
+    public sealed class HiveJobCreateParameters : QueryJobCreateParameters
     {
         /// <summary>
         /// Initializes a new instance of the HiveJobCreateParameters class.
@@ -54,9 +54,14 @@ namespace Microsoft.Hadoop.Client
         /// </summary>
         public ICollection<string> Arguments { get; private set; }
 
-        /// <summary>
-        /// Gets or sets the query file to use for a hive jobDetails.
-        /// </summary>
-        public string File { get; set; }
+        internal override string GetQuery()
+        {
+            return this.Query;
+        }
+
+        internal override void SetQuery(string queryText)
+        {
+            this.Query = queryText;
+        }
     }
 }

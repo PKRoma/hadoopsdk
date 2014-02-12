@@ -52,5 +52,10 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestCl
         /// The Accept Http Header.
         /// </summary>
         public static readonly KeyValuePair<string, string> Accept = new KeyValuePair<string, string>("accept", HttpConstants.ApplicationXml);
+
+        /// <summary>
+        /// The UserAgent Http Header.
+        /// </summary>
+        public static readonly KeyValuePair<string, string> UserAgent = new KeyValuePair<string, string>("useragent", "HDInsight .NET SDK");
     }
 }

@@ -16,7 +16,9 @@ namespace Microsoft.Hadoop.Client
 {
     using System;
     using System.Diagnostics.CodeAnalysis;
+    using System.Globalization;
     using System.Threading;
+    using Microsoft.Hadoop.Client.WebHCatResources;
     using Microsoft.WindowsAzure.Management.HDInsight;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
@@ -125,6 +127,64 @@ namespace Microsoft.Hadoop.Client
         private void CancellationCallback()
         {
             this.SetCancellationSource(Help.SafeCreate<CancellationTokenSource>());
+        }
+
+        /// <summary>
+        /// Prepares a query job for execution.
+        /// </summary>
+        /// <param name="queryJob">The Query job to execute.</param>
+        /// <typeparam name="TJobType">The Job type.</typeparam>
+        /// <returns>Query job which is prepared for execution.</returns>
+        [SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "RunAsFileJob", Justification = "RunAsFileJob is a property on this instance.")]
+        protected virtual TJobType PrepareQueryJob<TJobType>(TJobType queryJob) where TJobType : QueryJobCreateParameters
+        {
+            queryJob.ArgumentNotNull("queryJob");
+            if (queryJob.HasQuery())
+            {
+                string restrictedCharacter;
+                if (queryJob.RunAsFileJob)
+                {
+                    queryJob = this.UploadQueryFile(queryJob, queryJob.GetQuery());
+                }
+                else if (this.TryGetRestrictedCharactersInQuery(queryJob.GetQuery(), out restrictedCharacter))
+                {
+                    throw new InvalidOperationException(
+                        string.Format(
+                            CultureInfo.InvariantCulture,
+                            "Query contains restricted character :'{0}'.{1}Please submit job as a File job or set RunAsFileJob to true.",
+                            restrictedCharacter,
+                            Environment.NewLine));
+                }
+            }
+
+            return queryJob;
+        }
+
+        /// <summary>
+        /// Uploads the query text for query job into a file in storate.
+        /// </summary>
+        /// <typeparam name="TJobType">The Job type.</typeparam>
+        /// <param name="queryJob">The query job.</param>
+        /// <param name="queryText">The query text.</param>
+        /// <returns>Query job which is prepared for execution.</returns>
+        internal virtual TJobType UploadQueryFile<TJobType>(TJobType queryJob, string queryText) where TJobType : QueryJobCreateParameters
+        {
+            throw new NotImplementedException();
+        }
+
+        internal bool TryGetRestrictedCharactersInQuery(string queryText, out string restrictedCharacter)
+        {
+            restrictedCharacter = string.Empty;
+            foreach (var knownRestrictedCharacter in WebHCatConstants.GetRestrictedCharactersInQuery())
+            {
+                if (queryText.Contains(knownRestrictedCharacter))
+                {
+                    restrictedCharacter = knownRestrictedCharacter;
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

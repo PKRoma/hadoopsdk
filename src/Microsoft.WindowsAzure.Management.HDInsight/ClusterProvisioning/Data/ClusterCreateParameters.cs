@@ -14,6 +14,7 @@
 // permissions and limitations under the License.
 namespace Microsoft.WindowsAzure.Management.HDInsight
 {
+    using System;
     using System.Collections.ObjectModel;
 
     /// <summary>
@@ -73,6 +74,11 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
         public string Version { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether Head Node is highly available.
+        /// </summary>
+        public bool EnsureHighAvailability { get; set; }
+
+        /// <summary>
         /// Gets additional Azure Storage Account that you want to enable access to.
         /// </summary>
         public Collection<WabStorageAccountConfiguration> AdditionalStorageAccounts { get; private set; }
@@ -113,16 +119,28 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
         public OozieConfiguration OozieConfiguration { get; private set; }
 
         /// <summary>
+        /// Gets the Yarn service configuration of this HDInsight cluster.
+        /// </summary>
+        public ConfigValuesCollection YarnConfiguration { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the timeout period for the SDK to wait when creating a cluster.
+        /// </summary>
+        public TimeSpan CreateTimeout { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the ClusterCreateParameters class.
         /// </summary>
         public ClusterCreateParameters()
         {
+            this.CreateTimeout = TimeSpan.FromMinutes(45);
             this.AdditionalStorageAccounts = new Collection<WabStorageAccountConfiguration>();
             this.CoreConfiguration = new ConfigValuesCollection();
             this.HiveConfiguration = new HiveConfiguration();
             this.MapReduceConfiguration = new MapReduceConfiguration();
             this.OozieConfiguration = new OozieConfiguration();
             this.HdfsConfiguration = new ConfigValuesCollection();
+            this.YarnConfiguration = new ConfigValuesCollection();
         }
     }
 }

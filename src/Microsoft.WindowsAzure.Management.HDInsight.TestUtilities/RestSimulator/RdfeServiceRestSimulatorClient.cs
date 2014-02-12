@@ -14,6 +14,7 @@
 // permissions and limitations under the License.
 namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulator
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Net;
@@ -22,6 +23,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
     using Microsoft.Hadoop.Client;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestClient;
     using Microsoft.WindowsAzure.Management.HDInsight;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest;
 
     internal class RdfeServiceRestSimulatorClient : IRdfeServiceRestClient
     {
@@ -39,7 +41,12 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
 
             this.context = context;
             this.credentials = credentials;
+            this.PollInterval = TimeSpan.FromMilliseconds(10);
+            this.TimeOut = TimeSpan.FromMilliseconds(100);
         }
+
+        public TimeSpan PollInterval { get; set; }
+        public TimeSpan TimeOut { get; set; }
 
         public Task<IEnumerable<KeyValuePair<string, string>>> GetResourceProviderProperties()
         {

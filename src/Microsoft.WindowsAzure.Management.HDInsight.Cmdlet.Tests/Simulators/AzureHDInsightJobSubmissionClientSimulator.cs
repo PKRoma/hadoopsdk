@@ -28,6 +28,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Tests.Simulators
     using Microsoft.Hadoop.Client;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.GetAzureHDInsightClusters.Extensions;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Tests.Utilities;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest;
     using Microsoft.WindowsAzure.Management.HDInsight.Logging;
 
     internal class AzureHDInsightJobSubmissionClientSimulator : IJobSubmissionClient

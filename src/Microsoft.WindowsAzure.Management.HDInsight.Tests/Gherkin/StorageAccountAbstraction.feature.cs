@@ -99,10 +99,10 @@ this.ScenarioSetup(scenarioInfo);
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("VariantName", "Variant 0")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Uri", "localhost")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Version", "unknown")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "https://localhost:50111")]
+        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "http://localhost:50111")]
         public virtual void ICanResolveVariousUrisCorrectly_Variant0()
         {
-            this.ICanResolveVariousUrisCorrectly("localhost", "unknown", "https://localhost:50111", ((string[])(null)));
+            this.ICanResolveVariousUrisCorrectly("localhost", "unknown", "http://localhost:50111", ((string[])(null)));
         }
         
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute()]
@@ -112,10 +112,10 @@ this.ScenarioSetup(scenarioInfo);
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("VariantName", "Variant 1")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Uri", "localhost:123")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Version", "unknown")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "https://localhost:123")]
+        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "http://localhost:123")]
         public virtual void ICanResolveVariousUrisCorrectly_Variant1()
         {
-            this.ICanResolveVariousUrisCorrectly("localhost:123", "unknown", "https://localhost:123", ((string[])(null)));
+            this.ICanResolveVariousUrisCorrectly("localhost:123", "unknown", "http://localhost:123", ((string[])(null)));
         }
         
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute()]
@@ -125,10 +125,10 @@ this.ScenarioSetup(scenarioInfo);
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("VariantName", "Variant 2")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Uri", "localhost:443")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Version", "unknown")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "https://localhost:443")]
+        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "http://localhost:443")]
         public virtual void ICanResolveVariousUrisCorrectly_Variant2()
         {
-            this.ICanResolveVariousUrisCorrectly("localhost:443", "unknown", "https://localhost:443", ((string[])(null)));
+            this.ICanResolveVariousUrisCorrectly("localhost:443", "unknown", "http://localhost:443", ((string[])(null)));
         }
         
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute()]
@@ -138,10 +138,10 @@ this.ScenarioSetup(scenarioInfo);
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("VariantName", "Variant 3")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Uri", "localhost:563")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Version", "unknown")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "https://localhost:563")]
+        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "http://localhost:563")]
         public virtual void ICanResolveVariousUrisCorrectly_Variant3()
         {
-            this.ICanResolveVariousUrisCorrectly("localhost:563", "unknown", "https://localhost:563", ((string[])(null)));
+            this.ICanResolveVariousUrisCorrectly("localhost:563", "unknown", "http://localhost:563", ((string[])(null)));
         }
         
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute()]
@@ -151,10 +151,10 @@ this.ScenarioSetup(scenarioInfo);
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("VariantName", "Variant 4")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Uri", "localhost:50111")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Version", "unknown")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "https://localhost:50111")]
+        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "http://localhost:50111")]
         public virtual void ICanResolveVariousUrisCorrectly_Variant4()
         {
-            this.ICanResolveVariousUrisCorrectly("localhost:50111", "unknown", "https://localhost:50111", ((string[])(null)));
+            this.ICanResolveVariousUrisCorrectly("localhost:50111", "unknown", "http://localhost:50111", ((string[])(null)));
         }
         
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute()]
@@ -229,10 +229,10 @@ this.ScenarioSetup(scenarioInfo);
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("VariantName", "Variant 10")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Uri", "http://localhost")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Version", "unknown")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "https://localhost:50111")]
+        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "http://localhost:50111")]
         public virtual void ICanResolveVariousUrisCorrectly_Variant10()
         {
-            this.ICanResolveVariousUrisCorrectly("http://localhost", "unknown", "https://localhost:50111", ((string[])(null)));
+            this.ICanResolveVariousUrisCorrectly("http://localhost", "unknown", "http://localhost:50111", ((string[])(null)));
         }
         
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute()]
@@ -255,10 +255,10 @@ this.ScenarioSetup(scenarioInfo);
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("VariantName", "Variant 12")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Uri", "http://localhost:50111")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Version", "unknown")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "https://localhost:50111")]
+        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "http://localhost:50111")]
         public virtual void ICanResolveVariousUrisCorrectly_Variant12()
         {
-            this.ICanResolveVariousUrisCorrectly("http://localhost:50111", "unknown", "https://localhost:50111", ((string[])(null)));
+            this.ICanResolveVariousUrisCorrectly("http://localhost:50111", "unknown", "http://localhost:50111", ((string[])(null)));
         }
         
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute()]
@@ -281,10 +281,10 @@ this.ScenarioSetup(scenarioInfo);
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("VariantName", "Variant 14")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Uri", "http://localhost:123")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Version", "unknown")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "https://localhost:123")]
+        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "http://localhost:123")]
         public virtual void ICanResolveVariousUrisCorrectly_Variant14()
         {
-            this.ICanResolveVariousUrisCorrectly("http://localhost:123", "unknown", "https://localhost:123", ((string[])(null)));
+            this.ICanResolveVariousUrisCorrectly("http://localhost:123", "unknown", "http://localhost:123", ((string[])(null)));
         }
         
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute()]
@@ -307,10 +307,10 @@ this.ScenarioSetup(scenarioInfo);
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("VariantName", "Variant 16")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Uri", "http://localhost:443")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Version", "unknown")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "https://localhost:443")]
+        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "http://localhost:443")]
         public virtual void ICanResolveVariousUrisCorrectly_Variant16()
         {
-            this.ICanResolveVariousUrisCorrectly("http://localhost:443", "unknown", "https://localhost:443", ((string[])(null)));
+            this.ICanResolveVariousUrisCorrectly("http://localhost:443", "unknown", "http://localhost:443", ((string[])(null)));
         }
         
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute()]
@@ -333,10 +333,10 @@ this.ScenarioSetup(scenarioInfo);
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("VariantName", "Variant 18")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Uri", "http://localhost:563")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Version", "unknown")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "https://localhost:563")]
+        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "http://localhost:563")]
         public virtual void ICanResolveVariousUrisCorrectly_Variant18()
         {
-            this.ICanResolveVariousUrisCorrectly("http://localhost:563", "unknown", "https://localhost:563", ((string[])(null)));
+            this.ICanResolveVariousUrisCorrectly("http://localhost:563", "unknown", "http://localhost:563", ((string[])(null)));
         }
         
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute()]
@@ -749,10 +749,10 @@ this.ScenarioSetup(scenarioInfo);
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("VariantName", "Variant 50")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Uri", "localhost")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Version", "1.6")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "https://localhost:50111")]
+        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "http://localhost:50111")]
         public virtual void ICanResolveVariousUrisCorrectly_Variant50()
         {
-            this.ICanResolveVariousUrisCorrectly("localhost", "1.6", "https://localhost:50111", ((string[])(null)));
+            this.ICanResolveVariousUrisCorrectly("localhost", "1.6", "http://localhost:50111", ((string[])(null)));
         }
         
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute()]
@@ -762,10 +762,10 @@ this.ScenarioSetup(scenarioInfo);
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("VariantName", "Variant 51")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Uri", "localhost:123")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Version", "1.6")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "https://localhost:123")]
+        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "http://localhost:123")]
         public virtual void ICanResolveVariousUrisCorrectly_Variant51()
         {
-            this.ICanResolveVariousUrisCorrectly("localhost:123", "1.6", "https://localhost:123", ((string[])(null)));
+            this.ICanResolveVariousUrisCorrectly("localhost:123", "1.6", "http://localhost:123", ((string[])(null)));
         }
         
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute()]
@@ -775,10 +775,10 @@ this.ScenarioSetup(scenarioInfo);
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("VariantName", "Variant 52")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Uri", "localhost:443")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Version", "1.6")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "https://localhost:443")]
+        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "http://localhost:443")]
         public virtual void ICanResolveVariousUrisCorrectly_Variant52()
         {
-            this.ICanResolveVariousUrisCorrectly("localhost:443", "1.6", "https://localhost:443", ((string[])(null)));
+            this.ICanResolveVariousUrisCorrectly("localhost:443", "1.6", "http://localhost:443", ((string[])(null)));
         }
         
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute()]
@@ -788,10 +788,10 @@ this.ScenarioSetup(scenarioInfo);
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("VariantName", "Variant 53")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Uri", "localhost:563")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Version", "1.6")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "https://localhost:563")]
+        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "http://localhost:563")]
         public virtual void ICanResolveVariousUrisCorrectly_Variant53()
         {
-            this.ICanResolveVariousUrisCorrectly("localhost:563", "1.6", "https://localhost:563", ((string[])(null)));
+            this.ICanResolveVariousUrisCorrectly("localhost:563", "1.6", "http://localhost:563", ((string[])(null)));
         }
         
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute()]
@@ -801,10 +801,10 @@ this.ScenarioSetup(scenarioInfo);
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("VariantName", "Variant 54")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Uri", "localhost:50111")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Version", "1.6")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "https://localhost:50111")]
+        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "http://localhost:50111")]
         public virtual void ICanResolveVariousUrisCorrectly_Variant54()
         {
-            this.ICanResolveVariousUrisCorrectly("localhost:50111", "1.6", "https://localhost:50111", ((string[])(null)));
+            this.ICanResolveVariousUrisCorrectly("localhost:50111", "1.6", "http://localhost:50111", ((string[])(null)));
         }
         
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute()]
@@ -879,10 +879,10 @@ this.ScenarioSetup(scenarioInfo);
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("VariantName", "Variant 60")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Uri", "http://localhost")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Version", "1.6")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "https://localhost:50111")]
+        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "http://localhost:50111")]
         public virtual void ICanResolveVariousUrisCorrectly_Variant60()
         {
-            this.ICanResolveVariousUrisCorrectly("http://localhost", "1.6", "https://localhost:50111", ((string[])(null)));
+            this.ICanResolveVariousUrisCorrectly("http://localhost", "1.6", "http://localhost:50111", ((string[])(null)));
         }
         
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute()]
@@ -905,10 +905,10 @@ this.ScenarioSetup(scenarioInfo);
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("VariantName", "Variant 62")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Uri", "http://localhost:50111")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Version", "1.6")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "https://localhost:50111")]
+        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "http://localhost:50111")]
         public virtual void ICanResolveVariousUrisCorrectly_Variant62()
         {
-            this.ICanResolveVariousUrisCorrectly("http://localhost:50111", "1.6", "https://localhost:50111", ((string[])(null)));
+            this.ICanResolveVariousUrisCorrectly("http://localhost:50111", "1.6", "http://localhost:50111", ((string[])(null)));
         }
         
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute()]
@@ -931,10 +931,10 @@ this.ScenarioSetup(scenarioInfo);
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("VariantName", "Variant 64")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Uri", "http://localhost:123")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Version", "1.6")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "https://localhost:123")]
+        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "http://localhost:123")]
         public virtual void ICanResolveVariousUrisCorrectly_Variant64()
         {
-            this.ICanResolveVariousUrisCorrectly("http://localhost:123", "1.6", "https://localhost:123", ((string[])(null)));
+            this.ICanResolveVariousUrisCorrectly("http://localhost:123", "1.6", "http://localhost:123", ((string[])(null)));
         }
         
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute()]
@@ -957,10 +957,10 @@ this.ScenarioSetup(scenarioInfo);
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("VariantName", "Variant 66")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Uri", "http://localhost:443")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Version", "1.6")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "https://localhost:443")]
+        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "http://localhost:443")]
         public virtual void ICanResolveVariousUrisCorrectly_Variant66()
         {
-            this.ICanResolveVariousUrisCorrectly("http://localhost:443", "1.6", "https://localhost:443", ((string[])(null)));
+            this.ICanResolveVariousUrisCorrectly("http://localhost:443", "1.6", "http://localhost:443", ((string[])(null)));
         }
         
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute()]
@@ -983,10 +983,10 @@ this.ScenarioSetup(scenarioInfo);
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("VariantName", "Variant 68")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Uri", "http://localhost:563")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Version", "1.6")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "https://localhost:563")]
+        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "http://localhost:563")]
         public virtual void ICanResolveVariousUrisCorrectly_Variant68()
         {
-            this.ICanResolveVariousUrisCorrectly("http://localhost:563", "1.6", "https://localhost:563", ((string[])(null)));
+            this.ICanResolveVariousUrisCorrectly("http://localhost:563", "1.6", "http://localhost:563", ((string[])(null)));
         }
         
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute()]
@@ -1399,10 +1399,10 @@ this.ScenarioSetup(scenarioInfo);
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("VariantName", "Variant 100")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Uri", "localhost")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Version", "2.1")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "https://localhost:50111")]
+        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "http://localhost:50111")]
         public virtual void ICanResolveVariousUrisCorrectly_Variant100()
         {
-            this.ICanResolveVariousUrisCorrectly("localhost", "2.1", "https://localhost:50111", ((string[])(null)));
+            this.ICanResolveVariousUrisCorrectly("localhost", "2.1", "http://localhost:50111", ((string[])(null)));
         }
         
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute()]
@@ -1412,10 +1412,10 @@ this.ScenarioSetup(scenarioInfo);
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("VariantName", "Variant 101")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Uri", "localhost:123")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Version", "2.1")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "https://localhost:123")]
+        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "http://localhost:123")]
         public virtual void ICanResolveVariousUrisCorrectly_Variant101()
         {
-            this.ICanResolveVariousUrisCorrectly("localhost:123", "2.1", "https://localhost:123", ((string[])(null)));
+            this.ICanResolveVariousUrisCorrectly("localhost:123", "2.1", "http://localhost:123", ((string[])(null)));
         }
         
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute()]
@@ -1425,10 +1425,10 @@ this.ScenarioSetup(scenarioInfo);
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("VariantName", "Variant 102")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Uri", "localhost:443")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Version", "2.1")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "https://localhost:443")]
+        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "http://localhost:443")]
         public virtual void ICanResolveVariousUrisCorrectly_Variant102()
         {
-            this.ICanResolveVariousUrisCorrectly("localhost:443", "2.1", "https://localhost:443", ((string[])(null)));
+            this.ICanResolveVariousUrisCorrectly("localhost:443", "2.1", "http://localhost:443", ((string[])(null)));
         }
         
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute()]
@@ -1438,10 +1438,10 @@ this.ScenarioSetup(scenarioInfo);
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("VariantName", "Variant 103")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Uri", "localhost:563")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Version", "2.1")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "https://localhost:563")]
+        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "http://localhost:563")]
         public virtual void ICanResolveVariousUrisCorrectly_Variant103()
         {
-            this.ICanResolveVariousUrisCorrectly("localhost:563", "2.1", "https://localhost:563", ((string[])(null)));
+            this.ICanResolveVariousUrisCorrectly("localhost:563", "2.1", "http://localhost:563", ((string[])(null)));
         }
         
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute()]
@@ -1451,10 +1451,10 @@ this.ScenarioSetup(scenarioInfo);
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("VariantName", "Variant 104")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Uri", "localhost:50111")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Version", "2.1")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "https://localhost:50111")]
+        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "http://localhost:50111")]
         public virtual void ICanResolveVariousUrisCorrectly_Variant104()
         {
-            this.ICanResolveVariousUrisCorrectly("localhost:50111", "2.1", "https://localhost:50111", ((string[])(null)));
+            this.ICanResolveVariousUrisCorrectly("localhost:50111", "2.1", "http://localhost:50111", ((string[])(null)));
         }
         
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute()]
@@ -1529,10 +1529,10 @@ this.ScenarioSetup(scenarioInfo);
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("VariantName", "Variant 110")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Uri", "http://localhost")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Version", "2.1")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "https://localhost:50111")]
+        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "http://localhost:50111")]
         public virtual void ICanResolveVariousUrisCorrectly_Variant110()
         {
-            this.ICanResolveVariousUrisCorrectly("http://localhost", "2.1", "https://localhost:50111", ((string[])(null)));
+            this.ICanResolveVariousUrisCorrectly("http://localhost", "2.1", "http://localhost:50111", ((string[])(null)));
         }
         
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute()]
@@ -1555,10 +1555,10 @@ this.ScenarioSetup(scenarioInfo);
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("VariantName", "Variant 112")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Uri", "http://localhost:50111")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Version", "2.1")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "https://localhost:50111")]
+        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "http://localhost:50111")]
         public virtual void ICanResolveVariousUrisCorrectly_Variant112()
         {
-            this.ICanResolveVariousUrisCorrectly("http://localhost:50111", "2.1", "https://localhost:50111", ((string[])(null)));
+            this.ICanResolveVariousUrisCorrectly("http://localhost:50111", "2.1", "http://localhost:50111", ((string[])(null)));
         }
         
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute()]
@@ -1581,10 +1581,10 @@ this.ScenarioSetup(scenarioInfo);
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("VariantName", "Variant 114")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Uri", "http://localhost:123")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Version", "2.1")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "https://localhost:123")]
+        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "http://localhost:123")]
         public virtual void ICanResolveVariousUrisCorrectly_Variant114()
         {
-            this.ICanResolveVariousUrisCorrectly("http://localhost:123", "2.1", "https://localhost:123", ((string[])(null)));
+            this.ICanResolveVariousUrisCorrectly("http://localhost:123", "2.1", "http://localhost:123", ((string[])(null)));
         }
         
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute()]
@@ -1607,10 +1607,10 @@ this.ScenarioSetup(scenarioInfo);
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("VariantName", "Variant 116")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Uri", "http://localhost:443")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Version", "2.1")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "https://localhost:443")]
+        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "http://localhost:443")]
         public virtual void ICanResolveVariousUrisCorrectly_Variant116()
         {
-            this.ICanResolveVariousUrisCorrectly("http://localhost:443", "2.1", "https://localhost:443", ((string[])(null)));
+            this.ICanResolveVariousUrisCorrectly("http://localhost:443", "2.1", "http://localhost:443", ((string[])(null)));
         }
         
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute()]
@@ -1633,10 +1633,10 @@ this.ScenarioSetup(scenarioInfo);
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("VariantName", "Variant 118")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Uri", "http://localhost:563")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Version", "2.1")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "https://localhost:563")]
+        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "http://localhost:563")]
         public virtual void ICanResolveVariousUrisCorrectly_Variant118()
         {
-            this.ICanResolveVariousUrisCorrectly("http://localhost:563", "2.1", "https://localhost:563", ((string[])(null)));
+            this.ICanResolveVariousUrisCorrectly("http://localhost:563", "2.1", "http://localhost:563", ((string[])(null)));
         }
         
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute()]
@@ -2049,10 +2049,10 @@ this.ScenarioSetup(scenarioInfo);
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("VariantName", "Variant 150")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Uri", "localhost")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Version", "2.0")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "https://localhost:50111")]
+        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "http://localhost:50111")]
         public virtual void ICanResolveVariousUrisCorrectly_Variant150()
         {
-            this.ICanResolveVariousUrisCorrectly("localhost", "2.0", "https://localhost:50111", ((string[])(null)));
+            this.ICanResolveVariousUrisCorrectly("localhost", "2.0", "http://localhost:50111", ((string[])(null)));
         }
         
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute()]
@@ -2062,10 +2062,10 @@ this.ScenarioSetup(scenarioInfo);
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("VariantName", "Variant 151")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Uri", "localhost:123")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Version", "2.0")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "https://localhost:123")]
+        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "http://localhost:123")]
         public virtual void ICanResolveVariousUrisCorrectly_Variant151()
         {
-            this.ICanResolveVariousUrisCorrectly("localhost:123", "2.0", "https://localhost:123", ((string[])(null)));
+            this.ICanResolveVariousUrisCorrectly("localhost:123", "2.0", "http://localhost:123", ((string[])(null)));
         }
         
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute()]
@@ -2075,10 +2075,10 @@ this.ScenarioSetup(scenarioInfo);
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("VariantName", "Variant 152")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Uri", "localhost:443")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Version", "2.0")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "https://localhost:443")]
+        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "http://localhost:443")]
         public virtual void ICanResolveVariousUrisCorrectly_Variant152()
         {
-            this.ICanResolveVariousUrisCorrectly("localhost:443", "2.0", "https://localhost:443", ((string[])(null)));
+            this.ICanResolveVariousUrisCorrectly("localhost:443", "2.0", "http://localhost:443", ((string[])(null)));
         }
         
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute()]
@@ -2088,10 +2088,10 @@ this.ScenarioSetup(scenarioInfo);
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("VariantName", "Variant 153")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Uri", "localhost:563")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Version", "2.0")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "https://localhost:563")]
+        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "http://localhost:563")]
         public virtual void ICanResolveVariousUrisCorrectly_Variant153()
         {
-            this.ICanResolveVariousUrisCorrectly("localhost:563", "2.0", "https://localhost:563", ((string[])(null)));
+            this.ICanResolveVariousUrisCorrectly("localhost:563", "2.0", "http://localhost:563", ((string[])(null)));
         }
         
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute()]
@@ -2101,10 +2101,10 @@ this.ScenarioSetup(scenarioInfo);
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("VariantName", "Variant 154")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Uri", "localhost:50111")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Version", "2.0")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "https://localhost:50111")]
+        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "http://localhost:50111")]
         public virtual void ICanResolveVariousUrisCorrectly_Variant154()
         {
-            this.ICanResolveVariousUrisCorrectly("localhost:50111", "2.0", "https://localhost:50111", ((string[])(null)));
+            this.ICanResolveVariousUrisCorrectly("localhost:50111", "2.0", "http://localhost:50111", ((string[])(null)));
         }
         
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute()]
@@ -2179,10 +2179,10 @@ this.ScenarioSetup(scenarioInfo);
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("VariantName", "Variant 160")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Uri", "http://localhost")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Version", "2.0")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "https://localhost:50111")]
+        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "http://localhost:50111")]
         public virtual void ICanResolveVariousUrisCorrectly_Variant160()
         {
-            this.ICanResolveVariousUrisCorrectly("http://localhost", "2.0", "https://localhost:50111", ((string[])(null)));
+            this.ICanResolveVariousUrisCorrectly("http://localhost", "2.0", "http://localhost:50111", ((string[])(null)));
         }
         
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute()]
@@ -2205,10 +2205,10 @@ this.ScenarioSetup(scenarioInfo);
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("VariantName", "Variant 162")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Uri", "http://localhost:50111")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Version", "2.0")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "https://localhost:50111")]
+        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "http://localhost:50111")]
         public virtual void ICanResolveVariousUrisCorrectly_Variant162()
         {
-            this.ICanResolveVariousUrisCorrectly("http://localhost:50111", "2.0", "https://localhost:50111", ((string[])(null)));
+            this.ICanResolveVariousUrisCorrectly("http://localhost:50111", "2.0", "http://localhost:50111", ((string[])(null)));
         }
         
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute()]
@@ -2231,10 +2231,10 @@ this.ScenarioSetup(scenarioInfo);
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("VariantName", "Variant 164")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Uri", "http://localhost:123")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Version", "2.0")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "https://localhost:123")]
+        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "http://localhost:123")]
         public virtual void ICanResolveVariousUrisCorrectly_Variant164()
         {
-            this.ICanResolveVariousUrisCorrectly("http://localhost:123", "2.0", "https://localhost:123", ((string[])(null)));
+            this.ICanResolveVariousUrisCorrectly("http://localhost:123", "2.0", "http://localhost:123", ((string[])(null)));
         }
         
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute()]
@@ -2257,10 +2257,10 @@ this.ScenarioSetup(scenarioInfo);
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("VariantName", "Variant 166")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Uri", "http://localhost:443")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Version", "2.0")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "https://localhost:443")]
+        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "http://localhost:443")]
         public virtual void ICanResolveVariousUrisCorrectly_Variant166()
         {
-            this.ICanResolveVariousUrisCorrectly("http://localhost:443", "2.0", "https://localhost:443", ((string[])(null)));
+            this.ICanResolveVariousUrisCorrectly("http://localhost:443", "2.0", "http://localhost:443", ((string[])(null)));
         }
         
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute()]
@@ -2283,10 +2283,10 @@ this.ScenarioSetup(scenarioInfo);
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("VariantName", "Variant 168")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Uri", "http://localhost:563")]
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Version", "2.0")]
-        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "https://localhost:563")]
+        [Microsoft.VisualStudio.TestTools.UnitTesting.TestPropertyAttribute("Parameter:Resolved", "http://localhost:563")]
         public virtual void ICanResolveVariousUrisCorrectly_Variant168()
         {
-            this.ICanResolveVariousUrisCorrectly("http://localhost:563", "2.0", "https://localhost:563", ((string[])(null)));
+            this.ICanResolveVariousUrisCorrectly("http://localhost:563", "2.0", "http://localhost:563", ((string[])(null)));
         }
         
         [Microsoft.VisualStudio.TestTools.UnitTesting.TestMethodAttribute()]

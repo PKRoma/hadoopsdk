@@ -17,16 +17,21 @@ namespace Microsoft.Hadoop.Client
     /// <summary>
     /// Provides creation details for a new Sqoop job.
     /// </summary>
-    public sealed class SqoopJobCreateParameters : JobCreateParameters
+    public sealed class SqoopJobCreateParameters : QueryJobCreateParameters
     {
         /// <summary>
         /// Gets or sets the query to use for a sqoop job.
         /// </summary>
         public string Command { get; set; }
 
-        /// <summary>
-        /// Gets or sets the query file to use for a sqoop job.
-        /// </summary>
-        public string File { get; set; }
+        internal override string GetQuery()
+        {
+            return this.Command;
+        }
+
+        internal override void SetQuery(string queryText)
+        {
+            this.Command = queryText;
+        }
     }
 }

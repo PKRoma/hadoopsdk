@@ -23,7 +23,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.AzureManagementClient;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestClient;
-    
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
     using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities;
 
@@ -205,7 +205,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             {
                 // Creates the cluster
                 var restClient = ServiceLocator.Instance.Locate<IHDInsightManagementRestClientFactory>().Create(credentials, GetAbstractionContext());
-                var cluster = base.GetRandomCluster();
+                var cluster = GetRandomCluster();
                 string payload = new PayloadConverter().SerializeClusterCreateRequest(cluster);
                 await restClient.CreateContainer(cluster.Name, location, payload);
 

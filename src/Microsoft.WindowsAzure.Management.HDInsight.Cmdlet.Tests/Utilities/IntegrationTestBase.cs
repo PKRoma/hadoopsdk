@@ -22,6 +22,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Tests.Utilities
     using System.Management.Automation;
     using System.Security;
     using System.Security.Cryptography.X509Certificates;
+    using Microsoft.Hadoop.Client.HadoopJobSubmissionPocoClient.RemoteHadoop;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.BaseCommandInterfaces;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Commands.CommandImplementations;
@@ -34,7 +35,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Tests.Utilities
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Tests.PowerShellTestAbstraction.Interfaces;
     using Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Tests.Simulators;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core;
+    using Microsoft.WindowsAzure.Management.HDInsight.JobSubmission.PocoClient;
     using Microsoft.WindowsAzure.Management.HDInsight.Logging;
+    using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulator;
 
     public class IntegrationTestBase : DisposableObject
     {
@@ -124,6 +127,8 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Tests.Utilities
             cmdletRunManager.RegisterType<IAzureHDInsightSubscriptionsFileManagerFactory, AzureHDInsightSubscriptionsFileManagerSimulatorFactory>();
             cmdletRunManager.RegisterType<IAzureHDInsightConnectionSessionManagerFactory, AzureHDInsightConnectionSessionManagerSimulatorFactory>();
             cmdletRunManager.RegisterType<IBufferingLogWriterFactory, BufferingLogWriterFactory>();
+            cmdletRunManager.RegisterType<IRemoteHadoopJobSubmissionPocoClientFactory, HadoopJobSubmissionPocoSimulatorClientFactory>();
+            cmdletRunManager.RegisterType<IHDInsightJobSubmissionPocoClientFactory, HadoopJobSubmissionPocoSimulatorClientFactory>();
             cmdletRunManager.RegisterType<IAzureHDInsightStorageHandlerFactory, AzureHDInsightStorageHandlerSimulatorFactory>();
             cmdletRunManager.RegisterType<IAzureHDInsightClusterManagementClientFactory, AzureHDInsightClusterManagementClientSimulatorFactory>();
             cmdletRunManager.RegisterType<IAzureHDInsightJobSubmissionClientFactory, AzureHDInsightJobSubmissionClientSimulatorFactory>();

@@ -16,34 +16,34 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.Web
 {
     using System.Security.Cryptography.X509Certificates;
 
-    internal class HttpClientAbstractionFactory : IHttpClientAbstractionFactory
+    internal class HttpClientAbstractionFactory : HttpClientAbstractionFactoryBase
     {
-        public IHttpClientAbstraction Create(IAbstractionContext context)
+        public override IHttpClientAbstraction Create(IAbstractionContext context)
         {
             return HttpClientAbstraction.Create(context);
         }
 
-        public IHttpClientAbstraction Create(X509Certificate2 cert)
+        public override IHttpClientAbstraction Create(X509Certificate2 cert)
         {
             return HttpClientAbstraction.Create(cert);
         }
 
-        public IHttpClientAbstraction Create(X509Certificate2 cert, IAbstractionContext context)
+        public override IHttpClientAbstraction Create(X509Certificate2 cert, IAbstractionContext context)
         {
             return HttpClientAbstraction.Create(cert, context);
         }
 
-        public IHttpClientAbstraction Create(string token)
+        public override IHttpClientAbstraction Create(string token)
         {
             return HttpClientAbstraction.Create(token);
         }
 
-        public IHttpClientAbstraction Create(string token, IAbstractionContext context)
+        public override IHttpClientAbstraction Create(string token, IAbstractionContext context)
         {
             return HttpClientAbstraction.Create(token, context);
         }
 
-        public IHttpClientAbstraction Create()
+        public override IHttpClientAbstraction Create()
         {
             return HttpClientAbstraction.Create();
         }

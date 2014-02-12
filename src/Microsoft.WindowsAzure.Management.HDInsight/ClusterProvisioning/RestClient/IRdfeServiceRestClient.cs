@@ -30,14 +30,14 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestCl
         /// <summary>
         /// Get the properties of a subscription for a given resource type.
         /// </summary>
-        /// <returns>A key value pair enumberable containing the properties of this subscription.</returns>
+        /// <returns>A key value pair enumerable containing the properties of this subscription.</returns>
         Task<IEnumerable<KeyValuePair<string, string>>> GetResourceProviderProperties();
 
         /// <summary>
-        /// Parses the xml payload from a rdfe call response and returns a key value pair enumberable.
+        /// Parses the xml payload from a rdfe call response and returns a key value pair enumerable.
         /// </summary>
         /// <param name="payload">Xml payload from a rdfe call response.</param>
-        /// <returns>A key value pair enumberable containing the properties of this subscription.</returns>
+        /// <returns>A key value pair enumerable containing the properties of this subscription.</returns>
         IEnumerable<KeyValuePair<string, string>> ParseCapabilities(string payload);
     }
 }
