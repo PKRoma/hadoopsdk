@@ -15,7 +15,6 @@
 namespace Microsoft.Hadoop.Avro.Container
 {
     using System;
-    using System.Diagnostics.Contracts;
     using System.IO;
 
     /// <summary>
@@ -26,36 +25,33 @@ namespace Microsoft.Hadoop.Avro.Container
         /// <summary>
         /// Creates a reader of <see cref="Microsoft.Hadoop.Avro.AvroRecord"/> or primitive type.
         /// </summary>
-        /// <typeparam name="T">The type of deserialized objects. Should be a derivative of <see cref="AvroRecord"/>.</typeparam>
         /// <param name="stream">The stream containing Avro object container.</param>
         /// <returns>A reader.</returns>
         /// <remarks>By default, <paramref name="stream"/> is left open.</remarks>
-        public static IAvroReader<T> CreateGenericReader<T>(Stream stream)
+        public static IAvroReader<object> CreateGenericReader(Stream stream)
         {
-            return CreateGenericReader<T>(stream, true);
+            return CreateGenericReader(stream, true);
         }
 
         /// <summary>
         /// Creates a reader of <see cref="Microsoft.Hadoop.Avro.AvroRecord"/> or primitive type.
         /// </summary>
-        /// <typeparam name="T">The type of deserialized objects. Should be a derivative of <see cref="AvroRecord"/>.</typeparam>
         /// <param name="stream">The stream containing Avro object container.</param>
         /// <param name="leaveOpen">If set to <c>true</c> leaves the stream open.</param>
         /// <returns> A reader. </returns>
-        public static IAvroReader<T> CreateGenericReader<T>(Stream stream, bool leaveOpen)
+        public static IAvroReader<object> CreateGenericReader(Stream stream, bool leaveOpen)
         {
-            return CreateGenericReader<T>(stream, leaveOpen, new CodecFactory());
+            return CreateGenericReader(stream, leaveOpen, new CodecFactory());
         }
 
         /// <summary>
         /// Creates a reader of <see cref="Microsoft.Hadoop.Avro.AvroRecord"/> or primitive type.
         /// </summary>
-        /// <typeparam name="T">The type of deserialized objects. Should be a derivative of <see cref="AvroRecord"/>.</typeparam>
         /// <param name="stream">The stream containing Avro object container.</param>
         /// <param name="leaveOpen">If set to <c>true</c> leaves the stream open.</param>
         /// <param name="factory">The codec factory.</param>
         /// <returns> A reader. </returns>
-        public static IAvroReader<T> CreateGenericReader<T>(Stream stream, bool leaveOpen, CodecFactory factory)
+        public static IAvroReader<object> CreateGenericReader(Stream stream, bool leaveOpen, CodecFactory factory)
         {
             if (stream == null)
             {
@@ -65,22 +61,20 @@ namespace Microsoft.Hadoop.Avro.Container
             {
                 throw new ArgumentNullException("factory");
             }
-            Contract.EndContractBlock();
 
-            return new StreamReader<T>(null, stream, leaveOpen, factory);
+            return new StreamReader<object>(null, stream, leaveOpen, factory);
         }
 
         /// <summary>
         /// Creates a reader of <see cref="Microsoft.Hadoop.Avro.AvroRecord" /> or primitive type.
         /// </summary>
-        /// <typeparam name="T">The type of deserialized objects. Should be a derivative of <see cref="AvroRecord"/>.</typeparam>
         /// <param name="readerSchema">The reader schema.</param>
         /// <param name="stream">The stream containing Avro object container.</param>
         /// <param name="leaveOpen">If set to <c>true</c> leaves the stream open.</param>
         /// <param name="factory">The codec factory.</param>
         /// <returns> A reader. </returns>
         /// <remarks><paramref name="readerSchema"/> should be specified explicitely when the schema of the consumer/reader is different from the schema of the producer/writer.</remarks>
-        public static IAvroReader<T> CreateGenericReader<T>(string readerSchema, Stream stream, bool leaveOpen, CodecFactory factory)
+        public static IAvroReader<object> CreateGenericReader(string readerSchema, Stream stream, bool leaveOpen, CodecFactory factory)
         {
             if (string.IsNullOrEmpty(readerSchema))
             {
@@ -94,9 +88,8 @@ namespace Microsoft.Hadoop.Avro.Container
             {
                 throw new ArgumentNullException("factory");
             }
-            Contract.EndContractBlock();
 
-            return new StreamReader<T>(readerSchema, stream, leaveOpen, factory);
+            return new StreamReader<object>(readerSchema, stream, leaveOpen, factory);
         }
 
         /// <summary>
@@ -150,7 +143,6 @@ namespace Microsoft.Hadoop.Avro.Container
             {
                 throw new ArgumentNullException("codecFactory");
             }
-            Contract.EndContractBlock();
             return new StreamReader<T>(stream, leaveOpen, settings, codecFactory);
         }
 
@@ -207,36 +199,33 @@ namespace Microsoft.Hadoop.Avro.Container
             {
                 throw new ArgumentNullException("codec");
             }
-            Contract.EndContractBlock();
             return new StreamWriter<T>(stream, leaveOpen, AvroSerializer.Create<T>(settings), codec);
         }
 
         /// <summary>
         /// Creates a writer of <see cref="Microsoft.Hadoop.Avro.AvroRecord"/> or primitive type.
         /// </summary>
-        /// <typeparam name="T">The type of serialized objects. Should be a derivative of <see cref="AvroRecord"/>.</typeparam>
         /// <param name="schema">The writer schema.</param>
         /// <param name="stream">The stream that will contain the resulting Avro object container.</param>
         /// <param name="codec">The codec.</param>
         /// <returns> A writer.</returns>
         /// <exception cref="System.ArgumentNullException">Thrown when any argument is null.</exception>
         /// <remarks>By default, the <paramref name="stream"/> is left open.</remarks>
-        public static IAvroWriter<T> CreateGenericWriter<T>(string schema, Stream stream, Codec codec)
+        public static IAvroWriter<object> CreateGenericWriter(string schema, Stream stream, Codec codec)
         {
-            return CreateGenericWriter<T>(schema, stream, true, codec);
+            return CreateGenericWriter(schema, stream, true, codec);
         }
 
         /// <summary>
         /// Creates a writer of <see cref="Microsoft.Hadoop.Avro.AvroRecord"/> or primitive type.
         /// </summary>
-        /// <typeparam name="T">The type of serialized objects. Should be a derivative of <see cref="AvroRecord"/>.</typeparam>
         /// <param name="schema">The writer schema.</param>
         /// <param name="stream">The stream that will contain the resulting Avro object container.</param>
         /// <param name="leaveOpen">If set to <c>true</c> the <paramref name="stream"/> is left open.</param>
         /// <param name="codec">The codec.</param>
         /// <returns> A writer.</returns>
         /// <exception cref="System.ArgumentNullException">Thrown when any argument is null.</exception>
-        public static IAvroWriter<T> CreateGenericWriter<T>(string schema, Stream stream, bool leaveOpen, Codec codec)
+        public static IAvroWriter<object> CreateGenericWriter(string schema, Stream stream, bool leaveOpen, Codec codec)
         {
             if (string.IsNullOrEmpty(schema))
             {
@@ -250,8 +239,7 @@ namespace Microsoft.Hadoop.Avro.Container
             {
                 throw new ArgumentNullException("codec");
             }
-            Contract.EndContractBlock();
-            return new StreamWriter<T>(stream, leaveOpen, AvroSerializer.CreateGeneric<T>(schema), codec);
+            return new StreamWriter<object>(stream, leaveOpen, AvroSerializer.CreateGeneric(schema), codec);
         }
     }
 }

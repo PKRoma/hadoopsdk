@@ -14,9 +14,10 @@
 // permissions and limitations under the License.
 namespace Microsoft.Hadoop.Avro.Schema
 {
+    using System;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
-    using System.Diagnostics.Contracts;
+    using System.Diagnostics;
     using System.Globalization;
     using System.Linq;
     using System.Runtime.Serialization;
@@ -183,7 +184,8 @@ namespace Microsoft.Hadoop.Avro.Schema
 
         private TypeSchema BuildCore(EnumSchema w, EnumSchema r)
         {
-            bool match = this.DoNamesMatch(w, r) && w.Symbols.All(s => r.Symbols.Contains(s));
+            bool match = this.DoNamesMatch(w, r)
+                && w.Symbols.Select((s, i) => i < r.Symbols.Count && r.Symbols[i] == s).All(m => m);
             if (!match)
             {
                 return null;
@@ -196,7 +198,7 @@ namespace Microsoft.Hadoop.Avro.Schema
 
             var attr = new NamedEntityAttributes(new SchemaName(w.Name, w.Namespace), w.Aliases, w.Doc);
             var schema = new EnumSchema(attr, r.RuntimeType);
-            w.Symbols.ToList().ForEach(schema.AddSymbol);
+            r.Symbols.Where(s => !schema.Symbols.Contains(s)).ToList().ForEach(schema.AddSymbol);
             this.visited.Add(w, schema);
             return schema;
         }
@@ -440,8 +442,6 @@ namespace Microsoft.Hadoop.Avro.Schema
             Justification = "The method is used for double dispatch.")]
         private TypeSchema BuildCore(object w, object r)
         {
-            Contract.Assert(w != null);
-            Contract.Assert(r != null);
             return null;
         }
 

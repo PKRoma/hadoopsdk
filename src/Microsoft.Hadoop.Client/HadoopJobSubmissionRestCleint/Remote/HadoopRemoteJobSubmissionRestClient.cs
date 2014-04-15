@@ -32,6 +32,7 @@ namespace Microsoft.Hadoop.Client.WebHCatRest
     {
         private readonly BasicAuthCredential credentials;
         private readonly IAbstractionContext context;
+        private readonly bool ignoreSslErrors;
 
         /// <summary>
         /// Initializes a new instance of the HadoopRemoteJobSubmissionRestClient class.
@@ -42,10 +43,14 @@ namespace Microsoft.Hadoop.Client.WebHCatRest
         /// <param name="context">
         /// A CancellationToken that can be used to cancel events.
         /// </param>
-        public HadoopRemoteJobSubmissionRestClient(BasicAuthCredential credentials, IAbstractionContext context)
+        /// <param name="ignoreSslErrors">
+        /// Specifies that server side SSL error should be ignored.
+        /// </param>
+        public HadoopRemoteJobSubmissionRestClient(BasicAuthCredential credentials, IAbstractionContext context, bool ignoreSslErrors)
         {
             this.credentials = credentials;
             this.context = context;
+            this.ignoreSslErrors = ignoreSslErrors;
         }
 
         /// <inheritdoc />
@@ -140,7 +145,7 @@ namespace Microsoft.Hadoop.Client.WebHCatRest
         private async Task<IHttpResponseMessageAbstraction> MakeAsyncGetRequest(Uri relativeUri)
         {
             var factory = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>();
-            using (var httpClient = factory.Create(this.context))
+            using (var httpClient = factory.Create(this.context, false))
             {
                 var uri = new Uri(this.credentials.Server, relativeUri);
                 httpClient.RequestUri = uri;
@@ -158,7 +163,7 @@ namespace Microsoft.Hadoop.Client.WebHCatRest
         /// <returns>The response message from the remote cluster.</returns>
         private async Task<IHttpResponseMessageAbstraction> MakeAsyncJobSubmissionRequest(Uri relativeUri, string payload)
         {
-            using (var httpClient = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(this.context))
+            using (var httpClient = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(this.context, this.ignoreSslErrors))
             {
                 var uri = new Uri(this.credentials.Server, relativeUri);
                 httpClient.RequestUri = uri;
@@ -176,7 +181,7 @@ namespace Microsoft.Hadoop.Client.WebHCatRest
         /// <returns>The response message from the remote cluster.</returns>
         private async Task<IHttpResponseMessageAbstraction> MakeAsyncJobCancellationRequest(Uri relativeUri)
         {
-            using (var httpClient = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(this.context))
+            using (var httpClient = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(this.context, this.ignoreSslErrors))
             {
                 var uri = new Uri(this.credentials.Server, relativeUri);
                 httpClient.RequestUri = uri;

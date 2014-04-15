@@ -284,10 +284,10 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities
             runManager.RegisterType<IRemoteHadoopJobSubmissionPocoClientFactory, HadoopJobSubmissionPocoSimulatorClientFactory>();
             runManager.RegisterType<IHDInsightJobSubmissionPocoClientFactory, HadoopJobSubmissionPocoSimulatorClientFactory>();
             runManager.RegisterType<ISubscriptionRegistrationClientFactory, SubscriptionRegistrationSimulatorClientFactory>();
-            var timeManager = new RetryTimingManager();
-            timeManager.TimeOut = TimeSpan.FromSeconds(1);
-            timeManager.PollInterval = TimeSpan.FromMilliseconds(250);
-            runManager.RegisterInstance<IRetryTimingManager>(timeManager);
+            var timeManager = new HttpOperationManager();
+            timeManager.RetryCount = 2;
+            timeManager.RetryInterval = TimeSpan.FromMilliseconds(250);
+            runManager.RegisterInstance<IHttpOperationManager>(timeManager);
             var testManager = new IntegrationTestManager();
             if (!testManager.RunAzureTests())
             {
@@ -443,7 +443,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities
         protected static void CleanUpClusters()
         {
             var credentials = IntegrationTestBase.GetValidCredentials();
-            using (var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(credentials, GetAbstractionContext()))
+            using (var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(credentials, GetAbstractionContext(), false))
             {
                 var clusters = client.ListContainers();
                 clusters.WaitForResult();

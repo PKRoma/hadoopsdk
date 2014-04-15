@@ -24,6 +24,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoClient;
     using Microsoft.WindowsAzure.Management.HDInsight;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core;
+    using Microsoft.WindowsAzure.Management.HDInsight.Logging;
 
 
     internal class TestPocoClientFlowThrough : DisposableObject, IHDInsightManagementPocoClient
@@ -104,6 +105,11 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests
         public Task<UserChangeRequestStatus> GetStatus(string dnsName, string location, Guid operationId)
         {
             return underlying.GetStatus(dnsName, location, operationId);
+        }
+
+        public ILogger Logger
+        {
+            get { return underlying.Logger; }
         }
     }
 }

@@ -16,7 +16,6 @@ namespace Microsoft.Hadoop.Avro.Container
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
 
     /// <summary>
     ///     Represents a sequential reader of Avro objects.
@@ -37,7 +36,6 @@ namespace Microsoft.Hadoop.Avro.Container
             {
                 throw new ArgumentNullException("reader");
             }
-            Contract.EndContractBlock();
 
             this.reader = reader;
         }

@@ -23,6 +23,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
     using Microsoft.WindowsAzure.Management.HDInsight;
+    using Microsoft.WindowsAzure.Management.HDInsight.Logging;
     using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities;
 
     [TestClass]
@@ -77,9 +78,11 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
                 {
                     throw new NotImplementedException();
                 }
+
+                public ILogger Logger { get; private set; }
             }
 
-            public IHDInsightManagementRestClient Create(IHDInsightSubscriptionCredentials credentials, HDInsight.IAbstractionContext context)
+            public IHDInsightManagementRestClient Create(IHDInsightSubscriptionCredentials credentials, HDInsight.IAbstractionContext context, bool ignoreSslErrors)
             {
                 return new ThrowMockRestClient();
             }

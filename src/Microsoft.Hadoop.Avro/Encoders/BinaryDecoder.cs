@@ -15,7 +15,7 @@
 namespace Microsoft.Hadoop.Avro
 {
     using System;
-    using System.Diagnostics.Contracts;
+    using System.Globalization;
     using System.IO;
     using System.Runtime.Serialization;
     using System.Text;
@@ -47,7 +47,6 @@ namespace Microsoft.Hadoop.Avro
             {
                 throw new ArgumentNullException("stream");
             }
-            Contract.EndContractBlock();
 
             this.stream = stream;
             this.leaveOpen = leaveOpen;
@@ -126,7 +125,7 @@ namespace Microsoft.Hadoop.Avro
         public float DecodeFloat()
         {
             var value = new byte[4];
-            this.stream.Read(value, 0, value.Length);
+            this.ReadAllRequiredBytes(value);
             if (!BitConverter.IsLittleEndian)
             {
                 Array.Reverse(value);
@@ -143,7 +142,7 @@ namespace Microsoft.Hadoop.Avro
         public double DecodeDouble()
         {
             var value = new byte[8];
-            this.stream.Read(value, 0, value.Length);
+            this.ReadAllRequiredBytes(value);
             long longValue = value[0]
                 | (long)value[1] << 0x8
                 | (long)value[2] << 0x10
@@ -165,7 +164,7 @@ namespace Microsoft.Hadoop.Avro
         {
             int arraySize = this.DecodeInt();
             var array = new byte[arraySize];
-            this.stream.Read(array, 0, array.Length);
+            this.ReadAllRequiredBytes(array);
             return array;
         }
 
@@ -215,10 +214,9 @@ namespace Microsoft.Hadoop.Avro
             {
                 throw new ArgumentOutOfRangeException("size");
             }
-            Contract.EndContractBlock();
 
             var array = new byte[size];
-            this.stream.Read(array, 0, array.Length);
+            this.ReadAllRequiredBytes(array);
             return array;
         }
 
@@ -316,6 +314,16 @@ namespace Microsoft.Hadoop.Avro
             {
                 this.stream.Dispose();
                 this.stream = null;
+            }
+        }
+
+        private void ReadAllRequiredBytes(byte[] array)
+        {
+            int read = this.stream.ReadAllRequiredBytes(array, 0, array.Length);
+            if (read != array.Length)
+            {
+                throw new SerializationException(
+                    string.Format(CultureInfo.InvariantCulture, "Unexpected end of stream: '{0}' bytes missing.", array.Length - read));
             }
         }
     }

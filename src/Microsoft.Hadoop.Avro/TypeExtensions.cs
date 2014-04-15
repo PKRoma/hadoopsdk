@@ -16,6 +16,7 @@ namespace Microsoft.Hadoop.Avro
 {
     using System;
     using System.Collections.Generic;
+    using System.IO;
     using System.Linq;
     using System.Reflection;
     using System.Runtime.CompilerServices;
@@ -103,44 +104,16 @@ namespace Microsoft.Hadoop.Avro
 
         public static bool IsAnonymous(this Type type)
         {
-            return type.FullName.Contains("__Anonymous");
+            return type.IsClass
+                && type.GetCustomAttributes(false).Any(a => a is CompilerGeneratedAttribute)
+                && !type.IsNested
+                && type.Name.StartsWith("<>", StringComparison.Ordinal)
+                && type.Name.Contains("__Anonymous");
         }
 
         public static PropertyInfo GetPropertyByName(
             this Type type, string name, BindingFlags flags = BindingFlags.Public | BindingFlags.FlattenHierarchy | BindingFlags.Instance)
         {
-            if (type.IsInterface)
-            {
-                var considered = new HashSet<Type>();
-                var queue = new Queue<Type>();
-
-                considered.Add(type);
-                queue.Enqueue(type);
-                while (queue.Count > 0)
-                {
-                    Type subType = queue.Dequeue();
-                    foreach (Type subInterface in subType.GetInterfaces())
-                    {
-                        if (considered.Contains(subInterface))
-                        {
-                            continue;
-                        }
-
-                        considered.Add(subInterface);
-                        queue.Enqueue(subInterface);
-                    }
-
-                    PropertyInfo property = subType.GetProperty(name, flags);
-
-                    if (property != null)
-                    {
-                        return property;
-                    }
-                }
-
-                return null;
-            }
-
             return type.GetProperty(name, flags);
         }
 
@@ -212,11 +185,6 @@ namespace Microsoft.Hadoop.Avro
 
         public static IEnumerable<Type> GetAllInterfaces(this Type t)
         {
-            if (t.IsInterface)
-            {
-                yield return t;
-            }
-
             foreach (var i in t.GetInterfaces())
             {
                 yield return i;
@@ -283,10 +251,24 @@ namespace Microsoft.Hadoop.Avro
                 return Enumerable.Empty<Type>();
             }
 
-            return t.GetCustomAttributes(false)
+            return t.GetCustomAttributes(true)
                 .OfType<KnownTypeAttribute>()
-                .Select(a => a.Type)
-                .Concat(GetAllKnownTypes(t.BaseType));
+                .Select(a => a.Type);
+        }
+
+        public static int ReadAllRequiredBytes(this Stream stream, byte[] buffer, int offset, int count)
+        {
+            int toRead = count;
+            int currentOffset = offset;
+            int currentRead;
+            do
+            {
+                currentRead = stream.Read(buffer, currentOffset, toRead);
+                currentOffset += currentRead;
+                toRead -= currentRead;
+            }
+            while (toRead > 0 && currentRead != 0);
+            return currentOffset - offset;
         }
     }
 }

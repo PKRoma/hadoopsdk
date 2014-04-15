@@ -19,12 +19,14 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
     using System.Globalization;
     using System.Linq;
     using System.Net;
+    using System.Net.Http;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.Hadoop.Client;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning;
     using Microsoft.WindowsAzure.Management.HDInsight;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest;
     using Microsoft.WindowsAzure.Management.HDInsight.Logging;
 
     /// <summary>
@@ -71,7 +73,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
             continuePolling.ArgumentNotNull("continuePolling");
             var start = DateTime.Now;
             int pollingFailures = 0;
-            const int MaxPollingFailuresCount = 2;
+            const int MaxPollingFailuresCount = 10;
             T pollingResult = default(T);
             PollResult result = PollResult.Continue;
             do
@@ -80,14 +82,19 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
                 {
                     pollingResult = await poll();
                     result = continuePolling(pollingResult);
-                    if (notifyHandler.IsNotNull())
+                    if (notifyHandler.IsNotNull() && pollingResult.IsNotNull())
                     {
                         notifyHandler(pollingResult);
                     }
-
-                    if (result == PollResult.PosibleError)
+                    if (result == PollResult.Unknown || result == PollResult.Null)
                     {
                         pollingFailures++;
+                        if (result == PollResult.Null)
+                        {
+                            client.LogMessage("Poll for cluster returned no cluster.  Current error weight (out of 10): " + pollingFailures.ToString(CultureInfo.InvariantCulture),
+                                              Severity.Informational,
+                                              Verbosity.Diagnostic);
+                        }
                         cancellationToken.WaitForInterval(interval);
                     }
                     else if (result == PollResult.Continue)
@@ -96,21 +103,55 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
                         cancellationToken.WaitForInterval(interval);
                     }
                 }
-                catch (WebException pollingException)
+                catch (Exception ex)
                 {
-                    Help.DoNothing(pollingException);
-                    pollingFailures++;
-                    if (pollingFailures >= MaxPollingFailuresCount)
+                    ex = ex.GetFirstException();
+                    var hlex = ex as HttpLayerException;
+                    var httpEx = ex as HttpRequestException;
+                    var webex = ex as WebException;
+                    var timeOut = ex as TimeoutException;
+                    var taskCancled = ex as TaskCanceledException;
+                    var operationCanceled = ex as OperationCanceledException;
+                    if (taskCancled.IsNotNull() && taskCancled.CancellationToken.IsNotNull() && taskCancled.CancellationToken.IsCancellationRequested)
                     {
                         throw;
                     }
-                }
-                if (pollingFailures >= MaxPollingFailuresCount)
-                {
-                    return;
+                    if (operationCanceled.IsNotNull() && operationCanceled.CancellationToken.IsNotNull() && operationCanceled.CancellationToken.IsCancellationRequested)
+                    {
+                        throw;
+                    }
+                    if (hlex.IsNotNull() || httpEx.IsNotNull() || webex.IsNotNull() || taskCancled.IsNotNull() || timeOut.IsNotNull() || operationCanceled.IsNotNull())
+                    {
+                        pollingFailures += 5;
+                        client.LogMessage("Poll for cluster a manageable exception.  Current error weight (out of 10): " + pollingFailures.ToString(CultureInfo.InvariantCulture),
+                                          Severity.Informational,
+                                          Verbosity.Diagnostic);
+                        client.LogMessage(ex.ToString(), Severity.Informational, Verbosity.Diagnostic);
+                        if (pollingFailures >= MaxPollingFailuresCount)
+                        {
+                            client.LogMessage("Polling error weight exceeded maximum allowed.  Aborting operation.", Severity.Error, Verbosity.Normal);
+                            throw;
+                        }
+                    }
+                    else
+                    {
+                        client.LogMessage("Poll for cluster returned an unmanageable exception.  Aborting operation.", Severity.Error, Verbosity.Normal);
+                        client.LogException(ex);
+                        throw;
+                    }
                 }
             }
-            while ((result == PollResult.Continue || result == PollResult.PosibleError) && DateTime.Now - start < timeout);
+            while ((result == PollResult.Continue || result == PollResult.Null || result == PollResult.Unknown) && 
+                   DateTime.Now - start < timeout && 
+                   pollingFailures <= MaxPollingFailuresCount);
+            if (pollingFailures > MaxPollingFailuresCount)
+            {
+                client.LogMessage("Polling error weight exceeded maximum allowed.  Aborting operation.", Severity.Error, Verbosity.Normal);
+            }
+            if (notifyHandler.IsNotNull() && pollingResult.IsNotNull())
+            {
+                notifyHandler(pollingResult);
+            }
         }
 
         /// <summary>
@@ -217,7 +258,8 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
         internal enum PollResult
         {
             Continue,
-            PosibleError,
+            Unknown,
+            Null,
             Stop
         }
 
@@ -230,27 +272,46 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
         /// <param name="cluster">HDInsight cluster.</param>
         /// <param name="states">Acceptable states at which the polling can stop.</param>
         /// <returns>True, if we want polling to continue, false otherwise.</returns>
-        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "Microsoft.WindowsAzure.Management.HDInsight.Logging.ILogger.LogMessage(System.String,Microsoft.WindowsAzure.Management.HDInsight.Logging.Severity,Microsoft.WindowsAzure.Management.HDInsight.Logging.Verbosity)",
+        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", 
+            MessageId = "Microsoft.WindowsAzure.Management.HDInsight.Logging.LogProviderExtensions.LogMessage(Microsoft.WindowsAzure.Management.HDInsight.Logging.ILogProvider,System.String,Microsoft.WindowsAzure.Management.HDInsight.Logging.Severity,Microsoft.WindowsAzure.Management.HDInsight.Logging.Verbosity)",
             Justification = "This is for logging the literal is acceptable. [TGS]")]
         internal static PollResult PollSignal(this IHDInsightManagementPocoClient client, ClusterDetails cluster, params ClusterState[] states)
         {
             if (cluster == null)
             {
-                return PollResult.PosibleError;
+                client.LogMessage("Polling for cluster returned null.  Returning null to polling function for retry logic.", Severity.Informational, Verbosity.Diagnostic);
+                return PollResult.Null;
             }
+            PollResult retval = PollResult.Continue;
+
             client.RaiseClusterProvisioningEvent(client, new ClusterProvisioningStatusEventArgs(cluster, cluster.State));
             var msg = string.Format(CultureInfo.CurrentCulture, "Current State {0} -> waiting for one state of {1}", cluster.State, string.Join(",", states.Select(s => s.ToString())));
-            client.Context.Logger.LogMessage(msg, Severity.Informational, Verbosity.Diagnostic);
+            client.LogMessage(msg, Severity.Informational, Verbosity.Diagnostic);
 
-            if (cluster.State == ClusterState.Error || cluster.Error != null || states.Contains(cluster.State))
+            if (cluster.State == ClusterState.Error)
             {
-                return PollResult.Stop;
+                client.LogMessage("Stopping Poll because cluster state was in Error", Severity.Error, Verbosity.Normal);
+                retval = PollResult.Stop;
             }
-            if (cluster.State == ClusterState.Unknown)
+            else if (cluster.Error != null)
             {
-                return PollResult.PosibleError;
+                msg = string.Format(CultureInfo.CurrentCulture, "Stopping Poll because cluster returned an error message.  The message was: {0}", cluster.Error);
+                client.LogMessage(msg, Severity.Error, Verbosity.Normal);
+                retval = PollResult.Stop;
             }
-            return PollResult.Continue;
+            else if (states.Contains(cluster.State))
+            {
+                msg = string.Format(CultureInfo.CurrentCulture, "Stopping Poll because cluster returned in a final state.  The message was: {0}", cluster.State);
+                client.LogMessage(msg, Severity.Informational, Verbosity.Diagnostic);
+                retval = PollResult.Stop;
+            }
+            else if (cluster.State == ClusterState.Unknown)
+            {
+                retval = PollResult.Unknown;
+            }
+            msg = string.Format(CultureInfo.CurrentCulture, "Continue function determined a poll result of: {0}", retval);
+            client.LogMessage(msg, Severity.Informational, Verbosity.Diagnostic);
+            return retval;
         }
 
         /// <summary>

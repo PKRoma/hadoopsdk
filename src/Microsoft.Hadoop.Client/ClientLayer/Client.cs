@@ -36,6 +36,9 @@ namespace Microsoft.Hadoop.Client
         private CancellationTokenSource source;
         private IAbstractionContext abstractionContext;
 
+        /// <inheritdoc />
+        public bool IgnoreSslErrors { get; set; }
+
         /// <summary>
         /// Gets the Abstraction context to be used to control cancellation and log writing.
         /// </summary>
@@ -67,7 +70,7 @@ namespace Microsoft.Hadoop.Client
         /// <summary>
         /// Gets the Logger to be used to log messages.
         /// </summary>
-        protected ILogger Logger
+        public ILogger Logger
         {
             get
             {
@@ -85,6 +88,7 @@ namespace Microsoft.Hadoop.Client
         /// </summary>
         protected ClientBase()
         {
+            this.IgnoreSslErrors = false;
             this.SetCancellationSource(Help.SafeCreate<CancellationTokenSource>());
         }
 
@@ -122,6 +126,13 @@ namespace Microsoft.Hadoop.Client
         {
             logWriter.ArgumentNotNull("logWriter");
             this.Logger.AddWriter(logWriter);
+        }
+
+        /// <inheritdoc />
+        public void RemoveLogWriter(ILogWriter logWriter)
+        {
+            logWriter.ArgumentNotNull("logWriter");
+            this.logger.RemoveWriter(logWriter);
         }
 
         private void CancellationCallback()

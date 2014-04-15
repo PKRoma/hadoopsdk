@@ -29,17 +29,19 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Locati
         private const string RegionPrefix = "CAPABILITY_REGION_";
         private readonly IHDInsightSubscriptionCredentials credentials;
         private readonly IAbstractionContext context;
+        private readonly bool ignoreSslErrors;
 
-        internal LocationFinderClient(IHDInsightSubscriptionCredentials credentials, IAbstractionContext context)
+        internal LocationFinderClient(IHDInsightSubscriptionCredentials credentials, IAbstractionContext context, bool ignoreSslErrors)
         {
             this.context = context;
+            this.ignoreSslErrors = ignoreSslErrors;
             this.credentials = credentials;
         }
 
         public async Task<Collection<string>> ListAvailableLocations()
         {
             // Creates an HTTP client
-            var client = ServiceLocator.Instance.Locate<IRdfeServiceRestClientFactory>().Create(this.credentials, this.context);
+            var client = ServiceLocator.Instance.Locate<IRdfeServiceRestClientFactory>().Create(this.credentials, this.context, this.ignoreSslErrors);
 
             var capabilities = await client.GetResourceProviderProperties();
             return this.ListAvailableLocations(capabilities);

@@ -31,6 +31,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
     using Microsoft.WindowsAzure.Management.HDInsight;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Logging;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
     using Microsoft.WindowsAzure.Management.HDInsight.Logging;
 
@@ -40,13 +41,23 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
         internal const string HighAvailabilityCapabilitityName = "CAPABILITY_FEATURE_HIGH_AVAILABILITY";
 
         private readonly IHDInsightSubscriptionCredentials credentials;
+        private readonly bool ignoreSslErrors;
 
         public IAbstractionContext Context { get; private set; }
 
-        internal HDInsightManagementPocoClient(IHDInsightSubscriptionCredentials credentials, IAbstractionContext context)
+        internal HDInsightManagementPocoClient(IHDInsightSubscriptionCredentials credentials, IAbstractionContext context, bool ignoreSslErrors)
         {
             this.Context = context;
             this.credentials = credentials;
+            this.ignoreSslErrors = ignoreSslErrors;
+            if (context.IsNotNull() && context.Logger.IsNotNull())
+            {
+                this.Logger = context.Logger;
+            }
+            else
+            {
+                this.Logger = new Logger();
+            }
         }
 
         /// <inheritdoc />
@@ -64,8 +75,8 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
 
         public async Task<ICollection<ClusterDetails>> ListContainers()
         {
-            var client = ServiceLocator.Instance.Locate<IHDInsightManagementRestClientFactory>().Create(this.credentials, this.Context);
-            var overrideHandlers = ServiceLocator.Instance.Locate<IHDInsightClusterOverrideManager>().GetHandlers(this.credentials, this.Context);
+            var client = ServiceLocator.Instance.Locate<IHDInsightManagementRestClientFactory>().Create(this.credentials, this.Context, this.ignoreSslErrors);
+            var overrideHandlers = ServiceLocator.Instance.Locate<IHDInsightClusterOverrideManager>().GetHandlers(this.credentials, this.Context, this.ignoreSslErrors);
             var response = await client.ListCloudServices();
             return overrideHandlers.PayloadConverter.DeserializeListContainersResult(response.Content, this.credentials.DeploymentNamespace, this.credentials.SubscriptionId);
         }
@@ -118,14 +129,13 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
 
         public async Task CreateContainer(ClusterCreateParameters details)
         {
-            var msg = string.Format("Create Cluster Requested at {0}, from:\r\n {1}", DateTime.Now, string.Join("\r\n", new StackTrace().GetFrames().Select(f => f.GetMethod().Name)));
-            this.Context.Logger.LogMessage(msg, Severity.Informational, Verbosity.Diagnostic);
+            this.LogMessage("Create Cluster Requested", Severity.Informational, Verbosity.Diagnostic);
             // Validates that the AzureStorage Configurations are valid.
             this.ValidateAsvAccounts(details);
-            var overrideHandlers = ServiceLocator.Instance.Locate<IHDInsightClusterOverrideManager>().GetHandlers(this.credentials, this.Context);
+            var overrideHandlers = ServiceLocator.Instance.Locate<IHDInsightClusterOverrideManager>().GetHandlers(this.credentials, this.Context, this.ignoreSslErrors);
 
             var rdfeCapabilitiesClient =
-                ServiceLocator.Instance.Locate<IRdfeServiceRestClientFactory>().Create(this.credentials, this.Context);
+                ServiceLocator.Instance.Locate<IRdfeServiceRestClientFactory>().Create(this.credentials, this.Context, this.ignoreSslErrors);
             var capabilities = await rdfeCapabilitiesClient.GetResourceProviderProperties();
             if (!this.HasClusterCreateCapability(capabilities))
             {
@@ -134,7 +144,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
             }
 
             // Validates the region for the cluster creation
-            var locationClient = ServiceLocator.Instance.Locate<ILocationFinderClientFactory>().Create(this.credentials, this.Context);
+            var locationClient = ServiceLocator.Instance.Locate<ILocationFinderClientFactory>().Create(this.credentials, this.Context, this.ignoreSslErrors);
             var availableLocations = locationClient.ListAvailableLocations(capabilities);
             if (!availableLocations.Contains(details.Location, StringComparer.OrdinalIgnoreCase))
             {
@@ -147,7 +157,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
             AssertHighAvailibityCapabilityEnabled(capabilities, details);
 
             // Validates whether the subscription\location needs to be initialized
-            var registrationClient = ServiceLocator.Instance.Locate<ISubscriptionRegistrationClientFactory>().Create(this.credentials, this.Context);
+            var registrationClient = ServiceLocator.Instance.Locate<ISubscriptionRegistrationClientFactory>().Create(this.credentials, this.Context, this.ignoreSslErrors);
             if (!await registrationClient.ValidateSubscriptionLocation(details.Location))
             {
                 await registrationClient.RegisterSubscription();
@@ -155,7 +165,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
             }
 
             // Creates the cluster
-            var client = ServiceLocator.Instance.Locate<IHDInsightManagementRestClientFactory>().Create(this.credentials, this.Context);
+            var client = ServiceLocator.Instance.Locate<IHDInsightManagementRestClientFactory>().Create(this.credentials, this.Context, this.ignoreSslErrors);
             string payload = overrideHandlers.PayloadConverter.SerializeClusterCreateRequest(details);
             await client.CreateContainer(details.Name, details.Location, payload);
         }
@@ -175,17 +185,17 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
 
         public async Task DeleteContainer(string dnsName, string location)
         {
-            var client = ServiceLocator.Instance.Locate<IHDInsightManagementRestClientFactory>().Create(this.credentials, this.Context);
+            var client = ServiceLocator.Instance.Locate<IHDInsightManagementRestClientFactory>().Create(this.credentials, this.Context, this.ignoreSslErrors);
             await client.DeleteContainer(dnsName, location);
         }
 
         public async Task<Guid> EnableDisableProtocol(UserChangeRequestUserType requestType, UserChangeRequestOperationType operation, string dnsName, string location, string userName, string password, DateTimeOffset expiration)
         {
-            var overrideHandlers = ServiceLocator.Instance.Locate<IHDInsightClusterOverrideManager>().GetHandlers(this.credentials, this.Context);
+            var overrideHandlers = ServiceLocator.Instance.Locate<IHDInsightClusterOverrideManager>().GetHandlers(this.credentials, this.Context, this.ignoreSslErrors);
             var manager = ServiceLocator.Instance.Locate<IUserChangeRequestManager>();
             var handler = manager.LocateUserChangeRequestHandler(this.credentials.GetType(), requestType);
             var payload = handler.Item2(operation, userName, password, expiration);
-            var client = ServiceLocator.Instance.Locate<IHDInsightManagementRestClientFactory>().Create(this.credentials, this.Context);
+            var client = ServiceLocator.Instance.Locate<IHDInsightManagementRestClientFactory>().Create(this.credentials, this.Context, this.ignoreSslErrors);
             var response = await client.EnableDisableUserChangeRequest(dnsName, location, requestType, payload);
             var resultId = overrideHandlers.PayloadConverter.DeserializeConnectivityResponse(response.Content);
             var pocoHelper = new HDInsightManagementPocoHelper();
@@ -200,13 +210,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
             if (details.EnsureHighAvailability)
             {
                 var headNodeHACapability = capabilities.FirstOrDefault(capability => capability.Key == HighAvailabilityCapabilitityName);
-                var canSetHeadNodeHA = false;
-                if (headNodeHACapability.Key == HighAvailabilityCapabilitityName)
-                {
-                    bool.TryParse(headNodeHACapability.Value, out canSetHeadNodeHA);
-                }
-
-                if (!canSetHeadNodeHA)
+                if (headNodeHACapability.Key.IsNull())
                 {
                     throw new InvalidOperationException("Your subscription cannot create clusters with EnsureHighAvailability set to true, please contact Support.");
                 }
@@ -223,7 +227,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
                                                      string password,
                                                      DateTimeOffset expiration)
         {
-            var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(context.Credentials, context);
+            var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(context.Credentials, context, false);
             Guid operationId = await EnableDisableUserPocoCall(context, requestType, operation, dnsName, location, userName, password, expiration);
             await client.WaitForOperationCompleteOrError(dnsName, location, operationId, TimeSpan.FromHours(1), context.CancellationToken);
         }
@@ -238,7 +242,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
                                                                   string password,
                                                                   DateTimeOffset expiration)
         {
-            var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(context.Credentials, context);
+            var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(context.Credentials, context, false);
             var operationId = await client.EnableDisableProtocol(requestType, operation, dnsName, location, userName, password, expiration);
             return operationId;
         }
@@ -283,8 +287,8 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
 
         public async Task<UserChangeRequestStatus> GetStatus(string dnsName, string location, Guid operationId)
         {
-            var client = ServiceLocator.Instance.Locate<IHDInsightManagementRestClientFactory>().Create(this.credentials, this.Context);
-            var overrideHandlers = ServiceLocator.Instance.Locate<IHDInsightClusterOverrideManager>().GetHandlers(this.credentials, this.Context);
+            var client = ServiceLocator.Instance.Locate<IHDInsightManagementRestClientFactory>().Create(this.credentials, this.Context, this.ignoreSslErrors);
+            var overrideHandlers = ServiceLocator.Instance.Locate<IHDInsightClusterOverrideManager>().GetHandlers(this.credentials, this.Context, this.ignoreSslErrors);
             var response = await client.GetOperationStatus(dnsName, location, operationId);
             var responseObject = overrideHandlers.PayloadConverter.DeserializeConnectivityStatus(response.Content);
             return responseObject.Data;
@@ -316,5 +320,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
 
             return accountName;
         }
+
+        public ILogger Logger { get; private set; }
     }
 }

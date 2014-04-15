@@ -29,7 +29,10 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Locati
         /// <param name="context">
         /// A context instance that can be used to cancel the task.
         /// </param>
+        /// <param name="ignoreSslErrors">
+        /// Specifies that server side SSL errors should be ignored.
+        /// </param>
         /// <returns>A Location finder client instance.</returns>
-        ILocationFinderClient Create(IHDInsightSubscriptionCredentials credentials, IAbstractionContext context);
+        ILocationFinderClient Create(IHDInsightSubscriptionCredentials credentials, IAbstractionContext context, bool ignoreSslErrors);
     }
 }

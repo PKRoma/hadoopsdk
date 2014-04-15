@@ -16,7 +16,6 @@ namespace Microsoft.Hadoop.Avro.Container
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
     using System.IO;
 
     /// <summary>
@@ -48,7 +47,6 @@ namespace Microsoft.Hadoop.Avro.Container
             {
                 throw new ArgumentOutOfRangeException("objectCount");
             }
-            Contract.EndContractBlock();
 
             this.serializer = serializer;
             this.codec = codec;

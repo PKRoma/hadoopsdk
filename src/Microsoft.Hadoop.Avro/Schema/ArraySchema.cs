@@ -16,7 +16,6 @@ namespace Microsoft.Hadoop.Avro.Schema
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
     using Newtonsoft.Json;
 
     /// <summary>
@@ -43,7 +42,6 @@ namespace Microsoft.Hadoop.Avro.Schema
             {
                 throw new ArgumentNullException("item");
             }
-            Contract.EndContractBlock();
 
             this.itemSchema = item;
         }
@@ -57,15 +55,6 @@ namespace Microsoft.Hadoop.Avro.Schema
             TypeSchema item,
             Type runtimeType)
             : this(item, runtimeType, new Dictionary<string, string>())
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ArraySchema"/> class.
-        /// </summary>
-        /// <param name="item">The item.</param>
-        internal ArraySchema(TypeSchema item)
-            : this(item, typeof(Array))
         {
         }
 

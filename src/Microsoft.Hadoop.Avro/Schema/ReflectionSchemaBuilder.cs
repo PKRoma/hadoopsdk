@@ -16,7 +16,7 @@ namespace Microsoft.Hadoop.Avro.Schema
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
+    using System.Diagnostics;
     using System.Globalization;
     using System.Linq;
     using System.Reflection;
@@ -50,7 +50,7 @@ namespace Microsoft.Hadoop.Avro.Schema
             };
 
         private readonly AvroSerializerSettings settings;
-        private readonly HashSet<Type> knownTypes; 
+        private readonly HashSet<Type> knownTypes;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="ReflectionSchemaBuilder" /> class.
@@ -58,7 +58,10 @@ namespace Microsoft.Hadoop.Avro.Schema
         /// <param name="settings">The settings.</param>
         public ReflectionSchemaBuilder(AvroSerializerSettings settings)
         {
-            Contract.Assert(settings != null);
+            if (settings == null)
+            {
+                throw new ArgumentNullException("settings");
+            }
 
             this.settings = settings;
             this.knownTypes = new HashSet<Type>(this.settings.KnownTypes);
@@ -78,7 +81,6 @@ namespace Microsoft.Hadoop.Avro.Schema
             {
                 throw new ArgumentNullException("type");
             }
-            Contract.EndContractBlock();
 
             AvroContractResolver resolver = this.settings.Resolver;
             this.knownTypes.UnionWith(resolver.GetKnownTypes(type) ?? new List<Type>());
@@ -87,9 +89,6 @@ namespace Microsoft.Hadoop.Avro.Schema
 
         private TypeSchema CreateSchema(bool forceNullable, Type type, Dictionary<string, NamedSchema> schemas, uint currentDepth)
         {
-            Contract.Assert(type != null);
-            Contract.Assert(schemas != null);
-
             if (currentDepth == this.settings.MaxItemsInSchemaTree)
             {
                 throw new SerializationException(string.Format(CultureInfo.InvariantCulture, "Maximum depth of object graph reached."));
@@ -129,9 +128,6 @@ namespace Microsoft.Hadoop.Avro.Schema
 
         private TypeSchema CreateNullableSchema(Type type, Dictionary<string, NamedSchema> schemas, uint currentDepth)
         {
-            Contract.Assert(type != null);
-            Contract.Assert(schemas != null);
-
             var typeSchemas = new List<TypeSchema> { new NullSchema(type) };
             var notNullableSchema = this.CreateNotNullableSchema(type, schemas, currentDepth);
 
@@ -159,9 +155,6 @@ namespace Microsoft.Hadoop.Avro.Schema
         /// <exception cref="System.Runtime.Serialization.SerializationException">Thrown when maximum depth of object graph is reached.</exception>
         private TypeSchema CreateNotNullableSchema(Type type, Dictionary<string, NamedSchema> schemas, uint currentDepth)
         {
-            Contract.Assert(type != null);
-            Contract.Assert(schemas != null);
-
             TypeSchema schema = TryBuildPrimitiveTypeSchema(type);
             if (schema != null)
             {
@@ -186,8 +179,6 @@ namespace Microsoft.Hadoop.Avro.Schema
         /// </returns>
         private static TypeSchema TryBuildPrimitiveTypeSchema(Type type)
         {
-            Contract.Assert(type != null);
-
             if (!RuntimeTypeToAvroSchema.ContainsKey(type))
             {
                 return null;
@@ -207,9 +198,6 @@ namespace Microsoft.Hadoop.Avro.Schema
         /// <exception cref="System.Runtime.Serialization.SerializationException">Thrown when <paramref name="type"/> is not supported.</exception>
         private TypeSchema BuildComplexTypeSchema(Type type, Dictionary<string, NamedSchema> schemas, uint currentDepth)
         {
-            Contract.Assert(type != null);
-            Contract.Assert(schemas != null);
-
             if (type.IsEnum)
             {
                 return this.BuildEnumTypeSchema(type, schemas);
@@ -273,9 +261,6 @@ namespace Microsoft.Hadoop.Avro.Schema
         /// <returns>Enumeration schema.</returns>
         private TypeSchema BuildEnumTypeSchema(Type type, Dictionary<string, NamedSchema> schemas)
         {
-            Contract.Assert(type != null);
-            Contract.Assert(schemas != null);
-
             if (type.IsFlagEnum())
             {
                 return new LongSchema(type);
@@ -295,9 +280,6 @@ namespace Microsoft.Hadoop.Avro.Schema
 
         private NamedEntityAttributes GetNamedEntityAttributesFrom(Type type)
         {
-            Contract.Assert(type != null);
-            Contract.Assert(this.settings.Resolver != null);
-
             AvroContractResolver resolver = this.settings.Resolver;
             TypeSerializationInfo typeInfo = resolver.ResolveType(type);
             var name = new SchemaName(typeInfo.Name, typeInfo.Namespace);
@@ -319,15 +301,8 @@ namespace Microsoft.Hadoop.Avro.Schema
         /// </returns>
         private TypeSchema BuildArrayTypeSchema(Type type, Dictionary<string, NamedSchema> schemas, uint currentDepth)
         {
-            Contract.Assert(type != null);
-            Contract.Assert(schemas != null);
-
             Type element = type.GetElementType();
-            Contract.Assert(element != typeof(byte), "Byte arrays should be handled separately as a primitive type.");
-
             TypeSchema elementSchema = this.CreateSchema(false, element, schemas, currentDepth + 1);
-            Contract.Assert(elementSchema != null, "Schema is not allowed to be null.");
-
             return new ArraySchema(elementSchema, type);
         }
 
@@ -342,9 +317,6 @@ namespace Microsoft.Hadoop.Avro.Schema
         /// </returns>
         private TypeSchema BuildRecordTypeSchema(Type type, Dictionary<string, NamedSchema> schemas, uint currentDepth)
         {
-            Contract.Assert(type != null, "type");
-            Contract.Assert(schemas != null, "schemas");
-
             if (type == typeof(DateTimeOffset))
             {
                 return this.settings.UsePosixTime
@@ -372,7 +344,6 @@ namespace Microsoft.Hadoop.Avro.Schema
             var record = new RecordSchema(
                 attr,
                 type);
-            Contract.Assert(schemas.ContainsKey(type.ToString()) == false, "Should not be in the collection.");
             schemas.Add(type.ToString(), record);
 
             var members = resolver.ResolveMembers(type);
@@ -382,9 +353,6 @@ namespace Microsoft.Hadoop.Avro.Schema
 
         private TypeSchema BuildKnownTypeSchema(Type type, Dictionary<string, NamedSchema> schemas, uint currentDepth)
         {
-            Contract.Assert(type != null, "type");
-            Contract.Assert(schemas != null, "schemas");
-
             var applicable = this.GetApplicableKnownTypes(type).ToList();
             if (applicable.Count == 0)
             {
@@ -404,9 +372,10 @@ namespace Microsoft.Hadoop.Avro.Schema
 
         private IEnumerable<Type> GetApplicableKnownTypes(Type type)
         {
-            Contract.Assert(type != null, "type");
-
-            var allKnownTypes = new HashSet<Type>(this.knownTypes) { type };
+            var allKnownTypes = new HashSet<Type>(this.knownTypes)
+            {
+                type
+            };
             return allKnownTypes.Where(t => t.CanBeKnownTypeOf(type));
         }
 

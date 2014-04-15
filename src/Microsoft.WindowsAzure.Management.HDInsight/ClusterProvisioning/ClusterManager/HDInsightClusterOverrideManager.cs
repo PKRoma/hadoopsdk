@@ -36,7 +36,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Cluste
                     versionFinderFactory, uriBuilderFactory, payloadConverter);
         }
 
-        public HDInsightOverrideHandlers GetHandlers<T>(T credentials, IAbstractionContext cancellationToken) where T : IHDInsightSubscriptionCredentials
+        public HDInsightOverrideHandlers GetHandlers<T>(T credentials, IAbstractionContext cancellationToken, bool ignoreSslErrors) where T : IHDInsightSubscriptionCredentials
         {
             if (credentials.IsNull())
             {
@@ -48,7 +48,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Cluste
                 throw new NotSupportedException("The credential system supplied is not supported.");
             }
             var tuple = this.handlers[type];
-            return new HDInsightOverrideHandlers(tuple.Item1.Create(credentials, cancellationToken), tuple.Item2.Create(credentials), tuple.Item3);
+            return new HDInsightOverrideHandlers(tuple.Item1.Create(credentials, cancellationToken, ignoreSslErrors), tuple.Item2.Create(credentials), tuple.Item3);
         }
 
         private Type FindSupportedType(Type initial)

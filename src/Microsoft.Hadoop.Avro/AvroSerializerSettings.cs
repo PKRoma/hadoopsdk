@@ -30,7 +30,7 @@ namespace Microsoft.Hadoop.Avro
         {
             this.GenerateDeserializer = true;
             this.GenerateSerializer = true;
-            this.Resolver = new AvroPublicMemberContractResolver();
+            this.Resolver = new AvroDataContractResolver();
             this.MaxItemsInSchemaTree = 1024;
             this.UsePosixTime = false;
             this.KnownTypes = new List<Type>();
@@ -138,13 +138,26 @@ namespace Microsoft.Hadoop.Avro
         /// </returns>
         public override int GetHashCode()
         {
-            return this.GenerateSerializer.GetHashCode()
-                ^ this.GenerateDeserializer.GetHashCode()
-                ^ this.UsePosixTime.GetHashCode()
-                ^ this.MaxItemsInSchemaTree.GetHashCode()
-                ^ this.Resolver.GetHashCode()
-                ^ this.UseCache.GetHashCode()
-                ^ (this.Surrogate != null ? this.Surrogate.GetHashCode() : 0);
+            unchecked
+            {
+                var hashcode = 83;
+                hashcode = (hashcode * 89) + this.GenerateSerializer.GetHashCode();
+                hashcode = (hashcode * 89) + this.GenerateDeserializer.GetHashCode();
+                hashcode = (hashcode * 89) + this.UsePosixTime.GetHashCode();
+                hashcode = (hashcode * 89) + this.MaxItemsInSchemaTree.GetHashCode();
+                hashcode = (hashcode * 89) + (this.Resolver != null ? this.Resolver.GetHashCode() : 0);
+                hashcode = (hashcode * 89) + (this.Surrogate != null ? this.Surrogate.GetHashCode() : 0);
+                hashcode = (hashcode * 89) + this.UseCache.GetHashCode();
+                if (this.KnownTypes != null)
+                {
+                    hashcode = (hashcode * 89) + this.KnownTypes.Count();
+                    foreach (var knownType in this.KnownTypes)
+                    {
+                        hashcode = (hashcode * 89) + (knownType != null ? knownType.GetHashCode() : 0);
+                    }
+                }
+                return hashcode;
+            }
         }
     }
 }

@@ -24,9 +24,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.Web
     ///     Abstracts Http client requests.
     /// </summary>
 #if Non_Public_SDK
-    public interface IHttpClientAbstraction : IDisposable
+    public interface IHttpClientAbstraction : IDisposable, ILogProvider
 #else
-    internal interface IHttpClientAbstraction : IDisposable
+    internal interface IHttpClientAbstraction : IDisposable, ILogProvider
 #endif
     {
         /// <summary>
@@ -66,19 +66,5 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.Web
         ///     A task representing the response (once it has completed).
         /// </returns>
         Task<IHttpResponseMessageAbstraction> SendAsync();
-
-        /// <summary>
-        /// Logs a message to the instance logger of this HttpClient.
-        /// </summary>
-        /// <param name="severity">
-        /// The Severity of the message to log.
-        /// </param>
-        /// <param name="verbosity">
-        /// The verbosity of the message to log.
-        /// </param>
-        /// <param name="message">
-        /// The message to log.
-        /// </param>
-        void Log(Severity severity, Verbosity verbosity, string message);
     }
 }

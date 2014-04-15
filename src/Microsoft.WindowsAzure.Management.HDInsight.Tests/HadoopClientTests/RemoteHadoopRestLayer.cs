@@ -113,9 +113,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             var moqFactory = new Moq.Mock<IHttpClientAbstractionFactory>();
 
             // Overload both create methods.
-            moqFactory.Setup(fac => fac.Create(It.IsAny<X509Certificate2>(), It.IsAny<HDInsight.IAbstractionContext>()))
+            moqFactory.Setup(fac => fac.Create(It.IsAny<X509Certificate2>(), It.IsAny<HDInsight.IAbstractionContext>(), false))
                       .Returns(() => moqClient.Object);
-            moqFactory.Setup(fac => fac.Create(It.IsAny<HDInsight.IAbstractionContext>()))
+            moqFactory.Setup(fac => fac.Create(It.IsAny<HDInsight.IAbstractionContext>(), false))
                       .Returns(() => moqClient.Object);
 
             // Override the factory in the Service Locator (for this test only).
@@ -147,7 +147,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
 
             var cred = GetRemoteHadoopCredential();
             // Create a client.
-            var restClient = factory.Create(cred, GetAbstractionContext());
+            var restClient = factory.Create(cred, GetAbstractionContext(), false);
 
             // Call ListJobs.
             restClient.ListJobs().WaitForResult();
@@ -179,7 +179,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             var encodedUserName = "%26Needs%3DEncoding";
             
             // Create a client.
-            var restClient = factory.Create(cred, GetAbstractionContext());
+            var restClient = factory.Create(cred, GetAbstractionContext(), false);
 
             // Call ListJobs
             restClient.ListJobs().WaitForResult();
@@ -208,7 +208,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
 
             var cred = GetRemoteHadoopCredential();
             // Create a client.
-            var restClient = factory.Create(cred, GetAbstractionContext());
+            var restClient = factory.Create(cred, GetAbstractionContext(), false);
 
             // Call GetJob.
             var jobId = "12345";
@@ -241,7 +241,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             var encodedUserName = "%26Needs%3DEncoding";
 
             // Create a client.
-            var restClient = factory.Create(cred, GetAbstractionContext());
+            var restClient = factory.Create(cred, GetAbstractionContext(), false);
 
             // Call GetJob
             var jobId = "12345";
@@ -272,7 +272,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             var cred = GetRemoteHadoopCredential();
 
             // Create a client.
-            var restClient = factory.Create(cred, GetAbstractionContext());
+            var restClient = factory.Create(cred, GetAbstractionContext(), false);
 
             // Call GetJob
             var jobId = "1&2=345";
@@ -303,7 +303,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
 
             var cred = GetRemoteHadoopCredential();
             // Create a client.
-            var restClient = factory.Create(cred, GetAbstractionContext());
+            var restClient = factory.Create(cred, GetAbstractionContext(), false);
 
             // Call SubmitHiveJob.
             var payload = "some payload";
@@ -337,7 +337,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             var encodedUserName = "%26Needs%3DEncoding";
 
             // Create a client.
-            var restClient = factory.Create(cred, GetAbstractionContext());
+            var restClient = factory.Create(cred, GetAbstractionContext(), false);
 
             // Call SubmitHiveJob.
             var payload = "some payload";
@@ -368,7 +368,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
 
             var cred = GetRemoteHadoopCredential();
             // Create a client.
-            var restClient = factory.Create(cred, GetAbstractionContext());
+            var restClient = factory.Create(cred, GetAbstractionContext(), false);
 
             // Call SubmitHiveJob.
             var payload = "some payload";
@@ -402,7 +402,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             var encodedUserName = "%26Needs%3DEncoding";
 
             // Create a client.
-            var restClient = factory.Create(cred, GetAbstractionContext());
+            var restClient = factory.Create(cred, GetAbstractionContext(), false);
 
             // Call SubmitHiveJob.
             var payload = "some payload";

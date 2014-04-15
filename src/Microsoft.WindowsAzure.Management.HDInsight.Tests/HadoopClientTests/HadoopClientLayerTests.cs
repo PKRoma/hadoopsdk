@@ -732,7 +732,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             var factory = ServiceLocator.Instance.Locate<IHDInsightManagementRestClientFactory>();
             using (var context = new AbstractionContext(CancellationToken.None))
             {
-                var underlying = factory.Create(certificateCredentials, context);
+                var underlying = factory.Create(certificateCredentials, context, false);
 
                 var mockClient = new Mock<IHDInsightManagementRestClient>();
                 var callCount = 0;
@@ -744,7 +744,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
                     });
 
                 var mockFactory = new Mock<IHDInsightManagementRestClientFactory>();
-                mockFactory.Setup(x => x.Create(It.IsAny<IHDInsightSubscriptionCredentials>(), It.IsAny<IAbstractionContext>()))
+                mockFactory.Setup(x => x.Create(It.IsAny<IHDInsightSubscriptionCredentials>(), It.IsAny<IAbstractionContext>(), false))
                            .Returns(() => mockClient.Object);
 
                 var manager = ServiceLocator.Instance.Locate<IServiceLocationIndividualTestManager>();
@@ -793,7 +793,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             var factory = ServiceLocator.Instance.Locate<IHDInsightManagementRestClientFactory>();
             using (var context = new AbstractionContext(CancellationToken.None))
             {
-                var underlying = factory.Create(certificateCredentials, context);
+                var underlying = factory.Create(certificateCredentials, context, false);
 
                 var mockClient = new Mock<IHDInsightManagementRestClient>();
                 var callCount = 0;
@@ -805,7 +805,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
                           });
 
                 var mockFactory = new Mock<IHDInsightManagementRestClientFactory>();
-                mockFactory.Setup(x => x.Create(It.IsAny<IHDInsightSubscriptionCredentials>(), It.IsAny<IAbstractionContext>()))
+                mockFactory.Setup(x => x.Create(It.IsAny<IHDInsightSubscriptionCredentials>(), It.IsAny<IAbstractionContext>(), false))
                            .Returns(() => mockClient.Object);
 
                 var manager = ServiceLocator.Instance.Locate<IServiceLocationIndividualTestManager>();
@@ -1175,7 +1175,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
                 Password = IntegrationTestBase.TestCredentials.AzurePassword,
                 Server = GatewayUriResolver.GetGatewayUri(IntegrationTestBase.TestCredentials.WellKnownCluster.DnsName)
             };
-            var jobsPocoClient = new RemoteHadoopJobSubmissionPocoClientFactory().Create(remoteConnectionCredentials, GetAbstractionContext());
+            var jobsPocoClient = new RemoteHadoopJobSubmissionPocoClientFactory().Create(remoteConnectionCredentials, GetAbstractionContext(), false);
 
             this.ApplyIndividualTestMockingOnly();
             this.EnableHttpSpy();
@@ -1202,7 +1202,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
                 Password = IntegrationTestBase.TestCredentials.AzurePassword,
                 Server = GatewayUriResolver.GetGatewayUri(IntegrationTestBase.TestCredentials.WellKnownCluster.DnsName)
             };
-            var jobsPocoClient = new RemoteHadoopJobSubmissionPocoClientFactory().Create(remoteConnectionCredentials, GetAbstractionContext());
+            var jobsPocoClient = new RemoteHadoopJobSubmissionPocoClientFactory().Create(remoteConnectionCredentials, GetAbstractionContext(), false);
 
             this.ApplyIndividualTestMockingOnly();
             this.EnableHttpSpy();
@@ -1229,7 +1229,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
                 Password = IntegrationTestBase.TestCredentials.AzurePassword,
                 Server = GatewayUriResolver.GetGatewayUri(IntegrationTestBase.TestCredentials.WellKnownCluster.DnsName)
             };
-            var jobsPocoClient = new RemoteHadoopJobSubmissionPocoClientFactory().Create(remoteConnectionCredentials, GetAbstractionContext());
+            var jobsPocoClient = new RemoteHadoopJobSubmissionPocoClientFactory().Create(remoteConnectionCredentials, GetAbstractionContext(), false);
 
             this.ApplyIndividualTestMockingOnly();
             this.EnableHttpSpy();
@@ -1256,7 +1256,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
                 Password = IntegrationTestBase.TestCredentials.AzurePassword,
                 Server = GatewayUriResolver.GetGatewayUri(IntegrationTestBase.TestCredentials.WellKnownCluster.DnsName)
             };
-            var jobsPocoClient = new RemoteHadoopJobSubmissionPocoClientFactory().Create(remoteConnectionCredentials, GetAbstractionContext());
+            var jobsPocoClient = new RemoteHadoopJobSubmissionPocoClientFactory().Create(remoteConnectionCredentials, GetAbstractionContext(), false);
 
             this.ApplyIndividualTestMockingOnly();
             this.EnableHttpSpy();
@@ -1292,7 +1292,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
                 Password = IntegrationTestBase.TestCredentials.AzurePassword,
                 Server = GatewayUriResolver.GetGatewayUri(IntegrationTestBase.TestCredentials.WellKnownCluster.DnsName)
             };
-            var jobsPocoClient = new RemoteHadoopJobSubmissionPocoClientFactory().Create(remoteConnectionCredentials, GetAbstractionContext());
+            var jobsPocoClient = new RemoteHadoopJobSubmissionPocoClientFactory().Create(remoteConnectionCredentials, GetAbstractionContext(), false);
 
             this.ApplyIndividualTestMockingOnly();
             this.EnableHttpSpy();

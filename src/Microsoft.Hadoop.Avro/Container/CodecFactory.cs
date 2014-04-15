@@ -16,7 +16,6 @@ namespace Microsoft.Hadoop.Avro.Container
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
     using System.Globalization;
 
     /// <summary>
@@ -43,7 +42,6 @@ namespace Microsoft.Hadoop.Avro.Container
             {
                 throw new ArgumentNullException("codecName");
             }
-            Contract.EndContractBlock();
 
             if (!this.codecs.ContainsKey(codecName))
             {

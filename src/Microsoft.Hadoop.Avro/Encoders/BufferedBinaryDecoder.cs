@@ -15,7 +15,6 @@
 namespace Microsoft.Hadoop.Avro
 {
     using System;
-    using System.Diagnostics.Contracts;
     using System.IO;
     using System.Runtime.Serialization;
     using System.Text;
@@ -41,7 +40,6 @@ namespace Microsoft.Hadoop.Avro
             {
                 throw new ArgumentNullException("stream");
             }
-            Contract.EndContractBlock();
 
             this.buffer = new byte[1024];
             this.stream = stream;
@@ -403,7 +401,6 @@ namespace Microsoft.Hadoop.Avro
             {
                 throw new ArgumentOutOfRangeException("size");
             }
-            Contract.EndContractBlock();
 
             int stillAvailable = this.TryReadAhead(size);
             if (stillAvailable < size)
@@ -444,7 +441,7 @@ namespace Microsoft.Hadoop.Avro
                 this.currentBufferPosition = 0;
             }
 
-            this.available += this.stream.Read(this.buffer, this.available, size);
+            this.available += this.stream.ReadAllRequiredBytes(this.buffer, this.available, size);
             return this.available - this.currentBufferPosition;
         }
 
@@ -687,7 +684,6 @@ namespace Microsoft.Hadoop.Avro
             {
                 throw new ArgumentOutOfRangeException("size");
             }
-            Contract.EndContractBlock();
 
             int stillAvailable = this.TryReadAhead(size);
             if (stillAvailable < size)

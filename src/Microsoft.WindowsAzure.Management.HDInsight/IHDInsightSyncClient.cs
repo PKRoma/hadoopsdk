@@ -26,19 +26,19 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
         /// <summary>
         /// Queries the locations where HDInsight has been enabled for the subscription.
         /// </summary>
-        /// <returns>List of sindows Azure locations.</returns>
+        /// <returns>List of Windows Azure locations.</returns>
         Collection<string> ListAvailableLocations();
 
         /// <summary>
         /// Queries the locations where HDInsight has been enabled for the subscription.
         /// </summary>
-        /// <returns>List of sindows Azure locations.</returns>
+        /// <returns>List of Windows Azure locations.</returns>
         IEnumerable<KeyValuePair<string, string>> ListResourceProviderProperties();
 
         /// <summary>
         /// Queries the versions of HDInsight that have been enabled for the subscription.
         /// </summary>
-        /// <returns>List of sindows Azure locations.</returns>
+        /// <returns>List of Windows Azure locations.</returns>
         Collection<HDInsightVersion> ListAvailableVersions();
 
         /// <summary>

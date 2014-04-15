@@ -51,14 +51,14 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.InversionOfControl
 
             var overrideManager = new HDInsightClusterOverrideManager();
             overrideManager.AddOverride<HDInsightCertificateCredential>(new VersionFinderClientFactory(),
-                                                                                     new HDInsightManagementRdfeUriBuilderFactory(),
-                                                                                     new PayloadConverter());
+                                                                        new HDInsightManagementRdfeUriBuilderFactory(),
+                                                                        new PayloadConverter());
 
             overrideManager.AddOverride<HDInsightAccessTokenCredential>(new VersionFinderClientFactory(),
-                                                                                     new HDInsightManagementRdfeUriBuilderFactory(),
-                                                                                     new PayloadConverter());
+                                                                        new HDInsightManagementRdfeUriBuilderFactory(),
+                                                                        new PayloadConverter());
 
-            manager.RegisterType<IRetryTimingManager, RetryTimingManager>();
+            manager.RegisterType<IHttpOperationManager, HttpOperationManager>();
             manager.RegisterInstance<IHDInsightClusterOverrideManager>(overrideManager);
             manager.RegisterType<ICloudServiceNameResolver, CloudServiceNameResolver>();
             manager.RegisterType<IHDInsightManagementRestClientFactory, HDInsightManagementRestClientFactory>();
@@ -83,7 +83,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.InversionOfControl
 
         internal static Uri HttpChangeRequestUriBuilder(IHDInsightSubscriptionAbstractionContext context, string dnsName, string location)
         {
-            var overrideHandlers = ServiceLocator.Instance.Locate<IHDInsightClusterOverrideManager>().GetHandlers(context.Credentials, context);
+            var overrideHandlers = ServiceLocator.Instance.Locate<IHDInsightClusterOverrideManager>().GetHandlers(context.Credentials, context, false);
             return overrideHandlers.UriBuilder.GetEnableDisableHttpUri(dnsName, location);
         }
     }

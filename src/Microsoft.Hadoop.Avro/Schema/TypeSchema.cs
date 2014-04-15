@@ -16,7 +16,6 @@ namespace Microsoft.Hadoop.Avro.Schema
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
     using Microsoft.Hadoop.Avro.Serializers;
 
     /// <summary>
@@ -25,7 +24,7 @@ namespace Microsoft.Hadoop.Avro.Schema
     /// </summary>
     public abstract class TypeSchema : Schema
     {
-        private Type runtimeType;
+        private readonly Type runtimeType;
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="TypeSchema" /> class.
@@ -39,7 +38,6 @@ namespace Microsoft.Hadoop.Avro.Schema
             {
                 throw new ArgumentNullException("runtimeType");
             }
-            Contract.EndContractBlock();
 
             this.runtimeType = runtimeType;
         }
@@ -50,7 +48,6 @@ namespace Microsoft.Hadoop.Avro.Schema
         public Type RuntimeType
         {
             get { return this.runtimeType; }
-            //internal set { this.runtimeType = value; }
         }
 
         /// <summary>
@@ -62,5 +59,19 @@ namespace Microsoft.Hadoop.Avro.Schema
         ///     Gets or sets the builder.
         /// </summary>
         internal IObjectSerializer Serializer { get; set; }
+
+        /// <summary>
+        /// Creates schema from JSON string.
+        /// </summary>
+        /// <param name="schemaInJson">The schema.</param>
+        /// <returns>Created schema.</returns>
+        public static TypeSchema Create(string schemaInJson)
+        {
+            if (string.IsNullOrEmpty(schemaInJson))
+            {
+                throw new ArgumentNullException("schemaInJson");
+            }
+            return new JsonSchemaBuilder().BuildSchema(schemaInJson);
+        }
     }
 }

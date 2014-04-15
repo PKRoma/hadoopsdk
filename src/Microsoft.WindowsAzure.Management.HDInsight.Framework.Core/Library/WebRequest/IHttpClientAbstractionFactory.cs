@@ -98,6 +98,93 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.Web
         IHttpClientAbstraction Create(IAbstractionContext context);
 
         /// <summary>
+        ///     Creates a new HttpClientAbstraction class.
+        /// </summary>
+        /// <param name="cert">
+        ///     The X509 cert to use.
+        /// </param>
+        /// <param name="ignoreSslErrors">
+        /// Instructs that server certificate errors should be ignored.
+        /// </param>
+        /// <returns>
+        ///     A new instance of the HttpClientAbstraction.
+        /// </returns>
+        IHttpClientAbstraction Create(X509Certificate2 cert, bool ignoreSslErrors);
+
+        /// <summary>
+        ///     Creates a new HttpClientAbstraction class.
+        /// </summary>
+        /// <param name="cert">
+        ///     The X509 cert to use.
+        /// </param>
+        /// <param name="context">
+        /// The abstraction context to use.
+        /// </param>
+        /// <param name="ignoreSslErrors">
+        /// Instructs that server certificate errors should be ignored.
+        /// </param>
+        /// <returns>
+        ///     A new instance of the HttpClientAbstraction.
+        /// </returns>
+        IHttpClientAbstraction Create(X509Certificate2 cert, IAbstractionContext context, bool ignoreSslErrors);
+
+        /// <summary>
+        ///     Creates a new HttpClientAbstraction class.
+        /// </summary>
+        /// <param name="token">
+        ///     The access token to use.
+        /// </param>
+        /// <param name="ignoreSslErrors">
+        /// Instructs that server certificate errors should be ignored.
+        /// </param>
+        /// <returns>
+        ///     A new instance of the HttpClientAbstraction.
+        /// </returns>
+        IHttpClientAbstraction Create(string token, bool ignoreSslErrors);
+
+        /// <summary>
+        ///     Creates a new HttpClientAbstraction class.
+        /// </summary>
+        /// <param name="token">
+        ///     The access token to use.
+        /// </param>
+        /// <param name="context">
+        /// The abstraction context to use.
+        /// </param>
+        /// <param name="ignoreSslErrors">
+        /// Instructs that server certificate errors should be ignored.
+        /// </param>
+        /// <returns>
+        ///     A new instance of the HttpClientAbstraction.
+        /// </returns>
+        IHttpClientAbstraction Create(string token, IAbstractionContext context, bool ignoreSslErrors);
+
+        /// <summary>
+        ///     Creates a new HttpClientAbstraction class.
+        /// </summary>
+        /// <param name="ignoreSslErrors">
+        /// Instructs that server certificate errors should be ignored.
+        /// </param>
+        /// <returns>
+        ///     A new instance of the HttpClientAbstraction.
+        /// </returns>
+        IHttpClientAbstraction Create(bool ignoreSslErrors);
+
+        /// <summary>
+        ///     Creates a new HttpClientAbstraction class.
+        /// </summary>
+        /// <param name="context">
+        /// The abstraction context to use.
+        /// </param>
+        /// <param name="ignoreSslErrors">
+        /// Instructs that server certificate errors should be ignored.
+        /// </param>
+        /// <returns>
+        ///     A new instance of the HttpClientAbstraction.
+        /// </returns>
+        IHttpClientAbstraction Create(IAbstractionContext context, bool ignoreSslErrors);
+
+        /// <summary>
         ///     Performs multiple attempts of an HTTP Operation until the operation either succeeds or a timeout is reached.
         /// </summary>
         /// <param name="cert">
@@ -109,16 +196,19 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.Web
         /// <param name="shouldRetry">
         ///     A function that well determine the success or failure of the operation.
         /// </param>
-        /// <param name="timeout">
-        ///     The timeout period after which the operation will stop being performed.
+        /// <param name="retryCount">
+        ///     The number of times the operation will be attempted before giving up.
         /// </param>
-        /// <param name="pollInterval">
+        /// <param name="retryInterval">
         ///     The polling interval that should be used to wait between operations.
+        /// </param>
+        /// <param name="ignoreSslErrors">
+        ///     Specifies that server side SSL errors should be ignored.
         /// </param>
         /// <returns>
         ///     The results of the HTTP operation.
         /// </returns>
-        Task<IHttpResponseMessageAbstraction> Retry(X509Certificate2 cert, Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation, Func<IHttpResponseMessageAbstraction, bool> shouldRetry, TimeSpan timeout, TimeSpan pollInterval);
+        Task<IHttpResponseMessageAbstraction> Retry(X509Certificate2 cert, Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation, Func<IHttpResponseMessageAbstraction, bool> shouldRetry, int retryCount, TimeSpan retryInterval, bool ignoreSslErrors);
 
         /// <summary>
         ///     Performs multiple attempts of an HTTP Operation until the operation either succeeds or a timeout is reached.
@@ -135,16 +225,19 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.Web
         /// <param name="shouldRetry">
         ///     A function that well determine the success or failure of the operation.
         /// </param>
-        /// <param name="timeout">
-        ///     The timeout period after which the operation will stop being performed.
+        /// <param name="retryCount">
+        ///     The number of times the operation will be attempted before giving up.
         /// </param>
-        /// <param name="pollInterval">
+        /// <param name="retryInterval">
         ///     The polling interval that should be used to wait between operations.
+        /// </param>
+        /// <param name="ignoreSslErrors">
+        ///     Specifies that server side SSL errors should be ignored.
         /// </param>
         /// <returns>
         ///     The results of the HTTP operation.
         /// </returns>
-        Task<IHttpResponseMessageAbstraction> Retry(X509Certificate2 cert, IAbstractionContext context, Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation, Func<IHttpResponseMessageAbstraction, bool> shouldRetry, TimeSpan timeout, TimeSpan pollInterval);
+        Task<IHttpResponseMessageAbstraction> Retry(X509Certificate2 cert, IAbstractionContext context, Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation, Func<IHttpResponseMessageAbstraction, bool> shouldRetry, int retryCount, TimeSpan retryInterval, bool ignoreSslErrors);
 
         /// <summary>
         ///     Performs multiple attempts of an HTTP Operation until the operation either succeeds or a timeout is reached.
@@ -158,16 +251,19 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.Web
         /// <param name="shouldRetry">
         ///     A function that well determine the success or failure of the operation.
         /// </param>
-        /// <param name="timeout">
-        ///     The timeout period after which the operation will stop being performed.
+        /// <param name="retryCount">
+        ///     The number of times the operation will be attempted before giving up.
         /// </param>
-        /// <param name="pollInterval">
+        /// <param name="retryInterval">
         ///     The polling interval that should be used to wait between operations.
+        /// </param>
+        /// <param name="ignoreSslErrors">
+        ///     Specifies that server side SSL errors should be ignored.
         /// </param>
         /// <returns>
         ///     The results of the HTTP operation.
         /// </returns>
-        Task<IHttpResponseMessageAbstraction> Retry(string token, Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation, Func<IHttpResponseMessageAbstraction, bool> shouldRetry, TimeSpan timeout, TimeSpan pollInterval);
+        Task<IHttpResponseMessageAbstraction> Retry(string token, Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation, Func<IHttpResponseMessageAbstraction, bool> shouldRetry, int retryCount, TimeSpan retryInterval, bool ignoreSslErrors);
 
         /// <summary>
         ///     Performs multiple attempts of an HTTP Operation until the operation either succeeds or a timeout is reached.
@@ -184,16 +280,19 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.Web
         /// <param name="shouldRetry">
         ///     A function that well determine the success or failure of the operation.
         /// </param>
-        /// <param name="timeout">
-        ///     The timeout period after which the operation will stop being performed.
+        /// <param name="retryCount">
+        ///     The number of times the operation will be attempted before giving up.
         /// </param>
-        /// <param name="pollInterval">
+        /// <param name="retryInterval">
         ///     The polling interval that should be used to wait between operations.
+        /// </param>
+        /// <param name="ignoreSslErrors">
+        ///     Specifies that server side SSL errors should be ignored.
         /// </param>
         /// <returns>
         ///     The results of the HTTP operation.
         /// </returns>
-        Task<IHttpResponseMessageAbstraction> Retry(string token, IAbstractionContext context, Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation, Func<IHttpResponseMessageAbstraction, bool> shouldRetry, TimeSpan timeout, TimeSpan pollInterval);
+        Task<IHttpResponseMessageAbstraction> Retry(string token, IAbstractionContext context, Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation, Func<IHttpResponseMessageAbstraction, bool> shouldRetry, int retryCount, TimeSpan retryInterval, bool ignoreSslErrors);
 
         /// <summary>
         ///     Performs multiple attempts of an HTTP Operation until the operation either succeeds or a timeout is reached.
@@ -204,16 +303,19 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.Web
         /// <param name="shouldRetry">
         ///     A function that well determine the success or failure of the operation.
         /// </param>
-        /// <param name="timeout">
-        ///     The timeout period after which the operation will stop being performed.
+        /// <param name="retryCount">
+        ///     The number of times the operation will be attempted before giving up.
         /// </param>
         /// <param name="pollInterval">
         ///     The polling interval that should be used to wait between operations.
         /// </param>
+        /// <param name="ignoreSslErrors">
+        ///     Specifies that server side SSL errors should be ignored.
+        /// </param>
         /// <returns>
         ///     The results of the HTTP operation.
         /// </returns>
-        Task<IHttpResponseMessageAbstraction> Retry(Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation, Func<IHttpResponseMessageAbstraction, bool> shouldRetry, TimeSpan timeout, TimeSpan pollInterval);
+        Task<IHttpResponseMessageAbstraction> Retry(Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation, Func<IHttpResponseMessageAbstraction, bool> shouldRetry, int retryCount, TimeSpan pollInterval, bool ignoreSslErrors);
 
         /// <summary>
         ///     Performs multiple attempts of an HTTP Operation until the operation either succeeds or a timeout is reached.
@@ -227,15 +329,18 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.Web
         /// <param name="shouldRetry">
         ///     A function that well determine the success or failure of the operation.
         /// </param>
-        /// <param name="timeout">
-        ///     The timeout period after which the operation will stop being performed.
+        /// <param name="retryCount">
+        ///     The number of times the operation will be attempted before giving up.
         /// </param>
-        /// <param name="pollInterval">
+        /// <param name="retryInterval">
         ///     The polling interval that should be used to wait between operations.
+        /// </param>
+        /// <param name="ignoreSslErrors">
+        ///     Specifies that server side SSL errors should be ignored.
         /// </param>
         /// <returns>
         ///     The results of the HTTP operation.
         /// </returns>
-        Task<IHttpResponseMessageAbstraction> Retry(IAbstractionContext context, Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation, Func<IHttpResponseMessageAbstraction, bool> shouldRetry, TimeSpan timeout, TimeSpan pollInterval);
+        Task<IHttpResponseMessageAbstraction> Retry(IAbstractionContext context, Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation, Func<IHttpResponseMessageAbstraction, bool> shouldRetry, int retryCount, TimeSpan retryInterval, bool ignoreSslErrors);
     }
 }

@@ -36,6 +36,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
     using Microsoft.WindowsAzure.Management.HDInsight.Framework;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Logging;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
     using Microsoft.WindowsAzure.Management.HDInsight.Logging;
     using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.ServerDataObjects;
@@ -386,6 +387,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
             this.certificates.Add(cert.Thumbprint, cert);
             this.subscriptions.Add(IntegrationTestBase.TestCredentials.SubscriptionId);
             this.credentials = credentials;
+            this.Logger = new Logger();
         }
 
         internal static SimulatorClusterContainer GetCloudServiceInternal(string name)
@@ -516,7 +518,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
             this.LogMessage("Creating cluster '{0}' in location {1}", dnsName, location);
             this.ValidateConnection();
 
-            var registrationClient = ServiceLocator.Instance.Locate<ISubscriptionRegistrationClientFactory>().Create(this.credentials, this.context);
+            var registrationClient = ServiceLocator.Instance.Locate<ISubscriptionRegistrationClientFactory>().Create(this.credentials, this.context, false);
             if (!await registrationClient.ValidateSubscriptionLocation(location))
             {
                 var resolver = ServiceLocator.Instance.Locate<ICloudServiceNameResolver>();
@@ -644,7 +646,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
 
         private string GetVersion(string version)
         {
-            var overrideHandlers = ServiceLocator.Instance.Locate<IHDInsightClusterOverrideManager>().GetHandlers(this.credentials, this.context);
+            var overrideHandlers = ServiceLocator.Instance.Locate<IHDInsightClusterOverrideManager>().GetHandlers(this.credentials, this.context, false);
             var versionFinder = overrideHandlers.VersionFinder;
             var supportedVersions = versionFinder.ListAvailableVersions().WaitForResult();
             if (string.Equals(version, defaultVersion, StringComparison.OrdinalIgnoreCase))
@@ -1006,5 +1008,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
                 this.context.Logger.LogMessage(message, Severity.Informational, Verbosity.Diagnostic);
             }
         }
+
+        public ILogger Logger { get; private set; }
     }
 }

@@ -27,28 +27,42 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestCl
     using Microsoft.WindowsAzure.Management.HDInsight.Framework;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Logging;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
+    using Microsoft.WindowsAzure.Management.HDInsight.Logging;
 
     internal class HDInsightManagementRestClient : IHDInsightManagementRestClient
     {
         private readonly IHDInsightSubscriptionCredentials credentials;
         private readonly HDInsight.IAbstractionContext context;
         private const string HelpLinkForException = @"http://go.microsoft.com/fwlink/?LinkID=324137";
+        private readonly bool ignoreSslErrors;
 
         public IHDInsightSubscriptionCredentials Credentials
         {
             get { return this.credentials; }
         }
 
-        internal HDInsightManagementRestClient(IHDInsightSubscriptionCredentials credentials, HDInsight.IAbstractionContext context)
+        internal HDInsightManagementRestClient(IHDInsightSubscriptionCredentials credentials, HDInsight.IAbstractionContext context, bool ignoreSslErrors)
         {
             this.context = context;
             this.credentials = credentials;
+            this.ignoreSslErrors = ignoreSslErrors;
+            if (context.Logger.IsNotNull())
+            {
+                this.Logger = context.Logger;
+            }
+            else
+            {
+                this.Logger = new Logger();
+            }
         }
 
         private async Task<IHttpResponseMessageAbstraction> ProcessListCloudServices(IHttpClientAbstraction client)
         {
-            var overrideHandlers = ServiceLocator.Instance.Locate<IHDInsightClusterOverrideManager>().GetHandlers(this.credentials, this.context);
+            var httpLogic = ServiceLocator.Instance.Locate<IHttpOperationManager>();
+            client.Timeout = httpLogic.HttpOperationTimeout;
+            var overrideHandlers = ServiceLocator.Instance.Locate<IHDInsightClusterOverrideManager>().GetHandlers(this.credentials, this.context, this.ignoreSslErrors);
             var uriBuilder = overrideHandlers.UriBuilder;
 
             client.RequestUri = uriBuilder.GetListCloudServicesUri();
@@ -67,7 +81,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestCl
         {
             int i = 0;
             var start = DateTime.UtcNow;
-            var timingManager = ServiceLocator.Instance.Locate<IRetryTimingManager>();
+            var timingManager = ServiceLocator.Instance.Locate<IHttpOperationManager>();
             var factory = ServiceLocator.Instance.Locate<IHDInsightHttpClientAbstractionFactory>();
             var result = await factory.Retry(this.credentials,
                                              this.context,
@@ -77,8 +91,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestCl
                                                  i++;
                                                  return r.StatusCode != HttpStatusCode.Accepted && r.StatusCode != HttpStatusCode.OK;
                                              },
-                                             timingManager.TimeOut,
-                                             timingManager.PollInterval);
+                                             timingManager.RetryCount,
+                                             timingManager.RetryInterval,
+                                             this.ignoreSslErrors);
 
             if (result.StatusCode != HttpStatusCode.Accepted && result.StatusCode != HttpStatusCode.OK)
             {
@@ -90,10 +105,10 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestCl
         // Method = "PUT", UriTemplate = "{subscriptionId}/cloudservices/{cloudServiceName}/resources/{resourceProviderNamespace}/{resourceType}/{resourceName}"
         public async Task<IHttpResponseMessageAbstraction> CreateResource(string resourceId, string resourceType, string location, string clusterPayload)
         {
-            var overrideHandlers = ServiceLocator.Instance.Locate<IHDInsightClusterOverrideManager>().GetHandlers(this.credentials, this.context);
+            var overrideHandlers = ServiceLocator.Instance.Locate<IHDInsightClusterOverrideManager>().GetHandlers(this.credentials, this.context, this.ignoreSslErrors);
             var uriBuilder = overrideHandlers.UriBuilder;
             // Creates an HTTP client
-            using (var client = ServiceLocator.Instance.Locate<IHDInsightHttpClientAbstractionFactory>().Create(this.credentials, this.context))
+            using (var client = ServiceLocator.Instance.Locate<IHDInsightHttpClientAbstractionFactory>().Create(this.credentials, this.context, this.ignoreSslErrors))
             {
                 client.RequestUri = uriBuilder.GetCreateResourceUri(resourceId, resourceType, location);
                 client.Method = HttpMethod.Put;
@@ -127,10 +142,10 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestCl
         // Method = "DELETE", UriTemplate = "{subscriptionId}/cloudservices/{cloudServiceName}/resources/{resourceProviderNamespace}/{resourceType}/{resourceName}"
         public async Task<IHttpResponseMessageAbstraction> DeleteContainer(string dnsName, string location)
         {
-            var overrideHandlers = ServiceLocator.Instance.Locate<IHDInsightClusterOverrideManager>().GetHandlers(this.credentials, this.context);
+            var overrideHandlers = ServiceLocator.Instance.Locate<IHDInsightClusterOverrideManager>().GetHandlers(this.credentials, this.context, this.ignoreSslErrors);
             var uriBuilder = overrideHandlers.UriBuilder;
             // Creates an HTTP client
-            using (var client = ServiceLocator.Instance.Locate<IHDInsightHttpClientAbstractionFactory>().Create(this.credentials, this.context))
+            using (var client = ServiceLocator.Instance.Locate<IHDInsightHttpClientAbstractionFactory>().Create(this.credentials, this.context, this.ignoreSslErrors))
             {
                 client.RequestUri = uriBuilder.GetDeleteContainerUri(dnsName, location);
 
@@ -161,7 +176,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestCl
             {
                 throw new NotSupportedException("Request to submit a UserChangeRequest that is not supported by this client");
             }
-            using (IHttpClientAbstraction client = ServiceLocator.Instance.Locate<IHDInsightHttpClientAbstractionFactory>().Create(this.credentials, this.context))
+            using (IHttpClientAbstraction client = ServiceLocator.Instance.Locate<IHDInsightHttpClientAbstractionFactory>().Create(this.credentials, this.context, this.ignoreSslErrors))
             {
                 var hadoopContext = new HDInsightSubscriptionAbstractionContext(this.credentials, this.context);
                 client.RequestUri = handler.Item1(hadoopContext, dnsName, location);
@@ -185,7 +200,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestCl
 
         public async Task<IHttpResponseMessageAbstraction> ProcessGetOperationStatus(IHttpClientAbstraction client, string dnsName, string location, Guid operationId)
         {
-            var overrideHandlers = ServiceLocator.Instance.Locate<IHDInsightClusterOverrideManager>().GetHandlers(this.credentials, this.context);
+            var httpLogic = ServiceLocator.Instance.Locate<IHttpOperationManager>();
+            client.Timeout = httpLogic.HttpOperationTimeout;
+            var overrideHandlers = ServiceLocator.Instance.Locate<IHDInsightClusterOverrideManager>().GetHandlers(this.credentials, this.context, this.ignoreSslErrors);
             var uriBuilder = overrideHandlers.UriBuilder;
             client.RequestUri = uriBuilder.GetOperationStatusUri(dnsName, location, this.credentials.DeploymentNamespace, operationId);
             client.Method = HttpMethod.Get;
@@ -201,7 +218,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestCl
         {
             int i = 0;
             var start = DateTime.UtcNow;
-            var timingManager = ServiceLocator.Instance.Locate<IRetryTimingManager>();
+            var timingManager = ServiceLocator.Instance.Locate<IHttpOperationManager>();
             var factory = ServiceLocator.Instance.Locate<IHDInsightHttpClientAbstractionFactory>();
             var result = await factory.Retry(this.credentials,
                                              this.context,
@@ -211,8 +228,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestCl
                                                  i++;
                                                  return r.StatusCode != HttpStatusCode.Accepted && r.StatusCode != HttpStatusCode.OK;
                                              },
-                                             timingManager.TimeOut,
-                                             timingManager.PollInterval);
+                                             timingManager.RetryCount,
+                                             timingManager.RetryInterval,
+                                             this.ignoreSslErrors);
 
             if (result.StatusCode != HttpStatusCode.Accepted && result.StatusCode != HttpStatusCode.OK)
             {
@@ -220,5 +238,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestCl
             }
             return result;
         }
+
+        public ILogger Logger { get; private set; }
     }
 }

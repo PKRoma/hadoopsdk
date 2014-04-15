@@ -99,7 +99,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.RestSimulator
             await Task.Delay(TimeSpan.FromMilliseconds(1));
             lock (locker)
             {
-                var managementClient = ServiceLocator.Instance.Locate<IHDInsightManagementRestClientFactory>().Create(this.credentials, IntegrationTestBase.GetAbstractionContext());
+                var managementClient = ServiceLocator.Instance.Locate<IHDInsightManagementRestClientFactory>().Create(this.credentials, IntegrationTestBase.GetAbstractionContext(), false);
                 var payload = managementClient.ListCloudServices().WaitForResult();
                 var clusters = new PayloadConverter().DeserializeListContainersResult(payload.Content, this.credentials.DeploymentNamespace, this.credentials.SubscriptionId);
                 if (clusters.Any(cluster => cluster.Location == location))

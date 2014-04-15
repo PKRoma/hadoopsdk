@@ -16,7 +16,6 @@ namespace Microsoft.Hadoop.Avro.Schema
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
     using Newtonsoft.Json;
 
     /// <summary>
@@ -58,7 +57,6 @@ namespace Microsoft.Hadoop.Avro.Schema
             {
                 throw new ArgumentNullException("surrogateSchema");
             }
-            Contract.EndContractBlock();
 
             this.surrogateType = surrogateType;
             this.surrogateSchema = surrogateSchema;

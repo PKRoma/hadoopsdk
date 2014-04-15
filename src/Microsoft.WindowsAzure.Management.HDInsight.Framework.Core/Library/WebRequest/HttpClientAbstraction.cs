@@ -21,6 +21,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.Web
     using System.IO;
     using System.Net.Http;
     using System.Net.Http.Headers;
+    using System.Net.Security;
     using System.Security.Cryptography.X509Certificates;
     using System.Text;
     using System.Threading;
@@ -29,15 +30,16 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.Web
     using System.Xml.Linq;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Logging;
     using Microsoft.WindowsAzure.Management.HDInsight.Logging;
 
     internal class HttpClientAbstraction : DisposableObject, IHttpClientAbstraction
     {
         private const string ResponseLogFormat =
-            " HTTP Request:\r\n          Uri: {0}\r\n       Method: {1}\r\n Content Type: {2}\r\n      Headers: {3}\r\n      Content:\r\n{4}\r\n\r\nHTTP Response:\r\n  Status Code: {5}\r\n      Headers: {6}\r\n      Content:\r\n{7}\r\n\r\n";
+            " HTTP Request:\r\n  SDK Version: {8}\r\n          Uri: {0}\r\n       Method: {1}\r\n Content Type: {2}\r\n      Headers: {3}\r\n      Content:\r\n{4}\r\n\r\nHTTP Response:\r\n  Status Code: {5}\r\n      Headers: {6}\r\n      Content:\r\n{7}\r\n\r\n";
 
         private const string ExceptionLogFormat =
-            " HTTP Request:\r\n          Uri: {0}\r\n       Method: {1}\r\n Content Type: {2}\r\n      Headers: {3}\r\n      Content:\r\n{4}\r\n\r\n    Exception:\r\n{5}\r\n\r\n";
+            " HTTP Request:\r\n  SDK Version: {6}\r\n          Uri: {0}\r\n       Method: {1}\r\n Content Type: {2}\r\n      Headers: {3}\r\n      Content:\r\n{4}\r\n\r\n    Exception:\r\n{5}\r\n\r\n";
 
         private const string BearerAuthenticationType = "Bearer";
         private const string AuthorizationHeader = "Authorization";
@@ -46,19 +48,28 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.Web
         private CancellationToken cancellationToken = CancellationToken.None;
         private readonly ILogger instanceLogger;
 
-        internal HttpClientAbstraction(HttpClient client)
+        internal static TimeSpan DefaultTimeout = new TimeSpan(0, 5, 0);
+        private bool ignoreSslErrors = false;
+
+        internal HttpClientAbstraction(HttpClient client, WebRequestHandler handler, bool ignoreSslErrors)
         {
             this.client = client;
-            this.Timeout = new TimeSpan(0, 5, 0);
+            this.ignoreSslErrors = ignoreSslErrors;
+            this.Timeout = DefaultTimeout;
             this.Method = HttpMethod.Get;
+            handler.ServerCertificateValidationCallback += this.ServerCertificateValidationCallback;
             this.RequestHeaders = new Dictionary<string, string>();
             this.ContentType = HttpConstants.ApplicationXml;
+            this.instanceLogger = new Logger();
         }
 
-        internal HttpClientAbstraction(HttpClient client, IAbstractionContext context)
-            : this(client)
+        internal HttpClientAbstraction(HttpClient client, IAbstractionContext context, WebRequestHandler handler, bool ignoreSslErrors)
+            : this(client, handler, ignoreSslErrors)
         {
-            this.instanceLogger = context.Logger;
+            if (context.Logger.IsNotNull())
+            {
+                this.instanceLogger = context.Logger;
+            }
             this.cancellationToken = context.CancellationToken;
         }
 
@@ -125,7 +136,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.Web
             }
         }
 
-        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest.HttpClientAbstraction.Log(Microsoft.WindowsAzure.Management.HDInsight.Logging.Severity,Microsoft.WindowsAzure.Management.HDInsight.Logging.Verbosity,System.String)",
+        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "Microsoft.WindowsAzure.Management.HDInsight.Logging.LogProviderExtensions.LogMessage(Microsoft.WindowsAzure.Management.HDInsight.Logging.ILogProvider,System.String,Microsoft.WindowsAzure.Management.HDInsight.Logging.Severity,Microsoft.WindowsAzure.Management.HDInsight.Logging.Verbosity)",
             Justification = "Strictly log formatting string.")]
         private void LogRequestResponseDetails(HttpResponseMessageAbstraction response)
         {
@@ -183,9 +194,10 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.Web
                                            formattedRequestContent,
                                            response.StatusCode,
                                            responseHeaders,
-                                           formattedResponseContent);
+                                           formattedResponseContent,
+                                           this.GetType().Assembly.GetName().Version);
 
-            this.Log(Severity.Informational, Verbosity.Detailed, message);
+            this.LogMessage(message, Severity.Informational, Verbosity.Detailed);
         }
 
         private StringBuilder GetFormatedRequestHeaders()
@@ -207,7 +219,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.Web
             return requestHeaders;
         }
 
-        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest.HttpClientAbstraction.Log(Microsoft.WindowsAzure.Management.HDInsight.Logging.Severity,Microsoft.WindowsAzure.Management.HDInsight.Logging.Verbosity,System.String)",
+        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "Microsoft.WindowsAzure.Management.HDInsight.Logging.LogProviderExtensions.LogMessage(Microsoft.WindowsAzure.Management.HDInsight.Logging.ILogProvider,System.String,Microsoft.WindowsAzure.Management.HDInsight.Logging.Severity,Microsoft.WindowsAzure.Management.HDInsight.Logging.Verbosity)",
             Justification = "Strictly log formatting string.")]
         private void LogRequestException(Exception ex)
         {
@@ -226,60 +238,100 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.Web
                                            this.ContentType,
                                            requestHeaders,
                                            formattedRequestContent,
-                                           ex);
+                                           ex,
+                                           this.GetType().Assembly.GetName().Version);
 
-            this.Log(Severity.Error, Verbosity.Normal, message);
+            this.LogMessage(message, Severity.Error, Verbosity.Normal);
         }
 
-        public void Log(Severity severity, Verbosity verbosity, string message)
+        [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "Microsoft.WindowsAzure.Management.HDInsight.Logging.LogProviderExtensions.LogMessage(Microsoft.WindowsAzure.Management.HDInsight.Logging.ILogProvider,System.String,Microsoft.WindowsAzure.Management.HDInsight.Logging.Severity,Microsoft.WindowsAzure.Management.HDInsight.Logging.Verbosity)",
+            Justification = "Logging line. [tgs]")]
+        private bool ServerCertificateValidationCallback(object sender, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
         {
-            if (this.instanceLogger.IsNotNull())
+            var msg = string.Format(CultureInfo.InvariantCulture, "Validating SSL with an ignore setting of ({0})", this.ignoreSslErrors);
+            this.LogMessage(msg, Severity.Informational, Verbosity.Detailed);
+            msg = string.Format(CultureInfo.InvariantCulture, "Current Result: ({0})", sslPolicyErrors.ToString());
+            this.LogMessage(msg, Severity.Informational, Verbosity.Detailed);
+            if (sslPolicyErrors == SslPolicyErrors.None)
             {
-                this.instanceLogger.LogMessage(message, severity, verbosity);
+                return true;
             }
+            return this.ignoreSslErrors;
         }
 
-        public static IHttpClientAbstraction Create(X509Certificate2 cert)
+        public static IHttpClientAbstraction Create(X509Certificate2 cert, bool ignoreSslErrors)
         {
             var handler = new WebRequestHandler();
             handler.ClientCertificates.Add(cert);
-            return Help.SafeCreate(() => new HttpClientAbstraction(Help.SafeCreate(() => new HttpClient(handler))));
+            return Help.SafeCreate(() => new HttpClientAbstraction(Help.SafeCreate(() => new HttpClient(handler)), handler, ignoreSslErrors));
+        }
+
+        public static IHttpClientAbstraction Create(IAbstractionContext context, bool ignoreSslErrors)
+        {
+            var handler = new WebRequestHandler();
+            return Help.SafeCreate(() => new HttpClientAbstraction(Help.SafeCreate(() => new HttpClient(handler)), context, handler, ignoreSslErrors));
+        }
+
+        public static IHttpClientAbstraction Create(X509Certificate2 cert, IAbstractionContext context, bool ignoreSslErrors)
+        {
+            var handler = new WebRequestHandler();
+            handler.ClientCertificates.Add(cert);
+            return Help.SafeCreate(() => new HttpClientAbstraction(Help.SafeCreate(() => new HttpClient(handler)), context, handler, ignoreSslErrors));
+        }
+
+        public static IHttpClientAbstraction Create(string accessToken, bool ignoreSslErrors)
+        {
+            var handler = new WebRequestHandler();
+            var authorizationHeaderValue = string.Format(CultureInfo.InvariantCulture, "{0} {1}", BearerAuthenticationType, accessToken);
+            var abstractClient = Help.SafeCreate(() => new HttpClientAbstraction(Help.SafeCreate(() => new HttpClient(handler)), handler, ignoreSslErrors));
+            abstractClient.RequestHeaders.Add(AuthorizationHeader, authorizationHeaderValue);
+            return abstractClient;
         }
 
         public static IHttpClientAbstraction Create(IAbstractionContext context)
         {
-            var handler = new WebRequestHandler();
-            return Help.SafeCreate(() => new HttpClientAbstraction(Help.SafeCreate(() => new HttpClient(handler)), context));
-        }
-
-        public static IHttpClientAbstraction Create(X509Certificate2 cert, IAbstractionContext context)
-        {
-            var handler = new WebRequestHandler();
-            handler.ClientCertificates.Add(cert);
-            return Help.SafeCreate(() => new HttpClientAbstraction(Help.SafeCreate(() => new HttpClient(handler)), context));
-        }
-
-        public static IHttpClientAbstraction Create(string accessToken)
-        {
-            var handler = new WebRequestHandler();
-            var authorizationHeaderValue = string.Format(CultureInfo.InvariantCulture, "{0} {1}", BearerAuthenticationType, accessToken);
-            var abstractClient = Help.SafeCreate(() => new HttpClientAbstraction(Help.SafeCreate(() => new HttpClient(handler))));
-            abstractClient.RequestHeaders.Add(AuthorizationHeader, authorizationHeaderValue);
-            return abstractClient;
-        }
-
-        public static IHttpClientAbstraction Create(string accessToken, IAbstractionContext context)
-        {
-            var handler = new WebRequestHandler();
-            var authorizationHeaderValue = string.Format(CultureInfo.InvariantCulture, "{0} {1}", BearerAuthenticationType, accessToken);
-            var abstractClient = Help.SafeCreate(() => new HttpClientAbstraction(Help.SafeCreate(() => new HttpClient(handler)), context));
-            abstractClient.RequestHeaders.Add(AuthorizationHeader, authorizationHeaderValue);
-            return abstractClient;
+            return Create(context, false);
         }
 
         public static IHttpClientAbstraction Create()
         {
-            return Help.SafeCreate(() => new HttpClientAbstraction(Help.SafeCreate<HttpClient>()));
+            return Create(false);
+        }
+
+        public static IHttpClientAbstraction Create(X509Certificate2 cert)
+        {
+            return Create(cert, false);
+        }
+
+        public static IHttpClientAbstraction Create(X509Certificate2 cert, IAbstractionContext context)
+        {
+            return Create(cert, context, false);
+        }
+
+        public static IHttpClientAbstraction Create(string accessToken)
+        {
+            return Create(accessToken, false);
+        }
+
+        public static IHttpClientAbstraction Create(string accessToken, IAbstractionContext context)
+        {
+            return Create(accessToken, context, false);
+        }
+
+        public static IHttpClientAbstraction Create(string accessToken, IAbstractionContext context, bool ignoreSslErrors)
+        {
+            var handler = new WebRequestHandler();
+            var authorizationHeaderValue = string.Format(CultureInfo.InvariantCulture, "{0} {1}", BearerAuthenticationType, accessToken);
+            var abstractClient = Help.SafeCreate(() => new HttpClientAbstraction(Help.SafeCreate(() => new HttpClient(handler)), context, handler, ignoreSslErrors));
+            abstractClient.RequestHeaders.Add(AuthorizationHeader, authorizationHeaderValue);
+            return abstractClient;
+        }
+
+        public static IHttpClientAbstraction Create(bool ignoreSslErrors)
+        {
+            var handler = new WebRequestHandler();
+            var abstractClient = Help.SafeCreate(() => new HttpClientAbstraction(Help.SafeCreate(() => new HttpClient(handler)), handler, ignoreSslErrors));
+            return abstractClient;
         }
 
         internal static bool TryPrettyPrintXml(string content, out string formattedXml)
@@ -312,6 +364,11 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.Web
             }
 
             return true;
+        }
+
+        public ILogger Logger
+        {
+            get { return this.instanceLogger; }
         }
     }
 }

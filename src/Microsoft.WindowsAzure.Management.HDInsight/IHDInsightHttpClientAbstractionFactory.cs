@@ -34,10 +34,13 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
         /// <param name="context">
         ///     The context to use.
         /// </param>
+        /// <param name="ignoreSslErrors">
+        ///     Indicates that server side SSL Certificate errors should be ignored.
+        /// </param>
         /// <returns>
         ///     A new instance of the HttpClientAbstraction.
         /// </returns>
-        IHttpClientAbstraction Create(IHDInsightSubscriptionCredentials credentials, IAbstractionContext context);
+        IHttpClientAbstraction Create(IHDInsightSubscriptionCredentials credentials, IAbstractionContext context, bool ignoreSslErrors);
 
         /// <summary>
         ///     Creates a new HttpClientAbstraction class.
@@ -45,10 +48,13 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
         /// <param name="credentials">
         ///     The credentials to use.
         /// </param>
+        /// <param name="ignoreSslErrors">
+        ///     Indicates that server side SSL Certificate errors should be ignored.
+        /// </param>
         /// <returns>
         ///     A new instance of the HttpClientAbstraction.
         /// </returns>
-        IHttpClientAbstraction Create(IHDInsightSubscriptionCredentials credentials);
+        IHttpClientAbstraction Create(IHDInsightSubscriptionCredentials credentials, bool ignoreSslErrors);
 
         /// <summary>
         ///     Creates a new HttpClientAbstraction class.
@@ -56,109 +62,127 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
         /// <param name="context">
         ///     The context to use.
         /// </param>
+        /// <param name="ignoreSslErrors">
+        ///     Indicates that server side SSL Certificate errors should be ignored.
+        /// </param>
         /// <returns>
         ///     A new instance of the HttpClientAbstraction.
         /// </returns>
-        IHttpClientAbstraction Create(IAbstractionContext context);
+        IHttpClientAbstraction Create(IAbstractionContext context, bool ignoreSslErrors);
 
         /// <summary>
         ///     Creates a new HttpClientAbstraction class.
         /// </summary>
+        /// <param name="ignoreSslErrors">
+        ///     Indicates that server side SSL Certificate errors should be ignored.
+        /// </param>
         /// <returns>
         ///     A new instance of the HttpClientAbstraction.
         /// </returns>
-        IHttpClientAbstraction Create();
+        IHttpClientAbstraction Create(bool ignoreSslErrors);
 
         /// <summary>
         /// Performs a retry of an HDInsightHttpClient Operation.
         /// </summary>
         /// <param name="credentials">
-        /// The connection credentials to use.
+        ///     The connection credentials to use.
         /// </param>
         /// <param name="context">
-        /// The abstraction context to use.
+        ///     The abstraction context to use.
         /// </param>
         /// <param name="operation">
-        /// The Operation to perform.
+        ///     The Operation to perform.
         /// </param>
         /// <param name="shouldRetry">
-        /// A method that determines if the operation should be retried.
+        ///     A method that determines if the operation should be retried.
         /// </param>
-        /// <param name="timeout">
-        /// The timeout interval that should be used.
+        /// <param name="retryCount">
+        ///     The number of times the operation will be attempted before giving up.
         /// </param>
-        /// <param name="pollInterval">
-        /// The polling interval that should be used.
+        /// <param name="retryInterval">
+        ///     The delay between retries.
+        /// </param>
+        /// <param name="ignoreSslErrors">
+        ///     Specifies that server side SSL Errors should be ignored.
         /// </param>
         /// <returns>
         /// A task representing the Http Response.
         /// </returns>
-        Task<IHttpResponseMessageAbstraction> Retry(IHDInsightSubscriptionCredentials credentials, IAbstractionContext context, Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation, Func<IHttpResponseMessageAbstraction, bool> shouldRetry, TimeSpan timeout, TimeSpan pollInterval);
+        Task<IHttpResponseMessageAbstraction> Retry(IHDInsightSubscriptionCredentials credentials, IAbstractionContext context, Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation, Func<IHttpResponseMessageAbstraction, bool> shouldRetry, int retryCount, TimeSpan retryInterval, bool ignoreSslErrors);
 
         /// <summary>
         /// Performs a retry of an HDInsightHttpClient Operation.
         /// </summary>
         /// <param name="credentials">
-        /// The connection credentials to use.
+        ///     The connection credentials to use.
         /// </param>
         /// <param name="operation">
-        /// The Operation to perform.
+        ///     The Operation to perform.
         /// </param>
         /// <param name="shouldRetry">
-        /// A method that determines if the operation should be retried.
+        ///     A method that determines if the operation should be retried.
         /// </param>
-        /// <param name="timeout">
-        /// The timeout interval that should be used.
+        /// <param name="retryCount">
+        ///     The number of times the operation will be attempted before giving up.
         /// </param>
-        /// <param name="pollInterval">
-        /// The polling interval that should be used.
+        /// <param name="retryInterval">
+        ///     The delay between retries.
+        /// </param>
+        /// <param name="ignoreSslErrors">
+        ///     Specifies that server side SSL Errors should be ignored.
         /// </param>
         /// <returns>
         /// A task representing the Http Response.
         /// </returns>
-        Task<IHttpResponseMessageAbstraction> Retry(IHDInsightSubscriptionCredentials credentials, Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation, Func<IHttpResponseMessageAbstraction, bool> shouldRetry, TimeSpan timeout, TimeSpan pollInterval);
+        Task<IHttpResponseMessageAbstraction> Retry(IHDInsightSubscriptionCredentials credentials, Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation, Func<IHttpResponseMessageAbstraction, bool> shouldRetry, int retryCount, TimeSpan retryInterval, bool ignoreSslErrors);
 
         /// <summary>
         /// Performs a retry of an HDInsightHttpClient Operation.
         /// </summary>
         /// <param name="context">
-        /// The abstraction context to use.
+        ///     The abstraction context to use.
         /// </param>
         /// <param name="operation">
-        /// The Operation to perform.
+        ///     The Operation to perform.
         /// </param>
         /// <param name="shouldRetry">
-        /// A method that determines if the operation should be retried.
+        ///     A method that determines if the operation should be retried.
         /// </param>
-        /// <param name="timeout">
-        /// The timeout interval that should be used.
+        /// <param name="retryCount">
+        ///     The number of times the operation will be attempted before giving up.
         /// </param>
-        /// <param name="pollInterval">
-        /// The polling interval that should be used.
+        /// <param name="retryInterval">
+        ///     The delay between retries.
+        /// </param>
+        /// <param name="ignoreSslErrors">
+        ///     Specifies that server side SSL Errors should be ignored.
         /// </param>
         /// <returns>
         /// A task representing the Http Response.
         /// </returns>
-        Task<IHttpResponseMessageAbstraction> Retry(IAbstractionContext context, Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation, Func<IHttpResponseMessageAbstraction, bool> shouldRetry, TimeSpan timeout, TimeSpan pollInterval);
+        Task<IHttpResponseMessageAbstraction> Retry(IAbstractionContext context, Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation, Func<IHttpResponseMessageAbstraction, bool> shouldRetry, int retryCount, TimeSpan retryInterval, bool ignoreSslErrors);
 
         /// <summary>
         /// Performs a retry of an HDInsightHttpClient Operation.
         /// </summary>
         /// <param name="operation">
-        /// The Operation to perform.
+        ///     The Operation to perform.
         /// </param>
         /// <param name="shouldRetry">
-        /// A method that determines if the operation should be retried.
+        ///     A method that determines if the operation should be retried.
         /// </param>
-        /// <param name="timeout">
-        /// The timeout interval that should be used.
+        /// <param name="retryCount">
+        ///     The number of times the operation will be attempted before giving up.
         /// </param>
-        /// <param name="pollInterval">
-        /// The polling interval that should be used.
+        /// <param name="retryInterval">
+        ///     The delay between retries.
+        /// </param>
+        /// <param name="ignoreSslErrors">
+        ///     Specifies that server side SSL Errors should be ignored.
         /// </param>
         /// <returns>
         /// A task representing the Http Response.
         /// </returns>
-        Task<IHttpResponseMessageAbstraction> Retry(Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation, Func<IHttpResponseMessageAbstraction, bool> shouldRetry, TimeSpan timeout, TimeSpan pollInterval);
+        Task<IHttpResponseMessageAbstraction> Retry(Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation, Func<IHttpResponseMessageAbstraction, bool> shouldRetry, int retryCount, TimeSpan retryInterval, bool ignoreSslErrors);
     }
 }

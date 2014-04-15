@@ -32,10 +32,13 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
         /// <param name="context">
         /// A context containing a Cancellation Token that can be used to cancel the task.
         /// </param>
+        /// <param name="ignoreSslErrors">
+        /// Specifies that server side SSL Errors should be ignored.
+        /// </param>
         /// <returns>
         /// A new instance of the IHDInsightManagmentPocoClient interface to be used
         /// to manage a cluster.
         /// </returns>
-        IHDInsightManagementPocoClient Create(IHDInsightSubscriptionCredentials credentials, IAbstractionContext context);
+        IHDInsightManagementPocoClient Create(IHDInsightSubscriptionCredentials credentials, IAbstractionContext context, bool ignoreSslErrors);
     }
 }

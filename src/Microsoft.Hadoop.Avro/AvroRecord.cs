@@ -21,7 +21,7 @@ namespace Microsoft.Hadoop.Avro
 
     /// <summary>
     /// Represents an Avro generic record. It can be considered as a set of name-value pairs.
-    /// Please, use the <see cref="Microsoft.Hadoop.Avro.AvroSerializer.CreateGeneric{T}"/> method to create the corresponding <see cref="Microsoft.Hadoop.Avro.IAvroSerializer{T}"/>.
+    /// Please, use the <see cref="Microsoft.Hadoop.Avro.AvroSerializer.CreateGeneric"/> method to create the corresponding <see cref="Microsoft.Hadoop.Avro.IAvroSerializer{T}"/>.
     /// </summary>
     public sealed class AvroRecord : DynamicObject
     {

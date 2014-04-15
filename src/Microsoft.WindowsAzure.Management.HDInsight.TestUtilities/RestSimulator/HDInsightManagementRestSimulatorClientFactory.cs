@@ -20,7 +20,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
 
     internal class HDInsightManagementRestSimulatorClientFactory : IHDInsightManagementRestClientFactory
     {
-        public IHDInsightManagementRestClient Create(IHDInsightSubscriptionCredentials credentials, IAbstractionContext context)
+        public IHDInsightManagementRestClient Create(IHDInsightSubscriptionCredentials credentials, IAbstractionContext context, bool ignoreSslErrors)
         {
             return new HDInsightManagementRestSimulatorClient(credentials, context);
         }

@@ -109,7 +109,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         public async Task ICanPerformA_ListCloudServices_Using_RestClientAbstraction()
         {
             IHDInsightSubscriptionCredentials credentials = IntegrationTestBase.GetValidCredentials();
-            var client = ServiceLocator.Instance.Locate<IHDInsightManagementRestClientFactory>().Create(credentials, GetAbstractionContext());
+            var client = ServiceLocator.Instance.Locate<IHDInsightManagementRestClientFactory>().Create(credentials, GetAbstractionContext(), false);
             var result = await client.ListCloudServices();
             Assert.IsTrue(this.ContainsContainer(TestCredentials.WellKnownCluster.DnsName, result.Content));
         }
@@ -144,7 +144,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         public async Task ICanPerformA_CreateDeleteContainers_Using_RestClient()
         {
             IHDInsightSubscriptionCredentials credentials = IntegrationTestBase.GetValidCredentials();
-            var client = new HDInsightManagementRestClient(credentials, GetAbstractionContext());
+            var client = new HDInsightManagementRestClient(credentials, GetAbstractionContext(), false);
             var dnsName = GetRandomClusterName();
             var location = "East US 2";
             var subscriptionId = credentials.SubscriptionId;
@@ -210,8 +210,8 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
                 };
             }
             IHDInsightSubscriptionCredentials credentials = new AlternativeEnvironmentIHDInsightSubscriptionCertificateCredentialsFactory().Create(tempCredentials);
-            
-            var client = new HDInsightManagementRestClient(credentials, GetAbstractionContext());
+
+            var client = new HDInsightManagementRestClient(credentials, GetAbstractionContext(), false);
             var dnsName = GetRandomClusterName();
             var location = "East US";
             var subscriptionId = credentials.SubscriptionId;

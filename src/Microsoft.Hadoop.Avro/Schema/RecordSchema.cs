@@ -17,7 +17,6 @@ namespace Microsoft.Hadoop.Avro.Schema
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
-    using System.Diagnostics.Contracts;
     using Newtonsoft.Json;
 
     /// <summary>
@@ -65,7 +64,6 @@ namespace Microsoft.Hadoop.Avro.Schema
             {
                 throw new ArgumentNullException("field");
             }
-            Contract.EndContractBlock();
 
             this.fields.Add(field);
             this.fiedsByName.Add(field.Name, field);

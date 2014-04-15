@@ -19,9 +19,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Versio
 
     internal class VersionFinderClientFactory : IVersionFinderClientFactory
     {
-        public IVersionFinderClient Create(IHDInsightSubscriptionCredentials creds, IAbstractionContext context)
+        public IVersionFinderClient Create(IHDInsightSubscriptionCredentials creds, IAbstractionContext context, bool ignoreSslErrors)
         {
-            return new VersionFinderClient(creds, context);
+            return new VersionFinderClient(creds, context, ignoreSslErrors);
         }
     }
 }

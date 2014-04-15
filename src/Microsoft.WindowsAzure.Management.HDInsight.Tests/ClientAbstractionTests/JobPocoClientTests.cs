@@ -94,7 +94,7 @@
 
             //var createRequest = new ClientJobRequest();
             //createRequest.ClassName = "pi";
-            //createRequest.JobName = "foo";
+            //createRequest.JobName = "job1";
             //var args = new List<string>();
             //args.Add("16");
             //args.Add("10000");

@@ -20,7 +20,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.RestSimulator
 
     internal class SubscriptionRegistrationSimulatorClientFactory : ISubscriptionRegistrationClientFactory
     {
-        public ISubscriptionRegistrationClient Create(IHDInsightSubscriptionCredentials creds, IAbstractionContext context)
+        public ISubscriptionRegistrationClient Create(IHDInsightSubscriptionCredentials creds, IAbstractionContext context, bool ignoreSslErrors)
         {
             return new SubscriptionRegistrationSimulatorClient(creds.As<IHDInsightCertificateCredential>(), context);
         }

@@ -19,9 +19,9 @@ namespace Microsoft.Hadoop.Client.HadoopJobSubmissionPocoClient
 
     internal class RemoteHadoopJobSubmissionPocoClientFactory : IRemoteHadoopJobSubmissionPocoClientFactory
     {
-        public IHadoopJobSubmissionPocoClient Create(IJobSubmissionClientCredential credentials, IAbstractionContext context)
+        public IHadoopJobSubmissionPocoClient Create(IJobSubmissionClientCredential credentials, IAbstractionContext context, bool ignoreSslErrors)
         {
-            return new RemoteHadoopJobSubmissionPocoClient((BasicAuthCredential)credentials, context);
+            return new RemoteHadoopJobSubmissionPocoClient((BasicAuthCredential)credentials, context, ignoreSslErrors);
         }
     }
 }

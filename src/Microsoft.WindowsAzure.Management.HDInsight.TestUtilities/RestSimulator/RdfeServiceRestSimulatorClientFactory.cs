@@ -20,7 +20,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
 
     internal class RdfeServiceRestSimulatorClientFactory : IRdfeServiceRestClientFactory
     {
-        public IRdfeServiceRestClient Create(IHDInsightSubscriptionCredentials credentials, IAbstractionContext context)
+        public IRdfeServiceRestClient Create(IHDInsightSubscriptionCredentials credentials, IAbstractionContext context, bool ignoreSslErrors)
         {
             return new RdfeServiceRestSimulatorClient(credentials.As<IHDInsightCertificateCredential>(), context);
         }

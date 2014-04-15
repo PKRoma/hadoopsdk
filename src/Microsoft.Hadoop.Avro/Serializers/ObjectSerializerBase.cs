@@ -16,7 +16,6 @@ namespace Microsoft.Hadoop.Avro.Serializers
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
     using System.Globalization;
     using System.Linq.Expressions;
     using System.Reflection;
@@ -71,26 +70,39 @@ namespace Microsoft.Hadoop.Avro.Serializers
 
         protected MethodInfo Encode(string value)
         {
-            Contract.Assert(Encoders.ContainsKey(value), string.Format(CultureInfo.InvariantCulture, "Requested method '{0}' is not found.", value));
+            if (!Encoders.ContainsKey(value))
+            {
+                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Requested method '{0}' is not found.", value));
+            }
             return Encoders[value];
         }
 
         protected MethodInfo Decode(string value)
         {
-            Contract.Assert(Decoders.ContainsKey(value), string.Format(CultureInfo.InvariantCulture, "Requested method '{0}' is not found.", value));
+            if (!Decoders.ContainsKey(value))
+            {
+                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Requested method '{0}' is not found.", value));
+            }
             return Decoders[value];
         }
 
         protected MethodInfo Skip(string value)
         {
-            Contract.Assert(Skippers.ContainsKey(value), string.Format(CultureInfo.InvariantCulture, "Requested method '{0}' is not found.", value));
+            if (!Skippers.ContainsKey(value))
+            {
+                throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, "Requested method '{0}' is not found.", value));
+            }
             return Skippers[value];
         }
 
         protected MethodInfo Encode<T>()
         {
             var result = typeof(IEncoder).GetMethod("Encode", new[] { typeof(T) });
-            Contract.Assert(result != null, string.Format(CultureInfo.InvariantCulture, "Requested method IEncoder.Encode({0}) is not found.", typeof(T)));
+            if (result == null)
+            {
+                throw new InvalidOperationException(
+                    string.Format(CultureInfo.InvariantCulture, "Requested method Encode({0}) is not found.", typeof(T)));
+            }
             return result;
         }
 
@@ -106,9 +118,17 @@ namespace Microsoft.Hadoop.Avro.Serializers
 
         private MethodInfo GetDecoderMethod<T>(string genericMethodName, Type decoderType)
         {
-            Contract.Assert(DecoderTypes.ContainsKey(typeof(T)), string.Format(CultureInfo.InvariantCulture, "Requested method is not found for type '{0}'.", typeof(T)));
+            if (!DecoderTypes.ContainsKey(typeof(T)))
+            {
+                throw new InvalidOperationException(
+                    string.Format(CultureInfo.InvariantCulture, "Requested method is not found for type '{0}'.", typeof(T)));
+            }
             var result = decoderType.GetMethod(genericMethodName + DecoderTypes[typeof(T)]);
-            Contract.Assert(result != null, string.Format(CultureInfo.InvariantCulture, "Requested method is not found."));
+            if (result == null)
+            {
+                throw new InvalidOperationException(
+                    string.Format(CultureInfo.InvariantCulture, "Requested method is not found."));
+            }
             return result;
         }
 
@@ -123,7 +143,6 @@ namespace Microsoft.Hadoop.Avro.Serializers
             {
                 throw new ArgumentNullException("value");
             }
-            Contract.EndContractBlock();
 
             return this.BuildSerializerSafe(encoder, value);
         }
@@ -134,7 +153,6 @@ namespace Microsoft.Hadoop.Avro.Serializers
             {
                 throw new ArgumentNullException("decoder");
             }
-            Contract.EndContractBlock();
 
             return this.BuildDeserializerSafe(decoder);
         }
@@ -145,7 +163,6 @@ namespace Microsoft.Hadoop.Avro.Serializers
             {
                 throw new ArgumentNullException("decoder");
             }
-            Contract.EndContractBlock();
 
             return this.BuildSkipperSafe(decoder);
         }
@@ -156,7 +173,6 @@ namespace Microsoft.Hadoop.Avro.Serializers
             {
                 throw new ArgumentNullException("encoder");
             }
-            Contract.EndContractBlock();
 
             this.SerializeSafe(encoder, value);
         }
@@ -167,7 +183,6 @@ namespace Microsoft.Hadoop.Avro.Serializers
             {
                 throw new ArgumentNullException("decoder");
             }
-            Contract.EndContractBlock();
 
             return this.DeserializeSafe(decoder);
         }
@@ -178,7 +193,6 @@ namespace Microsoft.Hadoop.Avro.Serializers
             {
                 throw new ArgumentNullException("decoder");
             }
-            Contract.EndContractBlock();
 
             this.SkipSafe(decoder);
         }

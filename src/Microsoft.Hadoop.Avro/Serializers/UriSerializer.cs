@@ -14,6 +14,7 @@
 // permissions and limitations under the License.
 namespace Microsoft.Hadoop.Avro.Serializers
 {
+    using System.Diagnostics;
     using System.Globalization;
     using System.Linq.Expressions;
     using System.Reflection;
@@ -49,6 +50,7 @@ namespace Microsoft.Hadoop.Avro.Serializers
                         "Type '{0}' is considered a 'Uri' and expected to have a constructor with a string parameter.",
                         this.Schema.RuntimeType));
             }
+
             return Expression.New(constructor, new Expression[] { Expression.Call(decoder, this.Decode<string>()) });
         }
     }

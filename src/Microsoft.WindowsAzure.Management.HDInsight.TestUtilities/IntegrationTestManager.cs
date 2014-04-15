@@ -80,7 +80,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities
             var env = new CreationDetails();
             env.Location = "North Europe";
             def.EnvironmentType = EnvironmentType.Production;
-            def.Endpoint = "http://foo.url -- {this is only used for non production environments}";
+            def.Endpoint = "http://endpoint.url -- {this is only used for non production environments}";
             def.CloudServiceName = "hdinsight -- {this is only used for non production environments}";
 
             env.DefaultStorageAccount = new StorageAccountCredentials();

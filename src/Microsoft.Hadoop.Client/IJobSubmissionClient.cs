@@ -21,12 +21,5 @@ namespace Microsoft.Hadoop.Client
     /// </summary>
     public interface IJobSubmissionClient : IJobSubmissionSyncClient, IJobSubmissionAsyncClient
     {
-        /// <summary>
-        /// Adds a log writer to the client.
-        /// </summary>
-        /// <param name="logWriter">
-        /// The log writer.
-        /// </param>
-        void AddLogWriter(ILogWriter logWriter);
     }
 }

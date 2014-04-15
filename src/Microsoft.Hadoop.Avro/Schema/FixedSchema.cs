@@ -16,7 +16,6 @@ namespace Microsoft.Hadoop.Avro.Schema
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
     using Newtonsoft.Json;
 
     /// <summary>
@@ -49,7 +48,6 @@ namespace Microsoft.Hadoop.Avro.Schema
             {
                 throw new ArgumentOutOfRangeException("size");
             }
-            Contract.EndContractBlock();
 
             this.size = size;
         }

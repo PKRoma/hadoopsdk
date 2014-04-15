@@ -15,7 +15,6 @@
 namespace Microsoft.Hadoop.Avro
 {
     using System;
-    using System.Diagnostics.Contracts;
     using System.Globalization;
     using System.IO;
     using Microsoft.Hadoop.Avro.Schema;
@@ -37,7 +36,10 @@ namespace Microsoft.Hadoop.Avro
         /// <param name="serializer">The serializer.</param>
         internal AvroSerializer(GeneratedSerializer serializer)
         {
-            Contract.Assert(serializer != null);
+            if (serializer == null)
+            {
+                throw new ArgumentNullException("serializer");
+            }
 
             this.serializer = serializer;
             this.serialize = (Action<IEncoder, T>)serializer.Serialize;
@@ -128,7 +130,6 @@ namespace Microsoft.Hadoop.Avro
             {
                 throw new ArgumentNullException("decoder");
             }
-            Contract.EndContractBlock();
 
             if (this.deserialize == null)
             {

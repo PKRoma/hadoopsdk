@@ -35,18 +35,20 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.AzureM
     {
         private readonly IHDInsightSubscriptionCredentials credentials;
         private readonly HDInsight.IAbstractionContext context;
+        private readonly bool ignoreSslErrors;
 
-        internal SubscriptionRegistrationClient(IHDInsightSubscriptionCredentials credentials, HDInsight.IAbstractionContext context)
+        internal SubscriptionRegistrationClient(IHDInsightSubscriptionCredentials credentials, HDInsight.IAbstractionContext context, bool ignoreSslErrors)
         {
             this.context = context;
             this.credentials = credentials;
+            this.ignoreSslErrors = ignoreSslErrors;
         }
 
         // Method = "PUT", UriTemplate = "{subscriptionId}/services?service={namespace}.containers&action={action}
         public async Task RegisterSubscription()
         {
             // Creates an HTTP client
-            using (var client = ServiceLocator.Instance.Locate<IHDInsightHttpClientAbstractionFactory>().Create(this.credentials, this.context))
+            using (var client = ServiceLocator.Instance.Locate<IHDInsightHttpClientAbstractionFactory>().Create(this.credentials, this.context, this.ignoreSslErrors))
             {
                 // Creates the request
                 string relativeUri = string.Format(
@@ -118,8 +120,8 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.AzureM
 
         public async Task UnregisterSubscriptionLocation(string location)
         {
-            var managementClient = ServiceLocator.Instance.Locate<IHDInsightManagementRestClientFactory>().Create(this.credentials, this.context);
-            var overrideHandlers = ServiceLocator.Instance.Locate<IHDInsightClusterOverrideManager>().GetHandlers(this.credentials, this.context);
+            var managementClient = ServiceLocator.Instance.Locate<IHDInsightManagementRestClientFactory>().Create(this.credentials, this.context, this.ignoreSslErrors);
+            var overrideHandlers = ServiceLocator.Instance.Locate<IHDInsightClusterOverrideManager>().GetHandlers(this.credentials, this.context, this.ignoreSslErrors);
             var payload = await managementClient.ListCloudServices();
             var clusters = overrideHandlers.PayloadConverter.DeserializeListContainersResult(payload.Content, this.credentials.DeploymentNamespace, this.credentials.SubscriptionId);
             if (clusters.Any(cluster => cluster.Location == location))
@@ -145,7 +147,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.AzureM
                                                                          location);
 
             // Creates an HTTP client
-            using (var client = ServiceLocator.Instance.Locate<IHDInsightHttpClientAbstractionFactory>().Create(this.credentials, this.context))
+            using (var client = ServiceLocator.Instance.Locate<IHDInsightHttpClientAbstractionFactory>().Create(this.credentials, this.context, this.ignoreSslErrors))
             {
                 // Creates the request
                 string relativeUri = string.Format("{0}/cloudservices/{1}", this.credentials.SubscriptionId, regionCloudServicename);

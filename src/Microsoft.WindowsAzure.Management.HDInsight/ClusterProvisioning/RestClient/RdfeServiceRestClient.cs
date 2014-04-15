@@ -35,15 +35,19 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestCl
     {
         private readonly IHDInsightSubscriptionCredentials credentials;
         private readonly HDInsight.IAbstractionContext context;
+        private readonly bool ignoreSslErrors;
 
-        internal RdfeServiceRestClient(IHDInsightSubscriptionCredentials credentials, HDInsight.IAbstractionContext context)
+        internal RdfeServiceRestClient(IHDInsightSubscriptionCredentials credentials, HDInsight.IAbstractionContext context, bool ignoreSslErrors)
         {
             this.context = context;
+            this.ignoreSslErrors = ignoreSslErrors;
             this.credentials = credentials;
         }
 
         internal async Task<IHttpResponseMessageAbstraction> ProcessGetResourceProviderPropertiesRequest(IHttpClientAbstraction client)
         {
+            var httpLogic = ServiceLocator.Instance.Locate<IHttpOperationManager>();
+            client.Timeout = httpLogic.HttpOperationTimeout;
             Guid subscriptionId = this.credentials.SubscriptionId;
             string relativeUri = string.Format(CultureInfo.InvariantCulture,
                                                 "{0}/resourceproviders/{1}/Properties?resourceType={2}",
@@ -65,7 +69,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestCl
         {
             int i = 0;
             var start = DateTime.UtcNow;
-            var timingManager = ServiceLocator.Instance.Locate<IRetryTimingManager>();
+            var timingManager = ServiceLocator.Instance.Locate<IHttpOperationManager>();
             var factory = ServiceLocator.Instance.Locate<IHDInsightHttpClientAbstractionFactory>();
             var result = await factory.Retry(this.credentials,
                                              this.context,
@@ -75,8 +79,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestCl
                                                  i++;
                                                  return r.StatusCode != HttpStatusCode.Accepted && r.StatusCode != HttpStatusCode.OK;
                                              },
-                                             timingManager.TimeOut,
-                                             timingManager.PollInterval);
+                                             timingManager.RetryCount,
+                                             timingManager.RetryInterval,
+                                             this.ignoreSslErrors);
 
             if (result.StatusCode != HttpStatusCode.Accepted && result.StatusCode != HttpStatusCode.OK)
             {
@@ -84,30 +89,6 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestCl
             }
 
             return this.ParseCapabilities(result.Content);
-            // Creates an HTTP client
-            //using (var client = ServiceLocator.Instance.Locate<IHDInsightHttpClientAbstractionFactory>().Create(this.credentials, this.context))
-            //{
-            //    Guid subscriptionId = this.credentials.SubscriptionId;
-            //    string cloudServiceName = this.credentials.DeploymentNamespace;
-            //    string relativeUri = string.Format(CultureInfo.InvariantCulture,
-            //                                        "{0}/resourceproviders/{1}/Properties?resourceType={2}",
-            //                                        subscriptionId,
-            //                                        this.credentials.DeploymentNamespace,
-            //                                        "containers");
-            //    client.RequestUri = new Uri(this.credentials.Endpoint, new Uri(relativeUri, UriKind.Relative));
-
-            //    client.Method = HttpMethod.Get;
-            //    client.RequestHeaders.Add(HDInsightRestConstants.XMsVersion);
-            //    client.RequestHeaders.Add(HDInsightRestConstants.Accept);
-
-            //    var httpResponse = await client.SendAsync();
-            //    if (httpResponse.StatusCode != HttpStatusCode.OK)
-            //    {
-            //        throw new HttpLayerException(httpResponse.StatusCode, httpResponse.Content);
-            //    }
-
-            //    return this.ParseCapabilities(httpResponse.Content);
-            //}
         }
 
         public IEnumerable<KeyValuePair<string, string>> ParseCapabilities(string payload)

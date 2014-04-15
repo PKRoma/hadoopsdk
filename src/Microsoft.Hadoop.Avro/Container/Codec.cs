@@ -15,7 +15,6 @@
 namespace Microsoft.Hadoop.Avro.Container
 {
     using System;
-    using System.Diagnostics.Contracts;
     using System.IO;
 
     /// <summary>
@@ -34,7 +33,6 @@ namespace Microsoft.Hadoop.Avro.Container
             {
                 throw new ArgumentNullException("name");
             }
-            Contract.EndContractBlock();
 
             this.Name = name;
         }

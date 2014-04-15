@@ -16,7 +16,7 @@ namespace Microsoft.Hadoop.Avro.Schema
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
+    using System.Diagnostics;
     using System.Globalization;
     using System.Linq;
     using System.Runtime.Serialization;
@@ -86,8 +86,15 @@ namespace Microsoft.Hadoop.Avro.Schema
         /// <returns>Set of additional attributes.</returns>
         public static Dictionary<string, string> GetAttributesNotIn(this JObject obj, HashSet<string> attributes)
         {
-            Contract.Assert(obj != null);
-            Contract.Assert(attributes != null);
+            if (obj == null)
+            {
+                throw new ArgumentNullException("obj");
+            }
+
+            if (attributes == null)
+            {
+                throw new ArgumentNullException("attributes");
+            }
 
             var result = new Dictionary<string, string>();
 
@@ -112,8 +119,15 @@ namespace Microsoft.Hadoop.Avro.Schema
         /// <exception cref="System.Runtime.Serialization.SerializationException">Thrown when property can not be parsed properly.</exception>
         private static T ReadProperty<T>(JToken token, string propertyName, bool isOptional)
         {
-            Contract.Assert(token != null);
-            Contract.Assert(propertyName != null);
+            if (token == null)
+            {
+                throw new ArgumentNullException("token");
+            }
+
+            if (propertyName == null)
+            {
+                throw new ArgumentNullException("propertyName");
+            }
 
             JToken value = token[propertyName];
             if (value == null)
@@ -143,9 +157,20 @@ namespace Microsoft.Hadoop.Avro.Schema
         /// <exception cref="System.Runtime.Serialization.SerializationException">Thrown when property can not be parsed properly.</exception>
         private static List<T> ReadArrayProperty<T>(JToken token, string propertyName, bool isOptional, Func<JToken, int, T> func)
         {
-            Contract.Assert(token != null, "token");
-            Contract.Assert(propertyName != null, "propertyName");
-            Contract.Assert(func != null, "func");
+            if (token == null)
+            {
+                throw new ArgumentNullException("token");
+            }
+
+            if (propertyName == null)
+            {
+                throw new ArgumentNullException("propertyName");
+            }
+
+            if (func == null)
+            {
+                throw new ArgumentNullException("func");
+            }
 
             var result = new List<T>();
 

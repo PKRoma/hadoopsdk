@@ -14,7 +14,8 @@
 // permissions and limitations under the License.
 namespace Microsoft.Hadoop.Avro.Container
 {
-    using System.Diagnostics.Contracts;
+    using System;
+    using System.Diagnostics;
     using System.IO;
     using System.Linq;
     using System.Runtime.Serialization;
@@ -42,14 +43,21 @@ namespace Microsoft.Hadoop.Avro.Container
         /// <param name="codecFactory">The codec factory.</param>
         public StreamReader(string readerSchema, Stream stream, bool leaveOpen, CodecFactory codecFactory)
         {
-            Contract.Assert(stream != null);
-            Contract.Assert(codecFactory != null);
+            if (stream == null)
+            {
+                throw new ArgumentNullException("stream");
+            }
+
+            if (codecFactory == null)
+            {
+                throw new ArgumentNullException("codecFactory");
+            }
 
             this.stream = stream;
             this.decoder = new BinaryDecoder(stream, leaveOpen);
             this.header = ObjectContainerHeader.Read(this.decoder);
             this.codec = codecFactory.Create(this.header.CodecName);
-            this.serializer = AvroSerializer.CreateGenericDeserializerOnly<T>(this.header.Schema, readerSchema ?? this.header.Schema);
+            this.serializer = (IAvroSerializer<T>)AvroSerializer.CreateGenericDeserializerOnly(this.header.Schema, readerSchema ?? this.header.Schema);
         }
 
         /// <summary>
@@ -61,9 +69,20 @@ namespace Microsoft.Hadoop.Avro.Container
         /// <param name="codecFactory">The codec factory.</param>
         public StreamReader(Stream stream, bool leaveOpen, AvroSerializerSettings settings, CodecFactory codecFactory)
         {
-            Contract.Assert(stream != null);
-            Contract.Assert(settings != null);
-            Contract.Assert(codecFactory != null);
+            if (stream == null)
+            {
+                throw new ArgumentNullException("stream");
+            }
+
+            if (settings == null)
+            {
+                throw new ArgumentNullException("settings");
+            }
+
+            if (codecFactory == null)
+            {
+                throw new ArgumentNullException("codecFactory");
+            }
 
             this.stream = stream;
             this.decoder = new BinaryDecoder(stream, leaveOpen);

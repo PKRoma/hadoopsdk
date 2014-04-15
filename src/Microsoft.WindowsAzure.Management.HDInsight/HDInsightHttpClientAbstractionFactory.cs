@@ -28,19 +28,8 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
     /// </summary>
     internal class HDInsightHttpClientAbstractionFactory : IHDInsightHttpClientAbstractionFactory
     {
-        /// <summary>
-        ///     Creates a new HttpClientAbstraction class.
-        /// </summary>
-        /// <param name="credentials">
-        ///     The credentials to use.
-        /// </param>
-        /// <param name="context">
-        ///     The context to use.
-        /// </param>
-        /// <returns>
-        ///     A new instance of the HttpClientAbstraction.
-        /// </returns>
-        public IHttpClientAbstraction Create(IHDInsightSubscriptionCredentials credentials, HDInsight.IAbstractionContext context)
+        /// <inheritdoc />
+        public IHttpClientAbstraction Create(IHDInsightSubscriptionCredentials credentials, HDInsight.IAbstractionContext context, bool ignoreSslErrors)
         {
             IHDInsightCertificateCredential certCreds = credentials as IHDInsightCertificateCredential;
             IHDInsightAccessTokenCredential tokenCreds = credentials as IHDInsightAccessTokenCredential;
@@ -48,27 +37,19 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
             {
                 return
                     ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>()
-                                  .Create(certCreds.Certificate, context);
+                                  .Create(certCreds.Certificate, context, ignoreSslErrors);
             }
             if (tokenCreds != null)
             {
                 return
                     ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>()
-                                  .Create(tokenCreds.AccessToken, context);
+                                  .Create(tokenCreds.AccessToken, context, ignoreSslErrors);
             }
             throw new NotSupportedException("Credential Type is not supported");
         }
 
-        /// <summary>
-        ///     Creates a new HttpClientAbstraction class.
-        /// </summary>
-        /// <param name="credentials">
-        ///     The credentials to use.
-        /// </param>
-        /// <returns>
-        ///     A new instance of the HttpClientAbstraction.
-        /// </returns>
-        public IHttpClientAbstraction Create(IHDInsightSubscriptionCredentials credentials)
+        /// <inheritdoc />
+        public IHttpClientAbstraction Create(IHDInsightSubscriptionCredentials credentials, bool ignoreSslErrors)
         {
             IHDInsightCertificateCredential certCreds = credentials as IHDInsightCertificateCredential;
             IHDInsightAccessTokenCredential tokenCreds = credentials as IHDInsightAccessTokenCredential;
@@ -76,42 +57,29 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
             {
                 return
                     ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>()
-                                  .Create(certCreds.Certificate);
+                                  .Create(certCreds.Certificate, ignoreSslErrors);
             }
             if (tokenCreds != null)
             {
                 return
                     ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>()
-                                  .Create(tokenCreds.AccessToken);
+                                  .Create(tokenCreds.AccessToken, ignoreSslErrors);
             }
             throw new NotSupportedException("Credential Type is not supported");
         }
 
-        /// <summary>
-        ///     Creates a new HttpClientAbstraction class.
-        /// </summary>
-        /// <param name="context">
-        ///     The context to use.
-        /// </param>
-        /// <returns>
-        ///     A new instance of the HttpClientAbstraction.
-        /// </returns>
-        public IHttpClientAbstraction Create(HDInsight.IAbstractionContext context)
+        /// <inheritdoc />
+        public IHttpClientAbstraction Create(HDInsight.IAbstractionContext context, bool ignoreSslErrors)
         {
             return ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>()
-                              .Create(context);
+                              .Create(context, ignoreSslErrors);
         }
 
-        /// <summary>
-        ///     Creates a new HttpClientAbstraction class.
-        /// </summary>
-        /// <returns>
-        ///     A new instance of the HttpClientAbstraction.
-        /// </returns>
-        public IHttpClientAbstraction Create()
+        /// <inheritdoc />
+        public IHttpClientAbstraction Create(bool ignoreSslErrors)
         {
             return ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>()
-                              .Create();
+                              .Create(ignoreSslErrors);
         }
 
         /// <inheritdoc />
@@ -119,54 +87,55 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
                                                                  IAbstractionContext context,
                                                                  Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation,
                                                                  Func<IHttpResponseMessageAbstraction, bool> shouldRetry,
-                                                                 TimeSpan timeout,
-                                                                 TimeSpan pollInterval)
+                                                                 int retryCount,
+                                                                 TimeSpan retryInterval,
+                                                                 bool ignoreSslErrors)
         {
             IHDInsightCertificateCredential certCreds = credentials as IHDInsightCertificateCredential;
             IHDInsightAccessTokenCredential tokenCreds = credentials as IHDInsightAccessTokenCredential;
             if (certCreds != null)
             {
                 return await ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>()
-                                                    .Retry(certCreds.Certificate, context, operation, shouldRetry, timeout, pollInterval);
+                                                    .Retry(certCreds.Certificate, context, operation, shouldRetry, retryCount, retryInterval, ignoreSslErrors);
             }
             if (tokenCreds != null)
             {
                 return await ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>()
-                                                    .Retry(tokenCreds.AccessToken, context, operation, shouldRetry, timeout, pollInterval);
+                                                    .Retry(tokenCreds.AccessToken, context, operation, shouldRetry, retryCount, retryInterval, ignoreSslErrors);
             }
             throw new NotSupportedException("Credential Type is not supported");
         }
 
         /// <inheritdoc />
-        public async Task<IHttpResponseMessageAbstraction> Retry(IHDInsightSubscriptionCredentials credentials, Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation, Func<IHttpResponseMessageAbstraction, bool> shouldRetry, TimeSpan timeout, TimeSpan pollInterval)
+        public async Task<IHttpResponseMessageAbstraction> Retry(IHDInsightSubscriptionCredentials credentials, Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation, Func<IHttpResponseMessageAbstraction, bool> shouldRetry, int retryCount, TimeSpan retryInterval, bool ignoreSslErrors)
         {
             IHDInsightCertificateCredential certCreds = credentials as IHDInsightCertificateCredential;
             IHDInsightAccessTokenCredential tokenCreds = credentials as IHDInsightAccessTokenCredential;
             if (certCreds != null)
             {
                 return await ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>()
-                                                    .Retry(certCreds.Certificate, operation, shouldRetry, timeout, pollInterval);
+                                                    .Retry(certCreds.Certificate, operation, shouldRetry, retryCount, retryInterval, ignoreSslErrors);
             }
             if (tokenCreds != null)
             {
                 return await ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>()
-                                                    .Retry(tokenCreds.AccessToken, operation, shouldRetry, timeout, pollInterval);
+                                                    .Retry(tokenCreds.AccessToken, operation, shouldRetry, retryCount, retryInterval, ignoreSslErrors);
             }
             throw new NotSupportedException("Credential Type is not supported");
         }
 
         /// <inheritdoc />
-        public async Task<IHttpResponseMessageAbstraction> Retry(IAbstractionContext context, Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation, Func<IHttpResponseMessageAbstraction, bool> shouldRetry, TimeSpan timeout, TimeSpan pollInterval)
+        public async Task<IHttpResponseMessageAbstraction> Retry(IAbstractionContext context, Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation, Func<IHttpResponseMessageAbstraction, bool> shouldRetry, int retryCount, TimeSpan retryInterval, bool ignoreSslErrors)
         {
             return await ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>()
-                                                .Retry(context, operation, shouldRetry, timeout, pollInterval);
+                                                .Retry(context, operation, shouldRetry, retryCount, retryInterval, ignoreSslErrors);
         }
 
         /// <inheritdoc />
-        public async Task<IHttpResponseMessageAbstraction> Retry(Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation, Func<IHttpResponseMessageAbstraction, bool> shouldRetry, TimeSpan timeout, TimeSpan pollInterval)
+        public async Task<IHttpResponseMessageAbstraction> Retry(Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation, Func<IHttpResponseMessageAbstraction, bool> shouldRetry, int retryCount, TimeSpan retryInterval, bool ignoreSslErrors)
         {
             return await ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>()
-                                                .Retry(operation, shouldRetry, timeout, pollInterval);
+                                                .Retry(operation, shouldRetry, retryCount, retryInterval, ignoreSslErrors);
         }
     }
 }

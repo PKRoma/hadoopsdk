@@ -15,7 +15,7 @@
 namespace Microsoft.Hadoop.Avro
 {
     using System;
-    using System.Diagnostics.Contracts;
+    using System.Diagnostics;
     using System.Globalization;
     using System.Runtime.Serialization;
     using Microsoft.Hadoop.Avro.Schema;
@@ -103,30 +103,28 @@ namespace Microsoft.Hadoop.Avro
         /// A resulted serializer can serialize data in AvroRecord hierarchy. For more details, please see <b>Remarks</b> section of
         /// <see cref="Microsoft.Hadoop.Avro.IAvroSerializer{T}"/> interface.
         /// </summary>
-        /// <typeparam name="T">The type to create a serializer for. Should be a derivative of AvroRecord.</typeparam>
         /// <param name="schema">The schema.</param>
         /// <returns>A serializer.</returns>
         /// <exception cref="System.ArgumentNullException">Thrown when <paramref name="schema"/> is null.</exception>
-        public static IAvroSerializer<T> CreateGeneric<T>(string schema)
+        public static IAvroSerializer<object> CreateGeneric(string schema)
         {
             if (string.IsNullOrEmpty(schema))
             {
                 throw new ArgumentNullException("schema");
             }
 
-            return CreateForCore<T>(string.Empty, schema);
+            return CreateForCore<object>(string.Empty, schema);
         }
 
         /// <summary>
         ///     Creates a generic deserializer for the data that was written with the specified <paramref name="writerSchema">schema</paramref>.
         ///     Should be used, when reading the data written using an older version of the schema.
         /// </summary>
-        /// <typeparam name="T">The type to create a deserializer for (derivative of AvroRecord).</typeparam>
         /// <param name="writerSchema">The writer schema.</param>
         /// <param name="readerSchema">The reader schema.</param>
         /// <returns> A deserializer.</returns>
         /// <exception cref="System.ArgumentNullException"> Thrown if <paramref name="writerSchema"/> or <paramref name="readerSchema"/> is null.</exception>
-        public static IAvroSerializer<T> CreateGenericDeserializerOnly<T>(string writerSchema, string readerSchema)
+        public static IAvroSerializer<object> CreateGenericDeserializerOnly(string writerSchema, string readerSchema)
         {
             if (string.IsNullOrEmpty(writerSchema))
             {
@@ -138,12 +136,15 @@ namespace Microsoft.Hadoop.Avro
                 throw new ArgumentNullException("readerSchema");
             }
 
-            return CreateForCore<T>(writerSchema, readerSchema);
+            return CreateForCore<object>(writerSchema, readerSchema);
         }
 
         private static AvroSerializer<T> CreateForCore<T>(string writerSchema, AvroSerializerSettings settings)
         {
-            Contract.Assert(settings != null);
+            if (settings == null)
+            {
+                throw new ArgumentNullException("settings");
+            }
 
             var key = Tuple.Create(writerSchema, typeof(T), settings);
             var serializer = TypedSerializers.Get(key);
@@ -212,7 +213,10 @@ namespace Microsoft.Hadoop.Avro
             {
                 builderGenerator.Visit(reader);
                 Action<IEncoder, T> s = (e, obj) => reader.Serializer.Serialize(e, obj);
-                Func<IDecoder, T> d = decode => (T)reader.Serializer.Deserialize(decode);
+                Func<IDecoder, T> d = decode =>
+                {
+                    return (T)reader.Serializer.Deserialize(decode);
+                };
                 serializer = new GeneratedSerializer
                 {
                     WriterSchema = reader,
@@ -243,6 +247,11 @@ namespace Microsoft.Hadoop.Avro
 
             UntypedSerializers.Add(key, serializer);
             return new AvroSerializer<T>(serializer);
+        }
+
+        internal static int CacheEntriesCount
+        {
+            get { return TypedSerializers.Count; }
         }
     }
 }

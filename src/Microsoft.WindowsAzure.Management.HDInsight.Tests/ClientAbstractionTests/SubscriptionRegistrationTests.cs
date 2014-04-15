@@ -50,7 +50,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         public async Task ICanPerformA_PositiveSubscriptionValidation_Using_SubscriptionRegistrationAbstraction_AgainstAzure() // Always goes against azure to quickly validate end2end
         {
             IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
-            var client = new SubscriptionRegistrationClient(credentials, GetAbstractionContext());
+            var client = new SubscriptionRegistrationClient(credentials, GetAbstractionContext(), false);
             Assert.IsTrue(await client.ValidateSubscriptionLocation("East US 2"));
         }
 
@@ -61,7 +61,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         public async Task ICanPerformA_PositiveSubscriptionValidation_Using_SubscriptionRegistrationAbstraction()
         {
             IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
-            var client = ServiceLocator.Instance.Locate<ISubscriptionRegistrationClientFactory>().Create(credentials, GetAbstractionContext());
+            var client = ServiceLocator.Instance.Locate<ISubscriptionRegistrationClientFactory>().Create(credentials, GetAbstractionContext(), false);
             Assert.IsTrue(await client.ValidateSubscriptionLocation("East US 2"));
             Assert.IsFalse(await client.ValidateSubscriptionLocation("No Where"));
         }
@@ -73,7 +73,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         public async Task ICanPerformA_RepeatedSubscriptionRegistration_Using_SubscriptionRegistrationAbstraction()
         {
             IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
-            var client = ServiceLocator.Instance.Locate<ISubscriptionRegistrationClientFactory>().Create(credentials, GetAbstractionContext());
+            var client = ServiceLocator.Instance.Locate<ISubscriptionRegistrationClientFactory>().Create(credentials, GetAbstractionContext(), false);
             await client.RegisterSubscription();
             await client.RegisterSubscription();
             await client.RegisterSubscriptionLocation("North Europe");
@@ -104,7 +104,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             DeleteClusters(credentials, location);
 
             // Need to delete clusters, otherwise unregister will no-op
-            var client = ServiceLocator.Instance.Locate<ISubscriptionRegistrationClientFactory>().Create(credentials, GetAbstractionContext());
+            var client = ServiceLocator.Instance.Locate<ISubscriptionRegistrationClientFactory>().Create(credentials, GetAbstractionContext(), false);
             try
             {
                 await client.UnregisterSubscriptionLocation("North Europe");
@@ -142,7 +142,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         {
             IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
 
-            var client = ServiceLocator.Instance.Locate<ISubscriptionRegistrationClientFactory>().Create(credentials, GetAbstractionContext());
+            var client = ServiceLocator.Instance.Locate<ISubscriptionRegistrationClientFactory>().Create(credentials, GetAbstractionContext(), false);
             try
             {
                 await client.UnregisterSubscriptionLocation("East US 2");
@@ -177,7 +177,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
             DeleteClusters(credentials, "North Europe");
 
-            var client = ServiceLocator.Instance.Locate<ISubscriptionRegistrationClientFactory>().Create(credentials, GetAbstractionContext());
+            var client = ServiceLocator.Instance.Locate<ISubscriptionRegistrationClientFactory>().Create(credentials, GetAbstractionContext(), false);
             await client.RegisterSubscriptionLocation("North Europe");
             await client.UnregisterSubscriptionLocation("North Europe");
         }
@@ -194,7 +194,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             // Unregisters location
             var location = "North Europe";
             DeleteClusters(credentials, location);
-            var client = ServiceLocator.Instance.Locate<ISubscriptionRegistrationClientFactory>().Create(credentials, GetAbstractionContext());
+            var client = ServiceLocator.Instance.Locate<ISubscriptionRegistrationClientFactory>().Create(credentials, GetAbstractionContext(), false);
             if (await client.ValidateSubscriptionLocation(location))
             {
                 await client.UnregisterSubscriptionLocation(location);
@@ -204,7 +204,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             try
             {
                 // Creates the cluster
-                var restClient = ServiceLocator.Instance.Locate<IHDInsightManagementRestClientFactory>().Create(credentials, GetAbstractionContext());
+                var restClient = ServiceLocator.Instance.Locate<IHDInsightManagementRestClientFactory>().Create(credentials, GetAbstractionContext(), false);
                 var cluster = GetRandomCluster();
                 string payload = new PayloadConverter().SerializeClusterCreateRequest(cluster);
                 await restClient.CreateContainer(cluster.Name, location, payload);

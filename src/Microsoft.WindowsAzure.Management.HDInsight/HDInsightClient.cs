@@ -50,6 +50,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
         internal const string ClusterAlreadyExistsError = "The condition specified by the ETag is not satisfied.";
 
         private IHDInsightSubscriptionCredentials credentials;
+        private ClusterDetails currentDetails;
 
         /// <summary>
         /// Gets the connection credential.
@@ -61,6 +62,56 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
 
         /// <inheritdoc />
         public TimeSpan PollingInterval { get; set; }
+
+        /// <summary>
+        /// Gets or sets the the time out allowed for a single Http Request.
+        /// </summary>
+        public static TimeSpan HttpRequestTimeout
+        {
+            get
+            {
+                return ServiceLocator.Instance.Locate<IHttpOperationManager>().HttpOperationTimeout;
+            }
+
+            set
+            {
+                ServiceLocator.Instance.Locate<IHttpOperationManager>().HttpOperationTimeout = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the number of retries for an Http GET Operation.
+        /// NOTE: Currently this only supports GET operations.
+        /// </summary>
+        public static int HttpRequestRetryCount
+        {
+            get
+            {
+                return ServiceLocator.Instance.Locate<IHttpOperationManager>().RetryCount;
+            }
+
+            set
+            {
+                ServiceLocator.Instance.Locate<IHttpOperationManager>().RetryCount = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the delay between retry events on Http GET Operations.
+        /// NOTE: Currently this only supports GET operations.
+        /// </summary>
+        public static TimeSpan HttpRequestRetryInterval
+        {
+            get
+            {
+                return ServiceLocator.Instance.Locate<IHttpOperationManager>().RetryInterval;
+            }
+
+            set
+            {
+                ServiceLocator.Instance.Locate<IHttpOperationManager>().RetryInterval = value;
+            }
+        }
 
         /// <inheritdoc />
         internal static TimeSpan DefaultPollingInterval = TimeSpan.FromSeconds(15);
@@ -102,28 +153,28 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
         /// <inheritdoc />
         public async Task<Collection<string>> ListAvailableLocationsAsync()
         {
-            var client = ServiceLocator.Instance.Locate<ILocationFinderClientFactory>().Create(this.credentials, this.Context);
+            var client = ServiceLocator.Instance.Locate<ILocationFinderClientFactory>().Create(this.credentials, this.Context, this.IgnoreSslErrors);
             return await client.ListAvailableLocations();
         }
 
         /// <inheritdoc />
         public async Task<IEnumerable<KeyValuePair<string, string>>> ListResourceProviderPropertiesAsync()
         {
-            var client = ServiceLocator.Instance.Locate<IRdfeServiceRestClientFactory>().Create(this.credentials, this.Context);
+            var client = ServiceLocator.Instance.Locate<IRdfeServiceRestClientFactory>().Create(this.credentials, this.Context, this.IgnoreSslErrors);
             return await client.GetResourceProviderProperties();
         }
 
         /// <inheritdoc />
         public async Task<Collection<HDInsightVersion>> ListAvailableVersionsAsync()
         {
-            var overrideHandlers = ServiceLocator.Instance.Locate<IHDInsightClusterOverrideManager>().GetHandlers(this.credentials, this.Context);
+            var overrideHandlers = ServiceLocator.Instance.Locate<IHDInsightClusterOverrideManager>().GetHandlers(this.credentials, this.Context, this.IgnoreSslErrors);
             return await overrideHandlers.VersionFinder.ListAvailableVersions();
         }
 
         /// <inheritdoc />
         public async Task<ICollection<ClusterDetails>> ListClustersAsync()
         {
-            using (var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(this.credentials, this.Context))
+            using (var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(this.credentials, this.Context, this.IgnoreSslErrors))
             {
                 return await client.ListContainers();
             }
@@ -136,7 +187,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
             {
                 throw new ArgumentNullException("name");
             }
-            using (var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(this.credentials, this.Context))
+            using (var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(this.credentials, this.Context, this.IgnoreSslErrors))
             {
                 return await client.ListContainer(name);
             }
@@ -150,7 +201,8 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
                 throw new ArgumentNullException("clusterCreateParameters");
             }
 
-            var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(this.credentials, this.Context);
+            var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(this.credentials, this.Context, this.IgnoreSslErrors);
+            this.LogMessage("Validating Cluster Versions", Severity.Informational, Verbosity.Detailed);
             await this.ValidateClusterVersion(clusterCreateParameters);
 
             // listen to cluster provisioning events on the POCO client.
@@ -160,30 +212,27 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
             // Creates a cluster and waits for it to complete
             try
             {
+                this.LogMessage("Sending Cluster Create Request", Severity.Informational, Verbosity.Detailed);
                 await client.CreateContainer(clusterCreateParameters);
             }
-            catch (AggregateException aex)
+            catch (Exception ex)
             {
-                var ex = aex.GetInnerException();
-                var layerException = ex as HttpLayerException;
-                if (layerException != null)
+                ex = ex.GetFirstException();
+                var hlex = ex as HttpLayerException;
+                var httpEx = ex as HttpRequestException;
+                var webex = ex as WebException;
+                if (hlex.IsNotNull() || httpEx.IsNotNull() || webex.IsNotNull())
                 {
-                    requestException = layerException;
-                    HandleCreateHttpLayerException(clusterCreateParameters, layerException);
+                    requestException = ex;
+                    if (hlex.IsNotNull())
+                    {
+                        HandleCreateHttpLayerException(clusterCreateParameters, hlex);
+                    }
                 }
                 else
                 {
-                    requestException = ex as HttpRequestException;
+                    throw;
                 }
-            }
-            catch (HttpLayerException e)
-            {
-                requestException = e;
-                HandleCreateHttpLayerException(clusterCreateParameters, e);
-            }
-            catch (HttpRequestException rex)
-            {
-                requestException = rex;
             }
             await client.WaitForClusterInConditionOrError(this.HandleClusterWaitNotifyEvent,
                                                           clusterCreateParameters.Name,
@@ -194,7 +243,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
                                                           ClusterState.Running);
 
             // Validates that cluster didn't get on error state
-            var result = await this.GetClusterAsync(clusterCreateParameters.Name);
+            var result = this.currentDetails;
             if (result == null)
             {
                 if (requestException != null)
@@ -206,13 +255,11 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
             if (result.Error != null)
             {
                 throw new OperationCanceledException(
-                    string.Format(
-                        CultureInfo.InvariantCulture,
-                        "Unable to complete the '{0}' operation. Operation failed with code '{1}'. Cluster left behind state: '{2}'. Message: '{3}'.",
-                        result.Error.OperationType ?? "UNKNOWN",
-                        result.Error.HttpCode,
-                        result.Error.Message ?? "NULL",
-                        result.StateString ?? "NULL"));
+                    string.Format(CultureInfo.InvariantCulture,
+                                  "Unable to complete the cluster create operation. Operation failed with code '{0}'. Cluster left behind state: '{1}'. Message: '{2}'.",
+                                  result.Error.HttpCode,
+                                  result.StateString ?? "NULL",
+                                  result.Error.Message ?? "NULL"));
             }
 
             return result;
@@ -250,6 +297,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
         {
             if (cluster.IsNotNull())
             {
+                this.currentDetails = cluster;
                 this.RaiseClusterProvisioningEvent(this, new ClusterProvisioningStatusEventArgs(cluster, cluster.State));
             }
         }
@@ -262,7 +310,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
                 throw new ArgumentNullException("name");
             }
 
-            var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(this.credentials, this.Context);
+            var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(this.credentials, this.Context, this.IgnoreSslErrors);
             await client.DeleteContainer(name);
             await client.WaitForClusterNull(name, TimeSpan.FromMinutes(30), this.Context.CancellationToken);
         }
@@ -277,7 +325,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
 
             await this.AssertClusterVersionSupported(dnsName);
 
-            var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(this.credentials, this.Context);
+            var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(this.credentials, this.Context, this.IgnoreSslErrors);
             var operationId = await client.EnableHttp(dnsName, location, httpUserName, httpPassword);
             await client.WaitForOperationCompleteOrError(dnsName, location, operationId, TimeSpan.FromHours(1), this.Context.CancellationToken);
         }
@@ -302,7 +350,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
 
             await this.AssertClusterVersionSupported(dnsName);
 
-            var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(this.credentials, this.Context);
+            var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(this.credentials, this.Context, this.IgnoreSslErrors);
             var operationId = await client.DisableHttp(dnsName, location);
             await client.WaitForOperationCompleteOrError(dnsName, location, operationId, TimeSpan.FromHours(1), this.Context.CancellationToken);
         }
@@ -316,7 +364,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
         /// <inheritdoc />
         public IEnumerable<KeyValuePair<string, string>> ListResourceProviderProperties()
         {
-            var client = ServiceLocator.Instance.Locate<IRdfeServiceRestClientFactory>().Create(this.credentials, this.Context);
+            var client = ServiceLocator.Instance.Locate<IRdfeServiceRestClientFactory>().Create(this.credentials, this.Context, this.IgnoreSslErrors);
             return client.GetResourceProviderProperties().WaitForResult();
         }
 
@@ -381,7 +429,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
 
         private async Task ValidateClusterVersion(ClusterCreateParameters cluster)
         {
-            var overrideHandlers = ServiceLocator.Instance.Locate<IHDInsightClusterOverrideManager>().GetHandlers(this.credentials, this.Context);
+            var overrideHandlers = ServiceLocator.Instance.Locate<IHDInsightClusterOverrideManager>().GetHandlers(this.credentials, this.Context, this.IgnoreSslErrors);
             // Validates the version for cluster creation
             if (string.IsNullOrEmpty(cluster.Version) || string.Equals(cluster.Version, DEFAULTHDINSIGHTVERSION, StringComparison.OrdinalIgnoreCase))
             {
@@ -404,7 +452,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
 
         private void AssertSupportedVersion(Version hdinsightClusterVersion)
         {
-            var overrideHandlers = ServiceLocator.Instance.Locate<IHDInsightClusterOverrideManager>().GetHandlers(this.credentials, this.Context);
+            var overrideHandlers = ServiceLocator.Instance.Locate<IHDInsightClusterOverrideManager>().GetHandlers(this.credentials, this.Context, this.IgnoreSslErrors);
             switch (overrideHandlers.VersionFinder.GetVersionStatus(hdinsightClusterVersion))
             {
                 case VersionStatus.Obsolete:

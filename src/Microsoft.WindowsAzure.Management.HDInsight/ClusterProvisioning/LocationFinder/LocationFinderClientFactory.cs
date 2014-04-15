@@ -19,9 +19,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Locati
 
     internal class LocationFinderClientFactory : ILocationFinderClientFactory
     {
-        public ILocationFinderClient Create(IHDInsightSubscriptionCredentials credentials, IAbstractionContext context)
+        public ILocationFinderClient Create(IHDInsightSubscriptionCredentials credentials, IAbstractionContext context, bool ignoreSslErrors)
         {
-            return new LocationFinderClient(credentials, context);
+            return new LocationFinderClient(credentials, context, ignoreSslErrors);
         }
     }
 }

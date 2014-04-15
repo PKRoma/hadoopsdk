@@ -6,6 +6,12 @@
     <To>HadoopSdkLicense.rtf</To>
   </Copy>
 
+  <!-- Avro -->
+  <Copy>
+    <From>Microsoft.Hadoop.Avro\Microsoft.Hadoop.Avro.dll</From>
+    <To>Microsoft.Hadoop.Avro\lib\net40\Microsoft.Hadoop.Avro.dll</To>
+  </Copy>
+  
   <!-- Hadoop Client -->
   <Copy>
     <From>Microsoft.HDInsight.Threading\Microsoft.HDInsight.Threading.dll</From>

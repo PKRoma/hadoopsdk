@@ -17,7 +17,6 @@ namespace Microsoft.Hadoop.Avro.Schema
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
-    using System.Diagnostics.Contracts;
     using System.Globalization;
     using System.IO;
     using Newtonsoft.Json;
@@ -41,7 +40,6 @@ namespace Microsoft.Hadoop.Avro.Schema
             {
                 throw new ArgumentNullException("attributes");
             }
-            Contract.EndContractBlock();
 
             this.attributes = new Dictionary<string, string>(attributes);
         }
@@ -69,7 +67,6 @@ namespace Microsoft.Hadoop.Avro.Schema
             {
                 throw new ArgumentNullException("value");
             }
-            Contract.EndContractBlock();
             this.attributes.Add(attribute, value);
         }
 
@@ -96,8 +93,6 @@ namespace Microsoft.Hadoop.Avro.Schema
         /// <param name="seenSchemas">The seen schemas.</param>
         internal void ToJson(JsonTextWriter writer, HashSet<NamedSchema> seenSchemas)
         {
-            Contract.Assert(writer != null);
-            Contract.Assert(seenSchemas != null);
             this.ToJsonSafe(writer, seenSchemas);
         }
 

@@ -19,9 +19,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.AzureM
 
     internal class SubscriptionRegistrationClientFactory : ISubscriptionRegistrationClientFactory
     {
-        public ISubscriptionRegistrationClient Create(IHDInsightSubscriptionCredentials creds, IAbstractionContext context)
+        public ISubscriptionRegistrationClient Create(IHDInsightSubscriptionCredentials creds, IAbstractionContext context, bool ignoreSslErrors)
         {
-            return new SubscriptionRegistrationClient(creds, context);
+            return new SubscriptionRegistrationClient(creds, context, ignoreSslErrors);
         }
     }
 }

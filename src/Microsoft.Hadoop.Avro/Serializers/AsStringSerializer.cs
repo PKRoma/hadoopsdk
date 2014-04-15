@@ -15,7 +15,7 @@
 namespace Microsoft.Hadoop.Avro.Serializers
 {
     using System;
-    using System.Diagnostics.Contracts;
+    using System.Diagnostics;
     using System.Linq.Expressions;
     using System.Reflection;
     using Microsoft.Hadoop.Avro.Schema;
@@ -36,7 +36,6 @@ namespace Microsoft.Hadoop.Avro.Serializers
         protected override Expression BuildSerializerSafe(Expression encoder, Expression value)
         {
             MethodInfo toString = this.Schema.RuntimeType.GetMethod("ToString", new Type[] { });
-            Contract.Assert(toString != null);
             return Expression.Call(
                 encoder,
                 this.Encode<string>(),
@@ -46,8 +45,6 @@ namespace Microsoft.Hadoop.Avro.Serializers
         protected override Expression BuildDeserializerSafe(Expression decoder)
         {
             MethodInfo parse = this.Schema.RuntimeType.GetMethod("Parse", new[] { typeof(string) });
-            Contract.Assert(parse != null);
- 
             return Expression.Call(
                 parse,
                 Expression.Call(decoder, this.Decode<string>()));

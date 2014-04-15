@@ -197,12 +197,14 @@
     <Compile Include="Logging\ILogger.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>
+    <Compile Include="Logging\ILogProvider.cs" />
     <Compile Include="Logging\ILogWriter.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>
     <Compile Include="Logging\Logger.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>
+    <Compile Include="Logging\LogProviderExtensions.cs" />
     <Compile Include="Logging\LogWriter.cs">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Compile>

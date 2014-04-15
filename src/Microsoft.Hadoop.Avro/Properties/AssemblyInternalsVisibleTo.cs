@@ -6,4 +6,4 @@
 
 using System.Runtime.CompilerServices;
 
-[assembly: InternalsVisibleTo("Microsoft.Hadoop.Avro.Specifications")]
+[assembly: InternalsVisibleTo("Microsoft.Hadoop.Avro.Tests")]

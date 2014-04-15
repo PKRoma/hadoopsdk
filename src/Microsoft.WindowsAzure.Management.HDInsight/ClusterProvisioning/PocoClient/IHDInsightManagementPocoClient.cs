@@ -19,11 +19,12 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
     using System.Diagnostics.CodeAnalysis;
     using System.Threading.Tasks;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning;
+    using Microsoft.WindowsAzure.Management.HDInsight.Logging;
 
     /// <summary>
     /// Provides an object oriented abstraction over the HDInsight management REST client.
     /// </summary>
-    internal interface IHDInsightManagementPocoClient : IDisposable
+    internal interface IHDInsightManagementPocoClient : IDisposable, ILogProvider
     {
         /// <summary>
         /// Event that is fired when the client provisions a cluster.

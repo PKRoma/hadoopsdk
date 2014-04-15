@@ -57,7 +57,7 @@ namespace Microsoft.WindowsAzure.Management.Configuration
         /// <returns>The response message from the remote cluster.</returns>
         private async Task<IHttpResponseMessageAbstraction> MakeAsyncGetRequest(Uri relativeUri)
         {
-            using (var httpClient = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create())
+            using (var httpClient = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(false))
             {
                 var uri = new Uri(this.credentials.Server, relativeUri);
                 httpClient.RequestUri = uri;

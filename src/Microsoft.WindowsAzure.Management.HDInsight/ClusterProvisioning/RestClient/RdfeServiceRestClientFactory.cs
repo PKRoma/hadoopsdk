@@ -19,9 +19,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestCl
 
     internal class RdfeServiceRestClientFactory : IRdfeServiceRestClientFactory
     {
-        public IRdfeServiceRestClient Create(IHDInsightSubscriptionCredentials credentials, IAbstractionContext context)
+        public IRdfeServiceRestClient Create(IHDInsightSubscriptionCredentials credentials, IAbstractionContext context, bool ignoreSslErrors)
         {
-            return new RdfeServiceRestClient(credentials, context);
+            return new RdfeServiceRestClient(credentials, context, ignoreSslErrors);
         }
     }
 }

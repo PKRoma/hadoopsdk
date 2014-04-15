@@ -53,7 +53,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Configuration
             try
             {
                 IHttpClientAbstraction invalidAbstraction =
-                    ServiceLocator.Instance.Locate<IHDInsightHttpClientAbstractionFactory>().Create(credentials);
+                    ServiceLocator.Instance.Locate<IHDInsightHttpClientAbstractionFactory>().Create(credentials, false);
                 Assert.Fail("No Http client should be created with null credentials");
             }
             catch (NotSupportedException e)
@@ -78,7 +78,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Configuration
             try
             {
                 IHttpClientAbstraction invalidAbstraction =
-                    ServiceLocator.Instance.Locate<IHDInsightHttpClientAbstractionFactory>().Create(credentials);
+                    ServiceLocator.Instance.Locate<IHDInsightHttpClientAbstractionFactory>().Create(credentials, false);
                 Assert.Fail("No Http client should be created with unsupported credential types");
             }
             catch (NotSupportedException e)
@@ -105,7 +105,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Configuration
             try
             {
                 IHttpClientAbstraction validAbstraction =
-                    ServiceLocator.Instance.Locate<IHDInsightHttpClientAbstractionFactory>().Create(credentials);
+                    ServiceLocator.Instance.Locate<IHDInsightHttpClientAbstractionFactory>().Create(credentials, false);
                 Assert.IsTrue(validAbstraction.RequestHeaders.ContainsKey("Authorization"));
                 Assert.AreEqual(validAbstraction.RequestHeaders["Authorization"], "Bearer " + accessToken);
             }
@@ -158,7 +158,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Configuration
             {
                 //Should not have token header set when using a certificate
                 IHttpClientAbstraction validAbstraction =
-                    ServiceLocator.Instance.Locate<IHDInsightHttpClientAbstractionFactory>().Create(credentials);
+                    ServiceLocator.Instance.Locate<IHDInsightHttpClientAbstractionFactory>().Create(credentials, false);
                 Assert.IsFalse(validAbstraction.RequestHeaders.ContainsKey("Authorization"));
             }
             catch (NotSupportedException e)

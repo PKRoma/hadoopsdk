@@ -14,6 +14,7 @@
 // permissions and limitations under the License.
 namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Logging
 {
+    using System;
     using System.Collections.Generic;
     using Microsoft.WindowsAzure.Management.HDInsight.Logging;
 
@@ -21,9 +22,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Logging
     /// The default implementation of the logger.  All messages are 
     /// simply passed into the LogWriter.
     /// </summary>
-    internal class Logger : ILogger
+    public class Logger : ILogger
     {
-        private List<ILogWriter> writers = new List<ILogWriter>();
+        private List<Tuple<ILogWriter, object>> writers = new List<Tuple<ILogWriter, object>>();
 
         /// <inheritdoc />
         public void LogMessage(string message)
@@ -31,18 +32,59 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Logging
             this.LogMessage(message, Severity.Message, Verbosity.Normal);
         }
 
+        /// <inheritdoc />
         public void LogMessage(string message, Severity severity, Verbosity verbosity)
         {
-            foreach (var logWriter in this.writers)
+            List<Tuple<ILogWriter, object>> localWriters;
+            lock (this.writers)
             {
-                logWriter.Log(severity, verbosity, message);
+                // Lock the writers before capturing the list.
+                localWriters = this.writers;
+            }
+            foreach (var logWriter in localWriters)
+            {
+                // Lock the lock object.
+                lock (logWriter.Item2)
+                {
+                    // Log to the writer.
+                    logWriter.Item1.Log(severity, verbosity, message);
+                }
             }
         }
 
         /// <inheritdoc />
         public void AddWriter(ILogWriter writer)
         {
-            this.writers.Add(writer);
+            // Log the writers before adding a new item.
+            lock (this.writers)
+            {
+                // Use a Tuple so we can provide a lock object.
+                this.writers.Add(new Tuple<ILogWriter, object>(writer, new object()));
+            }
+        }
+
+        /// <inheritdoc />
+        public void RemoveWriter(ILogWriter writer)
+        {
+            Tuple<ILogWriter, object> toRemove = null;
+            // Log the writers before removing the item.
+            lock (this.writers)
+            {
+                // Enumerate and find the correct writer pair.
+                foreach (var keyValuePair in this.writers)
+                {
+                    if (keyValuePair.Item1 == writer)
+                    {
+                        toRemove = keyValuePair;
+                        break;
+                    }
+                }
+                // Remove the Tuple if we found one.
+                if (toRemove != null)
+                {
+                    this.writers.Remove(toRemove);
+                }
+            }
         }
     }
 }

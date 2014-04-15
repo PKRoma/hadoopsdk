@@ -15,7 +15,6 @@
 namespace Microsoft.Hadoop.Avro
 {
     using System;
-    using System.Diagnostics.Contracts;
     using System.IO;
     using System.Text;
 
@@ -49,7 +48,6 @@ namespace Microsoft.Hadoop.Avro
             {
                 throw new ArgumentNullException("stream");
             }
-            Contract.EndContractBlock();
 
             this.stream = stream;
             this.leaveOpen = leaveOpen;
@@ -136,7 +134,6 @@ namespace Microsoft.Hadoop.Avro
             {
                 throw new ArgumentNullException("value");
             }
-            Contract.EndContractBlock();
 
             this.Encode(value.Length);
             this.stream.Write(value, 0, value.Length);
@@ -153,7 +150,6 @@ namespace Microsoft.Hadoop.Avro
             {
                 throw new ArgumentNullException("value");
             }
-            Contract.EndContractBlock();
 
             this.Encode(Encoding.UTF8.GetBytes(value));
         }
@@ -195,7 +191,6 @@ namespace Microsoft.Hadoop.Avro
             {
                 throw new ArgumentNullException("value");
             }
-            Contract.EndContractBlock();
 
             this.stream.Write(value, 0, value.Length);
         }
@@ -211,7 +206,6 @@ namespace Microsoft.Hadoop.Avro
             {
                 throw new ArgumentNullException("stream");
             }
-            Contract.EndContractBlock();
 
             this.Encode(stream.Length);
             stream.CopyTo(this.stream);

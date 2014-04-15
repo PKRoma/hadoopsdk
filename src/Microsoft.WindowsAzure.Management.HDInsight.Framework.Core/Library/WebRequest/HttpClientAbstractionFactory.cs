@@ -18,34 +18,34 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.Web
 
     internal class HttpClientAbstractionFactory : HttpClientAbstractionFactoryBase
     {
-        public override IHttpClientAbstraction Create(IAbstractionContext context)
+        public override IHttpClientAbstraction Create(IAbstractionContext context, bool ignoreSslErrors)
         {
-            return HttpClientAbstraction.Create(context);
+            return HttpClientAbstraction.Create(context, ignoreSslErrors);
         }
 
-        public override IHttpClientAbstraction Create(X509Certificate2 cert)
+        public override IHttpClientAbstraction Create(X509Certificate2 cert, bool ignoreSslErrors)
         {
-            return HttpClientAbstraction.Create(cert);
+            return HttpClientAbstraction.Create(cert, ignoreSslErrors);
         }
 
-        public override IHttpClientAbstraction Create(X509Certificate2 cert, IAbstractionContext context)
+        public override IHttpClientAbstraction Create(X509Certificate2 cert, IAbstractionContext context, bool ignoreSslErrors)
         {
-            return HttpClientAbstraction.Create(cert, context);
+            return HttpClientAbstraction.Create(cert, context, ignoreSslErrors);
         }
 
-        public override IHttpClientAbstraction Create(string token)
+        public override IHttpClientAbstraction Create(string token, bool ignoreSslErrors)
         {
-            return HttpClientAbstraction.Create(token);
+            return HttpClientAbstraction.Create(token, ignoreSslErrors);
         }
 
-        public override IHttpClientAbstraction Create(string token, IAbstractionContext context)
+        public override IHttpClientAbstraction Create(string token, IAbstractionContext context, bool ignoreSslErrors)
         {
-            return HttpClientAbstraction.Create(token, context);
+            return HttpClientAbstraction.Create(token, context, ignoreSslErrors);
         }
 
-        public override IHttpClientAbstraction Create()
+        public override IHttpClientAbstraction Create(bool ignoreSslErrors)
         {
-            return HttpClientAbstraction.Create();
+            return HttpClientAbstraction.Create(ignoreSslErrors);
         }
     }
 }

@@ -15,7 +15,6 @@
 namespace Microsoft.Hadoop.Avro.Container
 {
     using System;
-    using System.Diagnostics.Contracts;
     using System.IO;
 
     /// <summary>
@@ -38,7 +37,6 @@ namespace Microsoft.Hadoop.Avro.Container
             {
                 throw new ArgumentNullException("decompressed");
             }
-            Contract.EndContractBlock();
 
             return decompressed;
         }
@@ -49,7 +47,6 @@ namespace Microsoft.Hadoop.Avro.Container
             {
                 throw new ArgumentNullException("compressed");
             }
-            Contract.EndContractBlock();
 
             return compressed;
         }

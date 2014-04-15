@@ -19,9 +19,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
 
     internal class HDInsightManagementPocoClientFactory : IHDInsightManagementPocoClientFactory
     {
-        public IHDInsightManagementPocoClient Create(IHDInsightSubscriptionCredentials credentials, IAbstractionContext context)
+        public IHDInsightManagementPocoClient Create(IHDInsightSubscriptionCredentials credentials, IAbstractionContext context, bool ignoreSslErrors)
         {
-            return new HDInsightManagementPocoClient(credentials, context);
+            return new HDInsightManagementPocoClient(credentials, context, ignoreSslErrors);
         }
     }
 }

@@ -86,7 +86,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
 
             // Validate Versions
-            var client = new VersionFinderClient(credentials, GetAbstractionContext());
+            var client = new VersionFinderClient(credentials, GetAbstractionContext(), false);
             var versions = await client.ListAvailableVersions();
             var versionStrings = versions.Select(v => v.Version).ToList();
             Assert.AreEqual(1, versionStrings.Count(version => version == "1.4"));
@@ -99,7 +99,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         public void UserSuppliedVersionTooLow()
         {
             var userVersion = new Version(HDInsightSDKSupportedVersions.MinVersion.Major, HDInsightSDKSupportedVersions.MinVersion.Minor - 1, 0, 0);
-            var client = new VersionFinderClient(IntegrationTestBase.GetValidCredentials(), GetAbstractionContext());
+            var client = new VersionFinderClient(IntegrationTestBase.GetValidCredentials(), GetAbstractionContext(), false);
 
             Assert.AreEqual(client.GetVersionStatus(userVersion), VersionStatus.Obsolete);
         }
@@ -110,7 +110,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         public void UserSuppliedVersionTooHigh()
         {
             var userVersion = new Version(HDInsightSDKSupportedVersions.MaxVersion.Major, HDInsightSDKSupportedVersions.MaxVersion.Minor + 1, 0, 0);
-            var client = new VersionFinderClient(IntegrationTestBase.GetValidCredentials(), GetAbstractionContext());
+            var client = new VersionFinderClient(IntegrationTestBase.GetValidCredentials(), GetAbstractionContext(), false);
 
             Assert.AreEqual(client.GetVersionStatus(userVersion), VersionStatus.ToolsUpgradeRequired);
         }
@@ -121,7 +121,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         public void UserSuppliedVersionValid()
         {
             var userVersion = new Version(HDInsightSDKSupportedVersions.MinVersion.Major, HDInsightSDKSupportedVersions.MinVersion.Minor + 1, 0, 0);
-            var client = new VersionFinderClient(IntegrationTestBase.GetValidCredentials(), GetAbstractionContext());
+            var client = new VersionFinderClient(IntegrationTestBase.GetValidCredentials(), GetAbstractionContext(), false);
             Assert.AreEqual(client.GetVersionStatus(userVersion), VersionStatus.Compatible);
         }
 
@@ -131,7 +131,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         public void UserSuppliedVersionValid_LowLimit()
         {
             var userVersion = new Version(HDInsightSDKSupportedVersions.MinVersion.Major, HDInsightSDKSupportedVersions.MinVersion.Minor, 0, 0);
-            var client = new VersionFinderClient(IntegrationTestBase.GetValidCredentials(), GetAbstractionContext());
+            var client = new VersionFinderClient(IntegrationTestBase.GetValidCredentials(), GetAbstractionContext(), false);
             Assert.AreEqual(client.GetVersionStatus(userVersion), VersionStatus.Compatible);
         }
 
@@ -141,7 +141,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         public void UserSuppliedVersionValid_HighLimit()
         {
             var userVersion = new Version(HDInsightSDKSupportedVersions.MaxVersion.Major, HDInsightSDKSupportedVersions.MaxVersion.Minor, 0, 0);
-            var client = new VersionFinderClient(IntegrationTestBase.GetValidCredentials(), GetAbstractionContext());
+            var client = new VersionFinderClient(IntegrationTestBase.GetValidCredentials(), GetAbstractionContext(), false);
             Assert.AreEqual(client.GetVersionStatus(userVersion), VersionStatus.Compatible);
         }
     }

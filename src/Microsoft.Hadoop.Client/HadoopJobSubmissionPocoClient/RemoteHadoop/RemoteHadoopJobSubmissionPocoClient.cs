@@ -27,7 +27,8 @@ namespace Microsoft.Hadoop.Client.HadoopJobSubmissionPocoClient.RemoteHadoop
     internal class RemoteHadoopJobSubmissionPocoClient : IHadoopJobSubmissionPocoClient
     {
         private readonly BasicAuthCredential credentials;
-        private readonly IHadoopJobSubmissionRestClient client;
+        private readonly IAbstractionContext context;
+        private readonly bool ignoreSslErrors;
 
         /// <summary>
         /// Initializes a new instance of the RemoteHadoopJobSubmissionPocoClient class.
@@ -38,10 +39,14 @@ namespace Microsoft.Hadoop.Client.HadoopJobSubmissionPocoClient.RemoteHadoop
         /// <param name="context">
         /// A context that contains a CancellationToken that can be used to cancel events.
         /// </param>
-        public RemoteHadoopJobSubmissionPocoClient(BasicAuthCredential credentials, IAbstractionContext context)
+        /// <param name="ignoreSslErrros">
+        /// Specifies that server side SSL errors should be ignored.
+        /// </param>
+        public RemoteHadoopJobSubmissionPocoClient(BasicAuthCredential credentials, IAbstractionContext context, bool ignoreSslErrros)
         {
             this.credentials = credentials;
-            this.client = ServiceLocator.Instance.Locate<IHadoopRemoteJobSubmissionRestClientFactory>().Create(credentials, context);
+            this.context = context;
+            this.ignoreSslErrors = ignoreSslErrros;
         }
 
         /// <inheritdoc />
@@ -49,7 +54,8 @@ namespace Microsoft.Hadoop.Client.HadoopJobSubmissionPocoClient.RemoteHadoop
         {
             //NEIN: Any code modification here should add unit tests for this class
             var converter = new PayloadConverter();
-            var result = await this.client.ListJobs();
+            var client = ServiceLocator.Instance.Locate<IHadoopRemoteJobSubmissionRestClientFactory>().Create(this.credentials, this.context, this.ignoreSslErrors);
+            var result = await client.ListJobs();
             return converter.DeserializeListJobResult(result.Content);
         }
 
@@ -58,7 +64,8 @@ namespace Microsoft.Hadoop.Client.HadoopJobSubmissionPocoClient.RemoteHadoop
         {
             //NEIN: Any code modification here should add unit tests for this class
             var converter = new PayloadConverter();
-            var result = await this.client.GetJob(jobId);
+            var client = ServiceLocator.Instance.Locate<IHadoopRemoteJobSubmissionRestClientFactory>().Create(this.credentials, this.context, this.ignoreSslErrors);
+            var result = await client.GetJob(jobId);
             return converter.DeserializeJobDetails(result.Content);
         }
 
@@ -68,7 +75,8 @@ namespace Microsoft.Hadoop.Client.HadoopJobSubmissionPocoClient.RemoteHadoop
             //NEIN: Any code modification here should add unit tests for this class
             var converter = new PayloadConverter();
             var payload = converter.SerializeMapReduceRequest(this.credentials.UserName, details);
-            var result = await this.client.SubmitMapReduceJob(payload);
+            var client = ServiceLocator.Instance.Locate<IHadoopRemoteJobSubmissionRestClientFactory>().Create(this.credentials, this.context, this.ignoreSslErrors);
+            var result = await client.SubmitMapReduceJob(payload);
             return new JobCreationResults() { JobId = converter.DeserializeJobSubmissionResponse(result.Content) };
         }
 
@@ -78,7 +86,8 @@ namespace Microsoft.Hadoop.Client.HadoopJobSubmissionPocoClient.RemoteHadoop
             //NEIN: Any code modification here should add unit tests for this class
             var converter = new PayloadConverter();
             var payload = converter.SerializeHiveRequest(this.credentials.UserName, details);
-            var result = await this.client.SubmitHiveJob(payload);
+            var client = ServiceLocator.Instance.Locate<IHadoopRemoteJobSubmissionRestClientFactory>().Create(this.credentials, this.context, this.ignoreSslErrors);
+            var result = await client.SubmitHiveJob(payload);
             return new JobCreationResults() { JobId = converter.DeserializeJobSubmissionResponse(result.Content) };
         }
 
@@ -88,7 +97,8 @@ namespace Microsoft.Hadoop.Client.HadoopJobSubmissionPocoClient.RemoteHadoop
             //NEIN: Any code modification here should add unit tests for this class
             var converter = new PayloadConverter();
             var payload = converter.SerializePigRequest(this.credentials.UserName, pigJobCreateParameters);
-            var result = await this.client.SubmitPigJob(payload);
+            var client = ServiceLocator.Instance.Locate<IHadoopRemoteJobSubmissionRestClientFactory>().Create(this.credentials, this.context, this.ignoreSslErrors);
+            var result = await client.SubmitPigJob(payload);
             return new JobCreationResults() { JobId = converter.DeserializeJobSubmissionResponse(result.Content) };
         }
 
@@ -97,7 +107,8 @@ namespace Microsoft.Hadoop.Client.HadoopJobSubmissionPocoClient.RemoteHadoop
             //NEIN: Any code modification here should add unit tests for this class
             var converter = new PayloadConverter();
             var payload = converter.SerializeSqoopRequest(this.credentials.UserName, sqoopJobCreateParameters);
-            var result = await this.client.SubmitSqoopJob(payload);
+            var client = ServiceLocator.Instance.Locate<IHadoopRemoteJobSubmissionRestClientFactory>().Create(this.credentials, this.context, this.ignoreSslErrors);
+            var result = await client.SubmitSqoopJob(payload);
             return new JobCreationResults() { JobId = converter.DeserializeJobSubmissionResponse(result.Content) };
         }
 
@@ -107,13 +118,15 @@ namespace Microsoft.Hadoop.Client.HadoopJobSubmissionPocoClient.RemoteHadoop
             //NEIN: Any code modification here should add unit tests for this class
             var converter = new PayloadConverter();
             var payload = converter.SerializeStreamingMapReduceRequest(this.credentials.UserName, pigJobCreateParameters);
-            var result = await this.client.SubmitStreamingMapReduceJob(payload);
+            var client = ServiceLocator.Instance.Locate<IHadoopRemoteJobSubmissionRestClientFactory>().Create(this.credentials, this.context, this.ignoreSslErrors);
+            var result = await client.SubmitStreamingMapReduceJob(payload);
             return new JobCreationResults() { JobId = converter.DeserializeJobSubmissionResponse(result.Content) };
         }
 
         public async Task<JobDetails> StopJob(string jobId)
         {
-            var result = await this.client.StopJob(jobId);
+            var client = ServiceLocator.Instance.Locate<IHadoopRemoteJobSubmissionRestClientFactory>().Create(this.credentials, this.context, this.ignoreSslErrors);
+            var result = await client.StopJob(jobId);
             var converter = new PayloadConverter();
 
             return converter.DeserializeJobDetails(result.Content);

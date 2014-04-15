@@ -30,9 +30,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests
 
         public List<TestPocoClientFlowThrough> Clients { get; private set; }
 
-        public IHDInsightManagementPocoClient Create(IHDInsightSubscriptionCredentials credentials, IAbstractionContext context)
+        public IHDInsightManagementPocoClient Create(IHDInsightSubscriptionCredentials credentials, IAbstractionContext context, bool ignoreSslErrors)
         {
-            var client = new TestPocoClientFlowThrough(underlying.Create(credentials, context));
+            var client = new TestPocoClientFlowThrough(underlying.Create(credentials, context, ignoreSslErrors));
             this.Clients.Add(client);
             return client;
         }

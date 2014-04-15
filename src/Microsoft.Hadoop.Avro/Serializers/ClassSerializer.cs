@@ -16,7 +16,6 @@ namespace Microsoft.Hadoop.Avro.Serializers
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
@@ -234,7 +233,6 @@ namespace Microsoft.Hadoop.Avro.Serializers
             {
                 throw new ArgumentNullException("object");
             }
-            Contract.EndContractBlock();
 
             var record = @object as AvroRecord;
             if (record == null)

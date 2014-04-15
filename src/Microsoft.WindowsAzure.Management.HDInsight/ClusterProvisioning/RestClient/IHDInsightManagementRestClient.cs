@@ -20,11 +20,12 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestCl
     using Microsoft.WindowsAzure.Management.HDInsight;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest;
+    using Microsoft.WindowsAzure.Management.HDInsight.Logging;
 
     /// <summary>
     /// Used to send container (cluster) request to the server.
     /// </summary>
-    internal interface IHDInsightManagementRestClient
+    internal interface IHDInsightManagementRestClient : ILogProvider
     {
         /// <summary>
         /// Lists the cloud services on the client.

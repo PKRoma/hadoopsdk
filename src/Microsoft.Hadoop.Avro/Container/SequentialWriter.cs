@@ -16,7 +16,6 @@ namespace Microsoft.Hadoop.Avro.Container
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
 
     /// <summary>
     ///     Represents a sequential writer of Avro objects.
@@ -46,7 +45,6 @@ namespace Microsoft.Hadoop.Avro.Container
             {
                 throw new ArgumentOutOfRangeException("syncNumberOfObjects");
             }
-            Contract.EndContractBlock();
 
             this.writer = writer;
             this.metadata = new Dictionary<string, byte[]>();
@@ -70,7 +68,6 @@ namespace Microsoft.Hadoop.Avro.Container
             {
                 throw new ArgumentNullException("value");
             }
-            Contract.EndContractBlock();
 
             this.metadata.Add(key, value);
         }

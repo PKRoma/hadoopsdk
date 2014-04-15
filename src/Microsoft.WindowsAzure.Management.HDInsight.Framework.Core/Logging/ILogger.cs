@@ -48,5 +48,11 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Logging
         /// The log writer.
         /// </param>
         void AddWriter(ILogWriter writer);
+
+        /// <summary>
+        /// Removes a log writer.
+        /// </summary>
+        /// <param name="writer">The log writer.</param>
+        void RemoveWriter(ILogWriter writer);
     }
 }

@@ -17,12 +17,18 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
     using System;
     using System.Threading;
     using Microsoft.Hadoop.Client;
+    using Microsoft.WindowsAzure.Management.HDInsight.Logging;
 
     /// <summary>
     /// Provides the base interface for ClusterProvisioning Clients.
     /// </summary>
     public interface IHDInsightClientBase : IJobSubmissionClientBase
     {
+        /// <summary>
+        /// Gets the cluster credentials.
+        /// </summary>
+        IHDInsightSubscriptionCredentials Credentials { get; }
+
         /// <summary>
         /// Gets or sets the polling interval for the CreateCluster\DeleteCluster operations.
         /// </summary>

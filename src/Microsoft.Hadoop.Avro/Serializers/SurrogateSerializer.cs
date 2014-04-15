@@ -15,7 +15,6 @@
 namespace Microsoft.Hadoop.Avro.Serializers
 {
     using System;
-    using System.Diagnostics.Contracts;
     using System.Linq.Expressions;
     using System.Reflection;
     using Microsoft.Hadoop.Avro.Schema;
@@ -38,7 +37,6 @@ namespace Microsoft.Hadoop.Avro.Serializers
             {
                 throw new ArgumentNullException("settings");
             }
-            Contract.EndContractBlock();
             this.settings = settings;
         }
 

@@ -15,7 +15,6 @@
 namespace Microsoft.Hadoop.Avro.Serializers
 {
     using System;
-    using System.Diagnostics.Contracts;
     using System.Globalization;
     using System.Linq.Expressions;
     using System.Reflection;
@@ -48,7 +47,6 @@ namespace Microsoft.Hadoop.Avro.Serializers
             {
                 throw new ArgumentNullException("object");
             }
-            Contract.EndContractBlock();
 
             var member = this.GetMember(@object);
             return this.schema.TypeSchema.Serializer.BuildSerializer(encoder, member);
@@ -64,7 +62,6 @@ namespace Microsoft.Hadoop.Avro.Serializers
             {
                 throw new ArgumentNullException("object");
             }
-            Contract.EndContractBlock();
 
             var member = this.GetMember(@object);
             return Expression.Assign(member, this.schema.TypeSchema.Serializer.BuildDeserializer(decoder));
@@ -76,7 +73,6 @@ namespace Microsoft.Hadoop.Avro.Serializers
             {
                 throw new ArgumentNullException("decoder");
             }
-            Contract.EndContractBlock();
             return this.schema.TypeSchema.Serializer.BuildSkipper(decoder);
         }
 
@@ -87,7 +83,6 @@ namespace Microsoft.Hadoop.Avro.Serializers
             {
                 throw new ArgumentException("Unexpected type.");
             }
-            Contract.EndContractBlock();
 
             this.schema.TypeSchema.Serializer.Serialize(encoder, record[this.schema.Position]);
         }
@@ -99,7 +94,6 @@ namespace Microsoft.Hadoop.Avro.Serializers
             {
                 throw new ArgumentException("Unexpected type.");
             }
-            Contract.EndContractBlock();
 
             record[this.schema.Position] = this.schema.UseDefaultValue
                 ? this.schema.DefaultValue
@@ -113,8 +107,6 @@ namespace Microsoft.Hadoop.Avro.Serializers
 
         private Expression GetMember(Expression @object)
         {
-            Contract.Assert(@object != null);
-
             MemberInfo info = this.schema.MemberInfo;
             var asPropertyInfo = info as PropertyInfo;
             var asFieldInfo = info as FieldInfo;

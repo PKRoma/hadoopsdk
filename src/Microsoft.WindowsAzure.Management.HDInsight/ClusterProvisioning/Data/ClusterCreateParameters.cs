@@ -133,7 +133,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
         /// </summary>
         public ClusterCreateParameters()
         {
-            this.CreateTimeout = TimeSpan.FromMinutes(45);
+            this.CreateTimeout = TimeSpan.FromHours(2);
             this.AdditionalStorageAccounts = new Collection<WabStorageAccountConfiguration>();
             this.CoreConfiguration = new ConfigValuesCollection();
             this.HiveConfiguration = new HiveConfiguration();

@@ -29,7 +29,10 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestCl
         /// </summary>
         /// <param name="credentials">Credentials object.</param>
         /// <param name="context">The Abstraction context.</param>
+        /// <param name="ignoreSslErrors">
+        /// Specifies that server side SSL errors should be ignored.
+        /// </param>
         /// <returns>An instance of the IRdfeServiceRestClient.</returns>
-        IRdfeServiceRestClient Create(IHDInsightSubscriptionCredentials credentials, IAbstractionContext context);
+        IRdfeServiceRestClient Create(IHDInsightSubscriptionCredentials credentials, IAbstractionContext context, bool ignoreSslErrors);
     }
 }

@@ -25,7 +25,9 @@ namespace Microsoft.Hadoop.Client
     using Microsoft.Hadoop.Client.HadoopJobSubmissionPocoClient.RemoteHadoop;
     using Microsoft.WindowsAzure.Management.HDInsight;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Logging;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
+    using Microsoft.WindowsAzure.Management.HDInsight.Logging;
 
     /// <summary>
     /// Represents a Hadoop client that can be used to submit jobs to an Hadoop cluster.
@@ -59,7 +61,7 @@ namespace Microsoft.Hadoop.Client
         public async Task<JobList> ListJobsAsync()
         {
             var factory = ServiceLocator.Instance.Locate<IRemoteHadoopJobSubmissionPocoClientFactory>();
-            var pocoClient = factory.Create(this.credentials, this.Context);
+            var pocoClient = factory.Create(this.credentials, this.Context, this.IgnoreSslErrors);
             var jobList = await pocoClient.ListJobs();
             return jobList;
         }
@@ -68,7 +70,7 @@ namespace Microsoft.Hadoop.Client
         public Task<JobDetails> GetJobAsync(string jobId)
         {
             var factory = ServiceLocator.Instance.Locate<IRemoteHadoopJobSubmissionPocoClientFactory>();
-            var pocoClient = factory.Create(this.credentials, this.Context);
+            var pocoClient = factory.Create(this.credentials, this.Context, this.IgnoreSslErrors);
             return pocoClient.GetJob(jobId);
         }
 
@@ -76,7 +78,7 @@ namespace Microsoft.Hadoop.Client
         public async Task<JobCreationResults> CreateMapReduceJobAsync(MapReduceJobCreateParameters mapReduceJobCreateParameters)
         {
             var factory = ServiceLocator.Instance.Locate<IRemoteHadoopJobSubmissionPocoClientFactory>();
-            var pocoClient = factory.Create(this.credentials, this.Context);
+            var pocoClient = factory.Create(this.credentials, this.Context, this.IgnoreSslErrors);
             return await pocoClient.SubmitMapReduceJob(mapReduceJobCreateParameters);
         }
 
@@ -84,7 +86,7 @@ namespace Microsoft.Hadoop.Client
         public Task<JobCreationResults> CreateHiveJobAsync(HiveJobCreateParameters hiveJobCreateParameters)
         {
             var factory = ServiceLocator.Instance.Locate<IRemoteHadoopJobSubmissionPocoClientFactory>();
-            var pocoClient = factory.Create(this.credentials, this.Context);
+            var pocoClient = factory.Create(this.credentials, this.Context, this.IgnoreSslErrors);
             return pocoClient.SubmitHiveJob(hiveJobCreateParameters);
         }
 
@@ -92,14 +94,14 @@ namespace Microsoft.Hadoop.Client
         public Task<JobCreationResults> CreatePigJobAsync(PigJobCreateParameters pigJobCreateParameters)
         {
             var factory = ServiceLocator.Instance.Locate<IRemoteHadoopJobSubmissionPocoClientFactory>();
-            var pocoClient = factory.Create(this.credentials, this.Context);
+            var pocoClient = factory.Create(this.credentials, this.Context, this.IgnoreSslErrors);
             return pocoClient.SubmitPigJob(pigJobCreateParameters);
         }
 
         public Task<JobCreationResults> CreateSqoopJobAsync(SqoopJobCreateParameters sqoopJobCreateParameters)
         {
             var factory = ServiceLocator.Instance.Locate<IRemoteHadoopJobSubmissionPocoClientFactory>();
-            var pocoClient = factory.Create(this.credentials, this.Context);
+            var pocoClient = factory.Create(this.credentials, this.Context, this.IgnoreSslErrors);
             return pocoClient.SubmitSqoopJob(sqoopJobCreateParameters);
         }
 
@@ -107,7 +109,7 @@ namespace Microsoft.Hadoop.Client
         public Task<JobDetails> StopJobAsync(string jobId)
         {
             var factory = ServiceLocator.Instance.Locate<IRemoteHadoopJobSubmissionPocoClientFactory>();
-            var pocoClient = factory.Create(this.credentials, this.Context);
+            var pocoClient = factory.Create(this.credentials, this.Context, this.IgnoreSslErrors);
             return pocoClient.StopJob(jobId);
         }
 
@@ -138,7 +140,7 @@ namespace Microsoft.Hadoop.Client
         public Task<JobCreationResults> CreateStreamingJobAsync(StreamingMapReduceJobCreateParameters streamingMapReduceJobCreateParameters)
         {
             var factory = ServiceLocator.Instance.Locate<IRemoteHadoopJobSubmissionPocoClientFactory>();
-            var pocoClient = factory.Create(this.credentials, this.Context);
+            var pocoClient = factory.Create(this.credentials, this.Context, this.IgnoreSslErrors);
             return pocoClient.SubmitStreamingJob(streamingMapReduceJobCreateParameters);
         }
 

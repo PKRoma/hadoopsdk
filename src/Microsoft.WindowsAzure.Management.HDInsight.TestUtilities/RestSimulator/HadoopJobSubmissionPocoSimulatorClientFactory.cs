@@ -25,7 +25,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
     internal class HadoopJobSubmissionPocoSimulatorClientFactory : IRemoteHadoopJobSubmissionPocoClientFactory, IHDInsightJobSubmissionPocoClientFactory
     {
         internal static IDictionary<string, HadoopJobSubmissionPocoSimulatorClient> pocoSimulators = new Dictionary<string, HadoopJobSubmissionPocoSimulatorClient>();
-        public IHadoopJobSubmissionPocoClient Create(IJobSubmissionClientCredential credentials, IAbstractionContext context)
+        public IHadoopJobSubmissionPocoClient Create(IJobSubmissionClientCredential credentials, IAbstractionContext context, bool ignoreSslErrors)
         {
             var remoteCredentials = credentials as BasicAuthCredential;
             if (remoteCredentials == null)

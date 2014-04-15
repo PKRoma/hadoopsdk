@@ -29,7 +29,10 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Versio
         /// <param name="context">
         /// The abstraction context token.
         /// </param>
+        /// <param name="ignoreSslErrors">
+        /// Specifies that server side SSL errors should be ignored.
+        /// </param>
         /// <returns>A version finder client instance.</returns>
-        IVersionFinderClient Create(IHDInsightSubscriptionCredentials credentials, IAbstractionContext context);
+        IVersionFinderClient Create(IHDInsightSubscriptionCredentials credentials, IAbstractionContext context, bool ignoreSslErrors);
     }
 }

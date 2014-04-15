@@ -17,7 +17,6 @@ namespace Microsoft.Hadoop.Avro.Container
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
-    using System.Diagnostics.Contracts;
     using System.IO;
     using System.Threading.Tasks;
 
@@ -37,9 +36,20 @@ namespace Microsoft.Hadoop.Avro.Container
 
         public StreamWriter(Stream stream, bool leaveOpen, IAvroSerializer<T> serializer, Codec codec)
         {
-            Contract.Assert(stream != null);
-            Contract.Assert(serializer != null);
-            Contract.Assert(codec != null);
+            if (stream == null)
+            {
+                throw new ArgumentNullException("stream");
+            }
+
+            if (serializer == null)
+            {
+                throw new ArgumentNullException("serializer");
+            }
+
+            if (codec == null)
+            {
+                throw new ArgumentNullException("codec");
+            }
 
             this.codec = codec;
             this.serializer = serializer;
@@ -75,7 +85,6 @@ namespace Microsoft.Hadoop.Avro.Container
             {
                 throw new ArgumentNullException("metadata");
             }
-            Contract.EndContractBlock();
 
             foreach (var record in metadata)
             {
@@ -113,7 +122,6 @@ namespace Microsoft.Hadoop.Avro.Container
             {
                 throw new ArgumentNullException("block");
             }
-            Contract.EndContractBlock();
 
             var taskSource = new TaskCompletionSource<long>();
             block.Flush();

@@ -19,9 +19,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestCl
 
     internal class HDInsightManagementRestClientFactory : IHDInsightManagementRestClientFactory
     {
-        public IHDInsightManagementRestClient Create(IHDInsightSubscriptionCredentials credentials, IAbstractionContext context)
+        public IHDInsightManagementRestClient Create(IHDInsightSubscriptionCredentials credentials, IAbstractionContext context, bool ignoreSslErrors)
         {
-            return new HDInsightManagementRestClient(credentials, context);
+            return new HDInsightManagementRestClient(credentials, context, ignoreSslErrors);
         }
     }
 }

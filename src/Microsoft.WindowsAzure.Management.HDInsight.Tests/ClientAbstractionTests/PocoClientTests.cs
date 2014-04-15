@@ -75,7 +75,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         public async Task ICanPerformA_ListContainers_Using_PocoClientAbstraction()
         {
             IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
-            using (var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(credentials, GetAbstractionContext()))
+            using (var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(credentials, GetAbstractionContext(), false))
             {
                 var containers =
                     from container in await client.ListContainers()
@@ -109,7 +109,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         public async Task ICanPerformA_ListNonExistingContainer_Using_PocoClientAbstraction()
         {
             IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
-            using (var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(credentials, GetAbstractionContext()))
+            using (var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(credentials, GetAbstractionContext(), false))
             {
                 var result = await client.ListContainer(GetRandomClusterName());
                 Assert.IsNull(result);
@@ -120,13 +120,13 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         [TestCategory("Integration")]
         [TestCategory("CheckIn")]
         [TestCategory("PocoClient")]
-        public void CanCreateAClusterWithHeadNodeHA_With_Capability_True()
+        public void CanCreateAClusterWithHeadNodeHA_With_Capability_Included()
         {
             var cluster = GetRandomCluster();
             cluster.EnsureHighAvailability = true;
             var capabilities = new List<KeyValuePair<string, string>>()
                 {
-                    new KeyValuePair<string, string>(HDInsightManagementPocoClient.HighAvailabilityCapabilitityName,"True")
+                    new KeyValuePair<string, string>(HDInsightManagementPocoClient.HighAvailabilityCapabilitityName,"HA Capability")
                 };
             HDInsightManagementPocoClient.AssertHighAvailibityCapabilityEnabled(capabilities, cluster);
         }
@@ -135,25 +135,15 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         [TestCategory("Integration")]
         [TestCategory("CheckIn")]
         [TestCategory("PocoClient")]
-        public void CannotCreateAClusterWithHeadNodeHA_With_Capability_False()
+        public void CanCreateAClusterWithHeadNodeHA_With_Capability_Included_ButFalse()
         {
             var cluster = GetRandomCluster();
             cluster.EnsureHighAvailability = true;
             var capabilities = new List<KeyValuePair<string, string>>()
                 {
-                    new KeyValuePair<string, string>(HDInsightManagementPocoClient.HighAvailabilityCapabilitityName,"False")
+                    new KeyValuePair<string, string>(HDInsightManagementPocoClient.HighAvailabilityCapabilitityName,"false")
                 };
-            try
-            {
-                HDInsightManagementPocoClient.AssertHighAvailibityCapabilityEnabled(capabilities, cluster);
-                Assert.Fail("Test failed.");
-            }
-            catch (InvalidOperationException invalidOperationException)
-            {
-                Assert.AreEqual(
-                    "Your subscription cannot create clusters with EnsureHighAvailability set to true, please contact Support.",
-                    invalidOperationException.Message);
-            }
+            HDInsightManagementPocoClient.AssertHighAvailibityCapabilityEnabled(capabilities, cluster);
         }
 
         [TestMethod]
@@ -200,7 +190,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         {
             IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
             await ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>()
-                                   .Create(credentials, GetAbstractionContext())
+                                   .Create(credentials, GetAbstractionContext(), false)
                                    .DeleteContainer(GetRandomClusterName());
         }
 
@@ -225,7 +215,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         {
             IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
             await ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>()
-                                   .Create(credentials, GetAbstractionContext())
+                                   .Create(credentials, GetAbstractionContext(), false)
                                    .DeleteContainer(GetRandomClusterName(), "East US");
         }
 
@@ -251,7 +241,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         {
             IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
             await ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>()
-                                   .Create(credentials, GetAbstractionContext())
+                                   .Create(credentials, GetAbstractionContext(), false)
                                    .DeleteContainer(TestCredentials.WellKnownCluster.DnsName, "Nowhere");
         }
 
@@ -279,7 +269,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             var clusterName = TestCredentials.WellKnownCluster.DnsName;
             try
             {
-                using (var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(creds, GetAbstractionContext()))
+                using (var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(creds, GetAbstractionContext(), false))
                 {
                     await client.DeleteContainer(clusterName);
                 }
@@ -315,7 +305,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             var clusterName = TestCredentials.WellKnownCluster.DnsName;
             try
             {
-                using (var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(creds, GetAbstractionContext()))
+                using (var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(creds, GetAbstractionContext(), false))
                 {
                     await client.ListContainer(clusterName);
                 }
@@ -351,7 +341,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             var cluster = GetRandomCluster();
             try
             {
-                using (var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(creds, GetAbstractionContext()))
+                using (var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(creds, GetAbstractionContext(), false))
                 {
                     await client.CreateContainer(cluster);
                 }
@@ -387,7 +377,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             var clusterName = TestCredentials.WellKnownCluster.DnsName;
             try
             {
-                using (var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(creds, GetAbstractionContext()))
+                using (var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(creds, GetAbstractionContext(), false))
                 {
                     await client.DeleteContainer(clusterName);
                 }
@@ -423,7 +413,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             var clusterName = TestCredentials.WellKnownCluster.DnsName;
             try
             {
-                using (var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(creds, GetAbstractionContext()))
+                using (var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(creds, GetAbstractionContext(), false))
                 {
                     await client.ListContainer(clusterName);
                 }
@@ -459,7 +449,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             var cluster = GetRandomCluster();
             try
             {
-                using (var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(creds, GetAbstractionContext()))
+                using (var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(creds, GetAbstractionContext(), false))
                 {
                     await client.CreateContainer(cluster);
                 }
@@ -520,7 +510,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
 
             // Unregisters subscription (just in case)
             var location = "North Europe";
-            var registrationClient = ServiceLocator.Instance.Locate<ISubscriptionRegistrationClientFactory>().Create(credentials, GetAbstractionContext());
+            var registrationClient = ServiceLocator.Instance.Locate<ISubscriptionRegistrationClientFactory>().Create(credentials, GetAbstractionContext(), false);
             if (await registrationClient.ValidateSubscriptionLocation(location))
             {
                 await registrationClient.UnregisterSubscriptionLocation(location);
@@ -711,7 +701,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         public void ICanStopPollingWhenErrorIsDetected()
         {
             IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
-            using (var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(credentials, GetAbstractionContext()))
+            using (var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(credentials, GetAbstractionContext(), false))
             {
                 var test = new ClusterDetails("TestCluster", ClusterState.Unknown.ToString());
                 test.Error = new ClusterErrorStatus(400, "Hit an error", "Create");
@@ -731,14 +721,14 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         public void ICanPossibleErrorPollingWhenClusterStateIsUnknown()
         {
             IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
-            using (var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(credentials, GetAbstractionContext()))
+            using (var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(credentials, GetAbstractionContext(), false))
             {
                 var result = client.PollSignal(null, ClusterState.Operational, ClusterState.Running);
-                Assert.AreEqual(result, IHDInsightManagementPocoClientExtensions.PollResult.PosibleError);
+                Assert.AreEqual(result, IHDInsightManagementPocoClientExtensions.PollResult.Null);
 
                 var test = new ClusterDetails("TestCluster", ClusterState.Unknown.ToString());
                 result = client.PollSignal(test, ClusterState.Operational, ClusterState.Running);
-                Assert.AreEqual(result, IHDInsightManagementPocoClientExtensions.PollResult.PosibleError);
+                Assert.AreEqual(result, IHDInsightManagementPocoClientExtensions.PollResult.Unknown);
             }
         }
 
@@ -750,7 +740,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         public void ICanContinuePollingWhenClusterStateIsValid()
         {
             IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
-            using (var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(credentials, GetAbstractionContext()))
+            using (var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(credentials, GetAbstractionContext(), false))
             {
                 var test = new ClusterDetails("TestCluster", ClusterState.ReadyForDeployment.ToString());
                 var result = client.PollSignal(test, ClusterState.Operational, ClusterState.Running);
@@ -804,7 +794,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         private async Task ValidateCreateClusterSucceeds(ClusterCreateParameters cluster, Action<ClusterDetails> postCreateValidation)
         {
             IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
-            using (var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(credentials, GetAbstractionContext()))
+            using (var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(credentials, GetAbstractionContext(), false))
             {
                 client.CreateContainer(cluster).Wait();
                 await client.WaitForClusterInConditionOrError(null, cluster.Name, TimeSpan.FromMinutes(30), HDInsightClient.DefaultPollingInterval, GetAbstractionContext(), this.CreatingStates);
@@ -865,7 +855,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
 
             try
             {
-                await ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(credentials, GetAbstractionContext()).CreateContainer(cluster);
+                await ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(credentials, GetAbstractionContext(), false).CreateContainer(cluster);
             }
             catch (ConfigurationErrorsException e)
             {
@@ -883,7 +873,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
 
             try
             {
-                await ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(credentials, GetAbstractionContext()).CreateContainer(cluster);
+                await ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(credentials, GetAbstractionContext(), false).CreateContainer(cluster);
             }
             catch (AggregateException e)
             {
@@ -899,7 +889,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             }
 
             Assert.Fail("ASV Validation should have failed.");
-            await ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(credentials, GetAbstractionContext()).CreateContainer(cluster);
+            await ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(credentials, GetAbstractionContext(), false).CreateContainer(cluster);
         }
 
         [TestMethod]
@@ -913,7 +903,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             this.ApplyIndividualTestMockingOnly();
             var cluster = GetRandomCluster();
             IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
-            await ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(credentials, GetAbstractionContext()).CreateContainer(cluster);
+            await ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(credentials, GetAbstractionContext(), false).CreateContainer(cluster);
 
             var storageCreds = new WindowsAzureStorageAccountCredentials()
             {
@@ -951,7 +941,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
 
             try
             {
-                await ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(credentials, GetAbstractionContext()).CreateContainer(cluster);
+                await ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(credentials, GetAbstractionContext(), false).CreateContainer(cluster);
                 Assert.Fail("Location Validation should have failed.");
             }
             catch (InvalidOperationException)
@@ -988,7 +978,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
 
             try
             {
-                await ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(credentials, GetAbstractionContext()).CreateContainer(cluster);
+                await ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(credentials, GetAbstractionContext(), false).CreateContainer(cluster);
             }
             catch (InvalidOperationException e)
             {
@@ -1027,7 +1017,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
             var cluster = GetRandomCluster();
             cluster.AdditionalStorageAccounts.Add(new WabStorageAccountConfiguration(IntegrationTestBase.TestCredentials.Environments[0].AdditionalStorageAccounts[0].Name, IntegrationTestBase.TestCredentials.Environments[0].DefaultStorageAccount.Key));
-            await ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(credentials, GetAbstractionContext()).CreateContainer(cluster);
+            await ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(credentials, GetAbstractionContext(), false).CreateContainer(cluster);
         }
 
         [TestMethod]
@@ -1054,7 +1044,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             cluster.Name = TestCredentials.WellKnownCluster.DnsName;
             try
             {
-                await ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(credentials, GetAbstractionContext()).CreateContainer(cluster);
+                await ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(credentials, GetAbstractionContext(), false).CreateContainer(cluster);
             }
             catch (HttpLayerException e)
             {
@@ -1066,7 +1056,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         private async Task ValidateCreateClusterFailsWithError(ClusterCreateParameters cluster)
         {
             IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
-            var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(credentials, GetAbstractionContext());
+            var client = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(credentials, GetAbstractionContext(), false);
             await client.CreateContainer(cluster);
             await client.WaitForClusterNotNull(cluster.Name, TimeSpan.FromMinutes(10), GetAbstractionContext().CancellationToken);
 

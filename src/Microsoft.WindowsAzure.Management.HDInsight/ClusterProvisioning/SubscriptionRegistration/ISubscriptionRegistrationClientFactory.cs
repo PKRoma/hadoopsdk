@@ -18,6 +18,6 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.AzureM
 
     internal interface ISubscriptionRegistrationClientFactory
     {
-        ISubscriptionRegistrationClient Create(IHDInsightSubscriptionCredentials creds, IAbstractionContext context);
+        ISubscriptionRegistrationClient Create(IHDInsightSubscriptionCredentials creds, IAbstractionContext context, bool ignoreSslErrors);
     }
 }

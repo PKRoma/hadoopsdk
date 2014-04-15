@@ -29,7 +29,8 @@ namespace Microsoft.Hadoop.Avro.Serializers
     {
         private readonly long[] valueMapping;
 
-        public EnumSerializer(EnumSchema schema) : base(schema)
+        public EnumSerializer(EnumSchema schema)
+            : base(schema)
         {
             this.valueMapping = this.Schema.AvroToCSharpValueMapping;
         }
@@ -72,10 +73,22 @@ namespace Microsoft.Hadoop.Avro.Serializers
             {
                 throw new SerializationException(
                     string.Format(
-                        CultureInfo.InvariantCulture, 
-                        "Invalid enumeration type '{0}'. Please, use '{1}' instead.", 
+                        CultureInfo.InvariantCulture,
+                        "Invalid enumeration type '{0}'. Please, use '{1}' instead.",
                         @object.GetType(),
                         typeof(AvroEnum)));
+            }
+
+            string normalized1 = @enum.Schema.ToString();
+            string normalized2 = this.Schema.ToString();
+            if (normalized1 != normalized2)
+            {
+                throw new SerializationException(
+                    string.Format(
+                        CultureInfo.InvariantCulture,
+                        "Enumeration schemas do not match: '{0}' != '{1}'.",
+                        normalized1,
+                        normalized2));
             }
             encoder.Encode(@enum.IntegerValue);
         }

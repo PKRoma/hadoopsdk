@@ -36,81 +36,81 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
 
         public ICollection<Tuple<IHttpClientAbstraction, IHttpResponseMessageAbstraction>> Clients { get; private set; }
 
-        public override IHttpClientAbstraction Create(X509Certificate2 cert)
+        public override IHttpClientAbstraction Create(X509Certificate2 cert, bool ignoreSslErrors)
         {
             var loc = this.AsyncMock;
             if (loc.IsNotNull())
             {
-                return new HttpAbstractionSimulatorClient(this, this.underlying.Create(cert), loc);
+                return new HttpAbstractionSimulatorClient(this, this.underlying.Create(cert, ignoreSslErrors), loc);
             }
             else
             {
-                return new HttpAbstractionSimulatorClient(this, this.underlying.Create(cert), null);
+                return new HttpAbstractionSimulatorClient(this, this.underlying.Create(cert, ignoreSslErrors), null);
             }
         }
 
-        public override IHttpClientAbstraction Create(X509Certificate2 cert, HDInsight.IAbstractionContext context)
+        public override IHttpClientAbstraction Create(X509Certificate2 cert, HDInsight.IAbstractionContext context, bool ignoreSslErrors)
         {
             var loc = this.AsyncMock;
             if (loc.IsNotNull())
             {
-                return new HttpAbstractionSimulatorClient(this, this.underlying.Create(cert, context), loc);
+                return new HttpAbstractionSimulatorClient(this, this.underlying.Create(cert, context, ignoreSslErrors), loc);
             }
             else
             {
-                return new HttpAbstractionSimulatorClient(this, this.underlying.Create(cert, context), null);
+                return new HttpAbstractionSimulatorClient(this, this.underlying.Create(cert, context, ignoreSslErrors), null);
             }
         }
 
-        public override IHttpClientAbstraction Create(string token)
+        public override IHttpClientAbstraction Create(string token, bool ignoreSslErrors)
         {
             var loc = this.AsyncMock;
             if (loc.IsNotNull())
             {
-                return new HttpAbstractionSimulatorClient(this, this.underlying.Create(token), loc);
+                return new HttpAbstractionSimulatorClient(this, this.underlying.Create(token, ignoreSslErrors), loc);
             }
             else
             {
-                return new HttpAbstractionSimulatorClient(this, this.underlying.Create(token), null);
+                return new HttpAbstractionSimulatorClient(this, this.underlying.Create(token, ignoreSslErrors), null);
             }
         }
 
-        public override IHttpClientAbstraction Create(string token, HDInsight.IAbstractionContext context)
+        public override IHttpClientAbstraction Create(string token, HDInsight.IAbstractionContext context, bool ignoreSslErrors)
         {
             var loc = this.AsyncMock;
             if (loc.IsNotNull())
             {
-                return new HttpAbstractionSimulatorClient(this, this.underlying.Create(token, context), loc);
+                return new HttpAbstractionSimulatorClient(this, this.underlying.Create(token, context, ignoreSslErrors), loc);
             }
             else
             {
-                return new HttpAbstractionSimulatorClient(this, this.underlying.Create(token, context), null);
+                return new HttpAbstractionSimulatorClient(this, this.underlying.Create(token, context, ignoreSslErrors), null);
             }
         }
 
-        public override IHttpClientAbstraction Create()
+        public override IHttpClientAbstraction Create(bool ignoreSslErrors)
         {
             var loc = this.AsyncMock;
             if (loc.IsNotNull())
             {
-                return new HttpAbstractionSimulatorClient(this, this.underlying.Create(), loc);
+                return new HttpAbstractionSimulatorClient(this, this.underlying.Create(ignoreSslErrors), loc);
             }
             else
             {
-                return new HttpAbstractionSimulatorClient(this, this.underlying.Create(), null);
+                return new HttpAbstractionSimulatorClient(this, this.underlying.Create(ignoreSslErrors), null);
             }
         }
 
-        public override IHttpClientAbstraction Create(HDInsight.IAbstractionContext context)
+        public override IHttpClientAbstraction Create(HDInsight.IAbstractionContext context, bool ignoreSslErrors)
         {
             var loc = this.AsyncMock;
             if (loc.IsNotNull())
             {
-                return new HttpAbstractionSimulatorClient(this, this.underlying.Create(context), loc);
+                return new HttpAbstractionSimulatorClient(this, this.underlying.Create(context, ignoreSslErrors), loc);
             }
             else
             {
-                return new HttpAbstractionSimulatorClient(this, this.underlying.Create(context), null);
+                return new HttpAbstractionSimulatorClient(this, this.underlying.Create(context, ignoreSslErrors), null);
             }
         }
     }

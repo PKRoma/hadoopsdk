@@ -15,11 +15,9 @@
 namespace Microsoft.Hadoop.Avro.Serializers
 {
     using System;
-    using System.Diagnostics.Contracts;
     using System.Globalization;
     using System.Linq.Expressions;
     using System.Reflection;
-    using System.Runtime.Serialization;
     using Microsoft.Hadoop.Avro.Schema;
 
     /// <summary>
@@ -32,7 +30,11 @@ namespace Microsoft.Hadoop.Avro.Serializers
 
         public DateTimeSerializer(LongSchema schema, bool usePosixTime) : base(schema)
         {
-            Contract.Assert(typeof(DateTime) == schema.RuntimeType, "Only type DateTime is supported.");
+            if (typeof(DateTime) != schema.RuntimeType)
+            {
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Only type DateTime is supported."));
+            }
+
             this.usePosixTime = usePosixTime;
         }
 
@@ -60,13 +62,12 @@ namespace Microsoft.Hadoop.Avro.Serializers
             ConstructorInfo ctor = typeof(DateTime).GetConstructor(new[] { typeof(long) });
             if (ctor == null)
             {
-                throw new SerializationException(
+                throw new InvalidOperationException(
                     string.Format(
                         CultureInfo.InvariantCulture,
-                        "Cannot find the constructor with a single long on '{0}' class.",
-                        this.Schema.RuntimeType));
+                        "'{0}' is expected to have a constructor with a single parameter of type long.",
+                        typeof(DateTime)));
             }
-
             return this.usePosixTime
                        ? Expression.Call(convertPosixTimeToDateTime, Expression.Call(decoder, this.Decode<long>()))
                        : (Expression)Expression.New(ctor, Expression.Call(decoder, this.Decode<long>()));
@@ -74,12 +75,14 @@ namespace Microsoft.Hadoop.Avro.Serializers
 
         public static long ConvertDateTimeToPosixTime(DateTime value)
         {
-            return (value.Ticks - UnixEpoch.Ticks) / 10000000;
+            var truncated = new DateTime(value.Ticks - (value.Ticks % TimeSpan.TicksPerSecond));
+            var different = truncated - UnixEpoch;
+            return (long)different.TotalSeconds;
         }
 
         public static DateTime ConvertPosixTimeToDateTime(long seconds)
         {
-            return new DateTime(UnixEpoch.Ticks + (seconds * 10000000));
+            return UnixEpoch.AddSeconds(seconds);
         }
     }
 }

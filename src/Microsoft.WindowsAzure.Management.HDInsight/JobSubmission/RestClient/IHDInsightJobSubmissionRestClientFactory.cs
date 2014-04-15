@@ -29,9 +29,12 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission.RestClient
         ///     The connection credentials to use when creating the object.
         /// </param>
         /// <param name="context">A context containing cancellation token and logger.</param>
+        /// <param name="ignoreSslErrors">
+        /// Specifies that server side SSL errors should be ignored.
+        /// </param>
         /// <returns>
         /// A new IHDInsightJobSubmissionRestClient class.
         /// </returns>
-        IHDInsightJobSubmissionRestClient Create(IHDInsightSubscriptionCredentials credentials, IAbstractionContext context);
+        IHDInsightJobSubmissionRestClient Create(IHDInsightSubscriptionCredentials credentials, IAbstractionContext context, bool ignoreSslErrors);
     }
 }

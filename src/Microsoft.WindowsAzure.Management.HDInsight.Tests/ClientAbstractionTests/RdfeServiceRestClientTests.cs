@@ -51,7 +51,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         {
             string xml = @"<root/>";
             IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
-            var rdfeCapabilitiesClient = ServiceLocator.Instance.Locate<IRdfeServiceRestClientFactory>().Create(credentials, GetAbstractionContext());
+            var rdfeCapabilitiesClient = ServiceLocator.Instance.Locate<IRdfeServiceRestClientFactory>().Create(credentials, GetAbstractionContext(), false);
             var capabilities = rdfeCapabilitiesClient.ParseCapabilities(xml);
             Assert.AreEqual(0, capabilities.Count());
         }
@@ -67,7 +67,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
                 "<ResourceProviderProperty><Key>CAPABILITY_REGION_EAST_US</Key><Value>East US</Value></ResourceProviderProperty>" +
                 "</ResourceProviderProperties>";
             IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
-            var rdfeCapabilitiesClient = ServiceLocator.Instance.Locate<IRdfeServiceRestClientFactory>().Create(credentials, GetAbstractionContext());
+            var rdfeCapabilitiesClient = ServiceLocator.Instance.Locate<IRdfeServiceRestClientFactory>().Create(credentials, GetAbstractionContext(), false);
             var capabilities = rdfeCapabilitiesClient.ParseCapabilities(xml);
             Assert.AreEqual(0, capabilities.Count(capability => capability.Key == "My Key"));
         }
@@ -80,7 +80,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         {
             string xml = @"<ResourceProviderProperties xmlns=""http://schemas.microsoft.com/windowsazure"" xmlns:i=""http://www.w3.org/2001/XMLSchema-instance""><ResourceProviderProperty><KeyA>CAPABILITY_REGION_EAST_US</KeyA><Value>East US</Value></ResourceProviderProperty></ResourceProviderProperties>";
             IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
-            var rdfeCapabilitiesClient = ServiceLocator.Instance.Locate<IRdfeServiceRestClientFactory>().Create(credentials, GetAbstractionContext());
+            var rdfeCapabilitiesClient = ServiceLocator.Instance.Locate<IRdfeServiceRestClientFactory>().Create(credentials, GetAbstractionContext(), false);
             var capabilities = rdfeCapabilitiesClient.ParseCapabilities(xml);
             Assert.AreEqual(0, capabilities.Count());
 
@@ -100,7 +100,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
 
             // Validate Versions & locations
-            var client = new RdfeServiceRestClient(credentials, GetAbstractionContext());
+            var client = new RdfeServiceRestClient(credentials, GetAbstractionContext(), false);
             var capabilities = await client.GetResourceProviderProperties();
             var versions = VersionFinderClient.ParseVersions(capabilities);
             var locations = LocationFinderClient.ParseLocations(capabilities);

@@ -58,7 +58,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             var creds = GetCredentials("hadoop");
             var x509 = new X509Certificate2(creds.Certificate);
             var conCreds = new HDInsightCertificateCredential(creds.SubscriptionId, x509, new Uri(endPoint), cloudNamespace);
-            var client = ServiceLocator.Instance.Locate<IHDInsightJobSubmissionRestClientFactory>().Create(conCreds, GetAbstractionContext());
+            var client = ServiceLocator.Instance.Locate<IHDInsightJobSubmissionRestClientFactory>().Create(conCreds, GetAbstractionContext(), false);
             var result = await client.ListJobs("wfoley-tortuga-07", "East US");
             Assert.IsNotNull(result);
         }
@@ -77,7 +77,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             var id = "job_201306130113_0009";
             var x509 = new X509Certificate2(creds.Certificate);
             var conCreds = new HDInsightCertificateCredential(creds.SubscriptionId, x509, new Uri(endPoint), cloudNamespace);
-            var client = ServiceLocator.Instance.Locate<IHDInsightJobSubmissionRestClientFactory>().Create(conCreds, GetAbstractionContext());
+            var client = ServiceLocator.Instance.Locate<IHDInsightJobSubmissionRestClientFactory>().Create(conCreds, GetAbstractionContext(), false);
             var result = await client.GetJobDetail("wfoley-tortuga-07", "East US", id);
             Assert.IsNotNull(result);
         }
@@ -136,7 +136,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             //endPoint = @"https://umapi.rdfetest.dnsdemo4.com:8443/";
 
             var conCreds = new HDInsightCertificateCredential(subId, x509, new Uri(endPoint), cloudNamespace);
-            var client = ServiceLocator.Instance.Locate<IHDInsightJobSubmissionRestClientFactory>().Create(conCreds, GetAbstractionContext());
+            var client = ServiceLocator.Instance.Locate<IHDInsightJobSubmissionRestClientFactory>().Create(conCreds, GetAbstractionContext(), false);
             var result = await client.CreateJob(dnsName, "East US", payLoad);
             Assert.IsNotNull(result);
         }

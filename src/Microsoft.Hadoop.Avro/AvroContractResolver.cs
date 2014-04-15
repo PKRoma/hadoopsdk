@@ -16,7 +16,6 @@ namespace Microsoft.Hadoop.Avro
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
 
     /// <summary>
     ///     Provides a mechanism for dynamically mapping C# types to and from Avro schema.
@@ -40,7 +39,6 @@ namespace Microsoft.Hadoop.Avro
             {
                 throw new ArgumentNullException("type");
             }
-            Contract.EndContractBlock();
 
             return new List<Type>();
         }
@@ -105,18 +103,6 @@ namespace Microsoft.Hadoop.Avro
         public override int GetHashCode()
         {
             return this.GetType().GetHashCode();
-        }
-
-        /// <summary>
-        /// Combines the type namespace and name and removes all Avro non-compatible symbols.
-        /// </summary>
-        /// <param name="type">The type.</param>
-        /// <returns>
-        /// The stripped type name.
-        /// </returns>
-        protected string GetStrippedTypeName(Type type)
-        {
-            return type.GetStrippedFullName();
         }
 
         /// <summary>

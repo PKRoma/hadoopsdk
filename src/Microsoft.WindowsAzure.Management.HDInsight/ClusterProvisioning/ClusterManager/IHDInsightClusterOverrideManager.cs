@@ -34,6 +34,6 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Cluste
                             IHDInsightManagementRestUriBuilderFactory uriBuilderFactory,
                             IPayloadConverter payloadConverter) where T : IHDInsightSubscriptionCredentials;
 
-        HDInsightOverrideHandlers GetHandlers<T>(T credentials, IAbstractionContext context) where T : IHDInsightSubscriptionCredentials;
+        HDInsightOverrideHandlers GetHandlers<T>(T credentials, IAbstractionContext context, bool ignoreSslErrors) where T : IHDInsightSubscriptionCredentials;
     }
 }

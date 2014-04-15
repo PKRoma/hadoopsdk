@@ -22,6 +22,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Logging;
     using Microsoft.WindowsAzure.Management.HDInsight.Logging;
 
     internal class HttpAbstractionSimulatorClient : DisposableObject, IHttpClientAbstraction
@@ -35,6 +36,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
             this.factory = factory;
             this.underlying = underlying;
             this.asyncMoc = asyncMoc;
+            this.Logger = new Logger();
         }
 
         public HttpMethod Method
@@ -91,5 +93,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
         public void Log(Severity severity, Verbosity verbosity, string message)
         {
         }
+
+        public ILogger Logger { get; private set; }
     }
 }

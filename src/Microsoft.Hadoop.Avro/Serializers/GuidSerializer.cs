@@ -15,7 +15,6 @@
 namespace Microsoft.Hadoop.Avro.Serializers
 {
     using System;
-    using System.Diagnostics.Contracts;
     using System.Linq.Expressions;
     using System.Reflection;
     using System.Runtime.Serialization;
@@ -41,7 +40,6 @@ namespace Microsoft.Hadoop.Avro.Serializers
             }
 
             this.guidConstructor = this.Schema.RuntimeType.GetConstructor(new[] { typeof(byte[]) });
-            Contract.Assert(this.guidConstructor != null, "Schema runtime type does not have a proper guid constructor.");
         }
 
         protected override Expression BuildSerializerSafe(Expression encoder, Expression value)

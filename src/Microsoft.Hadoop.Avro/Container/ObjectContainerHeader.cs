@@ -14,8 +14,10 @@
 // permissions and limitations under the License.
 namespace Microsoft.Hadoop.Avro.Container
 {
+    using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
+    using System.Diagnostics;
+    using System.Globalization;
     using System.Linq;
     using System.Runtime.Serialization;
     using System.Text;
@@ -40,7 +42,10 @@ namespace Microsoft.Hadoop.Avro.Container
         /// <param name="syncMarker">The sync marker.</param>
         public ObjectContainerHeader(byte[] syncMarker)
         {
-            Contract.Assert(syncMarker != null);
+            if (syncMarker == null)
+            {
+                throw new ArgumentNullException("syncMarker");
+            }
 
             this.metadata = new Dictionary<string, byte[]>();
             this.syncMarker = syncMarker;
@@ -74,7 +79,10 @@ namespace Microsoft.Hadoop.Avro.Container
 
             internal set
             {
-                Contract.Assert(!string.IsNullOrEmpty(value));
+                if (string.IsNullOrEmpty(value))
+                {
+                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Invalid codec name."));
+                }
                 this.AddMetadata(MetadataCodec, Encoding.UTF8.GetBytes(value));
             }
         }
@@ -96,7 +104,10 @@ namespace Microsoft.Hadoop.Avro.Container
 
             internal set
             {
-                Contract.Assert(!string.IsNullOrEmpty(value));
+                if (string.IsNullOrEmpty(value))
+                {
+                    throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Invalid schema."));
+                }
                 this.AddMetadata(MetadataSchema, Encoding.UTF8.GetBytes(value));
             }
         }
@@ -108,8 +119,15 @@ namespace Microsoft.Hadoop.Avro.Container
         /// <param name="value">The value.</param>
         public void AddMetadata(string key, byte[] value)
         {
-            Contract.Assert(!string.IsNullOrEmpty(key));
-            Contract.Assert(value != null);
+            if (key == null)
+            {
+                throw new ArgumentNullException("value");
+            }
+
+            if (value == null)
+            {
+                throw new ArgumentNullException("value");
+            }
 
             this.metadata.Add(key, value);
         }
@@ -128,7 +146,10 @@ namespace Microsoft.Hadoop.Avro.Container
         /// <param name="encoder">The encoder.</param>
         public void Write(IEncoder encoder)
         {
-            Contract.Assert(encoder != null);
+            if (encoder == null)
+            {
+                throw new ArgumentNullException("encoder");
+            }
 
             encoder.EncodeFixed(Magic);
             encoder.EncodeMapChunk(this.metadata.Count);
@@ -154,7 +175,10 @@ namespace Microsoft.Hadoop.Avro.Container
         /// <returns>The header.</returns>
         public static ObjectContainerHeader Read(IDecoder decoder)
         {
-            Contract.Assert(decoder != null);
+            if (decoder == null)
+            {
+                throw new ArgumentNullException("decoder");
+            }
 
             byte[] magic = decoder.DecodeFixed(Magic.Length);
             if (!Magic.SequenceEqual(magic))

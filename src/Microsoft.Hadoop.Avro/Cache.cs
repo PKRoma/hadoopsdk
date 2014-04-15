@@ -57,5 +57,10 @@ namespace Microsoft.Hadoop.Avro
                 this.cache.Add(key, value);
             }
         }
+
+        internal int Count
+        {
+            get { return this.cache.Count; }
+        }
     }
 }

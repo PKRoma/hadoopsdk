@@ -80,7 +80,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             var client = ServiceLocator.Instance.Locate<IHDInsightClientFactory>().Create(new HDInsightCertificateCredential(hdInsightCredentials.SubscriptionId, hdInsightCredentials.Certificate));
 
             var manager = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>();
-            var pocoClient = manager.Create(hdInsightCredentials, GetAbstractionContext());
+            var pocoClient = manager.Create(hdInsightCredentials, GetAbstractionContext(), false);
 
             var clusterDetails = GetRandomCluster();
             client.CreateCluster(clusterDetails);

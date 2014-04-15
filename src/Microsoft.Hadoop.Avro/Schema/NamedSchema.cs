@@ -17,7 +17,6 @@ namespace Microsoft.Hadoop.Avro.Schema
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
-    using System.Diagnostics.Contracts;
     using System.Threading;
 
     /// <summary>
@@ -44,7 +43,6 @@ namespace Microsoft.Hadoop.Avro.Schema
             {
                 throw new ArgumentNullException("nameAttributes");
             }
-            Contract.EndContractBlock();
 
             this.attributes = nameAttributes;
         }

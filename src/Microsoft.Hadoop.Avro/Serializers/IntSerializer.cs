@@ -14,7 +14,9 @@
 // permissions and limitations under the License.
 namespace Microsoft.Hadoop.Avro.Serializers
 {
+    using System;
     using System.Diagnostics.CodeAnalysis;
+    using System.Globalization;
     using System.Linq.Expressions;
     using Microsoft.Hadoop.Avro.Schema;
 
@@ -52,7 +54,7 @@ namespace Microsoft.Hadoop.Avro.Serializers
         [SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", Justification = "Internal + done in base class.")]
         protected override void SerializeSafe(IEncoder encoder, object @object)
         {
-            encoder.Encode((int)@object);
+            encoder.Encode(Convert.ToInt32(@object, CultureInfo.InvariantCulture));
         }
 
         [SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", Justification = "Internal + done in base class.")]

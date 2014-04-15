@@ -15,7 +15,6 @@
 namespace Microsoft.Hadoop.Avro.Serializers
 {
     using System;
-    using System.Diagnostics.Contracts;
     using System.Globalization;
     using System.Linq.Expressions;
     using System.Reflection;
@@ -31,7 +30,10 @@ namespace Microsoft.Hadoop.Avro.Serializers
 
         public DateTimeOffsetSerializer(PrimitiveTypeSchema schema, bool usePosixTime) : base(schema)
         {
-            Contract.Assert(typeof(DateTimeOffset) == schema.RuntimeType, "Schema should have DateTimeOffset type.");
+            if (typeof(DateTimeOffset) != schema.RuntimeType)
+            {
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Schema should have DateTimeOffset type."));
+            }
             this.usePosixTime = usePosixTime;
         }
 
@@ -41,11 +43,7 @@ namespace Microsoft.Hadoop.Avro.Serializers
                 "ConvertDateTimeToPosixTime", BindingFlags.Static | BindingFlags.Public);
 
             MethodInfo toString = this.Schema.RuntimeType.GetMethod("ToString", new[] { typeof(string) });
-            Contract.Assert(toString != null, "Cannot find DateTimeOffset.ToString.");
-
             PropertyInfo dateTime = this.Schema.RuntimeType.GetProperty("DateTime");
-            Contract.Assert(dateTime != null, "Cannot find DateTimeOffset.DateTime.");
-
             return this.usePosixTime
                 ? Expression.Call(
                     encoder,
@@ -61,12 +59,8 @@ namespace Microsoft.Hadoop.Avro.Serializers
         {
             MethodInfo convertPosixTimeToDateTime = typeof(DateTimeSerializer).GetMethod(
                 "ConvertPosixTimeToDateTime", BindingFlags.Static | BindingFlags.Public);
-            Contract.Assert(convertPosixTimeToDateTime != null, "Cannot find ConvertPosixTimeToDateTime.");
-
             MethodInfo parse = this.Schema.RuntimeType.GetMethod(
                 "Parse", new[] { typeof(string), typeof(IFormatProvider), typeof(DateTimeStyles) });
-            Contract.Assert(parse != null, "Cannot find DateTimeOffset.Parse.");
-
             ConstructorInfo ctor = this.Schema.RuntimeType.GetConstructor(new[] { typeof(DateTime) });
             if (ctor == null)
             {

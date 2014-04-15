@@ -15,7 +15,7 @@
 namespace Microsoft.Hadoop.Avro.Container
 {
     using System;
-    using System.Diagnostics.Contracts;
+    using System.Diagnostics;
     using System.IO;
     using System.IO.Compression;
 
@@ -29,7 +29,10 @@ namespace Microsoft.Hadoop.Avro.Container
 
         public CompressionStream(Stream buffer)
         {
-            Contract.Assert(buffer != null);
+            if (buffer == null)
+            {
+                throw new ArgumentNullException("buffer");
+            }
 
             this.compressionStream = new DeflateStream(buffer, CompressionMode.Compress, true);
             this.buffer = buffer;

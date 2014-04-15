@@ -57,7 +57,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
         {
             this.EnableHttpSpy();
             var credentials = GetValidCredentials();
-            var pocoClient = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(credentials, GetAbstractionContext());
+            var pocoClient = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>().Create(credentials, GetAbstractionContext(), false);
             var serverPayloadConverter = new ClusterProvisioningServerPayloadConverter();
             var passthrough = new PassthroughResponse();
             passthrough.Data = Guid.NewGuid();
@@ -89,7 +89,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             var client = ServiceLocator.Instance.Locate<IHDInsightClientFactory>().Create(new HDInsightCertificateCredential(credentials.SubscriptionId, credentials.Certificate));
 
             var manager = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>();
-            var pocoClient = manager.Create(credentials, GetAbstractionContext());
+            var pocoClient = manager.Create(credentials, GetAbstractionContext(), false);
             var containers = await pocoClient.ListContainers();
             ClusterDetails clusterDetails = containers.Last();
 
@@ -146,7 +146,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             var client = ServiceLocator.Instance.Locate<IHDInsightClientFactory>().Create(new HDInsightCertificateCredential(credentials.SubscriptionId, credentials.Certificate));
 
             var manager = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>();
-            var pocoClient = manager.Create(credentials, GetAbstractionContext());
+            var pocoClient = manager.Create(credentials, GetAbstractionContext(), false);
             var containers = await pocoClient.ListContainers();
             var clusterDetails = containers.Last();
             if (clusterDetails == null)
@@ -201,7 +201,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             var client = ServiceLocator.Instance.Locate<IHDInsightClientFactory>().Create(new HDInsightCertificateCredential(credentials.SubscriptionId, credentials.Certificate));
 
             var manager = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>();
-            var pocoClient = manager.Create(credentials, GetAbstractionContext());
+            var pocoClient = manager.Create(credentials, GetAbstractionContext(), false);
             var containers = await pocoClient.ListContainers();
             ClusterDetails clusterDetails = containers.Last();
             var clusterCreationDetails = GetRandomCluster();
@@ -259,7 +259,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             var client = ServiceLocator.Instance.Locate<IHDInsightClientFactory>().Create(new HDInsightCertificateCredential(credentials.SubscriptionId, credentials.Certificate));
 
             var manager = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>();
-            var pocoClient = manager.Create(credentials, GetAbstractionContext());
+            var pocoClient = manager.Create(credentials, GetAbstractionContext(), false);
             var containers = await pocoClient.ListContainers();
             ClusterDetails clusterDetails = containers.Last();
             var clusterCreationDetails = GetRandomCluster();
@@ -320,7 +320,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             {
 
                 var manager = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>();
-                var pocoClient = manager.Create(credentials, GetAbstractionContext());
+                var pocoClient = manager.Create(credentials, GetAbstractionContext(), false);
 
                 clusterDetails.Version = "1.5.0.0.LargeSKU-amd64-134231";
                 client.CreateCluster(clusterDetails);
@@ -359,7 +359,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             {
 
                 var manager = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>();
-                var pocoClient = manager.Create(credentials, GetAbstractionContext());
+                var pocoClient = manager.Create(credentials, GetAbstractionContext(), false);
 
                 clusterDetails.Version = "1.5.0.0.LargeSKU-amd64-134231";
                 client.CreateCluster(clusterDetails);

@@ -110,7 +110,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             public MockRemotePoco Mock { get; set; }
 
 
-            public IHadoopJobSubmissionPocoClient Create(IJobSubmissionClientCredential credentials, IAbstractionContext context)
+            public IHadoopJobSubmissionPocoClient Create(IJobSubmissionClientCredential credentials, IAbstractionContext context, bool ignoreSslErrors)
             {
                 return Mock;
             }
@@ -135,7 +135,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
                 UserName = "someone"
             };
 
-            var poco = new HDInsightJobSubmissionPocoClient(creds, GetAbstractionContext());
+            var poco = new HDInsightJobSubmissionPocoClient(creds, GetAbstractionContext(), false);
             var task = poco.SubmitHiveJob(new HiveJobCreateParameters() { JobName = "myJob", Query = "someQuery" });
             task.Wait();
 
@@ -162,7 +162,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
                 UserName = "someone"
             };
 
-            var poco = new HDInsightJobSubmissionPocoClient(creds, GetAbstractionContext());
+            var poco = new HDInsightJobSubmissionPocoClient(creds, GetAbstractionContext(), false);
             var task = poco.SubmitMapReduceJob(new MapReduceJobCreateParameters() { JobName = "myJob", ClassName = "someApp", JarFile = "someFile" });
             task.Wait();
 
@@ -189,7 +189,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
                 UserName = "someone"
             };
 
-            var poco = new HDInsightJobSubmissionPocoClient(creds, GetAbstractionContext());
+            var poco = new HDInsightJobSubmissionPocoClient(creds, GetAbstractionContext(), false);
             var task = poco.SubmitSqoopJob(new SqoopJobCreateParameters() { Command = "load remote;" });
             task.Wait();
 
@@ -216,7 +216,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
                 UserName = "someone"
             };
 
-            var poco = new HDInsightJobSubmissionPocoClient(creds, GetAbstractionContext());
+            var poco = new HDInsightJobSubmissionPocoClient(creds, GetAbstractionContext(), false);
             var task = poco.GetJob("2345");
             task.Wait();
 
@@ -236,7 +236,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
                 UserName = IntegrationTestBase.TestCredentials.AzureUserName
             };
 
-            var poco = new RemoteHadoopJobSubmissionPocoClient(creds, GetAbstractionContext());
+            var poco = new RemoteHadoopJobSubmissionPocoClient(creds, GetAbstractionContext(), false);
             var job = await poco.GetJob("job_201309101629_0004");
 
             Assert.IsNull(job);
@@ -262,7 +262,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
                 UserName = "someone"
             };
 
-            var poco = new HDInsightJobSubmissionPocoClient(creds, GetAbstractionContext());
+            var poco = new HDInsightJobSubmissionPocoClient(creds, GetAbstractionContext(), false);
             var task = poco.ListJobs();
             task.Wait();
 

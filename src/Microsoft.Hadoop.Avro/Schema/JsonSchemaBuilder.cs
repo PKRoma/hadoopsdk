@@ -16,7 +16,7 @@ namespace Microsoft.Hadoop.Avro.Schema
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
+    using System.Diagnostics;
     using System.Globalization;
     using System.Linq;
     using System.Runtime.Serialization;
@@ -60,7 +60,6 @@ namespace Microsoft.Hadoop.Avro.Schema
             {
                 throw new ArgumentNullException("schema");
             }
-            Contract.EndContractBlock();
 
             JToken token = JToken.Parse(schema);
             if (token == null)
@@ -84,8 +83,6 @@ namespace Microsoft.Hadoop.Avro.Schema
         /// <exception cref="System.Runtime.Serialization.SerializationException">Thrown when JSON schema type is not supported.</exception>
         private TypeSchema Parse(JToken token, NamedSchema parent, Dictionary<string, NamedSchema> namedSchemas)
         {
-            Contract.Assert(token != null);
-
             if (token.Type == JTokenType.Object)
             {
                 return this.ParseJsonObject(token as JObject, parent, namedSchemas);
@@ -110,7 +107,7 @@ namespace Microsoft.Hadoop.Avro.Schema
 
             if (token.Type == JTokenType.Array)
             {
-                return this.ParseUnionType(token as JArray, namedSchemas);
+                return this.ParseUnionType(token as JArray, parent, namedSchemas);
             }
 
             throw new SerializationException(
@@ -129,8 +126,6 @@ namespace Microsoft.Hadoop.Avro.Schema
         /// <exception cref="System.Runtime.Serialization.SerializationException">Thrown when JSON schema type is invalid.</exception>
         private TypeSchema ParseJsonObject(JObject token, NamedSchema parent, Dictionary<string, NamedSchema> namedSchemas)
         {
-            Contract.Assert(token != null);
-
             JToken tokenType = token[Token.Type];
             if (tokenType.Type == JTokenType.String)
             {
@@ -146,9 +141,9 @@ namespace Microsoft.Hadoop.Avro.Schema
                     case Token.Enum:
                         return this.ParseEnumType(token, parent, namedSchemas);
                     case Token.Array:
-                        return this.ParseArrayType(token, namedSchemas);
+                        return this.ParseArrayType(token, parent, namedSchemas);
                     case Token.Map:
-                        return this.ParseMapType(token, namedSchemas);
+                        return this.ParseMapType(token, parent, namedSchemas);
                     case Token.Fixed:
                         return this.ParseFixedType(token, parent);
                     default:
@@ -159,7 +154,7 @@ namespace Microsoft.Hadoop.Avro.Schema
 
             if (tokenType.Type == JTokenType.Array)
             {
-                return this.ParseUnionType(tokenType as JArray, namedSchemas);
+                return this.ParseUnionType(tokenType as JArray, parent, namedSchemas);
             }
 
             throw new SerializationException(
@@ -170,24 +165,19 @@ namespace Microsoft.Hadoop.Avro.Schema
         /// Parses a union token.
         /// </summary>
         /// <param name="unionToken">The union token.</param>
+        /// <param name="parent">The parent.</param>
         /// <param name="namedSchemas">The named schemas.</param>
         /// <returns>
         /// Schema internal representation.
         /// </returns>
         /// <exception cref="System.Runtime.Serialization.SerializationException">Thrown when union schema type is invalid.</exception>
-        private TypeSchema ParseUnionType(JArray unionToken, Dictionary<string, NamedSchema> namedSchemas)
+        private TypeSchema ParseUnionType(JArray unionToken, NamedSchema parent, Dictionary<string, NamedSchema> namedSchemas)
         {
-            if (unionToken == null)
-            {
-                throw new ArgumentNullException("unionToken");
-            }
-            Contract.EndContractBlock();
-
             var types = new HashSet<string>();
             var schemas = new List<TypeSchema>();
             foreach (var typeAlternative in unionToken.Children())
             {
-                var schema = this.Parse(typeAlternative, null, namedSchemas);
+                var schema = this.Parse(typeAlternative, parent, namedSchemas);
                 if (schema.Type == Token.Union)
                 {
                     throw new SerializationException(
@@ -219,8 +209,6 @@ namespace Microsoft.Hadoop.Avro.Schema
         /// <exception cref="System.Runtime.Serialization.SerializationException">Thrown when <paramref name="enumeration"/> contains invalid symbols.</exception>
         private TypeSchema ParseEnumType(JObject enumeration, NamedSchema parent, Dictionary<string, NamedSchema> namedSchemas)
         {
-            Contract.Assert(enumeration != null);
-
             var name = enumeration.RequiredProperty<string>(Token.Name);
             var nspace = this.GetNamespace(enumeration, parent, name);
             var enumName = new SchemaName(name, nspace);
@@ -252,15 +240,14 @@ namespace Microsoft.Hadoop.Avro.Schema
         /// Parses a JSON object representing an Avro array.
         /// </summary>
         /// <param name="array">JSON representing the array.</param>
+        /// <param name="parent">The parent.</param>
         /// <param name="namedSchemas">The named schemas.</param>
         /// <returns>
         /// A corresponding schema.
         /// </returns>
-        /// <exception cref="System.Runtime.Serialization.SerializationException">Thrown when no 'items' property is found in <paramref name="array"/>.</exception>
-        private TypeSchema ParseArrayType(JObject array, Dictionary<string, NamedSchema> namedSchemas)
+        /// <exception cref="System.Runtime.Serialization.SerializationException">Thrown when no 'items' property is found in <paramref name="array" />.</exception>
+        private TypeSchema ParseArrayType(JObject array, NamedSchema parent, Dictionary<string, NamedSchema> namedSchemas)
         {
-            Contract.Assert(array != null);
-
             var itemType = array[Token.Items];
             if (itemType == null)
             {
@@ -268,7 +255,7 @@ namespace Microsoft.Hadoop.Avro.Schema
                     string.Format(CultureInfo.InvariantCulture, "Property 'items' cannot be found inside the array '{0}'.", array));
             }
 
-            var elementSchema = this.Parse(itemType, null, namedSchemas);
+            var elementSchema = this.Parse(itemType, parent, namedSchemas);
             return new ArraySchema(elementSchema, typeof(Array));
         }
 
@@ -276,15 +263,14 @@ namespace Microsoft.Hadoop.Avro.Schema
         /// Parses a JSON object representing an Avro map.
         /// </summary>
         /// <param name="map">JSON representing the map.</param>
+        /// <param name="parent">The parent.</param>
         /// <param name="namedSchemas">The named schemas.</param>
         /// <returns>
         /// A corresponding schema.
         /// </returns>
-        /// <exception cref="System.Runtime.Serialization.SerializationException">Thrown when 'values' property is not found in <paramref name="map"/>.</exception>
-        private TypeSchema ParseMapType(JObject map, Dictionary<string, NamedSchema> namedSchemas)
+        /// <exception cref="System.Runtime.Serialization.SerializationException">Thrown when 'values' property is not found in <paramref name="map" />.</exception>
+        private TypeSchema ParseMapType(JObject map, NamedSchema parent, Dictionary<string, NamedSchema> namedSchemas)
         {
-            Contract.Assert(map != null);
-
             var valueType = map[Token.Values];
             if (valueType == null)
             {
@@ -292,7 +278,7 @@ namespace Microsoft.Hadoop.Avro.Schema
                     string.Format(CultureInfo.InvariantCulture, "Property 'values' cannot be found inside the map '{0}'.", map));
             }
 
-            var valueSchema = this.Parse(valueType, null, namedSchemas);
+            var valueSchema = this.Parse(valueType, parent, namedSchemas);
             return new MapSchema(new StringSchema(), valueSchema, typeof(Dictionary<string, object>));
         }
 
@@ -308,8 +294,6 @@ namespace Microsoft.Hadoop.Avro.Schema
         /// <exception cref="System.Runtime.Serialization.SerializationException">Thrown when <paramref name="record"/> can not be parsed properly.</exception>
         private TypeSchema ParseRecordType(JObject record, NamedSchema parent, Dictionary<string, NamedSchema> namedSchemas)
         {
-            Contract.Assert(record != null);
-
             var name = record.RequiredProperty<string>(Token.Name);
             var nspace = this.GetNamespace(record, parent, name);
             var recordName = new SchemaName(name, nspace);
@@ -351,9 +335,6 @@ namespace Microsoft.Hadoop.Avro.Schema
         /// <exception cref="System.Runtime.Serialization.SerializationException">Thrown when <paramref name="field"/> is not valid or when sort order is not valid.</exception>
         private RecordField ParseRecordField(JObject field, NamedSchema parent, Dictionary<string, NamedSchema> namedSchemas, int position)
         {
-            Contract.Assert(field != null);
-            Contract.Assert(parent != null);
-
             var name = field.RequiredProperty<string>(Token.Name);
             var doc = field.OptionalProperty<string>(Token.Doc);
             var order = field.OptionalProperty<string>(Token.Order);
@@ -398,7 +379,6 @@ namespace Microsoft.Hadoop.Avro.Schema
         /// <returns>Schema internal representation.</returns>
         private TypeSchema ParsePrimitiveTypeFromString(string token)
         {
-            Contract.Assert(token != null);
             return this.CreatePrimitiveTypeSchema(token, new Dictionary<string, string>());
         }
 
@@ -410,8 +390,6 @@ namespace Microsoft.Hadoop.Avro.Schema
         /// <returns>Schema internal representation.</returns>
         private TypeSchema ParsePrimitiveTypeFromObject(JObject token, string usingTypeName = null)
         {
-            Contract.Assert(token != null);
-
             if (usingTypeName == null)
             {
                 usingTypeName = token.RequiredProperty<string>(Token.Type);
@@ -429,9 +407,6 @@ namespace Microsoft.Hadoop.Avro.Schema
         /// <returns>Schema internal representation.</returns>
         private TypeSchema CreatePrimitiveTypeSchema(string type, Dictionary<string, string> attributes)
         {
-            Contract.Assert(attributes != null);
-            Contract.Assert(PrimitiveRuntimeType.ContainsKey(type), "Type should be primitive.");
-
             var result = PrimitiveRuntimeType[type]();
             foreach (var attribute in attributes)
             {
@@ -442,8 +417,6 @@ namespace Microsoft.Hadoop.Avro.Schema
 
         private FixedSchema ParseFixedType(JObject type, NamedSchema parent)
         {
-            Contract.Assert(type != null);
-
             var name = type.RequiredProperty<string>(Token.Name);
             var nspace = this.GetNamespace(type, parent, name);
             var fixedName = new SchemaName(name, nspace);

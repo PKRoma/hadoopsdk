@@ -84,14 +84,14 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
 
             // Makes sure we get region locations even if we unregister the location
             DeleteClusters(credentials, "North Europe");
-            var registrationClient = new SubscriptionRegistrationClient(credentials, GetAbstractionContext());
+            var registrationClient = new SubscriptionRegistrationClient(credentials, GetAbstractionContext(), false);
             if (await registrationClient.ValidateSubscriptionLocation("North Europe"))
             {
                 await registrationClient.UnregisterSubscriptionLocation("North Europe");
             }
 
             // Validate locations
-            var client = new LocationFinderClient(credentials, GetAbstractionContext());
+            var client = new LocationFinderClient(credentials, GetAbstractionContext(), false);
             var locations = await client.ListAvailableLocations();
             Assert.AreEqual(1, locations.Count(location => location == "East US"));
             Assert.AreEqual(1, locations.Count(location => location == "East US 2"));

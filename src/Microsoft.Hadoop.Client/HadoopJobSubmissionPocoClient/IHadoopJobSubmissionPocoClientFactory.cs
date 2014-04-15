@@ -30,10 +30,13 @@ namespace Microsoft.Hadoop.Client.HadoopJobSubmissionPocoClient
         /// <param name="context">
         /// The context which contains a cancelation token for the request.
         /// </param>
+        /// <param name="ignoreSslErrors">
+        /// Specifies that server side SSL errors should be be ignored.
+        /// </param>
         /// <returns>
         /// A new instance of an HadoopJobSubmissionPoco client capable of talking to the 
         /// specified cluster.
         /// </returns>
-        IHadoopJobSubmissionPocoClient Create(IJobSubmissionClientCredential credentials, IAbstractionContext context);
+        IHadoopJobSubmissionPocoClient Create(IJobSubmissionClientCredential credentials, IAbstractionContext context, bool ignoreSslErrors);
     }
 }

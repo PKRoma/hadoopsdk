@@ -14,8 +14,8 @@
 // permissions and limitations under the License.
 namespace Microsoft.Hadoop.Avro.Schema
 {
+    using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
 
     /// <summary>
     ///     Standard attributes supported by named schemas.
@@ -30,8 +30,15 @@ namespace Microsoft.Hadoop.Avro.Schema
         /// <param name="doc">The doc.</param>
         public NamedEntityAttributes(SchemaName name, IEnumerable<string> aliases, string doc)
         {
-            Contract.Assert(name != null);
-            Contract.Assert(aliases != null);
+            if (name == null)
+            {
+                throw new ArgumentNullException("name");
+            }
+
+            if (aliases == null)
+            {
+                throw new ArgumentNullException("aliases");
+            }
 
             this.Name = name;
             this.Aliases = new List<string>(aliases);

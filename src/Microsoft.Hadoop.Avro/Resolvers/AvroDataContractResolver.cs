@@ -16,7 +16,6 @@ namespace Microsoft.Hadoop.Avro
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
     using System.Globalization;
     using System.Linq;
     using System.Reflection;
@@ -62,7 +61,6 @@ namespace Microsoft.Hadoop.Avro
             {
                 throw new ArgumentNullException("type");
             }
-            Contract.EndContractBlock();
 
             return new HashSet<Type>(type.GetAllKnownTypes());
         }
@@ -82,7 +80,6 @@ namespace Microsoft.Hadoop.Avro
             {
                 throw new ArgumentNullException("type");
             }
-            Contract.EndContractBlock();
 
             if (type.IsUnsupported())
             {
@@ -139,7 +136,6 @@ namespace Microsoft.Hadoop.Avro
             {
                 throw new ArgumentNullException("type");
             }
-            Contract.EndContractBlock();
 
             if (type.IsKeyValuePair())
             {

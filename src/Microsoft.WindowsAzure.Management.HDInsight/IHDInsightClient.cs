@@ -21,17 +21,5 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
     /// </summary>
     public interface IHDInsightClient : IHDInsightAsyncClient, IHDInsightSyncClient
     {
-        /// <summary>
-        /// Adds a log writer to the client.
-        /// </summary>
-        /// <param name="logWriter">
-        /// The log writer.
-        /// </param>
-        void AddLogWriter(ILogWriter logWriter);
-
-        /// <summary>
-        /// Gets the cluster credentials.
-        /// </summary>
-        IHDInsightSubscriptionCredentials Credentials { get; }
     }
 }

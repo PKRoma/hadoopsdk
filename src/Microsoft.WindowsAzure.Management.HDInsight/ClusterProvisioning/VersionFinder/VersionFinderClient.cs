@@ -30,17 +30,19 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Versio
         private const string VersionPrefix = "CAPABILITY_VERSION_";
         private readonly IHDInsightSubscriptionCredentials credentials;
         private readonly IAbstractionContext context;
+        private readonly bool ignoreSslErrors;
 
-        public VersionFinderClient(IHDInsightSubscriptionCredentials creds, IAbstractionContext context)
+        public VersionFinderClient(IHDInsightSubscriptionCredentials creds, IAbstractionContext context, bool ignoreSslErrors)
         {
             this.context = context;
+            this.ignoreSslErrors = ignoreSslErrors;
             this.credentials = creds;
         }
 
         // Method = "GET", UriTemplate = "UriTemplate = "{subscriptionId}/resourceproviders/{resourceProviderNamespace}/Properties?resourceType={resourceType}"
         public async Task<Collection<HDInsightVersion>> ListAvailableVersions()
         {
-            var client = ServiceLocator.Instance.Locate<IRdfeServiceRestClientFactory>().Create(this.credentials, this.context);
+            var client = ServiceLocator.Instance.Locate<IRdfeServiceRestClientFactory>().Create(this.credentials, this.context, this.ignoreSslErrors);
 
             var capabilities = await client.GetResourceProviderProperties();
             return this.ListAvailableVersions(capabilities);

@@ -16,7 +16,7 @@
   <Version>
     <Major>1</Major>
     <Minor>1</Minor>
-    <Patch>0</Patch>
+    <Patch>1</Patch>
   </Version>
   <Prepare>
     <CopyTree>
@@ -45,6 +45,14 @@
     </CopyTree>
     <Zip folder="Cmdlet" name="Microsoft.WindowsAzure.Management.HDInsight.Cmdlets.zip" />
     <Zip folder="Lat" name="Microsoft.WindowsAzure.HDInsight.LogAnalysisTool.zip" />
+    <NuGet id="Microsoft.Hadoop.Avro" outputFolder="Avro" >
+      <Title>Microsoft .NET Library for Avro</Title>
+      <ProjectUrl>http://hadoopsdk.codeplex.com</ProjectUrl>
+      <Description>Provides a .NET API for Serializing data into the Avro format.</Description>
+      <Dependencies>
+        <Dependency id="Newtonsoft.Json" version="5.0.5" />
+      </Dependencies>
+    </NuGet>
     <NuGet id="Microsoft.Hadoop.Client" outputFolder="HadoopClient">
       <Title>Microsoft .NET API for Hadoop</Title>
       <ProjectUrl>http://hadoopsdk.codeplex.com</ProjectUrl>
@@ -53,7 +61,7 @@
         <NoReference targetFramework="net40" file="Microsoft.HDInsight.Threading.dll" />
       </NoReferences>
       <Dependencies>
-        <Dependency id="WindowsAzure.Storage" version="3.0.2.0"/>
+        <Dependency id="WindowsAzure.Storage" version="3.0.3.0"/>
       </Dependencies>
       <Authors>Microsoft</Authors>
       <Owners>Microsoft Azure-sdk</Owners>
@@ -81,6 +89,10 @@
     </NuGet>
   </Prepare>
   <Package>
+    <CopyTree>
+      <From>Avro</From>
+      <To>Avro</To>
+    </CopyTree>
     <CopyTree>
       <From>HadoopClient</From>
       <To>HadoopClient</To>

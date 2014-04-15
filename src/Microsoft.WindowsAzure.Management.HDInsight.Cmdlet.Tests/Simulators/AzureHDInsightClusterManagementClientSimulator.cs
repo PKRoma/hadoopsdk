@@ -143,6 +143,8 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Tests.Simulators
         private readonly IHDInsightSubscriptionCredentials credentials;
         private readonly ILogger logger;
 
+        public ILogger Logger { get { return this.logger; } }
+
         private CancellationTokenSource cancellationTokenSource;
 
         public AzureHDInsightClusterManagementClientSimulator(IHDInsightSubscriptionCredentials credentials)
@@ -157,8 +159,15 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Tests.Simulators
 
         public event EventHandler<ClusterProvisioningStatusEventArgs> ClusterProvisioning;
         public CancellationToken CancellationToken { get; private set; }
+        public void RemoveLogWriter(ILogWriter logWriter)
+        {
+            this.logger.RemoveWriter(logWriter);
+        }
+
         public IHDInsightSubscriptionCredentials Credentials { get; private set; }
         public TimeSpan PollingInterval { get; set; }
+
+        public bool IgnoreSslErrors { get; set; }
 
         public void AddLogWriter(ILogWriter logWriter)
         {

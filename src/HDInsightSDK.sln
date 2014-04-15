@@ -45,7 +45,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureLogTool", "Tools\Azure
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Hadoop.Avro", "Microsoft.Hadoop.Avro\Microsoft.Hadoop.Avro.csproj", "{EAB38A14-211F-4361-A06E-3EC1E07ABE33}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Hadoop.Avro.Specifications", "Microsoft.Hadoop.Avro.Specifications\Microsoft.Hadoop.Avro.Specifications.csproj", "{1ED444F4-A5ED-43B7-87E1-4BBE111511C9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Hadoop.Avro.Tests", "Microsoft.Hadoop.Avro.Tests\Microsoft.Hadoop.Avro.Tests.csproj", "{1ED444F4-A5ED-43B7-87E1-4BBE111511C9}"
 EndProject
 Global
 	GlobalSection(TestCaseManagementSettings) = postSolution

@@ -17,7 +17,6 @@ namespace Microsoft.Hadoop.Avro.Serializers
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
-    using System.Diagnostics.Contracts;
     using System.Globalization;
     using System.Linq.Expressions;
     using System.Reflection;
@@ -35,7 +34,10 @@ namespace Microsoft.Hadoop.Avro.Serializers
         /// <param name="schema">The schema.</param>
         public ArraySerializer(ArraySchema schema) : base(schema)
         {
-            Contract.Assert(schema.RuntimeType.IsArray || schema.RuntimeType == typeof(Array));
+            if (!schema.RuntimeType.IsArray && schema.RuntimeType != typeof(Array))
+            {
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Only arrays allowed."));
+            }
         }
 
         protected override Expression BuildSerializerSafe(Expression encoder, Expression value)
@@ -81,8 +83,6 @@ namespace Microsoft.Hadoop.Avro.Serializers
             Type arrayType = this.Schema.RuntimeType;
 
             MethodInfo resize = typeof(Array).GetMethod("Resize").MakeGenericMethod(arrayType.GetElementType());
-            Contract.Assert(resize != null);
-
             var body = new List<Expression>();
 
             ParameterExpression result = Expression.Variable(arrayType, "result");

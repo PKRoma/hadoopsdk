@@ -17,7 +17,7 @@ namespace Microsoft.Hadoop.Avro.Schema
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
-    using System.Diagnostics.Contracts;
+    using System.Diagnostics;
     using System.Globalization;
     using System.Linq;
     using Newtonsoft.Json;
@@ -55,18 +55,26 @@ namespace Microsoft.Hadoop.Avro.Schema
             Dictionary<string, string> attributes)
             : base(namedEntityAttributes, runtimeType, attributes)
         {
+            if (runtimeType == null)
+            {
+                throw new ArgumentNullException("runtimeType");
+            }
+
             this.symbols = new List<string>();
             this.symbolToValue = new Dictionary<string, int>();
             this.valueToSymbol = new Dictionary<int, string>();
             this.avroToCSharpValueMapping = new List<long>();
 
-            if (runtimeType != null && runtimeType.IsEnum)
+            if (runtimeType.IsEnum)
             {
                 this.symbols = Enum.GetNames(runtimeType).ToList();
                 Array values = Enum.GetValues(runtimeType);
                 for (int i = 0; i < this.symbols.Count; i++)
                 {
+                    int v = Convert.ToInt32(values.GetValue(i), CultureInfo.InvariantCulture);
                     this.avroToCSharpValueMapping.Add(Convert.ToInt64(values.GetValue(i), CultureInfo.InvariantCulture));
+                    this.symbolToValue.Add(this.symbols[i], v);
+                    this.valueToSymbol.Add(v, this.symbols[i]);
                 }
             }
         }
@@ -137,7 +145,10 @@ namespace Microsoft.Hadoop.Avro.Schema
 
         internal void AddSymbol(string symbol)
         {
-            Contract.Assert(!string.IsNullOrEmpty(symbol));
+            if (string.IsNullOrEmpty(symbol))
+            {
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Symbol should not be null."));
+            }
 
             this.symbols.Add(symbol);
             this.symbolToValue.Add(symbol, this.symbolToValue.Count);

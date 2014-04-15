@@ -69,7 +69,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission
 
             if (retval.IsNull() || ignoreCache)
             {
-                var overrideHandlers = ServiceLocator.Instance.Locate<IHDInsightClusterOverrideManager>().GetHandlers(this.subscriptionCredentials, this.Context);
+                var overrideHandlers = ServiceLocator.Instance.Locate<IHDInsightClusterOverrideManager>().GetHandlers(this.subscriptionCredentials, this.Context, this.IgnoreSslErrors);
                 ServiceLocator.Instance.Locate<IHDInsightClientFactory>().Create(this.subscriptionCredentials);
                 IHDInsightSubscriptionCredentials actualCredentials = ServiceLocator.Instance.Locate<IHDInsightSubscriptionCredentialsFactory>()
                                                                                     .Create(this.subscriptionCredentials);
@@ -197,7 +197,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission
         private IHadoopJobSubmissionPocoClient GetPocoClient(bool ignoreCache = false)
         {
             var details = this.GetJobSubmissionClusterDetails(ignoreCache);
-            var pocoClient = ServiceLocator.Instance.Locate<IHDInsightJobSubmissionPocoClientFactory>().Create(details.RemoteCredentials, this.Context);
+            var pocoClient = ServiceLocator.Instance.Locate<IHDInsightJobSubmissionPocoClientFactory>().Create(details.RemoteCredentials, this.Context, this.IgnoreSslErrors);
             return pocoClient;
         }
 

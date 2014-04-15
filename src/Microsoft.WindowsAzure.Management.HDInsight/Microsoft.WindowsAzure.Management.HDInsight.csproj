@@ -51,8 +51,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ClusterProvisioning\RestClient\IRetryTimingManager.cs" />
-    <Compile Include="ClusterProvisioning\RestClient\RetryTimingManager.cs" />
+    <Compile Include="ClusterProvisioning\RestClient\IHttpOperationManager.cs" />
+    <Compile Include="ClusterProvisioning\RestClient\HttpOperationManager.cs" />
     <Compile Include="JobSubmission\JobSubmissionCache.cs" />
     <Compile Include="ClusterProvisioning\AsvValidator\AsvValidatorClientFactory.cs" />
     <Compile Include="ClusterProvisioning\AsvValidator\IAsvValidatorClientFactory.cs" />

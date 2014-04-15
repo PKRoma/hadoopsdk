@@ -45,6 +45,8 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Tests.Simulators
 
         private IJobSubmissionClientCredential credentials;
 
+        public ILogger Logger { get { return this.logger; } }
+
         public AzureHDInsightJobSubmissionClientSimulator(
             IJobSubmissionClientCredential credential, AzureHDInsightClusterManagementClientSimulator.SimulatorClusterContainer cluster)
         {
@@ -64,6 +66,13 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Tests.Simulators
         {
             this.logger.AddWriter(logWriter);
         }
+
+        public void RemoveLogWriter(ILogWriter logWriter)
+        {
+            this.logger.RemoveWriter(logWriter);
+        }
+
+        public bool IgnoreSslErrors { get; set; }
 
         public void Cancel()
         {

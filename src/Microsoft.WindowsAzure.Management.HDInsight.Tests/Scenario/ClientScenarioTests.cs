@@ -185,7 +185,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
                 Password = testCluster.HttpPassword,
                 UserName = testCluster.HttpUserName
             };
-            var jobSubmissionClient = new HDInsightJobSubmissionPocoClient(connectionCredentials, GetAbstractionContext());
+            var jobSubmissionClient = new HDInsightJobSubmissionPocoClient(connectionCredentials, GetAbstractionContext(), false);
             var jobHistory = jobSubmissionClient.ListJobs().WaitForResult();
             var expectedJobHistory = SyncClientScenarioTests.GetJobHistory(connectionCredentials.Server.OriginalString);
             Assert.AreEqual(jobHistory.Jobs.Count, expectedJobHistory.Jobs.Count);
@@ -214,7 +214,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
                 Password = testCluster.HttpPassword,
                 UserName = testCluster.HttpUserName
             };
-            var jobSubmissionClient = new HDInsightJobSubmissionPocoClient(connectionCredentials, GetAbstractionContext());
+            var jobSubmissionClient = new HDInsightJobSubmissionPocoClient(connectionCredentials, GetAbstractionContext(), false);
             jobSubmissionClient.ListJobs().WaitForResult();
         }
 

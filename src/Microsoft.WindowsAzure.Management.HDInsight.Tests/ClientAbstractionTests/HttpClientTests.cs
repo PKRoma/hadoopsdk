@@ -52,7 +52,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             //         Given I want to use an X509 Cert for authentication
             IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
             //           And I have an Http Client
-            using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(credentials.Certificate))
+            using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(credentials.Certificate, false))
             {
                 //       And I set the uri for the request object
                 client.RequestUri = new Uri("http://httpbin.org/get");
@@ -81,7 +81,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             //         Given I want to use an X509 Cert for authentication
             IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
             //           And I have an Http Client
-            using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(credentials.Certificate))
+            using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(credentials.Certificate, false))
             {
                 //       And I set the uri for the request object
                 client.RequestUri = new Uri("http://httpbin.org/put");
@@ -115,7 +115,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             //         Given I want to use an X509 Cert for authentication
             IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
             //           And I have an Http Client
-            using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(credentials.Certificate))
+            using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(credentials.Certificate, false))
             {
                 //       And I set the uri for the request object
                 client.RequestUri = new Uri("http://httpbin.org/post");
@@ -148,7 +148,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             //         Given I want to use an X509 Cert for authentication
             IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
             //           And I have an Http Client
-            using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(credentials.Certificate))
+            using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(credentials.Certificate, false))
             {
                 //       And I set the uri for the request object
                 client.RequestUri = new Uri("http://httpbin.org/delete");
@@ -179,7 +179,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             //         Given I want to use an X509 Cert for authentication
             IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
             //           And I have an Http Client
-            using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(credentials.Certificate))
+            using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(credentials.Certificate, false))
             {
                 //      Then for create a simple requests
                 client.RequestUri = new Uri("http://httpbin.org/get");
@@ -200,7 +200,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             //         Given I want to use an X509 Cert for authentication
             IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
             //           And I have an Http Client
-            using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(credentials.Certificate))
+            using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(credentials.Certificate, false))
             {
                 //       And I set the uri to the base of Azure Services
                 client.RequestUri = new Uri(credentials.Endpoint, new Uri(credentials.SubscriptionId.ToString(), UriKind.Relative));
@@ -236,7 +236,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
                 //         Given I want to use an X509 Cert for authentication
                 IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
                 //           And I have an Http Client
-                using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(credentials.Certificate))
+                using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(credentials.Certificate, false))
                 {
                     //       And I set the uri for a http that will take 30 sec to complete
                     client.RequestUri = new Uri("http://httpbin.org/delay/30000");
@@ -275,7 +275,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             //           And I have an Http Client
             try
             {
-                using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(credentials.Certificate, new AbstractionContext(token)))
+                using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(credentials.Certificate, new AbstractionContext(token), false))
                 {
                     //       And I set the uri for a http that will take 30 sec to complete
                     client.RequestUri = new Uri("http://httpbin.org/delay/30000");
@@ -309,7 +309,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             //         Given I want to use an X509 Cert for authentication
             IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
             //           And I have an Http Client
-            using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(credentials.Certificate))
+            using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(credentials.Certificate, false))
             {
                 //       And I set the uri for a http that will trigger a 404 (NotFound)
                 client.RequestUri = new Uri("http://httpbin.org/status/404");
@@ -339,7 +339,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             //         Given I want to use an X509 Cert for authentication
             IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
             //           And I have an Http Client
-            using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(credentials.Certificate))
+            using (var client = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(credentials.Certificate, false))
             {
 
                 //       And I set the uri to the base of Azure Services

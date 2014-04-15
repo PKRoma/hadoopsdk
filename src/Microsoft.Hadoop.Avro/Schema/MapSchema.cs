@@ -16,7 +16,6 @@ namespace Microsoft.Hadoop.Avro.Schema
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.Contracts;
     using Newtonsoft.Json;
 
     /// <summary>
@@ -55,7 +54,6 @@ namespace Microsoft.Hadoop.Avro.Schema
             {
                 throw new ArgumentNullException("valueSchema");
             }
-            Contract.EndContractBlock();
 
             this.valueSchema = valueSchema;
             this.keySchema = keySchema;

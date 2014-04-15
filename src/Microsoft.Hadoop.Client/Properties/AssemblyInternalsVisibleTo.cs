@@ -18,3 +18,4 @@ using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("Microsoft.WindowsAzure.Management.HDInsight.Tests")]
 [assembly: InternalsVisibleTo("Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Tests")]
+[assembly: InternalsVisibleTo("Microsoft.Hadoop.Avro.Tests")]

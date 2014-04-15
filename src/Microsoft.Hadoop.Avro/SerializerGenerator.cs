@@ -15,7 +15,6 @@
 namespace Microsoft.Hadoop.Avro
 {
     using System;
-    using System.Diagnostics.Contracts;
     using System.Linq.Expressions;
     using Microsoft.Hadoop.Avro.Schema;
 
@@ -23,7 +22,11 @@ namespace Microsoft.Hadoop.Avro
     {
         public Action<IEncoder, T> GenerateSerializer<T>(TypeSchema schema)
         {
-            Contract.Assert(schema != null);
+            if (schema == null)
+            {
+                throw new ArgumentNullException("schema");
+            }
+
             ParameterExpression instance = Expression.Parameter(typeof(T), "instance");
             ParameterExpression encoder = Expression.Parameter(typeof(IEncoder), "encoder");
 
@@ -35,7 +38,10 @@ namespace Microsoft.Hadoop.Avro
 
         public Func<IDecoder, T> GenerateDeserializer<T>(TypeSchema schema)
         {
-            Contract.Assert(schema != null);
+            if (schema == null)
+            {
+                throw new ArgumentNullException("schema");
+            }
 
             ParameterExpression decoder = Expression.Parameter(typeof(IDecoder), "decoder");
 

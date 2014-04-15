@@ -14,7 +14,10 @@
 // permissions and limitations under the License.
 namespace Microsoft.Hadoop.Avro
 {
+    using System;
     using System.Diagnostics.CodeAnalysis;
+    using System.Globalization;
+
     using Microsoft.Hadoop.Avro.Schema;
 
     /// <summary>
@@ -33,6 +36,10 @@ namespace Microsoft.Hadoop.Avro
         public AvroEnum(Schema.Schema schema)
         {
             this.schema = schema as EnumSchema;
+            if (this.schema == null)
+            {
+                throw new ArgumentException(string.Format(CultureInfo.InvariantCulture, "Enum schema expected."), "schema");
+            }
         }
 
         /// <summary>
@@ -65,7 +72,7 @@ namespace Microsoft.Hadoop.Avro
         /// <value>
         /// The integer value.
         /// </value>
-        public int IntegerValue
+        internal int IntegerValue
         {
             get
             {
@@ -78,5 +85,4 @@ namespace Microsoft.Hadoop.Avro
             }
         }
     }
-
 }
