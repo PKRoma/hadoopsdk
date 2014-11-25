@@ -18,6 +18,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission
     using System.Globalization;
     using System.IO;
     using System.Linq;
+    using System.Reflection;
     using System.Text;
     using System.Threading.Tasks;
     using Microsoft.Hadoop.Client;
@@ -37,12 +38,28 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission
         private const string TaskLogsFileName = "logs/list.txt";
         private const string TaskLogsDirectoryName = "logs";
         private const string QueryFilesDirectoryName = "queries";
+        private const string SDKVersionUserAgentString = "HDInsight .NET SDK/{0} {1}";
 
         private IHDInsightSubscriptionCredentials subscriptionCredentials;
 
-        internal HDInsightHadoopClient(IHDInsightSubscriptionCredentials credential)
+        private string userAgentString;
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Need so that we dont fail instantiations.")]
+        internal HDInsightHadoopClient(IHDInsightSubscriptionCredentials credential, string customUserAgent = null)
         {
             this.subscriptionCredentials = credential;
+            customUserAgent = customUserAgent ?? string.Empty;
+            // Read assembly version
+            var assemblyVersion = "NA";
+            try
+            {
+                assemblyVersion = Assembly.GetExecutingAssembly().GetName().Version.ToString(4);
+            }
+            catch
+            {
+            }
+
+            this.userAgentString = string.Format(CultureInfo.InvariantCulture, SDKVersionUserAgentString, assemblyVersion, customUserAgent);
         }
 
         internal JobSubmissionClusterDetails GetJobSubmissionClusterDetails(bool ignoreCache = false)
@@ -74,6 +91,8 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission
                 IHDInsightSubscriptionCredentials actualCredentials = ServiceLocator.Instance.Locate<IHDInsightSubscriptionCredentialsFactory>()
                                                                                     .Create(this.subscriptionCredentials);
                 var hdinsight = ServiceLocator.Instance.Locate<IHDInsightClientFactory>().Create(actualCredentials);
+
+                hdinsight.IgnoreSslErrors = this.IgnoreSslErrors;
 
                 var cluster = hdinsight.GetCluster(clusterName);
                 var versionFinderClient = overrideHandlers.VersionFinder;
@@ -197,7 +216,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission
         private IHadoopJobSubmissionPocoClient GetPocoClient(bool ignoreCache = false)
         {
             var details = this.GetJobSubmissionClusterDetails(ignoreCache);
-            var pocoClient = ServiceLocator.Instance.Locate<IHDInsightJobSubmissionPocoClientFactory>().Create(details.RemoteCredentials, this.Context, this.IgnoreSslErrors);
+            var pocoClient = ServiceLocator.Instance.Locate<IHDInsightJobSubmissionPocoClientFactory>().Create(details.RemoteCredentials, this.Context, this.IgnoreSslErrors, this.userAgentString);
             return pocoClient;
         }
 
@@ -350,6 +369,11 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission
                 var fileContents = new StreamReader(fileContentStream).ReadToEnd();
                 File.WriteAllText(localFilePath, fileContents);
             }
+        }
+
+        public string GetCustomUserAgent()
+        {
+            return this.userAgentString;
         }
 
         private void AssertSupportedVersion(Version hdinsightClusterVersion, IVersionFinderClient versionFinderClient)

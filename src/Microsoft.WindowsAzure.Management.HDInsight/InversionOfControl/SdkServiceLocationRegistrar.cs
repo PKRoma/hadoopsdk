@@ -22,7 +22,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.InversionOfControl
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.ClusterManager;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.LocationFinder;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoClient;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.ResourceTypeFinder;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestClient;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestClient.ClustersResource;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.VersionFinder;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
@@ -58,7 +60,6 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.InversionOfControl
                                                                         new HDInsightManagementRdfeUriBuilderFactory(),
                                                                         new PayloadConverter());
 
-            manager.RegisterType<IHttpOperationManager, HttpOperationManager>();
             manager.RegisterInstance<IHDInsightClusterOverrideManager>(overrideManager);
             manager.RegisterType<ICloudServiceNameResolver, CloudServiceNameResolver>();
             manager.RegisterType<IHDInsightManagementRestClientFactory, HDInsightManagementRestClientFactory>();
@@ -73,6 +74,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.InversionOfControl
             manager.RegisterType<IHDInsightJobSubmissionPocoClientFactory, HDInsightJobSubmissionPocoClientFactory>();
             manager.RegisterType<IHDInsightHttpClientAbstractionFactory, HDInsightHttpClientAbstractionFactory>();
             manager.RegisterType<IJobSubmissionCache, JobSubmissionCache>();
+            manager.RegisterType<IRdfeClustersResourceRestClientFactory, RdfeClustersResourceRestClientFactory>();
+            manager.RegisterType<IRdfeResourceTypeFinderFactory, RdfeResourceTypeFinderClientFactory>();
+            
             var changeManager = new UserChangeRequestManager();
             changeManager.RegisterUserChangeRequestHandler(typeof(HDInsightCertificateCredential), UserChangeRequestUserType.Http, HttpChangeRequestUriBuilder, PayloadConverter.SerializeConnectivityRequest);
             manager.RegisterInstance<IUserChangeRequestManager>(changeManager);

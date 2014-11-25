@@ -37,6 +37,23 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestCl
         }
 
         /// <inheritdoc />
+        public Uri GetGetClusterResourceDetailUri(string resourceId, string resourceType, string location)
+        {
+            string regionCloudServicename = this.resolver.GetCloudServiceName(this.credentials.SubscriptionId,
+                                                                              this.credentials.DeploymentNamespace,
+                                                                              location);
+            string relativeUri = string.Format(CultureInfo.InvariantCulture,
+                                        "{0}/cloudservices/{1}/resources/{2}/~/{3}/{4}",
+                                        this.credentials.SubscriptionId,
+                                        regionCloudServicename,
+                                        this.credentials.DeploymentNamespace,
+                                        resourceType,
+                                        resourceId);
+
+            return new Uri(this.credentials.Endpoint, new Uri(relativeUri, UriKind.Relative));
+        }
+
+        /// <inheritdoc />
         public Uri GetCreateResourceUri(string resourceId, string resourceType, string location)
         {
             string regionCloudServicename = this.resolver.GetCloudServiceName(this.credentials.SubscriptionId,

@@ -38,7 +38,25 @@ namespace Microsoft.Hadoop.Client
         /// </returns>
         public static IJobSubmissionClient Connect(IJobSubmissionClientCredential credentials)
         {
-            return ServiceLocator.Instance.Locate<IHadoopClientFactoryManager>().Create(credentials);
+            return Connect(credentials, string.Empty);
+        }
+
+        /// <summary>
+        /// Creates a new instance of the Hadoop Client that can be used to 
+        /// submit jobs to a Hadoop instance.
+        /// </summary>
+        /// <param name="credentials">
+        /// The connection credentials for the Hadoop instance.
+        /// </param>
+        /// <param name="customUserAgent">
+        /// Custom user agent string if needed.
+        /// </param>
+        /// <returns>
+        /// An Hadoop client implementation.
+        /// </returns>
+        public static IJobSubmissionClient Connect(IJobSubmissionClientCredential credentials, string customUserAgent)
+        {
+            return ServiceLocator.Instance.Locate<IHadoopClientFactoryManager>().Create(credentials, customUserAgent);
         }
     }
 }

@@ -58,7 +58,7 @@ namespace Microsoft.Hadoop.Avro.Schema
         ///     Adds the field.
         /// </summary>
         /// <param name="field">The field.</param>
-        public void AddField(RecordField field)
+        internal void AddField(RecordField field)
         {
             if (field == null)
             {

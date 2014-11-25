@@ -14,6 +14,7 @@
 // permissions and limitations under the License.
 namespace Microsoft.WindowsAzure.Management.HDInsight
 {
+    using System.Security.Cryptography.X509Certificates;
     using Microsoft.WindowsAzure.Management.HDInsight.Logging;
 
     /// <summary>

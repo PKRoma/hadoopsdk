@@ -22,42 +22,9 @@ namespace Microsoft.Hadoop.Client
     using Microsoft.WindowsAzure.Management.HDInsight.Logging;
 
     /// <summary>
-    /// Represents the base interface of a Hadoop Client.
+    /// Represents the base interface of a Job Submission Client.
     /// </summary>
-    public interface IJobSubmissionClientBase : IDisposable, ILogProvider
+    public interface IJobSubmissionClientBase : IHadoopClientBase
     {
-        /// <summary>
-        /// Cancel's a pending operation.
-        /// </summary>
-        void Cancel();
-
-        /// <summary>
-        /// Adds a log writer to the client.
-        /// </summary>
-        /// <param name="logWriter">
-        /// The log writer.
-        /// </param>
-        void AddLogWriter(ILogWriter logWriter);
-
-        /// <summary>
-        /// Removes a log writer.
-        /// </summary>
-        /// <param name="logWriter">
-        /// The log writer.
-        /// </param>
-        void RemoveLogWriter(ILogWriter logWriter);
-
-        /// <summary>
-        /// Gets or sets a value indicating whether or not servicer side SSL errors should be ignored.
-        /// </summary>
-        bool IgnoreSslErrors { get; set; }
-
-        /// <summary>
-        /// Allows a user to set a custom cancellation source.
-        /// </summary>
-        /// <param name="tokenSource">
-        /// The cancellation source.
-        /// </param>
-        void SetCancellationSource(CancellationTokenSource tokenSource);
     }
 }

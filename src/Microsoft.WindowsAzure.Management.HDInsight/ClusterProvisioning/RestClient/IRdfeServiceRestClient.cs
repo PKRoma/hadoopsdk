@@ -20,6 +20,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestCl
     using System.Diagnostics.CodeAnalysis;
     using System.Text;
     using System.Threading.Tasks;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Retries;
 
     /// <summary>
     /// Specifies a contract for accessing rdfe properties of a subscription for a given resource type.

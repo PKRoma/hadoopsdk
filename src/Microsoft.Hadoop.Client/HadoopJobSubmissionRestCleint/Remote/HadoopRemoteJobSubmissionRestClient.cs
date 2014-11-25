@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation
+// Copyright (c) Microsoft Corporation
 // All rights reserved.
 // 
 // Licensed under the Apache License, Version 2.0 (the "License"); you may not
@@ -15,8 +15,10 @@
 namespace Microsoft.Hadoop.Client.WebHCatRest
 {
     using System;
+    using System.Collections.Generic;
     using System.Net;
     using System.Net.Http;
+    using System.Net.Http.Headers;
     using System.Text;
     using System.Threading.Tasks;
     using Microsoft.WindowsAzure.Management.HDInsight;
@@ -33,6 +35,7 @@ namespace Microsoft.Hadoop.Client.WebHCatRest
         private readonly BasicAuthCredential credentials;
         private readonly IAbstractionContext context;
         private readonly bool ignoreSslErrors;
+        private readonly string userAgentString;
 
         /// <summary>
         /// Initializes a new instance of the HadoopRemoteJobSubmissionRestClient class.
@@ -46,11 +49,19 @@ namespace Microsoft.Hadoop.Client.WebHCatRest
         /// <param name="ignoreSslErrors">
         /// Specifies that server side SSL error should be ignored.
         /// </param>
-        public HadoopRemoteJobSubmissionRestClient(BasicAuthCredential credentials, IAbstractionContext context, bool ignoreSslErrors)
+        /// <param name="userAgentString">UserAgent string to pass to all calls.</param>
+        public HadoopRemoteJobSubmissionRestClient(BasicAuthCredential credentials, IAbstractionContext context, bool ignoreSslErrors, string userAgentString)
         {
             this.credentials = credentials;
             this.context = context;
             this.ignoreSslErrors = ignoreSslErrors;
+            this.userAgentString = userAgentString ?? string.Empty;
+        }
+
+        /// <inheritdoc/>
+        public string GetUserAgentString()
+        {
+            return this.userAgentString;
         }
 
         /// <inheritdoc />
@@ -144,12 +155,12 @@ namespace Microsoft.Hadoop.Client.WebHCatRest
         /// <returns>The response message from the remote cluster.</returns>
         private async Task<IHttpResponseMessageAbstraction> MakeAsyncGetRequest(Uri relativeUri)
         {
-            var factory = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>();
-            using (var httpClient = factory.Create(this.context, false))
+            using (var httpClient = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(this.context, this.ignoreSslErrors))
             {
                 var uri = new Uri(this.credentials.Server, relativeUri);
                 httpClient.RequestUri = uri;
                 httpClient.Method = HttpMethod.Get;
+                httpClient.Content = new StringContent(string.Empty);
                 this.ProvideStandardHeaders(httpClient);
                 return await SendRequestWithErrorChecking(httpClient, HttpStatusCode.OK);
             }
@@ -169,7 +180,7 @@ namespace Microsoft.Hadoop.Client.WebHCatRest
                 httpClient.RequestUri = uri;
                 httpClient.Method = HttpMethod.Post;
                 this.ProvideStandardHeaders(httpClient);
-                httpClient.Content = payload;
+                httpClient.Content = new StringContent(payload);
                 return await SendRequestWithErrorChecking(httpClient, HttpStatusCode.OK);
             }
         }
@@ -186,6 +197,7 @@ namespace Microsoft.Hadoop.Client.WebHCatRest
                 var uri = new Uri(this.credentials.Server, relativeUri);
                 httpClient.RequestUri = uri;
                 httpClient.Method = HttpMethod.Delete;
+                httpClient.Content = new StringContent(string.Empty);
                 this.ProvideStandardHeaders(httpClient);
                 return await SendRequestWithErrorChecking(httpClient, HttpStatusCode.OK);
             }
@@ -205,7 +217,8 @@ namespace Microsoft.Hadoop.Client.WebHCatRest
                 httpClient.RequestHeaders.Add(HadoopRemoteRestConstants.Authorization, "Basic " + Convert.ToBase64String(byteArray));
             }
             httpClient.RequestHeaders.Add("accept", "application/json");
-            httpClient.RequestHeaders.Add("useragent", "HDInsight .NET SDK");
+            httpClient.RequestHeaders.Add("useragent", this.GetUserAgentString());
+            httpClient.RequestHeaders.Add("User-Agent", this.GetUserAgentString());
         }
 
         /// <summary>

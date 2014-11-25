@@ -14,6 +14,8 @@
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <TestProjectType>UnitTest</TestProjectType>
+    <SpecFlowTasksPath>$(SolutionDir)\packages\SpecFlow.1.9.0\tools\specflow.exe</SpecFlowTasksPath>
     <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -38,18 +40,19 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Avro">
-      <HintPath>..\external\avro\Avro.dll</HintPath>
+      <HintPath>..\external\avro\release\Avro.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="Microsoft.VisualStudio.QualityTools.UnitTestFramework, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
-    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Newtonsoft.Json.5.0.5\lib\net40\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="protobuf-net">
       <HintPath>..\external\protobuf.net\r602\net30\protobuf-net.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -71,9 +74,17 @@
     <None Include="App.config">
       <SubType>Designer</SubType>
     </None>
+    <None Include="CodeGenTests\GenerationVerification.feature">
+      <Generator>SpecFlowSingleFileGenerator</Generator>
+      <LastGenOutput>GenerationVerification.feature.cs</LastGenOutput>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Microsoft.Hadoop.Avro.Tools\Microsoft.Hadoop.Avro.Tools.csproj">
+      <Project>{ffd3590e-fefa-4057-902a-f6f3677b0bae}</Project>
+      <Name>Microsoft.Hadoop.Avro.Tools</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Microsoft.Hadoop.Avro\Microsoft.Hadoop.Avro.csproj">
       <Project>{EAB38A14-211F-4361-A06E-3EC1E07ABE33}</Project>
       <Name>Microsoft.Hadoop.Avro</Name>
@@ -81,10 +92,6 @@
     <ProjectReference Include="..\Microsoft.Hadoop.Client\Microsoft.Hadoop.Client.csproj">
       <Project>{7C2E800C-09E5-484A-BB08-6C17578E7E45}</Project>
       <Name>Microsoft.Hadoop.Client</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Microsoft.WindowsAzure.Management.HDInsight.Cmdlet\Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.csproj">
-      <Project>{43333c08-29f5-4948-a8c6-4f486331cdc9}</Project>
-      <Name>Microsoft.WindowsAzure.Management.HDInsight.Cmdlet</Name>
     </ProjectReference>
     <ProjectReference Include="..\Microsoft.WindowsAzure.Management.HDInsight.Framework.Core\Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.csproj">
       <Project>{55787775-8B25-436F-B9B9-C2B60EF80B20}</Project>
@@ -106,7 +113,15 @@
   <ItemGroup>
     <Compile Include="AvroContainerTests.cs" />
     <Compile Include="AvroSerializerTests.cs" />
+    <Compile Include="AvroToolsTests\AvroToolsTests.cs" />
     <Compile Include="CodecsTests.cs" />
+    <Compile Include="CodeGenTests\CodeGenerationTests.cs" />
+    <Compile Include="CodeGenTests\CodeGenerationVerificationSteps.cs" />
+    <Compile Include="CodeGenTests\GenerationVerification.feature.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>GenerationVerification.feature</DependentUpon>
+    </Compile>
     <Compile Include="EncodeDecodeTests\BufferedEncodeDecodeTests.cs" />
     <Compile Include="EncodeDecodeTests\EncodeDecodeTests.cs" />
     <Compile Include="GenericRecordTests\AvroGenericsTests.cs" />
@@ -115,11 +130,13 @@
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="IntegrationWithHiveTest\AvroIntegrationWithHiveConfigurations.cs" />
     <Compile Include="IntegrationWithHiveTest\IntegrationWithHiveTests.cs" />
+    <Compile Include="MockExecutionContext.cs" />
     <Compile Include="SchemaTests\JsonSchemaBuilderTests.cs" />
     <Compile Include="SchemaTests\ReflectionSchemaBuilderTests.cs" />
     <Compile Include="SchemaTests\SchemaDefaultValuesTests.cs" />
     <Compile Include="SchemaTests\SchemaEvolutionTests.cs" />
     <Compile Include="SchemaTests\SchemaTests.cs" />
+    <Compile Include="TestClasses\TestClassesForAvroUnion.cs" />
     <Compile Include="TestClasses\TestClassesForIntegrationWithHive.cs" />
     <Compile Include="TestClasses\TestClassesForSchemaMatching.cs" />
     <Compile Include="TestClasses\TestClassesCollections.cs" />
@@ -132,9 +149,6 @@
     <Compile Include="ResolverTests.cs" />
     <Compile Include="TestClasses\TestClasses.cs" />
     <Compile Include="OfficialSampleTest.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="..\..\build\targets\Project.CSharp.targets" />

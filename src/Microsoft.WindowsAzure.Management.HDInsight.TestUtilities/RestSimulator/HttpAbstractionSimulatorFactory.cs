@@ -101,6 +101,19 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
             }
         }
 
+        public override IHttpClientAbstraction Create(bool ignoreSslErrors, bool allowAutoRedirect)
+        {
+            var loc = this.AsyncMock;
+            if (loc.IsNotNull())
+            {
+                return new HttpAbstractionSimulatorClient(this, this.underlying.Create(ignoreSslErrors, allowAutoRedirect), loc);
+            }
+            else
+            {
+                return new HttpAbstractionSimulatorClient(this, this.underlying.Create(ignoreSslErrors, allowAutoRedirect), null);
+            }
+        }
+
         public override IHttpClientAbstraction Create(HDInsight.IAbstractionContext context, bool ignoreSslErrors)
         {
             var loc = this.AsyncMock;

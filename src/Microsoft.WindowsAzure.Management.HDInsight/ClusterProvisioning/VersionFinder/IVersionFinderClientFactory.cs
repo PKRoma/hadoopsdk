@@ -14,7 +14,6 @@
 // permissions and limitations under the License.
 namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.VersionFinder
 {
-    using System.Threading;
     using Microsoft.WindowsAzure.Management.HDInsight;
 
     /// <summary>
@@ -26,13 +25,11 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Versio
         /// Creates a version finder client instance.
         /// </summary>
         /// <param name="credentials">Credentials containing user subscription id.</param>
-        /// <param name="context">
-        /// The abstraction context token.
-        /// </param>
-        /// <param name="ignoreSslErrors">
-        /// Specifies that server side SSL errors should be ignored.
-        /// </param>
-        /// <returns>A version finder client instance.</returns>
+        /// <param name="context">The abstraction context token.</param>
+        /// <param name="ignoreSslErrors">Specifies that server side SSL errors should be ignored.</param>
+        /// <returns>
+        /// A version finder client instance.
+        /// </returns>
         IVersionFinderClient Create(IHDInsightSubscriptionCredentials credentials, IAbstractionContext context, bool ignoreSslErrors);
     }
 }

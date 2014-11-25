@@ -22,6 +22,7 @@ namespace Microsoft.Hadoop.Client
     using Microsoft.WindowsAzure.Management.HDInsight;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Retries;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Logging;
     using Microsoft.WindowsAzure.Management.HDInsight.Logging;
 
@@ -38,6 +39,16 @@ namespace Microsoft.Hadoop.Client
 
         /// <inheritdoc />
         public bool IgnoreSslErrors { get; set; }
+
+        /// <summary>
+        /// Gets or sets the HTTP operation timeout.
+        /// </summary>
+        public TimeSpan HttpOperationTimeout { get; protected set; }
+
+        /// <summary>
+        /// Gets or sets the retry policy.
+        /// </summary>
+        public IRetryPolicy RetryPolicy { get; protected set; }
 
         /// <summary>
         /// Gets the Abstraction context to be used to control cancellation and log writing.
@@ -86,9 +97,24 @@ namespace Microsoft.Hadoop.Client
         /// <summary>
         /// Initializes a new instance of the ClientBase class.
         /// </summary>
-        protected ClientBase()
+        protected ClientBase() : this(RetryDefaultConstants.DefaultOperationTimeout, RetryPolicyFactory.CreateExponentialRetryPolicy())
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the ClientBase class.
+        /// </summary>
+        /// <param name="httpOperationTimeout">The HTTP operation timeout.</param>
+        /// <param name="retryPolicy">The retry policy.</param>
+        protected ClientBase(TimeSpan? httpOperationTimeout, IRetryPolicy retryPolicy)
         {
             this.IgnoreSslErrors = false;
+            this.RetryPolicy = retryPolicy ?? RetryPolicyFactory.CreateExponentialRetryPolicy();
+            this.HttpOperationTimeout = httpOperationTimeout ?? RetryDefaultConstants.DefaultOperationTimeout;
+            if (this.HttpOperationTimeout < TimeSpan.FromSeconds(1))
+            {
+                throw new ArgumentOutOfRangeException("httpOperationTimeout", "The specified HTTP Operation Timeout is too small. The minimum allowed timeout is 1 second.");
+            }
             this.SetCancellationSource(Help.SafeCreate<CancellationTokenSource>());
         }
 
@@ -116,7 +142,7 @@ namespace Microsoft.Hadoop.Client
                 oldSource.Dispose();
             }
 
-            this.abstractionContext = Help.SafeCreate(() => new AbstractionContext(tokenSource, this.Logger));
+            this.abstractionContext = Help.SafeCreate(() => new AbstractionContext(tokenSource, this.Logger, this.HttpOperationTimeout, this.RetryPolicy));
             tokenSource.Token.Register(this.CancellationCallback);
             this.source = tokenSource;
         }
@@ -134,7 +160,7 @@ namespace Microsoft.Hadoop.Client
             logWriter.ArgumentNotNull("logWriter");
             this.logger.RemoveWriter(logWriter);
         }
-
+        
         private void CancellationCallback()
         {
             this.SetCancellationSource(Help.SafeCreate<CancellationTokenSource>());
@@ -159,11 +185,14 @@ namespace Microsoft.Hadoop.Client
                 }
                 else if (this.TryGetRestrictedCharactersInQuery(queryJob.GetQuery(), out restrictedCharacter))
                 {
+                    //Replace new lines and carriage returns by their string escape sequences
+                    string formattedCharacter = restrictedCharacter.Replace('\n'.ToString(), "\\n");
+                    formattedCharacter = formattedCharacter.Replace('\r'.ToString(), "\\r");
                     throw new InvalidOperationException(
                         string.Format(
                             CultureInfo.InvariantCulture,
                             "Query contains restricted character :'{0}'.{1}Please submit job as a File job or set RunAsFileJob to true.",
-                            restrictedCharacter,
+                            formattedCharacter,
                             Environment.NewLine));
                 }
             }
@@ -190,7 +219,7 @@ namespace Microsoft.Hadoop.Client
             {
                 if (queryText.Contains(knownRestrictedCharacter))
                 {
-                    restrictedCharacter = knownRestrictedCharacter;
+                    restrictedCharacter = knownRestrictedCharacter.ToString();
                     return true;
                 }
             }

@@ -17,6 +17,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Locati
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Threading.Tasks;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Retries;
 
     /// <summary>
     /// Interface to allow a user to retrieve tha available locations for a subscription id.
@@ -26,7 +27,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Locati
         /// <summary>
         /// Lists the available locations for a subscription id.
         /// </summary>
-        /// <returns>Available locations for a subscription id.</returns>
+        /// <returns>
+        /// Available locations for a subscription id.
+        /// </returns>
         Task<Collection<string>> ListAvailableLocations();
 
         /// <summary>

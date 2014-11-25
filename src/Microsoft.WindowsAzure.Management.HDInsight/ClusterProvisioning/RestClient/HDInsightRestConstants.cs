@@ -16,8 +16,6 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestCl
 {
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
-    using Microsoft.WindowsAzure.Management.HDInsight;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest;
 
     /// <summary>
@@ -41,6 +39,11 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestCl
         /// An Http header denoting to use a different Schema version when communicating with the RDFE server.
         /// </summary>
         public static readonly KeyValuePair<string, string> SchemaVersion2 = new KeyValuePair<string, string>("schemaversion", "2.0");
+
+        /// <summary>
+        /// An Http header denoting to use a different Schema version when communicating with the RDFE server.
+        /// </summary>
+        public static readonly KeyValuePair<string, string> SchemaVersion3 = new KeyValuePair<string, string>("schemaversion", "3.0");
             
         /// <summary>
         /// The X-ms-version Http Header.

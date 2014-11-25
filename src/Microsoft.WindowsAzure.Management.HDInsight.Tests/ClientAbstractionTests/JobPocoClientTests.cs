@@ -32,7 +32,7 @@
         [TestMethod]
         public async Task SubmitJobWithNoArguments()
         {
-            string endPoint = @"https://managementnext.rdfetest.dnsdemo4.com:443";
+            string endPoint = @"https://managementnext.rdfetest.dnsdemo4.com";
             string cloudNamespace = @"hdinsight-wfoley";
             // string cloudNamespace = @"hdinsight";
             var creds = GetCredentials("hadoop");
@@ -43,7 +43,7 @@
             dnsName = "laurenycluster2-laureny";
             subId = new Guid("0fec600d-7e0c-4282-ad96-9b515db0471b");
             cloudNamespace = "hdinsight-current";
-            endPoint = @"https://umapi.rdfetest.dnsdemo4.com:8443/";
+            endPoint = @"https://umapi.rdfetest.dnsdemo4.com/";
 
             var createRequest = new HadoopHiveJobCreationDetails();
             createRequest.JobName = "HivePositive";
@@ -80,7 +80,7 @@
         [TestCategory("RestClient")]
         public async Task ListJobsUsingPocoClient()
         {
-            string endPoint = @"https://managementnext.rdfetest.dnsdemo4.com:443";
+            string endPoint = @"https://managementnext.rdfetest.dnsdemo4.com";
             string cloudNamespace = @"hdinsight-wfoley";
             // string cloudNamespace = @"hdinsight";
             var creds = GetCredentials("hadoop");
@@ -90,7 +90,7 @@
             //dnsName = "Test-TestJobSubmit-20130624171952-f7e88";
             //subId = new Guid("0fec600d-7e0c-4282-ad96-9b515db0471b");
             //cloudNamespace = "hdinsight-current";
-            //endPoint = @"https://umapi.rdfetest.dnsdemo4.com:8443/";
+            //endPoint = @"https://umapi.rdfetest.dnsdemo4.com/";
 
             //var createRequest = new ClientJobRequest();
             //createRequest.ClassName = "pi";

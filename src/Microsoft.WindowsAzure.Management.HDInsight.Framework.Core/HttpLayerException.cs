@@ -70,13 +70,13 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.Web
         {
             this.AttemptsMade = 1;
         }
-
+        
         /// <summary>
         /// Initializes a new instance of the HttpLayerException class.
         /// </summary>
         /// <param name="statusCode">Status code received from the failed request.</param>
         /// <param name="content">Content of the failed request.</param>
-        public HttpLayerException(System.Net.HttpStatusCode statusCode, string content) : base(string.Format(CultureInfo.InvariantCulture,
+        public HttpLayerException(HttpStatusCode statusCode, string content) : base(string.Format(CultureInfo.InvariantCulture,
                                                                                                              "Request failed with code:{0}\r\nContent:{1}",
                                                                                                              statusCode,
                                                                                                              content ?? "(null)"))

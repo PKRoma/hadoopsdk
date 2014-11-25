@@ -26,7 +26,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Cluste
     {
         private Dictionary<Type, Tuple<IVersionFinderClientFactory, IHDInsightManagementRestUriBuilderFactory, IPayloadConverter>> handlers =
             new Dictionary<Type, Tuple<IVersionFinderClientFactory, IHDInsightManagementRestUriBuilderFactory, IPayloadConverter>>();
-
+        
         public void AddOverride<T>(IVersionFinderClientFactory versionFinderFactory,
                                    IHDInsightManagementRestUriBuilderFactory uriBuilderFactory,
                                    IPayloadConverter payloadConverter) where T : IHDInsightSubscriptionCredentials

@@ -14,20 +14,27 @@
 // permissions and limitations under the License.
 namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.ServerDataObjects
 {
+    using System;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.IO;
     using System.Linq;
+    using System.Management.Automation;
     using System.Runtime.Serialization;
     using System.Runtime.Serialization.Json;
     using System.Text;
     using System.Xml;
     using System.Xml.Linq;
-    using Microsoft.HDInsight.Management.Contracts.May2013;
+    using Microsoft.WindowsAzure.Management.HDInsight.Contracts.May2013;
+    using Microsoft.WindowsAzure.Management.HDInsight.Contracts.May2014;
+    using Microsoft.WindowsAzure.Management.HDInsight.Contracts.May2014.Components;
+    using Microsoft.WindowsAzure.Management.HDInsight.Contracts.May2014.Components.YarnApplications;
+    using Microsoft.WindowsAzure.Management.HDInsight.Contracts.May2014.Resources.CredentialBackedResources;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
     using Microsoft.WindowsAzure.Management.HDInsight;
     using Microsoft.WindowsAzure.Management.HDInsight.Tests.ServerDataObjects.Rdfe;
+    using Microsoft.WindowsAzure.Management.HDInsight.Contracts.May2014.Components.CustomActions;
 
     internal static class ServerSerializer
     {
@@ -48,6 +55,8 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.ServerDataOb
         private const string Version = "Version";
         private const string BlobContainers = "BlobContainers";
         private const string ExtendedErrorMessage = "ExtendedErrorMessage";
+        private const string HeadNodeRoleName = "HeadNodeRole";
+        private const string WorkerNodeRoleName = "WorkerNodeRole";
 
         internal static string SerializeListContainersResult(IEnumerable<ClusterDetails> containers, string deploymentNamespace, bool writeError, bool writeExtendedError)
         {
@@ -70,17 +79,32 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.ServerDataOb
             return DeserializeFromXml<Resource>(payload);
         }
 
-        internal static ClusterCreateParameters DeserializeClusterCreateRequest(string payload)
+        internal static HDInsight.ClusterCreateParameters DeserializeClusterCreateRequest(string payload)
         {
             var resource = DeserializeFromXml<Resource>(payload);
             var createPayload = DeserializeFromXml<ClusterContainer>(resource.IntrinsicSettings[0].OuterXml);
             return CreateClusterRequest_FromInternal(createPayload);
         }
 
+        internal static HDInsight.ClusterCreateParameters DeserializeClusterCreateRequestV3(string payload)
+        {
+            var resource = DeserializeFromXml<Resource>(payload);
+            var createPayload =
+                DeserializeFromXml<Microsoft.WindowsAzure.Management.HDInsight.Contracts.May2014.ClusterCreateParameters>(resource.IntrinsicSettings[0].OuterXml);
+            return CreateClusterRequest_FromInternalV3(createPayload);
+        }
+
         internal static ClusterContainer DeserializeClusterCreateRequestToInternal(string payload)
         {
             var resource = DeserializeFromXml<Resource>(payload);
             var createPayload = DeserializeFromXml<ClusterContainer>(resource.IntrinsicSettings[0].OuterXml);
+            return createPayload;
+        }
+
+        internal static Microsoft.WindowsAzure.Management.HDInsight.Contracts.May2014.ClusterCreateParameters DeserializeClusterCreateRequestToInternalV3(string payload)
+        {
+            var resource = DeserializeFromXml<Resource>(payload);
+            var createPayload = DeserializeFromXml<Microsoft.WindowsAzure.Management.HDInsight.Contracts.May2014.ClusterCreateParameters>(resource.IntrinsicSettings[0].OuterXml);
             return createPayload;
         }
 
@@ -145,20 +169,135 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.ServerDataOb
             }
         }
 
-        private static ClusterCreateParameters CreateClusterRequest_FromInternal(ClusterContainer payloadObject)
+        public static string GetClusterUsernameFromPayloadObject(
+            Microsoft.WindowsAzure.Management.HDInsight.Contracts.May2014.ClusterCreateParameters cluster)
         {
-            var cluster = new ClusterCreateParameters
+            GatewayComponent gateway = cluster.Components.OfType<GatewayComponent>().Single();
+            return gateway.RestAuthCredential.Username;
+        }
+
+        public static string GetClusterPasswordFromPayloadObject(
+            Microsoft.WindowsAzure.Management.HDInsight.Contracts.May2014.ClusterCreateParameters cluster)
+        {
+            GatewayComponent gateway = cluster.Components.OfType<GatewayComponent>().Single();
+            return gateway.RestAuthCredential.Password;
+        }
+
+        public static int GetClusterSizeFromPayloadObject(Microsoft.WindowsAzure.Management.HDInsight.Contracts.May2014.ClusterCreateParameters cluster)
+        {
+            var workerNodeRoles = cluster.ClusterRoleCollection.ToList().Where(role => role.FriendlyName == WorkerNodeRoleName).ToList();
+            if (workerNodeRoles.Any())
+            {
+                return workerNodeRoles.First().InstanceCount;
+            }
+            return 0;
+        }
+
+        public static WabStorageAccountConfiguration GetDefaultStorageAccountFromFromPayloadObject(
+            Microsoft.WindowsAzure.Management.HDInsight.Contracts.May2014.ClusterCreateParameters cluster)
+        {
+            // For Yarn clusters (version later than 3.0 inclusive), the default storage account is for MapReduceApplication
+            YarnComponent yarn = cluster.Components.OfType<YarnComponent>().Single();
+            MapReduceApplication mrApp = yarn.Applications.OfType<MapReduceApplication>().Single();
+            if (mrApp.DefaultStorageAccountAndContainer.ShouldProvisionNew)
+            {
+                return null;
+            }
+            return new WabStorageAccountConfiguration(
+                mrApp.DefaultStorageAccountAndContainer.AccountDnsName,
+                mrApp.DefaultStorageAccountAndContainer.Key,
+                mrApp.DefaultStorageAccountAndContainer.BlobContainerName);
+        }
+
+        public static IEnumerable<WabStorageAccountConfiguration> GetAdditionalStorageAccountFromFromPayloadObject(
+            Microsoft.WindowsAzure.Management.HDInsight.Contracts.May2014.ClusterCreateParameters cluster)
+        {
+            // For Yarn clusters (HDI version starts from 3.0), the additional storage account is for MapReduceApplication
+            YarnComponent yarn = cluster.Components.OfType<YarnComponent>().Single();
+            MapReduceApplication mrApp = yarn.Applications.OfType<MapReduceApplication>().Single();
+            var additionalStorageAccounts = mrApp.AdditionalStorageContainers.ToList();
+            if (additionalStorageAccounts.Any())
+            {
+                var result = (from BlobContainerCredentialBackedResource tem in additionalStorageAccounts
+                              select new WabStorageAccountConfiguration(tem.AccountDnsName, tem.Key, tem.BlobContainerName)).ToList();
+                return result;
+            }
+            return Enumerable.Empty<WabStorageAccountConfiguration>();
+        }
+
+        private static HDInsight.ClusterCreateParameters CreateClusterRequest_FromInternalV3(
+            Microsoft.WindowsAzure.Management.HDInsight.Contracts.May2014.ClusterCreateParameters payloadObject)
+        {
+            var cluster = new HDInsight.ClusterCreateParameters
+            {
+                Location = payloadObject.Location,
+                Name = payloadObject.DnsName,
+                UserName = GetClusterUsernameFromPayloadObject(payloadObject),
+                Password = GetClusterPasswordFromPayloadObject(payloadObject),
+                Version = payloadObject.Version,
+                DefaultStorageAccountName = GetDefaultStorageAccountFromFromPayloadObject(payloadObject).Name,
+                DefaultStorageAccountKey = GetDefaultStorageAccountFromFromPayloadObject(payloadObject).Key,
+                DefaultStorageContainer = GetDefaultStorageAccountFromFromPayloadObject(payloadObject).Container,
+                ClusterSizeInNodes = payloadObject.ClusterRoleCollection.ToList().Single(role => role.FriendlyName == WorkerNodeRoleName).InstanceCount + 1
+            };
+
+            var headNodeRole = payloadObject.ClusterRoleCollection.ToList().Where(role => role.FriendlyName == HeadNodeRoleName).ToList();
+            if (headNodeRole.Any())
+            {
+                if (headNodeRole.First().VMSize == VmSize.Large)
+                {
+                    cluster.HeadNodeSize = HDInsight.NodeVMSize.Default;
+                }
+                else
+                {
+                    cluster.HeadNodeSize = (HDInsight.NodeVMSize)((int)(headNodeRole.First().VMSize));
+                }
+            }
+
+            if (payloadObject.VirtualNetworkConfiguration != null)
+            {
+                cluster.VirtualNetworkId = payloadObject.VirtualNetworkConfiguration.VirtualNetworkSite;
+                cluster.SubnetName = payloadObject.VirtualNetworkConfiguration.AddressAssignments.First().Subnets.First().Name;
+            }
+
+            CopyConfigurationForCluster(payloadObject, cluster);
+
+            return cluster;
+        }
+
+        private static HDInsight.ClusterCreateParameters CreateClusterRequest_FromInternal(ClusterContainer payloadObject)
+        {
+            var cluster = new HDInsight.ClusterCreateParameters
             {
                 Location = payloadObject.Region,
                 Name = payloadObject.ClusterName
             };
-
             cluster.UserName = payloadObject.Deployment.ClusterUsername;
             cluster.Password = payloadObject.Deployment.ClusterPassword;
             cluster.Version = payloadObject.Deployment.Version;
             cluster.DefaultStorageAccountName = payloadObject.StorageAccounts[0].AccountName;
             cluster.DefaultStorageAccountKey = payloadObject.StorageAccounts[0].Key;
             cluster.DefaultStorageContainer = payloadObject.StorageAccounts[0].BlobContainerName;
+
+            var headnodeRole = payloadObject.Deployment.Roles.Single(r => r.RoleType == ClusterRoleType.HeadNode);
+
+            //if headnode count is 1 and size XL, then we treat it as Default on the server side
+            if (headnodeRole.VMSize == Microsoft.WindowsAzure.Management.HDInsight.Contracts.May2013.NodeVMSize.ExtraLarge && headnodeRole.Count == 1)
+            {
+                cluster.HeadNodeSize = HDInsight.NodeVMSize.Default;
+            }
+            else switch (headnodeRole.VMSize)
+            {
+                case Microsoft.WindowsAzure.Management.HDInsight.Contracts.May2013.NodeVMSize.ExtraLarge:
+                    cluster.HeadNodeSize = HDInsight.NodeVMSize.ExtraLarge;
+                    break;
+                case Microsoft.WindowsAzure.Management.HDInsight.Contracts.May2013.NodeVMSize.Large:
+                    cluster.HeadNodeSize = HDInsight.NodeVMSize.Large;
+                    break;
+                default:
+                    throw new InvalidDataContractException(string.Format("The server returned an unsupported value for head node VM size '{0}", headnodeRole.VMSize));
+            }
+
             foreach (var asv in payloadObject.StorageAccounts.Skip(1))
             {
                 cluster.AdditionalStorageAccounts.Add(new WabStorageAccountConfiguration(asv.AccountName, asv.Key));
@@ -197,8 +336,188 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.ServerDataOb
             return cluster;
         }
 
+        private static Microsoft.WindowsAzure.Management.HDInsight.ClusterNodeType[] ConvertClusterRoleToClusterNodeType(CustomAction ca)
+        {
+            IList<Microsoft.WindowsAzure.Management.HDInsight.ClusterNodeType> cnt = 
+                new List<Microsoft.WindowsAzure.Management.HDInsight.ClusterNodeType>();
+
+            if (ca.ClusterRoleCollection.IsNotNull() && ca.ClusterRoleCollection.Count > 0)
+            {
+                // Converts ClusterRole to ClusterNodeType based on the assigned name.
+                foreach (var cr in ca.ClusterRoleCollection)
+                {
+                    if (cr.FriendlyName.IsNullOrEmpty())
+                    {
+                        throw new ArgumentException("No valid node type provided.");
+                    }
+
+                    if (cr.FriendlyName.ToLower(CultureInfo.CurrentCulture).Equals("headnoderole"))
+                    {
+                        cnt.Add(Microsoft.WindowsAzure.Management.HDInsight.ClusterNodeType.HeadNode);
+                    }
+                    else if (cr.FriendlyName.ToLower(CultureInfo.CurrentCulture).Equals("workernoderole"))
+                    {
+                        cnt.Add(Microsoft.WindowsAzure.Management.HDInsight.ClusterNodeType.DataNode);
+                    }
+                    else
+                    {
+                        throw new NotSupportedException("No such node type supported.");
+                    }
+                }
+
+            }
+
+            return cnt.ToArray();
+        }
+
+        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity",
+            Justification = "This complexity is needed to handle all the types in the submit payload.")]
+        private static void CopyConfigurationForCluster(
+            Microsoft.WindowsAzure.Management.HDInsight.Contracts.May2014.ClusterCreateParameters payloadObject, HDInsight.ClusterCreateParameters cluster)
+        {
+            var yarn = payloadObject.Components.OfType<YarnComponent>().Single();
+            var mapreduce = yarn.Applications.OfType<MapReduceApplication>().Single();
+            var hive = payloadObject.Components.OfType<HiveComponent>().Single();
+            var oozie = payloadObject.Components.OfType<OozieComponent>().Single();
+            var hdfs = payloadObject.Components.OfType<HdfsComponent>().Single();
+            var hadoopCore = payloadObject.Components.OfType<HadoopCoreComponent>().Single();
+
+            HBaseComponent hbase = null;
+            if (payloadObject.Components.OfType<HBaseComponent>().Count() == 1)
+            {
+                hbase = payloadObject.Components.OfType<HBaseComponent>().Single();
+            }
+            StormComponent storm = null;
+            if (payloadObject.Components.OfType<StormComponent>().Count() == 1)
+            {
+                storm = payloadObject.Components.OfType<StormComponent>().Single();
+            }
+            CustomActionComponent configActions = null;
+            if (payloadObject.Components.OfType<CustomActionComponent>().Count() == 1)
+            {
+                configActions = payloadObject.Components.OfType<CustomActionComponent>().Single();
+            }
+
+            if (hadoopCore.CoreSiteXmlProperties.Any())
+            {
+                cluster.CoreConfiguration.AddRange(
+                    hadoopCore.CoreSiteXmlProperties.Select(prop => new KeyValuePair<string, string>(prop.Name, prop.Value)));
+            }
+
+            if (hdfs.HdfsSiteXmlProperties.Any())
+            {
+                cluster.HdfsConfiguration.AddRange(hdfs.HdfsSiteXmlProperties.Select(prop => new KeyValuePair<string, string>(prop.Name, prop.Value)));
+            }
+
+            if (mapreduce.MapRedSiteXmlProperties.Any())
+            {
+                cluster.MapReduceConfiguration.ConfigurationCollection.AddRange(
+                    mapreduce.MapRedSiteXmlProperties.Select(prop => new KeyValuePair<string, string>(prop.Name, prop.Value)));
+            }
+
+            if (mapreduce.CapacitySchedulerConfiguration.Any())
+            {
+                cluster.MapReduceConfiguration.CapacitySchedulerConfigurationCollection.AddRange(
+                    mapreduce.CapacitySchedulerConfiguration.Select(prop => new KeyValuePair<string, string>(prop.Name, prop.Value)));
+            }
+
+            if (mapreduce.AdditionalStorageContainers.ToList().Any())
+            {
+                cluster.AdditionalStorageAccounts.AddRange(
+                    from BlobContainerCredentialBackedResource tem in mapreduce.AdditionalStorageContainers
+                    select new WabStorageAccountConfiguration(tem.AccountDnsName, tem.Key, tem.BlobContainerName));
+            }
+
+            if (yarn.Configuration.Any())
+            {
+                cluster.YarnConfiguration.AddRange(yarn.Configuration.Select(prop => new KeyValuePair<string, string>(prop.Name, prop.Value)));
+            }
+
+            if (hive.HiveSiteXmlProperties.Any())
+            {
+                cluster.HiveConfiguration.ConfigurationCollection.AddRange(
+                    hive.HiveSiteXmlProperties.Select(prop => new KeyValuePair<string, string>(prop.Name, prop.Value)));
+            }
+
+            if (hive.AdditionalLibraries != null)
+            {
+                cluster.HiveConfiguration.AdditionalLibraries = new WabStorageAccountConfiguration(
+                    hive.AdditionalLibraries.AccountDnsName, hive.AdditionalLibraries.Key, hive.AdditionalLibraries.BlobContainerName);
+            }
+
+            if (!hive.Metastore.ShouldProvisionNew)
+            {
+                var metaStore = (SqlAzureDatabaseCredentialBackedResource)hive.Metastore;
+                cluster.HiveMetastore = new Metastore(
+                    metaStore.SqlServerName, metaStore.DatabaseName, metaStore.Credentials.Username, metaStore.Credentials.Password);
+            }
+
+            if (configActions != null)
+            {
+                foreach (var configAction in configActions.CustomActions)
+                {
+                    ScriptCustomAction sca = configAction as ScriptCustomAction;
+
+                    if (sca != null)
+                    {
+                        cluster.ConfigActions.Add(new ScriptAction(
+                                sca.Name, ConvertClusterRoleToClusterNodeType(sca), sca.Uri, sca.Parameters));
+                    }
+                }
+            }
+
+            if (oozie.Configuration.Any())
+            {
+                cluster.OozieConfiguration.ConfigurationCollection.AddRange(
+                    oozie.Configuration.Select(prop => new KeyValuePair<string, string>(prop.Name, prop.Value)));
+            }
+
+            if (oozie.AdditionalSharedLibraries != null)
+            {
+                cluster.OozieConfiguration.AdditionalSharedLibraries =
+                    new WabStorageAccountConfiguration(
+                        oozie.AdditionalSharedLibraries.AccountDnsName,
+                        oozie.AdditionalSharedLibraries.Key,
+                        oozie.AdditionalSharedLibraries.BlobContainerName);
+            }
+
+            if (oozie.AdditionalActionExecutorLibraries != null)
+            {
+                cluster.OozieConfiguration.AdditionalActionExecutorLibraries =
+                    new WabStorageAccountConfiguration(
+                        oozie.AdditionalActionExecutorLibraries.AccountDnsName,
+                        oozie.AdditionalActionExecutorLibraries.Key,
+                        oozie.AdditionalActionExecutorLibraries.BlobContainerName);
+            }
+
+            if (!oozie.Metastore.ShouldProvisionNew)
+            {
+                var metaStore = (SqlAzureDatabaseCredentialBackedResource)oozie.Metastore;
+                cluster.OozieMetastore = new Metastore(
+                    metaStore.SqlServerName, metaStore.DatabaseName, metaStore.Credentials.Username, metaStore.Credentials.Password);
+            }
+
+            if (hbase != null && hbase.HBaseConfXmlProperties.Any())
+            {
+                cluster.HBaseConfiguration.ConfigurationCollection.AddRange(
+                    hbase.HBaseConfXmlProperties.Select(prop => new KeyValuePair<string, string>(prop.Name, prop.Value)));
+            }
+
+            if (hbase != null && hbase.AdditionalLibraries != null)
+            {
+                cluster.HBaseConfiguration.AdditionalLibraries = new WabStorageAccountConfiguration(
+                    hbase.AdditionalLibraries.AccountDnsName, hbase.AdditionalLibraries.Key, hbase.AdditionalLibraries.BlobContainerName);
+            }
+
+            if (storm != null && storm.StormConfiguration.Any())
+            {
+                cluster.StormConfiguration.AddRange(
+                    storm.StormConfiguration.Select(prop => new KeyValuePair<string, string>(prop.Name, prop.Value)));
+            }
+        }
+
         [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = "This complexity is needed to handle all the types in the submit payload.")]
-        private static void CopyConfiguration(ClusterContainer payloadObject, ClusterCreateParameters cluster)
+        private static void CopyConfiguration(ClusterContainer payloadObject, HDInsight.ClusterCreateParameters cluster)
         {
             if (payloadObject.Settings.Core != null && payloadObject.Settings.Core.Configuration != null)
             {
@@ -288,7 +607,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.ServerDataOb
             {
                 result.AdditionalStorageAccounts = new List<WabStorageAccountConfiguration>();
             }
-
+            resource.Type = "containers";
             resource.OutputItems = new OutputItemList
             {
                 new OutputItem { Key = CreatedDate, Value = result.CreatedDate.ToString(CultureInfo.InvariantCulture) },
@@ -312,7 +631,6 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.ServerDataOb
                     resource.OperationStatus = new ResourceOperationStatus { Type = result.Error.OperationType };
                     resource.OperationStatus.Error = new ResourceErrorInfo { HttpCode = result.Error.HttpCode, Message = result.Error.Message };
                     resource.OutputItems.Add(new OutputItem { Key = ExtendedErrorMessage, Value = result.Error.Message });
-                    resource.Type = result.Error.OperationType;
                 }
             }
 
@@ -321,7 +639,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.ServerDataOb
                 new OutputItem { Key = RdpUserName, Value = result.RdpUserName },
                 new OutputItem { Key = HttpUserName, Value = result.HttpUserName },
                 new OutputItem { Key = HttpPassword, Value = result.HttpPassword },
-                new OutputItem { Key = Version, Value = result.Version },
+                new OutputItem { Key = Version, Value = result.Version }
             };
 
             resource.IntrinsicSettings = new XmlNode[] { SerializeToXmlNode(intrinsicSettings) };

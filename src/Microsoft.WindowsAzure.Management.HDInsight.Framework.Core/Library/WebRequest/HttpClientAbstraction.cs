@@ -79,7 +79,66 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.Web
 
         public Uri RequestUri { get; set; }
 
-        public string Content { get; set; }
+        private HttpContent content;
+
+        public HttpContent Content
+        {
+            get
+            {
+                return this.content;
+            }
+
+            set
+            {
+                this.content = value;
+                if (value.IsNotNull())
+                {
+                    this.Content.LoadIntoBufferAsync().WaitForResult();
+                }
+            }
+        }
+
+        private string stringContent;
+
+        public string StringContent 
+        {
+            get
+            {
+                if (this.stringContent.IsNullOrEmpty())
+                {
+                    if (this.Content.IsNotNull())
+                    {
+                        this.stringContent = this.Content.ReadAsStringAsync().Result;
+                    }
+                    else
+                    {
+                        this.stringContent = string.Empty;
+                    }
+                }
+                return this.stringContent;
+            }
+        }
+
+        private Stream streamContent;
+
+        public Stream StreamContent
+        {
+            get
+            {
+                if (this.streamContent.IsNull())
+                {
+                    if (this.Content.IsNotNull())
+                    {
+                        this.streamContent = this.Content.ReadAsStreamAsync().Result;
+                    }
+                    else
+                    {
+                        this.streamContent = null;
+                    }
+                }
+                return this.streamContent;
+            }
+        }
 
         public IDictionary<string, string> RequestHeaders { get; private set; }
 
@@ -93,7 +152,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.Web
             requestMessage.RequestUri = this.RequestUri;
             if (this.Method == HttpMethod.Post || this.Method == HttpMethod.Put)
             {
-                requestMessage.Content = new StringContent(this.Content);
+                requestMessage.Content = this.CopyContent();
                 requestMessage.Content.Headers.ContentType = new MediaTypeHeaderValue(this.ContentType);
             }
             requestMessage.Headers.Clear();
@@ -136,6 +195,20 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.Web
             }
         }
 
+        private HttpContent CopyContent()
+        {
+            HttpContent localContent;
+            if (this.Content is StringContent)
+            {
+                localContent = new StringContent(this.StringContent);
+            }
+            else
+            {
+                localContent = new StreamContent(this.StreamContent);
+            }
+            return localContent;
+        }
+
         [SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "Microsoft.WindowsAzure.Management.HDInsight.Logging.LogProviderExtensions.LogMessage(Microsoft.WindowsAzure.Management.HDInsight.Logging.ILogProvider,System.String,Microsoft.WindowsAzure.Management.HDInsight.Logging.Severity,Microsoft.WindowsAzure.Management.HDInsight.Logging.Verbosity)",
             Justification = "Strictly log formatting string.")]
         private void LogRequestResponseDetails(HttpResponseMessageAbstraction response)
@@ -173,7 +246,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.Web
                 isFirst = false;
             }
 
-            var formattedRequestContent = this.Content;
+            var formattedRequestContent = this.StringContent;
             if (this.ContentType == HttpConstants.ApplicationXml)
             {
                 TryPrettyPrintXml(formattedRequestContent, out formattedRequestContent);
@@ -225,7 +298,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.Web
         {
             var requestHeaders = this.GetFormatedRequestHeaders();
 
-            var formattedRequestContent = this.Content;
+            var formattedRequestContent = this.StringContent;
             if (this.ContentType == HttpConstants.ApplicationXml)
             {
                 TryPrettyPrintXml(formattedRequestContent, out formattedRequestContent);
@@ -330,6 +403,14 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.Web
         public static IHttpClientAbstraction Create(bool ignoreSslErrors)
         {
             var handler = new WebRequestHandler();
+            var abstractClient = Help.SafeCreate(() => new HttpClientAbstraction(Help.SafeCreate(() => new HttpClient(handler)), handler, ignoreSslErrors));
+            return abstractClient;
+        }
+
+        public static IHttpClientAbstraction Create(bool ignoreSslErrors, bool allowAutoRedirect)
+        {
+            var handler = new WebRequestHandler();
+            handler.AllowAutoRedirect = allowAutoRedirect;
             var abstractClient = Help.SafeCreate(() => new HttpClientAbstraction(Help.SafeCreate(() => new HttpClient(handler)), handler, ignoreSslErrors));
             return abstractClient;
         }

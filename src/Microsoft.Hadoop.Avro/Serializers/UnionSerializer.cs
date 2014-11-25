@@ -68,11 +68,13 @@ namespace Microsoft.Hadoop.Avro.Serializers
             for (int i = this.itemSchemas.Count - 1; i >= 0; i--)
             {
                 conditions = Expression.IfThenElse(
-                        Expression.Equal(unionTypeParameter, Expression.Constant(i)),
-                        (this.itemSchemas[i] is NullSchema
-                            ? Expression.Assign(resultParameter, this.itemSchemas[i].Serializer.BuildDeserializer(decoder))
-                            : Expression.Assign(resultParameter, Expression.Convert(this.itemSchemas[i].Serializer.BuildDeserializer(decoder), this.Schema.RuntimeType))),
-                        elseBranch);
+                    Expression.Equal(unionTypeParameter, Expression.Constant(i)),
+                    this.itemSchemas[i] is NullSchema
+                        ? Expression.Assign(resultParameter, this.itemSchemas[i].Serializer.BuildDeserializer(decoder))
+                        : Expression.Assign(
+                            resultParameter,
+                            Expression.Convert(this.itemSchemas[i].Serializer.BuildDeserializer(decoder), this.Schema.RuntimeType)),
+                    elseBranch);
                 elseBranch = conditions;
             }
             return Expression.Block(new[] { resultParameter, unionTypeParameter }, new Expression[] { assignUnionType, conditions, resultParameter });
@@ -132,7 +134,7 @@ namespace Microsoft.Hadoop.Avro.Serializers
 
         private Expression BuildUnionSerializer(Expression encoder, Expression value, IList<IndexedSchema> schemas)
         {
-            Expression elseBranch = Expression.Empty();
+            Expression elseBranch = Expression.Throw(Expression.Constant(new SerializationException(string.Format(CultureInfo.InvariantCulture, "Object type does match any item schema of the union."))));
             ConditionalExpression conditions = null;
             for (int i = schemas.Count - 1; i >= 0; i--)
             {
@@ -147,7 +149,7 @@ namespace Microsoft.Hadoop.Avro.Serializers
                         Expression.Call(encoder, this.Encode<int>(), new Expression[] { Expression.Constant(schemas[i].Index) }),
                         schema.Serializer.BuildSerializer(
                             encoder,
-                            value.Type == schema.RuntimeType ? value : Expression.TypeAs(value, schema.RuntimeType))),
+                            value.Type == schema.RuntimeType ? value : Expression.Convert(value, schema.RuntimeType))),
                     elseBranch);
                 elseBranch = conditions;
             }

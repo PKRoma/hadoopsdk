@@ -27,6 +27,7 @@ namespace Microsoft.Hadoop.Avro.Tests
     using Microsoft.Hadoop.Avro;
     using Microsoft.Hadoop.Avro.Schema;
     using Microsoft.Hadoop.Avro.Serializers;
+    using Microsoft.Hadoop.Avro.Tests.TestClasses;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     [TestClass]
@@ -131,6 +132,23 @@ namespace Microsoft.Hadoop.Avro.Tests
 
         [TestMethod]
         [TestCategory("CheckIn")]
+        public void Serializer_SerializerComplexStructWithNull()
+        {
+            var expected = new ComplexStruct();
+            RoundTripSerializationWithCheck(
+                expected);
+        }
+
+        [TestMethod]
+        [TestCategory("CheckIn")]
+        public void Serializer_SerializerComplexStructWithValues()
+        {
+            var expected = new ComplexStruct(new List<int> { 1, 2, 3 });
+            RoundTripSerializationWithCheck(expected);
+        }
+
+        [TestMethod]
+        [TestCategory("CheckIn")]
         public void Serializer_SerializeClassWithUri()
         {
             RoundTripSerializationWithCheck(ContainingUrlClass.Create());
@@ -191,6 +209,22 @@ namespace Microsoft.Hadoop.Avro.Tests
         public void Serializer_SerializeEnumClass()
         {
             RoundTripSerializationWithCheck(ClassOfEnum.Create(true));
+        }
+
+        [TestMethod]
+        [TestCategory("CheckIn")]
+        public void Serializer_SerializeFixed()
+        {
+            RoundTripSerializationWithCheck(AvroFixedClass.Create(7));
+        }
+
+        [TestMethod]
+        [TestCategory("CheckIn")]
+        [ExpectedException(typeof(SerializationException))]
+        public void Serializer_SerializeFixedWithWrongSize()
+        {
+            var obj = AvroFixedClass.Create(5);
+            RoundTripSerializationWithCheck(obj);
         }
         #endregion
 
@@ -1291,5 +1325,50 @@ namespace Microsoft.Hadoop.Avro.Tests
             }
         }
         #endregion
+
+        #region AvroUnion tests
+
+        [TestMethod]
+        [TestCategory("CheckIn")]
+        public void Serializer_SerializeUnionOfIntStringNull()
+        {
+            var expected = ClassOfUnion.Create();
+            var serializer = AvroSerializer.Create<ClassOfUnion>();
+
+            var fieldType =
+                ((RecordSchema)serializer.WriterSchema).Fields.First(f => f.Name == "IntClassOfIntNullFieldClassOfInt").TypeSchema as UnionSchema;
+            Assert.IsNotNull(fieldType);
+            Assert.IsTrue(fieldType.Schemas[0].RuntimeType == typeof(int));
+            Assert.IsTrue(fieldType.Schemas[1].RuntimeType == typeof(ClassOfInt));
+            Assert.IsTrue(fieldType.Schemas[2].RuntimeType == typeof(AvroNull));
+            using (var stream = new MemoryStream())
+            {
+                serializer.Serialize(stream, expected);
+                stream.Seek(0, SeekOrigin.Begin);
+                var actual = serializer.Deserialize(stream);
+
+                Assert.AreEqual(expected, actual);
+            }
+        }
+
+        [TestMethod]
+        [TestCategory("CheckIn")]
+        [ExpectedException(typeof(SerializationException))]
+        public void Serializer_SeiralizeUnionOnIntStringNullUsingWrongValue()
+        {
+            var obj = ClassOfUnion.Create();
+            obj.IntStringNullFieldInt = Utilities.GetRandom<float>(false);
+            RoundTripSerializationWithCheck(obj);
+        }
+
+        [TestMethod]
+        [TestCategory("CheckIn")]
+        public void Serializer_AvroUnionBackwardCompatbilityWithKnownTypes()
+        {
+            var expected = ClassWithKnownTypesAndAvroUnion.Create();
+            RoundTripSerializationWithCheck(expected);
+        }
+
+        #endregion //AvroUnion tests
     }
 }

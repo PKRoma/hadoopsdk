@@ -47,5 +47,10 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.Web
         {
             return HttpClientAbstraction.Create(ignoreSslErrors);
         }
+
+        public override IHttpClientAbstraction Create(bool ignoreSslErrors, bool allowAutoRedirect)
+        {
+            return HttpClientAbstraction.Create(ignoreSslErrors, allowAutoRedirect);
+        }
     }
 }

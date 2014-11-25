@@ -16,6 +16,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
 {
     using System;
     using System.Collections.ObjectModel;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data;
 
     /// <summary>
     /// Object that encapsulates all the properties of a List Request.
@@ -74,14 +75,22 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
         public string Version { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether Head Node is highly available.
+        /// Gets or sets the size of the Head Node.
         /// </summary>
-        public bool EnsureHighAvailability { get; set; }
+        /// <value>
+        /// The size of the head node.
+        /// </value>
+        public NodeVMSize HeadNodeSize { get; set; }
 
         /// <summary>
         /// Gets additional Azure Storage Account that you want to enable access to.
         /// </summary>
         public Collection<WabStorageAccountConfiguration> AdditionalStorageAccounts { get; private set; }
+
+        /// <summary>
+        /// Gets config actions for the cluster.
+        /// </summary>
+        public Collection<ConfigAction> ConfigActions { get; private set; }
 
         /// <summary>
         /// Gets or sets the database to store the metadata for Oozie.
@@ -124,9 +133,34 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
         public ConfigValuesCollection YarnConfiguration { get; private set; }
 
         /// <summary>
+        /// Gets the HBase service configuration of this HDInsight cluster.
+        /// </summary>
+        public HBaseConfiguration HBaseConfiguration { get; private set; }
+
+        /// <summary>
+        /// Gets the Storm service configuration of this HDInsight cluster.
+        /// </summary>
+        public ConfigValuesCollection StormConfiguration { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the flavor for a cluster.
+        /// </summary>
+        public ClusterType ClusterType { get; set; }
+
+        /// <summary>
         /// Gets or sets the timeout period for the SDK to wait when creating a cluster.
         /// </summary>
         public TimeSpan CreateTimeout { get; set; }
+
+        /// <summary>
+        /// Gets or sets the virtual network guid for this HDInsight cluster.
+        /// </summary>
+        public string VirtualNetworkId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the subnet name for this HDInsight cluster.
+        /// </summary>
+        public string SubnetName { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the ClusterCreateParameters class.
@@ -135,12 +169,19 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
         {
             this.CreateTimeout = TimeSpan.FromHours(2);
             this.AdditionalStorageAccounts = new Collection<WabStorageAccountConfiguration>();
+            this.ConfigActions = new Collection<ConfigAction>();
             this.CoreConfiguration = new ConfigValuesCollection();
             this.HiveConfiguration = new HiveConfiguration();
             this.MapReduceConfiguration = new MapReduceConfiguration();
             this.OozieConfiguration = new OozieConfiguration();
             this.HdfsConfiguration = new ConfigValuesCollection();
             this.YarnConfiguration = new ConfigValuesCollection();
+            this.HBaseConfiguration = new HBaseConfiguration();
+            this.StormConfiguration = new ConfigValuesCollection();
+            
+            // By default create hadoop only cluster unless set otherwise
+            this.ClusterType = ClusterType.Hadoop; 
+            this.HeadNodeSize = NodeVMSize.Default;
         }
     }
 }

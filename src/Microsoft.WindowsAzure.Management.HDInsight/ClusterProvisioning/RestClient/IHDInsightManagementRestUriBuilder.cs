@@ -37,6 +37,15 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestCl
         Uri GetCreateResourceUri(string resourceId, string resourceType, string location);
 
         /// <summary>
+        /// Gets the Uri for a Get Resource details request.
+        /// </summary>
+        /// <param name="resourceId">Resource Id.</param>
+        /// <param name="resourceType">Resource Type.</param>
+        /// <param name="location">Region the cluster is to be deployed in.</param>
+        /// <returns>The Uri for a Get Resource details request.</returns>
+        Uri GetGetClusterResourceDetailUri(string resourceId, string resourceType, string location);
+
+        /// <summary>
         /// Gets the Uri for a Delete Container request.
         /// </summary>
         /// <param name="dnsName">DnsName of the cluster.</param>

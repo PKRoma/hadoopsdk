@@ -156,17 +156,9 @@ namespace Microsoft.Hadoop.Avro.Tests
 
         public static LargeClass Create(string queryResult)
         {
-            string[] actualTokens = queryResult.TrimEnd('\r').Split('\t');
+            var actualTokens = queryResult.TrimEnd('\r').Split('\t');
 
-            sbyte[] sbyteArray = JArray.Parse(actualTokens[6]).Select(o => (sbyte)o).ToArray();
-            byte[] byteArray;
-            unchecked
-            {
-                byteArray = sbyteArray.Select(arg => (byte)arg).ToArray();
-            }
-            var guid = new Guid(byteArray);
-
-            var result = new LargeClass
+            return new LargeClass
             {
                 BoolMember = bool.Parse(actualTokens[0]),
                 DateTimeMember = DateTimeSerializer.ConvertPosixTimeToDateTime(long.Parse(actualTokens[1])),
@@ -174,7 +166,7 @@ namespace Microsoft.Hadoop.Avro.Tests
                 DoubleMember = double.Parse(actualTokens[3], NumberStyles.AllowDecimalPoint | NumberStyles.AllowExponent, CultureInfo.InvariantCulture),
                 EnumMember = (Utilities.RandomEnumeration)Enum.Parse(typeof(Utilities.RandomEnumeration), actualTokens[4]),
                 FloatMember = float.Parse(actualTokens[5], NumberStyles.Float, CultureInfo.InvariantCulture),
-                GuidMember = guid,
+                GuidMember = new Guid(Convert.FromBase64String(actualTokens[6])),
                 IntArrayMember = JArray.Parse(actualTokens[7]).Select(token => (int)token).ToArray(),
                 IntListMember = JArray.Parse(actualTokens[8]).Select(token => (int)token).ToList(),
                 IntMapMember = JsonConvert.DeserializeObject<Dictionary<string, int>>(actualTokens[9]),
@@ -183,8 +175,6 @@ namespace Microsoft.Hadoop.Avro.Tests
                 SByteArrayMember = JArray.Parse(actualTokens[12]).Select(token => (sbyte)token).ToArray(),
                 StringMember = actualTokens[13]
             };
-
-            return result;
         }
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", 

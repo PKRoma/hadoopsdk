@@ -17,6 +17,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core
     using System;
     using System.Threading;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Retries;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Logging;
     using Microsoft.WindowsAzure.Management.HDInsight.Logging;
 
@@ -33,12 +34,16 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core
         /// </summary>
         /// <param name="tokenSource">A Cancellation token source.</param>
         /// <param name="logger">A logger instance.</param>
-        public AbstractionContext(CancellationTokenSource tokenSource, ILogger logger)
+        /// <param name="httpOperationTimeout">The HTTP operation timeout.</param>
+        /// <param name="retryPolicy">The retry policy.</param>
+        public AbstractionContext(CancellationTokenSource tokenSource, ILogger logger, TimeSpan httpOperationTimeout, IRetryPolicy retryPolicy)
         {
+            this.RetryPolicy = retryPolicy;
             tokenSource.ArgumentNotNull("tokenSource");
             logger.ArgumentNotNull("logger");
             this.CancellationTokenSource = tokenSource;
             this.Logger = logger;
+            this.HttpOperationTimeout = httpOperationTimeout;
         }
 
         /// <summary>
@@ -48,8 +53,10 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core
         internal AbstractionContext(CancellationToken token)
         {
             this.userSetToken = token;
+            this.RetryPolicy = RetryPolicyFactory.CreateExponentialRetryPolicy();
             this.useUserToken = true;
             this.Logger = new Logger();
+            this.HttpOperationTimeout = RetryDefaultConstants.DefaultOperationTimeout;
         }
 
         /// <summary>
@@ -62,11 +69,12 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core
             {
                 throw new ArgumentNullException("original");
             }
-
+            this.RetryPolicy = original.RetryPolicy;
+            this.HttpOperationTimeout = original.HttpOperationTimeout;
             this.userSetToken = original.CancellationToken;
             this.Logger = original.Logger;
         }
-
+        
         /// <summary>
         /// Gets a cancellation token to cancel any running requests.
         /// </summary>
@@ -82,6 +90,11 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core
                 return this.CancellationTokenSource.Token;
             }
         }
+        
+        /// <summary>
+        /// Gets the HTTP operation timeout.
+        /// </summary>
+        public TimeSpan HttpOperationTimeout { get; private set; }
 
         /// <summary>
         /// Gets a source to generate cancellation token to cancel any running requests.
@@ -92,5 +105,10 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core
         /// Gets a logger to write log messages to.
         /// </summary>
         public ILogger Logger { get; private set; }
+
+        /// <summary>
+        /// Gets the retry policy.
+        /// </summary>
+        public IRetryPolicy RetryPolicy { get; private set; }
     }
 }

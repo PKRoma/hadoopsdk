@@ -52,13 +52,13 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             public bool SendAsyncCalled { get; set; }
             public Dictionary<string, string> Headers { get; set; }
             public HttpMethod Method { get; set; }
-            public string Content { get; set; }
+            public HttpContent Content { get; set; }
  
             public MockResults()
             {
                 this.SendAsyncCalled = false;
                 this.Headers = new Dictionary<string, string>();
-                this.Content = string.Empty;
+                this.Content = new StringContent(String.Empty);
             }
         }
 
@@ -99,7 +99,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             moqClient.SetupGet(client => client.Content)
                      .Returns(() => results.Content);
 
-            moqClient.SetupSet(abstraction => abstraction.Content = It.IsAny<string>()).Callback<string>(content => results.Content = content);
+            moqClient.SetupSet(abstraction => abstraction.Content = It.IsAny<HttpContent>()).Callback<HttpContent>(content => results.Content = content);
 
             // Mock the SendAsync method (to just return the response object previously created).
             moqClient.Setup(c => c.SendAsync())
@@ -136,6 +136,8 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             return credentials;
         }
 
+        private string userAgentString = "Mock Test UserAgent";
+
         [TestMethod]
         [TestCategory("CheckIn")]
         public void ListJobsWithValidRequest()
@@ -147,7 +149,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
 
             var cred = GetRemoteHadoopCredential();
             // Create a client.
-            var restClient = factory.Create(cred, GetAbstractionContext(), false);
+            var restClient = factory.Create(cred, GetAbstractionContext(), false, userAgentString);
 
             // Call ListJobs.
             restClient.ListJobs().WaitForResult();
@@ -157,7 +159,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             Assert.AreEqual(HttpMethod.Get, mockResults.Method);
             Assert.AreEqual("/templeton/v1/jobs", mockResults.RequestUri.AbsolutePath);
             Assert.AreEqual("?user.name=" + cred.UserName + "&" + HadoopRemoteRestConstants.ShowAllFields, mockResults.RequestUri.Query);
-            Assert.AreEqual(3, mockResults.Headers.Count);
+            Assert.AreEqual(4, mockResults.Headers.Count);
             Assert.IsTrue(mockResults.Headers.ContainsKey("accept"));
             Assert.IsTrue(mockResults.Headers.ContainsKey("useragent"));
             Assert.AreEqual("application/json",mockResults.Headers["accept"]);
@@ -179,7 +181,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             var encodedUserName = "%26Needs%3DEncoding";
             
             // Create a client.
-            var restClient = factory.Create(cred, GetAbstractionContext(), false);
+            var restClient = factory.Create(cred, GetAbstractionContext(), false, userAgentString);
 
             // Call ListJobs
             restClient.ListJobs().WaitForResult();
@@ -189,7 +191,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             Assert.AreEqual(HttpMethod.Get, mockResults.Method);
             Assert.AreEqual("/templeton/v1/jobs", mockResults.RequestUri.AbsolutePath);
             Assert.AreEqual("?user.name=" + encodedUserName + "&" + HadoopRemoteRestConstants.ShowAllFields, mockResults.RequestUri.Query);
-            Assert.AreEqual(3, mockResults.Headers.Count);
+            Assert.AreEqual(4, mockResults.Headers.Count);
             Assert.IsTrue(mockResults.Headers.ContainsKey("accept"));
             Assert.IsTrue(mockResults.Headers.ContainsKey("useragent"));
             Assert.AreEqual("application/json", mockResults.Headers["accept"]);
@@ -208,7 +210,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
 
             var cred = GetRemoteHadoopCredential();
             // Create a client.
-            var restClient = factory.Create(cred, GetAbstractionContext(), false);
+            var restClient = factory.Create(cred, GetAbstractionContext(), false, userAgentString);
 
             // Call GetJob.
             var jobId = "12345";
@@ -219,7 +221,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             Assert.AreEqual(HttpMethod.Get, mockResults.Method);
             Assert.AreEqual("/templeton/v1/jobs/" + jobId, mockResults.RequestUri.AbsolutePath);
             Assert.AreEqual("?user.name=" + cred.UserName, mockResults.RequestUri.Query);
-            Assert.AreEqual(3, mockResults.Headers.Count);
+            Assert.AreEqual(4, mockResults.Headers.Count);
             Assert.IsTrue(mockResults.Headers.ContainsKey("accept"));
             Assert.IsTrue(mockResults.Headers.ContainsKey("useragent"));
             Assert.AreEqual("application/json", mockResults.Headers["accept"]);
@@ -241,7 +243,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             var encodedUserName = "%26Needs%3DEncoding";
 
             // Create a client.
-            var restClient = factory.Create(cred, GetAbstractionContext(), false);
+            var restClient = factory.Create(cred, GetAbstractionContext(), false, userAgentString);
 
             // Call GetJob
             var jobId = "12345";
@@ -252,7 +254,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             Assert.AreEqual(HttpMethod.Get, mockResults.Method);
             Assert.AreEqual("/templeton/v1/jobs/" +jobId, mockResults.RequestUri.AbsolutePath);
             Assert.AreEqual("?user.name=" + encodedUserName, mockResults.RequestUri.Query);
-            Assert.AreEqual(3, mockResults.Headers.Count);
+            Assert.AreEqual(4, mockResults.Headers.Count);
             Assert.IsTrue(mockResults.Headers.ContainsKey("accept"));
             Assert.IsTrue(mockResults.Headers.ContainsKey("useragent"));
             Assert.AreEqual("application/json", mockResults.Headers["accept"]);
@@ -272,7 +274,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             var cred = GetRemoteHadoopCredential();
 
             // Create a client.
-            var restClient = factory.Create(cred, GetAbstractionContext(), false);
+            var restClient = factory.Create(cred, GetAbstractionContext(), false, userAgentString);
 
             // Call GetJob
             var jobId = "1&2=345";
@@ -284,7 +286,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             Assert.AreEqual(HttpMethod.Get, mockResults.Method);
             Assert.AreEqual("/templeton/v1/jobs/" + encodedJobId, mockResults.RequestUri.AbsolutePath);
             Assert.AreEqual("?user.name=" + cred.UserName, mockResults.RequestUri.Query);
-            Assert.AreEqual(3, mockResults.Headers.Count);
+            Assert.AreEqual(4, mockResults.Headers.Count);
             Assert.IsTrue(mockResults.Headers.ContainsKey("accept"));
             Assert.IsTrue(mockResults.Headers.ContainsKey("useragent"));
             Assert.AreEqual("application/json", mockResults.Headers["accept"]);
@@ -303,7 +305,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
 
             var cred = GetRemoteHadoopCredential();
             // Create a client.
-            var restClient = factory.Create(cred, GetAbstractionContext(), false);
+            var restClient = factory.Create(cred, GetAbstractionContext(), false, userAgentString);
 
             // Call SubmitHiveJob.
             var payload = "some payload";
@@ -314,13 +316,13 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             Assert.AreEqual(HttpMethod.Post, mockResults.Method);
             Assert.AreEqual("/templeton/v1/hive", mockResults.RequestUri.AbsolutePath);
             Assert.AreEqual("?user.name=" + cred.UserName , mockResults.RequestUri.Query);
-            Assert.AreEqual(3, mockResults.Headers.Count);
+            Assert.AreEqual(4, mockResults.Headers.Count);
             Assert.IsTrue(mockResults.Headers.ContainsKey("accept"));
             Assert.IsTrue(mockResults.Headers.ContainsKey("useragent"));
             Assert.AreEqual("application/json", mockResults.Headers["accept"]);
             Assert.IsTrue(mockResults.Headers.ContainsKey("Authorization"));
             Assert.IsTrue(mockResults.Headers["Authorization"].StartsWith("Basic "));
-            Assert.AreEqual(payload, mockResults.Content);
+            Assert.AreEqual(payload, mockResults.Content.ReadAsStringAsync().Result);
         }
 
         [TestMethod]
@@ -337,7 +339,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             var encodedUserName = "%26Needs%3DEncoding";
 
             // Create a client.
-            var restClient = factory.Create(cred, GetAbstractionContext(), false);
+            var restClient = factory.Create(cred, GetAbstractionContext(), false, userAgentString);
 
             // Call SubmitHiveJob.
             var payload = "some payload";
@@ -348,13 +350,13 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             Assert.AreEqual(HttpMethod.Post, mockResults.Method);
             Assert.AreEqual("/templeton/v1/hive", mockResults.RequestUri.AbsolutePath);
             Assert.AreEqual("?user.name=" + encodedUserName, mockResults.RequestUri.Query);
-            Assert.AreEqual(3, mockResults.Headers.Count);
+            Assert.AreEqual(4, mockResults.Headers.Count);
             Assert.IsTrue(mockResults.Headers.ContainsKey("useragent"));
             Assert.IsTrue(mockResults.Headers.ContainsKey("accept"));
             Assert.AreEqual("application/json", mockResults.Headers["accept"]);
             Assert.IsTrue(mockResults.Headers.ContainsKey("Authorization"));
             Assert.IsTrue(mockResults.Headers["Authorization"].StartsWith("Basic "));
-            Assert.AreEqual(payload, mockResults.Content);
+            Assert.AreEqual(payload, mockResults.Content.ReadAsStringAsync().Result);
         }
 
         [TestMethod]
@@ -368,7 +370,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
 
             var cred = GetRemoteHadoopCredential();
             // Create a client.
-            var restClient = factory.Create(cred, GetAbstractionContext(), false);
+            var restClient = factory.Create(cred, GetAbstractionContext(), false, userAgentString);
 
             // Call SubmitHiveJob.
             var payload = "some payload";
@@ -379,13 +381,13 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             Assert.AreEqual(HttpMethod.Post, mockResults.Method);
             Assert.AreEqual("/templeton/v1/mapreduce/jar", mockResults.RequestUri.AbsolutePath);
             Assert.AreEqual("?user.name=" + cred.UserName, mockResults.RequestUri.Query);
-            Assert.AreEqual(3, mockResults.Headers.Count);
+            Assert.AreEqual(4, mockResults.Headers.Count);
             Assert.IsTrue(mockResults.Headers.ContainsKey("accept"));
             Assert.IsTrue(mockResults.Headers.ContainsKey("useragent"));
             Assert.AreEqual("application/json", mockResults.Headers["accept"]);
             Assert.IsTrue(mockResults.Headers.ContainsKey("Authorization"));
             Assert.IsTrue(mockResults.Headers["Authorization"].StartsWith("Basic "));
-            Assert.AreEqual(payload, mockResults.Content);
+            Assert.AreEqual(payload, mockResults.Content.ReadAsStringAsync().Result);
         }
 
         [TestMethod]
@@ -402,7 +404,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             var encodedUserName = "%26Needs%3DEncoding";
 
             // Create a client.
-            var restClient = factory.Create(cred, GetAbstractionContext(), false);
+            var restClient = factory.Create(cred, GetAbstractionContext(), false, userAgentString);
 
             // Call SubmitHiveJob.
             var payload = "some payload";
@@ -413,13 +415,13 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
             Assert.AreEqual(HttpMethod.Post, mockResults.Method);
             Assert.AreEqual("/templeton/v1/mapreduce/jar", mockResults.RequestUri.AbsolutePath);
             Assert.AreEqual("?user.name=" + encodedUserName, mockResults.RequestUri.Query);
-            Assert.AreEqual(3, mockResults.Headers.Count);
+            Assert.AreEqual(4, mockResults.Headers.Count);
             Assert.IsTrue(mockResults.Headers.ContainsKey("accept"));
             Assert.IsTrue(mockResults.Headers.ContainsKey("useragent"));
             Assert.AreEqual("application/json", mockResults.Headers["accept"]);
             Assert.IsTrue(mockResults.Headers.ContainsKey("Authorization"));
             Assert.IsTrue(mockResults.Headers["Authorization"].StartsWith("Basic "));
-            Assert.AreEqual(payload, mockResults.Content);
+            Assert.AreEqual(payload, mockResults.Content.ReadAsStringAsync().Result);
         }
     }
 }

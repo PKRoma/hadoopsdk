@@ -14,31 +14,78 @@
 // permissions and limitations under the License.
 namespace Microsoft.WindowsAzure.Management.HDInsight
 {
-    internal enum NodeVMSize
+    using System;
+    using Microsoft.WindowsAzure.Management.HDInsight.Contracts.May2014;
+
+    /// <summary>
+    /// Size of a VM on Windows Azure.
+    /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design",
+        "CA1027:MarkEnumsWithFlags", Justification = "Doesn't make sense to do that for this type")]
+    public enum NodeVMSize
     {
         /// <summary>
-        /// An extra small virtual machine, shared core.
+        /// The default VM size, it is one of the values below.
         /// </summary>
-        ExtraSmall = 1,
-
+        Default = 0,
+        
         /// <summary>
-        /// A small virtual machine, 1 core.
+        /// Extra large virtual machine, 8 cores.
         /// </summary>
-        Small = 1,
-
-        /// <summary>
-        /// Medium virtual machine, 2 cores.
-        /// </summary>
-        Medium = 2,
+        ExtraLarge = 8,
 
         /// <summary>
         /// Large virtual machine, 4 cores.
         /// </summary>
         Large = 4,
+    }
+
+    /// <summary>
+    /// An extension class to easily convert from <see cref="NodeVMSize"/> to 
+    /// <see cref="NodeVMSizeInternal"/>.
+    /// </summary>
+    internal static class NodeVMSizeExtensions
+    {
+        /// <summary>
+        /// Converts the user facing Node size enum to internal node size enum.
+        /// </summary>
+        /// <param name="nodeVmSize">Size of the node vm.</param>
+        /// <returns>The corresponding <see cref="NodeVMSizeInternal"/>.</returns>
+        /// <exception cref="System.InvalidProgramException">Execution should never reach here.</exception>
+        public static NodeVMSizeInternal ToNodeVMSize(this NodeVMSize nodeVmSize)
+        {
+            switch (nodeVmSize)
+            {
+                case NodeVMSize.ExtraLarge:
+                    return NodeVMSizeInternal.ExtraLarge;
+                case NodeVMSize.Large:
+                    return NodeVMSizeInternal.Large;
+                case NodeVMSize.Default:
+                    return NodeVMSizeInternal.ExtraLarge;
+                default:
+                    throw new InvalidProgramException("Execution should never reach here!");
+            }
+        }
 
         /// <summary>
-        /// Extra large virtual machine, 8 cores.
+        /// Extension method to covert NodeVMSize to VMSize.
         /// </summary>
-        ExtraLarge = 8
+        /// <param name="nodeVMSize">Size of the vm.</param>
+        /// <returns>The corresponding VMSize.</returns>
+        /// <exception cref="System.ArgumentException">Unknown vmSize.</exception>
+        public static VmSize ToVmSize(this NodeVMSize nodeVMSize)
+        {
+            switch (nodeVMSize)
+            {
+                case NodeVMSize.Default:
+                case NodeVMSize.Large:
+                    return VmSize.Large;
+                case NodeVMSize.ExtraLarge:
+                    return VmSize.ExtraLarge;
+                default:
+                    throw new InvalidProgramException("Execution should never reach here!");
+            }
+        }
+
     }
 }

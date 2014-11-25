@@ -19,6 +19,6 @@ namespace Microsoft.Hadoop.Client.HadoopJobSubmissionRestCleint
 
     internal interface IHadoopJobSubmissionRestClientFactory
     {
-        IHadoopJobSubmissionRestClient Create(IJobSubmissionClientCredential credentials, IAbstractionContext context, bool ignoreSslErrrors);
+        IHadoopJobSubmissionRestClient Create(IJobSubmissionClientCredential credentials, IAbstractionContext context, bool ignoreSslErrors, string userAgentString);
     }
 }

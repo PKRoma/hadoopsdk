@@ -20,11 +20,11 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
 
     internal class StorageAccountSimulatorFactory : IWabStorageAbstractionFactory
     {
-        private IDictionary<string, StorageAbstractionSimulator> simulators;
+        private IDictionary<string, WabStorageAbstractionSimulator> simulators;
 
         public StorageAccountSimulatorFactory()
         {
-            this.simulators = new Dictionary<string, StorageAbstractionSimulator>();
+            this.simulators = new Dictionary<string, WabStorageAbstractionSimulator>();
         }
 
         private static StorageAccountSimulatorFactory instance = new StorageAccountSimulatorFactory();
@@ -35,10 +35,10 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
 
         public IStorageAbstraction Create(WindowsAzureStorageAccountCredentials credentials)
         {
-            StorageAbstractionSimulator simulator;
+            WabStorageAbstractionSimulator simulator;
             if (!this.simulators.TryGetValue(credentials.Name, out simulator))
             {
-                simulator = new StorageAbstractionSimulator(credentials);
+                simulator = new WabStorageAbstractionSimulator(credentials);
                 this.simulators.Add(credentials.Name, simulator);
             }
             return simulator;

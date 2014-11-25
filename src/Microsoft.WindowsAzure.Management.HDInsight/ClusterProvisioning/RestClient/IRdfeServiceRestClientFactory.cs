@@ -14,9 +14,11 @@
 // permissions and limitations under the License.
 namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestClient
 {
+    using System;
     using System.Diagnostics.CodeAnalysis;
     using System.Threading;
     using Microsoft.WindowsAzure.Management.HDInsight;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Retries;
 
     /// <summary>
     /// Factory class to create an instance of the IRdfeServiceRestClient.
@@ -30,7 +32,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestCl
         /// <param name="credentials">Credentials object.</param>
         /// <param name="context">The Abstraction context.</param>
         /// <param name="ignoreSslErrors">
-        /// Specifies that server side SSL errors should be ignored.
+        ///     Specifies that server side SSL errors should be ignored.
         /// </param>
         /// <returns>An instance of the IRdfeServiceRestClient.</returns>
         IRdfeServiceRestClient Create(IHDInsightSubscriptionCredentials credentials, IAbstractionContext context, bool ignoreSslErrors);

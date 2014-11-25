@@ -50,7 +50,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
             get { return this.underlying.RequestUri; }
             set { this.underlying.RequestUri = value; }
         }
-        public string Content
+        public HttpContent Content
         {
             get { return this.underlying.Content; }
             set { this.underlying.Content = value; }

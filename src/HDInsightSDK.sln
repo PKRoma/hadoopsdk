@@ -1,6 +1,7 @@
-﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30723.0
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{7028DA7F-3677-42DF-BE0E-B7E2B7566A44}"
 	ProjectSection(SolutionItems) = preProject
 		buildconfig.xml = buildconfig.xml
@@ -33,13 +34,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Mana
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Management.HDInsight.Framework.Core", "Microsoft.WindowsAzure.Management.HDInsight.Framework.Core\Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.csproj", "{55787775-8B25-436F-B9B9-C2B60EF80B20}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.HDInsight.Threading", "Microsoft.HDInsight.Threading\Microsoft.HDInsight.Threading.csproj", "{DBFFC131-E089-4173-9B9E-6826FE596FAF}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "netmapred", "netmapred\netmapred.csproj", "{2222745D-7800-4D1C-8F60-77F9FE3EC956}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Management.HDInsight.Cmdlet", "Microsoft.WindowsAzure.Management.HDInsight.Cmdlet\Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.csproj", "{43333C08-29F5-4948-A8C6-4F486331CDC9}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Tests", "Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Tests\Microsoft.WindowsAzure.Management.HDInsight.Cmdlet.Tests.csproj", "{9CB3A580-E4DC-4DF8-BB4C-EB5729A6EBCD}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AzureLogTool", "Tools\AzureStorageLogAnalysis\AzureLogTool.csproj", "{1A818046-55B5-4D6E-9506-A527B7A9A3DB}"
 EndProject
@@ -47,10 +42,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Hadoop.Avro", "Mi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Hadoop.Avro.Tests", "Microsoft.Hadoop.Avro.Tests\Microsoft.Hadoop.Avro.Tests.csproj", "{1ED444F4-A5ED-43B7-87E1-4BBE111511C9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.HadoopAppliance.Client", "Microsoft.HadoopAppliance.Client\Microsoft.HadoopAppliance.Client.csproj", "{EBEDA7E0-2C02-497C-BA2E-47030BCF2F2F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.WindowsAzure.Management.HDInsight.Contracts", "Microsoft.WindowsAzure.Management.HDInsight.Contracts\Microsoft.WindowsAzure.Management.HDInsight.Contracts.csproj", "{D85F1E93-C3DD-4319-9247-C64B5B13B877}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.Hadoop.Avro.Tools", "Microsoft.Hadoop.Avro.Tools\Microsoft.Hadoop.Avro.Tools.csproj", "{FFD3590E-FEFA-4057-902A-F6F3677B0BAE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microsoft.HDInsight.Net.Http.Formatting", "Microsoft.HDInsight.Net.Http.Formatting\Microsoft.HDInsight.Net.Http.Formatting.csproj", "{148BD053-7FDC-4E8C-BCC8-016EA61FCAAA}"
+EndProject
 Global
-	GlobalSection(TestCaseManagementSettings) = postSolution
-		CategoryFile = HDInsightSDK.vsmdi
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Coverage|Any CPU = Coverage|Any CPU
 		Debug|Any CPU = Debug|Any CPU
@@ -117,30 +117,12 @@ Global
 		{55787775-8B25-436F-B9B9-C2B60EF80B20}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{55787775-8B25-436F-B9B9-C2B60EF80B20}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{55787775-8B25-436F-B9B9-C2B60EF80B20}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DBFFC131-E089-4173-9B9E-6826FE596FAF}.Coverage|Any CPU.ActiveCfg = Coverage|Any CPU
-		{DBFFC131-E089-4173-9B9E-6826FE596FAF}.Coverage|Any CPU.Build.0 = Coverage|Any CPU
-		{DBFFC131-E089-4173-9B9E-6826FE596FAF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DBFFC131-E089-4173-9B9E-6826FE596FAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DBFFC131-E089-4173-9B9E-6826FE596FAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DBFFC131-E089-4173-9B9E-6826FE596FAF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2222745D-7800-4D1C-8F60-77F9FE3EC956}.Coverage|Any CPU.ActiveCfg = Release|Any CPU
 		{2222745D-7800-4D1C-8F60-77F9FE3EC956}.Coverage|Any CPU.Build.0 = Release|Any CPU
 		{2222745D-7800-4D1C-8F60-77F9FE3EC956}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2222745D-7800-4D1C-8F60-77F9FE3EC956}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2222745D-7800-4D1C-8F60-77F9FE3EC956}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2222745D-7800-4D1C-8F60-77F9FE3EC956}.Release|Any CPU.Build.0 = Release|Any CPU
-		{43333C08-29F5-4948-A8C6-4F486331CDC9}.Coverage|Any CPU.ActiveCfg = Coverage|Any CPU
-		{43333C08-29F5-4948-A8C6-4F486331CDC9}.Coverage|Any CPU.Build.0 = Coverage|Any CPU
-		{43333C08-29F5-4948-A8C6-4F486331CDC9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{43333C08-29F5-4948-A8C6-4F486331CDC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{43333C08-29F5-4948-A8C6-4F486331CDC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{43333C08-29F5-4948-A8C6-4F486331CDC9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9CB3A580-E4DC-4DF8-BB4C-EB5729A6EBCD}.Coverage|Any CPU.ActiveCfg = Coverage|Any CPU
-		{9CB3A580-E4DC-4DF8-BB4C-EB5729A6EBCD}.Coverage|Any CPU.Build.0 = Coverage|Any CPU
-		{9CB3A580-E4DC-4DF8-BB4C-EB5729A6EBCD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9CB3A580-E4DC-4DF8-BB4C-EB5729A6EBCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9CB3A580-E4DC-4DF8-BB4C-EB5729A6EBCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9CB3A580-E4DC-4DF8-BB4C-EB5729A6EBCD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{1A818046-55B5-4D6E-9506-A527B7A9A3DB}.Coverage|Any CPU.ActiveCfg = Coverage|Any CPU
 		{1A818046-55B5-4D6E-9506-A527B7A9A3DB}.Coverage|Any CPU.Build.0 = Coverage|Any CPU
 		{1A818046-55B5-4D6E-9506-A527B7A9A3DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -159,6 +141,30 @@ Global
 		{1ED444F4-A5ED-43B7-87E1-4BBE111511C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1ED444F4-A5ED-43B7-87E1-4BBE111511C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1ED444F4-A5ED-43B7-87E1-4BBE111511C9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EBEDA7E0-2C02-497C-BA2E-47030BCF2F2F}.Coverage|Any CPU.ActiveCfg = Release|Any CPU
+		{EBEDA7E0-2C02-497C-BA2E-47030BCF2F2F}.Coverage|Any CPU.Build.0 = Release|Any CPU
+		{EBEDA7E0-2C02-497C-BA2E-47030BCF2F2F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EBEDA7E0-2C02-497C-BA2E-47030BCF2F2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EBEDA7E0-2C02-497C-BA2E-47030BCF2F2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EBEDA7E0-2C02-497C-BA2E-47030BCF2F2F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D85F1E93-C3DD-4319-9247-C64B5B13B877}.Coverage|Any CPU.ActiveCfg = Release|Any CPU
+		{D85F1E93-C3DD-4319-9247-C64B5B13B877}.Coverage|Any CPU.Build.0 = Release|Any CPU
+		{D85F1E93-C3DD-4319-9247-C64B5B13B877}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D85F1E93-C3DD-4319-9247-C64B5B13B877}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D85F1E93-C3DD-4319-9247-C64B5B13B877}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D85F1E93-C3DD-4319-9247-C64B5B13B877}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FFD3590E-FEFA-4057-902A-F6F3677B0BAE}.Coverage|Any CPU.ActiveCfg = Release|Any CPU
+		{FFD3590E-FEFA-4057-902A-F6F3677B0BAE}.Coverage|Any CPU.Build.0 = Release|Any CPU
+		{FFD3590E-FEFA-4057-902A-F6F3677B0BAE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FFD3590E-FEFA-4057-902A-F6F3677B0BAE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FFD3590E-FEFA-4057-902A-F6F3677B0BAE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FFD3590E-FEFA-4057-902A-F6F3677B0BAE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{148BD053-7FDC-4E8C-BCC8-016EA61FCAAA}.Coverage|Any CPU.ActiveCfg = Coverage|Any CPU
+		{148BD053-7FDC-4E8C-BCC8-016EA61FCAAA}.Coverage|Any CPU.Build.0 = Coverage|Any CPU
+		{148BD053-7FDC-4E8C-BCC8-016EA61FCAAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{148BD053-7FDC-4E8C-BCC8-016EA61FCAAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{148BD053-7FDC-4E8C-BCC8-016EA61FCAAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{148BD053-7FDC-4E8C-BCC8-016EA61FCAAA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -174,13 +180,17 @@ Global
 		{DB09F70B-FD28-4CC8-86B3-883D71CA9A02} = {2F9569F2-5EA1-4E69-8829-CD5688AC14AA}
 		{567FA9B5-5695-4CF1-89B6-BA5C8DDA5927} = {2F9569F2-5EA1-4E69-8829-CD5688AC14AA}
 		{55787775-8B25-436F-B9B9-C2B60EF80B20} = {2F9569F2-5EA1-4E69-8829-CD5688AC14AA}
-		{DBFFC131-E089-4173-9B9E-6826FE596FAF} = {2F9569F2-5EA1-4E69-8829-CD5688AC14AA}
 		{2222745D-7800-4D1C-8F60-77F9FE3EC956} = {2F9569F2-5EA1-4E69-8829-CD5688AC14AA}
-		{43333C08-29F5-4948-A8C6-4F486331CDC9} = {2F9569F2-5EA1-4E69-8829-CD5688AC14AA}
-		{9CB3A580-E4DC-4DF8-BB4C-EB5729A6EBCD} = {2F9569F2-5EA1-4E69-8829-CD5688AC14AA}
 		{1A818046-55B5-4D6E-9506-A527B7A9A3DB} = {2F9569F2-5EA1-4E69-8829-CD5688AC14AA}
 		{EAB38A14-211F-4361-A06E-3EC1E07ABE33} = {2F9569F2-5EA1-4E69-8829-CD5688AC14AA}
 		{1ED444F4-A5ED-43B7-87E1-4BBE111511C9} = {2F9569F2-5EA1-4E69-8829-CD5688AC14AA}
+		{EBEDA7E0-2C02-497C-BA2E-47030BCF2F2F} = {2F9569F2-5EA1-4E69-8829-CD5688AC14AA}
+		{D85F1E93-C3DD-4319-9247-C64B5B13B877} = {2F9569F2-5EA1-4E69-8829-CD5688AC14AA}
+		{FFD3590E-FEFA-4057-902A-F6F3677B0BAE} = {2F9569F2-5EA1-4E69-8829-CD5688AC14AA}
+		{148BD053-7FDC-4E8C-BCC8-016EA61FCAAA} = {2F9569F2-5EA1-4E69-8829-CD5688AC14AA}
+	EndGlobalSection
+	GlobalSection(TestCaseManagementSettings) = postSolution
+		CategoryFile = HDInsightSDK.vsmdi
 	EndGlobalSection
 	GlobalSection(SpecExplorer.ActivityCompletionStatus) = preSolution
 		SpecExplorer.ActivityCompletionStatus = TestExisting: ;ModelFromScratch: 

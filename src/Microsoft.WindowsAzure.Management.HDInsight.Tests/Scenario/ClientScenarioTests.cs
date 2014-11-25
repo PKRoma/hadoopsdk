@@ -24,10 +24,12 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
     using Microsoft.Hadoop.Client.WebHCatRest;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.VersionFinder;
 
     using Microsoft.WindowsAzure.Management.HDInsight;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Retries;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
     using Microsoft.WindowsAzure.Management.HDInsight.JobSubmission;
     using Microsoft.WindowsAzure.Management.HDInsight.JobSubmission.PocoClient;
@@ -39,6 +41,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
     public class SyncClientScenarioTests : IntegrationTestBase
     {
         private const int AzureTestTimeout = 35 * 60 * 1000;
+        private string customUserAgent = "SyncClient";
 
         [TestInitialize]
         public override void Initialize()
@@ -60,6 +63,28 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
         {
             this.ApplyIndividualTestMockingOnly();
             ListAvailableLocations();
+        }
+
+        [TestMethod]
+        [TestCategory("Production")]
+        [TestCategory(TestRunMode.Nightly)]
+        [TestCategory("Scenario")]
+        [ExpectedException(typeof(TimeoutException))]
+        public void ListClustersFailsOnTimeout_AgainstAzure()
+        {
+            this.ApplyIndividualTestMockingOnly();
+            ListClustersFailsOnTimeout();
+        }
+
+        [TestMethod]
+        [TestCategory("Production")]
+        [TestCategory(TestRunMode.Nightly)]
+        [TestCategory("Scenario")]
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
+        public void ListClustersFailsOnSpecifiedTimeoutTooSmall_AgainstAzure()
+        {
+            this.ApplyIndividualTestMockingOnly();
+            ListClustersFailsOnSpecifiedTimeoutTooSmall();
         }
 
         [TestMethod]
@@ -143,6 +168,27 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
 
         [TestMethod]
         [TestCategory("CheckIn")]
+        public void ListClustersFailsOnTimeout()
+        {
+            // Creates the client
+            IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
+            var client = HDInsightClient.Connect(new HDInsightCertificateCredential(credentials.SubscriptionId, credentials.Certificate), TimeSpan.FromSeconds(1), RetryPolicyFactory.CreateExponentialRetryPolicy(TimeSpan.FromMilliseconds(0), TimeSpan.FromSeconds(1), TimeSpan.FromMilliseconds(100), 2, 0.2));
+            client.ListClusters();
+        }
+
+        [TestMethod]
+        [TestCategory("CheckIn")]
+        [ExpectedException(typeof(ArgumentOutOfRangeException))]
+        public void ListClustersFailsOnSpecifiedTimeoutTooSmall()
+        {
+            // Creates the client
+            IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
+            var client = HDInsightClient.Connect(new HDInsightCertificateCredential(credentials.SubscriptionId, credentials.Certificate), TimeSpan.FromMilliseconds(0), RetryPolicyFactory.CreateExponentialRetryPolicy(TimeSpan.FromMilliseconds(0), TimeSpan.FromSeconds(1), TimeSpan.FromMilliseconds(100), 2, 0.2));
+            client.ListClusters();
+        }
+
+        [TestMethod]
+        [TestCategory("CheckIn")]
         public void ListAvailableVersions()
         {
             // Creates the client
@@ -185,7 +231,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
                 Password = testCluster.HttpPassword,
                 UserName = testCluster.HttpUserName
             };
-            var jobSubmissionClient = new HDInsightJobSubmissionPocoClient(connectionCredentials, GetAbstractionContext(), false);
+            var jobSubmissionClient = new HDInsightJobSubmissionPocoClient(connectionCredentials, GetAbstractionContext(), false, customUserAgent);
             var jobHistory = jobSubmissionClient.ListJobs().WaitForResult();
             var expectedJobHistory = SyncClientScenarioTests.GetJobHistory(connectionCredentials.Server.OriginalString);
             Assert.AreEqual(jobHistory.Jobs.Count, expectedJobHistory.Jobs.Count);
@@ -214,7 +260,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
                 Password = testCluster.HttpPassword,
                 UserName = testCluster.HttpUserName
             };
-            var jobSubmissionClient = new HDInsightJobSubmissionPocoClient(connectionCredentials, GetAbstractionContext(), false);
+            var jobSubmissionClient = new HDInsightJobSubmissionPocoClient(connectionCredentials, GetAbstractionContext(), false, customUserAgent);
             jobSubmissionClient.ListJobs().WaitForResult();
         }
 
@@ -689,6 +735,58 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
             client.CreateCluster(clusterRequest);
         }
 
+        // This is disabled because scenario test doesn't support creating 3.x clusters
+        /*
+        [TestMethod]
+        [TestCategory("CheckIn")]
+        public void CreateHBaseCluster_VersionValid()
+        {
+            var clusterRequest = GetRandomCluster();
+            clusterRequest.ClusterType = ClusterType.HBase;
+            clusterRequest.Version = "3.1";
+            IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
+            var client = HDInsightClient.Connect(new HDInsightCertificateCredential(credentials.SubscriptionId, credentials.Certificate));
+            client.CreateCluster(clusterRequest);
+        }
+
+        [TestMethod]
+        [TestCategory("Production")]
+        [TestCategory(TestRunMode.Nightly)]
+        [TestCategory("Scenario")]
+        public void CreateHBaseCluster_AgainstAzure()
+        {
+            this.ApplyIndividualTestMockingOnly();
+            CreateHBaseCluster_VersionValid();
+        }
+        */
+
+        // This is disabled because scenario test doesn't support creating 3.x clusters
+        /*
+        [TestMethod]
+        [TestCategory("CheckIn")]
+        public void CreateStormCluster()
+        {
+            var clusterRequest = GetRandomCluster();
+            clusterRequest.ClusterType = ClusterType.Storm;
+            clusterRequest.Version = "3.1";
+            var client = HDInsightClient.Connect(IntegrationTestBase.GetValidCredentials());
+            client.CreateCluster(clusterRequest);
+        }
+        */
+
+        // This is disabled because storm has not been pushed to production yet
+        /*
+        [TestMethod]
+        [TestCategory("Production")]
+        [TestCategory(TestRunMode.Nightly)]
+        [TestCategory("Scenario")]
+        public void CreateStormCluster_AgainstAzure()
+        {
+            this.ApplyIndividualTestMockingOnly();
+            CreateStormCluster();
+        }
+        */
+
         [TestMethod]
         [TestCategory("CheckIn")]
         public void CreateCluster_RaisesEvents()
@@ -700,14 +798,14 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
             bool hdConfigurationEventFired = false;
             bool clusterStorageProvisionedEventFired = false;
             bool azureConfigurationEventFired = false;
-            bool oprationalEventFired = false;
+            bool operationalEventFired = false;
             client.ClusterProvisioning += (sender, args) =>
             {
                 acceptedEventFired = acceptedEventFired || args.State == ClusterState.Accepted;
                 clusterStorageProvisionedEventFired = clusterStorageProvisionedEventFired || args.State == ClusterState.ClusterStorageProvisioned;
                 azureConfigurationEventFired = azureConfigurationEventFired || args.State == ClusterState.AzureVMConfiguration;
                 hdConfigurationEventFired = hdConfigurationEventFired || args.State == ClusterState.HDInsightConfiguration;
-                oprationalEventFired = oprationalEventFired || args.State == ClusterState.Operational;
+                operationalEventFired = operationalEventFired || args.State == ClusterState.Operational;
             };
 
             client.CreateCluster(clusterRequest);
@@ -716,7 +814,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
             Assert.IsTrue(clusterStorageProvisionedEventFired);
             Assert.IsTrue(azureConfigurationEventFired);
             Assert.IsTrue(hdConfigurationEventFired);
-            Assert.IsTrue(oprationalEventFired);
+            Assert.IsTrue(operationalEventFired);
         }
 
         [TestMethod]
@@ -735,7 +833,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.Scenario
                                      args.State != ClusterState.ClusterStorageProvisioned &&
                                      args.State != ClusterState.AzureVMConfiguration &&
                                      args.State != ClusterState.HDInsightConfiguration &&
-                                     args.State != ClusterState.Operational);
+                                     args.State != ClusterState.Operational &&
+                                     args.State != ClusterState.PatchQueued &&
+                                     args.State != ClusterState.CertRolloverQueued);
             };
 
             client.CreateCluster(clusterRequest);

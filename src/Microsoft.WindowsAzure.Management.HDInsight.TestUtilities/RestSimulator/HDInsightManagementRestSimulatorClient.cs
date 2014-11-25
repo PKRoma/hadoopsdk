@@ -24,32 +24,42 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
     using System.Net.Http;
     using System.Security.Cryptography.X509Certificates;
     using System.Threading.Tasks;
-    using Microsoft.HDInsight.Management.Contracts;
+    using Microsoft.WindowsAzure.Management.HDInsight.Contracts;
+    using Microsoft.WindowsAzure.Management.HDInsight.Contracts.May2014;
+    using Microsoft.WindowsAzure.Management.HDInsight.Contracts.May2014.Components;
+    using Microsoft.WindowsAzure.Management.HDInsight.Contracts.May2014.Components.YarnApplications;
+    using Microsoft.WindowsAzure.Management.HDInsight.Contracts.May2014.Resources;
+    using Microsoft.WindowsAzure.Management.HDInsight.Contracts.May2014.Resources.CredentialBackedResources;
     using Microsoft.Hadoop.Client;
-    using Microsoft.HDInsight.Management.Contracts.May2013;
+    using Microsoft.WindowsAzure.Management.HDInsight.Contracts.May2013;
     using Microsoft.WindowsAzure.Management.Configuration.Data;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.AzureManagementClient;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.ClusterManager;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestClient;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.VersionFinder;
     using Microsoft.WindowsAzure.Management.HDInsight;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Retries;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Logging;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
     using Microsoft.WindowsAzure.Management.HDInsight.Logging;
     using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.ServerDataObjects;
 
     /// <summary>
-    /// Provides a simulator for HDInsight rest calls.
+    /// Provides a simulator for HDInsight REST calls. This allows efficient local testing of
+    /// the SDK using the simulator instead of talking to an actual running service.
+    /// Testing against the actual service is reserved for more expensive and less frequent
+    /// scenario tests.
     /// </summary>
     internal class HDInsightManagementRestSimulatorClient : IHDInsightManagementRestClient
     {
         public static int OperationTimeToCompletionInMilliseconds = 0;
         private const string defaultVersion = "default";
         private readonly HDInsight.IAbstractionContext context;
-
+        
         private static List<string> nonOverridableConfigurationProperties = new List<string>()
         {
             "fs.default.name",
@@ -431,12 +441,18 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
                                 cluster.Cluster.ChangeState(HDInsight.ClusterState.Operational);
                             }
                             break;
+                        case HDInsight.ClusterState.PatchQueued:
+                            cluster.Cluster.ChangeState(HDInsight.ClusterState.PatchQueued);
+                            break;
                         case HDInsight.ClusterState.Operational:
                             cluster.Cluster.ChangeState(HDInsight.ClusterState.Running);
 
                             break;
                         case HDInsight.ClusterState.DeletePending:
                             cluster.Cluster.ChangeState(HDInsight.ClusterState.Deleting);
+                            break;
+                        case HDInsight.ClusterState.CertRolloverQueued:
+                            cluster.Cluster.ChangeState(HDInsight.ClusterState.CertRolloverQueued);
                             break;
                         case HDInsight.ClusterState.Deleting:
                             tempList.Add(cluster);
@@ -467,13 +483,37 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
             return await Task.FromResult(new HttpResponseMessageAbstraction(HttpStatusCode.Accepted, null, value));
         }
 
-        private ClusterErrorStatus ValidateClusterCreation(ClusterCreateParameters cluster)
+        private ClusterErrorStatus ValidateClusterCreation(HDInsight.ClusterCreateParameters cluster)
         {
             if (!this.ValidateClusterCreationMetadata(cluster.HiveMetastore, cluster.OozieMetastore))
                 return new ClusterErrorStatus(400, "Invalid metastores", "create");
             return null;
         }
 
+        private ClusterErrorStatus ValidateHBaseClusterCreation(Microsoft.WindowsAzure.Management.HDInsight.Contracts.May2014.ClusterCreateParameters cluster)
+        {
+            HiveComponent hive = cluster.Components.OfType<HiveComponent>().Single();
+            OozieComponent oozie = cluster.Components.OfType<OozieComponent>().Single();
+            Metastore hiveMetastore = null;
+            Metastore oozieMetastore = null;
+            if (!hive.Metastore.ShouldProvisionNew)
+            {
+                var metaStore = (SqlAzureDatabaseCredentialBackedResource)hive.Metastore;
+                hiveMetastore = new Metastore(
+                    metaStore.SqlServerName, metaStore.DatabaseName, metaStore.Credentials.Username, metaStore.Credentials.Password);
+            }
+            if (!oozie.Metastore.ShouldProvisionNew)
+            {
+                var metaStore = (SqlAzureDatabaseCredentialBackedResource)oozie.Metastore;
+                oozieMetastore = new Metastore(
+                    metaStore.SqlServerName, metaStore.DatabaseName, metaStore.Credentials.Username, metaStore.Credentials.Password);
+            }
+            if (!this.ValidateClusterCreationMetadata(hiveMetastore, oozieMetastore))
+            {
+                return new ClusterErrorStatus(400, "Invalid metastores", "create");
+            }
+            return null;
+        }
 
         private bool ValidateClusterCreationMetadata(Metastore hive, Metastore oozie)
         {
@@ -513,7 +553,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
                     select s).Any();
         }
 
-        public async Task<IHttpResponseMessageAbstraction> CreateContainer(string dnsName, string location, string clusterPayload)
+        public async Task<IHttpResponseMessageAbstraction> CreateContainer(string dnsName, string location, string clusterPayload, int schemaVersion=2)
         {
             this.LogMessage("Creating cluster '{0}' in location {1}", dnsName, location);
             this.ValidateConnection();
@@ -531,32 +571,62 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
 
             lock (Clusters)
             {
-                var existingCluster = Clusters.FirstOrDefault(c => c.Cluster.Name == dnsName);
+                var existingCluster = Clusters.FirstOrDefault(c => c.Cluster.Name == dnsName && c.Cluster.Location == location);
                 if (existingCluster != null)
                     throw new HttpLayerException(HttpStatusCode.BadRequest, "<!DOCTYPE html><html>" + HDInsightClient.ClusterAlreadyExistsError + "</html>");
 
-                var resource = ServerSerializer.DeserializeClusterCreateRequestIntoResource(clusterPayload);
-                if (resource.SchemaVersion != "2.0")
+                HDInsight.ClusterCreateParameters cluster = null;
+                AzureHDInsightClusterConfiguration azureClusterConfig = null;
+                ClusterDetails createCluster = null;
+                if (schemaVersion == 2)
                 {
-                    throw new HttpLayerException(HttpStatusCode.BadRequest, "SchemaVersion needs to be at least 2.0");
+                    var resource = ServerSerializer.DeserializeClusterCreateRequestIntoResource(clusterPayload);
+                    if (resource.SchemaVersion != "2.0")
+                    {
+                        throw new HttpLayerException(HttpStatusCode.BadRequest, "SchemaVersion needs to be at 2.0");
+                    }
+                    cluster = ServerSerializer.DeserializeClusterCreateRequest(clusterPayload);
+                    var storageAccounts = GetStorageAccounts(cluster).ToList();
+                    createCluster = new ClusterDetails(cluster.Name, HDInsight.ClusterState.ReadyForDeployment.ToString())
+                    {
+                        ConnectionUrl = string.Format(@"https://{0}.azurehdinsight.net", cluster.Name),
+                        Location = cluster.Location,
+                        Error = this.ValidateClusterCreation(cluster),
+                        HttpUserName = cluster.UserName,
+                        HttpPassword = cluster.Password,
+                        Version = this.GetVersion(cluster.Version),
+                        ClusterSizeInNodes = cluster.ClusterSizeInNodes,
+                        DefaultStorageAccount = storageAccounts.FirstOrDefault(),
+                        AdditionalStorageAccounts = storageAccounts.Skip(1),
+                        ClusterType = cluster.ClusterType
+                    };
+                    var clusterCreateDetails = ServerSerializer.DeserializeClusterCreateRequestToInternal(clusterPayload);
+                    azureClusterConfig = GetAzureHDInsightClusterConfiguration(createCluster, clusterCreateDetails);
                 }
-                var cluster = ServerSerializer.DeserializeClusterCreateRequest(clusterPayload);
-                var storageAccounts = GetStorageAccounts(cluster).ToList();
-                var createCluster = new ClusterDetails(cluster.Name, HDInsight.ClusterState.ReadyForDeployment.ToString())
+                else if (schemaVersion == 3)
                 {
-                    ConnectionUrl = string.Format(@"https://{0}.azurehdinsight.net", cluster.Name),
-                    Location = cluster.Location,
-                    Error = this.ValidateClusterCreation(cluster),
-                    HttpUserName = cluster.UserName,
-                    HttpPassword = cluster.Password,
-                    Version = this.GetVersion(cluster.Version),
-                    ClusterSizeInNodes = cluster.ClusterSizeInNodes,
-                    DefaultStorageAccount = storageAccounts.FirstOrDefault(),
-                    AdditionalStorageAccounts = storageAccounts.Skip(1)
-                };
-
-                var clusterCreateDetails = ServerSerializer.DeserializeClusterCreateRequestToInternal(clusterPayload);
-                var azureClusterConfig = GetAzureHDInsightClusterConfiguration(createCluster, clusterCreateDetails);
+                    cluster = ServerSerializer.DeserializeClusterCreateRequestV3(clusterPayload);
+                    var storageAccounts = GetStorageAccounts(cluster).ToList();
+                    createCluster = new ClusterDetails(cluster.Name, HDInsight.ClusterState.ReadyForDeployment.ToString())
+                    {
+                        ConnectionUrl = string.Format(@"https://{0}.azurehdinsight.net", cluster.Name),
+                        Location = cluster.Location,
+                        Error = this.ValidateClusterCreation(cluster),
+                        HttpUserName = cluster.UserName,
+                        HttpPassword = cluster.Password,
+                        Version = this.GetVersion(cluster.Version),
+                        ClusterSizeInNodes = cluster.ClusterSizeInNodes,
+                        DefaultStorageAccount = storageAccounts.FirstOrDefault(),
+                        AdditionalStorageAccounts = storageAccounts.Skip(1),
+                        ClusterType = cluster.ClusterType
+                    };
+                    var clusterCreateDetails = ServerSerializer.DeserializeClusterCreateRequestToInternalV3(clusterPayload);
+                    azureClusterConfig = GetAzureHDInsightClusterConfigurationV3(createCluster, clusterCreateDetails);
+                }
+                else
+                {
+                    throw new HttpLayerException(HttpStatusCode.BadRequest, "Invalid SchemaVersion");
+                }
 
                 var simCluster = new SimulatorClusterContainer() { Cluster = createCluster, Configuration = azureClusterConfig };
                 Clusters.Add(simCluster);
@@ -570,6 +640,78 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
                 }
             }
             return new HttpResponseMessageAbstraction(HttpStatusCode.Accepted, null, string.Empty);
+        }
+
+        private static AzureHDInsightClusterConfiguration GetAzureHDInsightClusterConfigurationV3(
+            ClusterDetails cluster, Microsoft.WindowsAzure.Management.HDInsight.Contracts.May2014.ClusterCreateParameters clusterCreateDetails)
+        {
+            var azureClusterConfig = new AzureHDInsightClusterConfiguration();
+            var yarn = clusterCreateDetails.Components.OfType<YarnComponent>().Single();
+            var mapreduce = yarn.Applications.OfType<MapReduceApplication>().Single();
+            var hive = clusterCreateDetails.Components.OfType<HiveComponent>().Single();
+            var oozie = clusterCreateDetails.Components.OfType<OozieComponent>().Single();
+            var hdfs = clusterCreateDetails.Components.OfType<HdfsComponent>().Single();
+            var hadoopCore = clusterCreateDetails.Components.OfType<HadoopCoreComponent>().Single();
+
+            if (hadoopCore.CoreSiteXmlProperties.Any())
+            {
+                AssertConfigOptionsAllowedMay2014(cluster, hadoopCore.CoreSiteXmlProperties, "Core");
+                azureClusterConfig.Core.AddRange(
+                    hadoopCore.CoreSiteXmlProperties.Select(prop => new KeyValuePair<string, string>(prop.Name, prop.Value)));
+            }
+
+            if (hive.HiveSiteXmlProperties.Any())
+            {
+                AssertConfigOptionsAllowedMay2014(cluster, hive.HiveSiteXmlProperties, "Hive");
+                azureClusterConfig.Hive.AddRange(hive.HiveSiteXmlProperties.Select(prop => new KeyValuePair<string, string>(prop.Name, prop.Value)));
+            }
+
+            if (hdfs.HdfsSiteXmlProperties.Any())
+            {
+                AssertConfigOptionsAllowedMay2014(cluster, hdfs.HdfsSiteXmlProperties, "Hdfs");
+                azureClusterConfig.Hdfs.AddRange(hdfs.HdfsSiteXmlProperties.Select(prop => new KeyValuePair<string, string>(prop.Name, prop.Value)));
+            }
+
+            if (mapreduce.MapRedSiteXmlProperties.Any())
+            {
+                AssertConfigOptionsAllowedMay2014(cluster, mapreduce.MapRedSiteXmlProperties, "MapReduce");
+                azureClusterConfig.MapReduce.AddRange(
+                    mapreduce.MapRedSiteXmlProperties.Select(prop => new KeyValuePair<string, string>(prop.Name, prop.Value)));
+            }
+
+            if (oozie.Configuration.Any())
+            {
+                AssertConfigOptionsAllowedMay2014(cluster, oozie.Configuration, "Oozie");
+                azureClusterConfig.Oozie.AddRange(oozie.Configuration.Select(prop => new KeyValuePair<string, string>(prop.Name, prop.Value)));
+            }
+
+            if (yarn.Configuration.Any())
+            {
+                AssertConfigOptionsAllowedMay2014(cluster, yarn.Configuration, "Yarn");
+                azureClusterConfig.Yarn.AddRange(oozie.Configuration.Select(prop => new KeyValuePair<string, string>(prop.Name, prop.Value)));
+            }
+
+            return azureClusterConfig;
+        }
+
+        private static void AssertConfigOptionsAllowedMay2014(
+            ClusterDetails cluster, IEnumerable<Microsoft.WindowsAzure.Management.HDInsight.Contracts.May2014.Property> propertyList, string settingsName)
+        {
+            var nonOverridableProperty = propertyList.FirstOrDefault(prop => nonOverridableConfigurationProperties.Contains(prop.Name));
+            if (nonOverridableProperty != null)
+            {
+                // 'Specified Custom Settings are not valid. Error report: The following properties cannot be overridden for component: Core
+                //  fs.default.name
+                cluster.Error = new ClusterErrorStatus(
+                    (int)HttpStatusCode.BadRequest,
+                    string.Format(
+                        CultureInfo.InvariantCulture,
+                    "Specified Custom Settings are not valid. Error report: The following properties cannot be overridden for component: {0} {1} {2}",
+                    settingsName,
+                    Environment.NewLine,
+                    nonOverridableProperty.Name),
+                    "Create");
+            }
         }
 
         private static AzureHDInsightClusterConfiguration GetAzureHDInsightClusterConfiguration(
@@ -615,7 +757,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
             return azureClusterConfig;
         }
 
-        private static void AssertConfigOptionsAllowed(ClusterDetails cluster, IEnumerable<Property> propertyList, string settingsName)
+        private static void AssertConfigOptionsAllowed(ClusterDetails cluster, IEnumerable<Microsoft.WindowsAzure.Management.HDInsight.Contracts.May2013.Property> propertyList, string settingsName)
         {
             var nonOverridableProperty = propertyList.FirstOrDefault(prop => nonOverridableConfigurationProperties.Contains(prop.Name));
             if (nonOverridableProperty != null)
@@ -634,7 +776,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
             }
         }
 
-        private static IEnumerable<WabStorageAccountConfiguration> GetStorageAccounts(ClusterCreateParameters cluster)
+        private static IEnumerable<WabStorageAccountConfiguration> GetStorageAccounts(HDInsight.ClusterCreateParameters cluster)
         {
             var storageAccounts = new List<WabStorageAccountConfiguration>();
             storageAccounts.Add(
@@ -714,7 +856,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
                     // We are still pending.
                     return this.ReturnResponse(passThroughResponse);
                 }
-                passThroughResponse.Error = new ErrorDetails()
+                passThroughResponse.Error = new Microsoft.WindowsAzure.Management.HDInsight.Contracts.ErrorDetails()
                 {
                     StatusCode = HttpStatusCode.NotFound,
                     ErrorId = "Not Found",
@@ -758,13 +900,13 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
                 statusResponse.UserType = UserType.Http;
                 statusResponse.RequestIssueDate = DateTime.UtcNow;
                 statusResponse.State = UserChangeOperationState.Pending;
-                ErrorDetails error;
+                Microsoft.WindowsAzure.Management.HDInsight.Contracts.ErrorDetails error;
 
                 var cluster = GetCloudServiceInternal(dnsName);
                 // If the Cluster is not Found.
                 if (cluster.IsNull())
                 {
-                    error = new ErrorDetails()
+                    error = new Microsoft.WindowsAzure.Management.HDInsight.Contracts.ErrorDetails()
                     {
                         StatusCode = HttpStatusCode.NotFound,
                         ErrorId = "NOT FOUND",
@@ -776,7 +918,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
                 }
                 if (!this.SupportedConnectivityClusterVersions.Contains(cluster.Cluster.Version))
                 {
-                    error = new ErrorDetails()
+                    error = new Microsoft.WindowsAzure.Management.HDInsight.Contracts.ErrorDetails()
                     {
                         StatusCode = HttpStatusCode.BadRequest,
                         ErrorId = "UNSUPPORTED",
@@ -795,7 +937,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
                 {
                     if (cluster.HttpPendingOp.Response.RequestIssueDate.AddMilliseconds(OperationTimeToCompletionInMilliseconds) > DateTime.UtcNow)
                     {
-                        error = new ErrorDetails()
+                        error = new Microsoft.WindowsAzure.Management.HDInsight.Contracts.ErrorDetails()
                         {
                             StatusCode = HttpStatusCode.Conflict,
                             ErrorId = "CONFLICT",
@@ -811,7 +953,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
                     // If the cluster already has a User and we are trying to enable again.
                     if (cluster.Cluster.HttpUserName.IsNotNullOrEmpty())
                     {
-                        error = new ErrorDetails()
+                        error = new Microsoft.WindowsAzure.Management.HDInsight.Contracts.ErrorDetails()
                         {
                             StatusCode = HttpStatusCode.BadRequest,
                             ErrorId = "Bad Request",
@@ -827,7 +969,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
                     {
                         if (cluster.Cluster.RdpUserName.Equals(request.Username))
                         {
-                            error = new ErrorDetails()
+                            error = new Microsoft.WindowsAzure.Management.HDInsight.Contracts.ErrorDetails()
                             {
                                 StatusCode = HttpStatusCode.BadRequest,
                                 ErrorId = "USERCHANGE_INVALIDNAME",
@@ -842,7 +984,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
                     if (request.Username == "fail")
                     {
                         statusResponse.State = UserChangeOperationState.Error;
-                        statusResponse.Error = new ErrorDetails()
+                        statusResponse.Error = new Microsoft.WindowsAzure.Management.HDInsight.Contracts.ErrorDetails()
                         {
                             StatusCode = HttpStatusCode.BadRequest,
                             ErrorId = "Bad Request",
@@ -878,13 +1020,13 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
                 statusResponse.UserType = UserType.Rdp;
                 statusResponse.RequestIssueDate = DateTime.UtcNow;
                 statusResponse.State = UserChangeOperationState.Pending;
-                ErrorDetails error;
+                Microsoft.WindowsAzure.Management.HDInsight.Contracts.ErrorDetails error;
 
                 var cluster = GetCloudServiceInternal(dnsName);
                 // If the Cluster is not Found.
                 if (cluster.IsNull())
                 {
-                    error = new ErrorDetails()
+                    error = new Microsoft.WindowsAzure.Management.HDInsight.Contracts.ErrorDetails()
                     {
                         StatusCode = HttpStatusCode.NotFound,
                         ErrorId = "NOT FOUND",
@@ -897,7 +1039,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
                 // If the cluster has a pending operation (for the simulator pending operations always take <OperationTimeToCompletionInSeconds> seconds)
                 if (!this.SupportedConnectivityClusterVersions.Contains(cluster.Cluster.Version))
                 {
-                    error = new ErrorDetails()
+                    error = new Microsoft.WindowsAzure.Management.HDInsight.Contracts.ErrorDetails()
                     {
                         StatusCode = HttpStatusCode.BadRequest,
                         ErrorId = "UNSUPPORTED",
@@ -912,7 +1054,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
                 {
                     if (cluster.RdpPendingOp.Response.RequestIssueDate.AddMilliseconds(OperationTimeToCompletionInMilliseconds) > DateTime.UtcNow)
                     {
-                        error = new ErrorDetails()
+                        error = new Microsoft.WindowsAzure.Management.HDInsight.Contracts.ErrorDetails()
                         {
                             StatusCode = HttpStatusCode.Conflict,
                             ErrorId = "CONFLICT",
@@ -928,7 +1070,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
                     // If the cluster already has a User and we are trying to enable again.
                     if (cluster.Cluster.RdpUserName.IsNotNullOrEmpty())
                     {
-                        error = new ErrorDetails()
+                        error = new Microsoft.WindowsAzure.Management.HDInsight.Contracts.ErrorDetails()
                         {
                             StatusCode = HttpStatusCode.BadRequest,
                             ErrorId = "Bad Request",
@@ -944,7 +1086,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
                     {
                         if (cluster.Cluster.HttpUserName.Equals(request.Username))
                         {
-                            error = new ErrorDetails()
+                            error = new Microsoft.WindowsAzure.Management.HDInsight.Contracts.ErrorDetails()
                             {
                                 StatusCode = HttpStatusCode.BadRequest,
                                 ErrorId = "USERCHANGE_INVALIDNAME",
@@ -959,7 +1101,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.TestUtilities.RestSimulato
                     if (request.Username == "fail")
                     {
                         statusResponse.State = UserChangeOperationState.Error;
-                        statusResponse.Error = new ErrorDetails()
+                        statusResponse.Error = new Microsoft.WindowsAzure.Management.HDInsight.Contracts.ErrorDetails()
                         {
                             StatusCode = HttpStatusCode.BadRequest,
                             ErrorId = "Bad Request",

@@ -20,6 +20,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestCl
     using Microsoft.WindowsAzure.Management.HDInsight;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Retries;
     using Microsoft.WindowsAzure.Management.HDInsight.Logging;
 
     /// <summary>
@@ -34,7 +35,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestCl
         /// The response from the request.
         /// </returns>
         Task<IHttpResponseMessageAbstraction> ListCloudServices();
-
+        
         /// <summary>
         /// Creates a new cluster on the subscription.
         /// </summary>
@@ -47,10 +48,13 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestCl
         /// <param name="clusterPayload">
         /// The creation payload with the details of the cluster to create.
         /// </param>
+        /// <param name="schemaVersion">
+        /// The schemaversion header we sent to the server, by default it is 2.
+        /// </param>
         /// <returns>
         /// A task that represents the cluster creation.
         /// </returns>
-        Task<IHttpResponseMessageAbstraction> CreateContainer(string dnsName, string location, string clusterPayload);
+        Task<IHttpResponseMessageAbstraction> CreateContainer(string dnsName, string location, string clusterPayload, int schemaVersion = 2);
 
         /// <summary>
         /// Deletes a cluster from the subscription.

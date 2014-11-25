@@ -64,8 +64,35 @@ namespace Microsoft.Hadoop.Client.ClientLayer
                 throw new InvalidOperationException("Attempt to use a Hadoop credentials class that has not been registered.");
             }
             var factory = this.locator.Locate(type);
-            var createMethod = factory.GetType().GetMethod("Create");
+            var createMethod = factory.GetType().GetMethod("Create", new Type[] { credentials.GetType() });
             return (IJobSubmissionClient)createMethod.Invoke(factory, new object[] { credentials });
+        }
+
+        /// <inheritdoc />
+        public IJobSubmissionClient Create(IJobSubmissionClientCredential credentials, string userAgentString)
+        {
+            credentials.ArgumentNotNull("credentials");
+            Type type;
+            if (!this.credentialsMap.TryGetValue(credentials.GetType(), out type))
+            {
+                throw new InvalidOperationException("Attempt to use a Hadoop credentials class that has not been registered.");
+            }
+            var factory = this.locator.Locate(type);
+            var createMethod = factory.GetType().GetMethod("Create", new Type[] { credentials.GetType(), typeof(string) });
+            return (IJobSubmissionClient)createMethod.Invoke(factory, new object[] { credentials, userAgentString });
+        }
+
+        public IHadoopApplicationHistoryClient CreateHadoopApplicationHistoryClient(IJobSubmissionClientCredential credentials)
+        {
+            credentials.ArgumentNotNull("credentials");
+            Type type;
+            if (!this.credentialsMap.TryGetValue(credentials.GetType(), out type))
+            {
+                throw new InvalidOperationException("Attempt to use a Hadoop credentials class that has not been registered.");
+            }
+            var factory = this.locator.Locate(type);
+            var createMethod = factory.GetType().GetMethod("CreateHadoopApplicationHistoryClient");
+            return (IHadoopApplicationHistoryClient)createMethod.Invoke(factory, new object[] { credentials });
         }
     }
 }

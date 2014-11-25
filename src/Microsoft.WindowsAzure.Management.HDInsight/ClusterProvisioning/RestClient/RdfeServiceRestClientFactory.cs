@@ -14,8 +14,10 @@
 // permissions and limitations under the License.
 namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestClient
 {
+    using System;
     using Microsoft.WindowsAzure.Management.HDInsight;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Retries;
 
     internal class RdfeServiceRestClientFactory : IRdfeServiceRestClientFactory
     {

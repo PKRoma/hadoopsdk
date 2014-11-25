@@ -23,7 +23,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
 
     internal class ProductionIHDInsightSubscriptionCertificateCredentialsFactory : IHDInsightSubscriptionCredentialsFactory
     {
-        private const string EndPoint = @"https://management.core.windows.net:8443/";
+        private const string EndPoint = @"https://management.core.windows.net/";
 
         private const string Namespace = @"hdinsight";
 

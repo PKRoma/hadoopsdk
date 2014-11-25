@@ -88,7 +88,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
                 //       And I set the method to Post
                 client.Method = HttpMethod.Put;
                 //       And I set the content to "Hello World"
-                client.Content = "Hello World";
+                client.Content = new StringContent("Hello World");
 
                 //      When I call Client.SendAsync
                 var responseTask = client.SendAsync();
@@ -122,7 +122,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
                 //       And I set the method to Post
                 client.Method = HttpMethod.Post;
                 //       And I set the content to "Hello World"
-                client.Content = "Hello World";
+                client.Content = new StringContent("Hello World");
 
                 //      When I call Client.SendAsync
                 var responseTask = client.SendAsync();

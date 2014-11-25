@@ -15,7 +15,10 @@
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestClient;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.DynamicXml.Writer;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Retries;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Logging;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
+    using Microsoft.WindowsAzure.Management.HDInsight.Logging;
     using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
 
@@ -84,8 +87,23 @@
 
         internal async Task<IHttpResponseMessageAbstraction> PerformRequest()
         {
-            var factory = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>();
-            return await factory.Retry(this.DoClientSend, this.ShouldRetry, 1, this.pollInterval, false);
+            using (CancellationTokenSource source = new CancellationTokenSource())
+            {
+                var factory = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>();
+                OperationExecutionResult<IHttpResponseMessageAbstraction> result = await
+                        OperationExecutor.ExecuteOperationWithRetry(
+                            () => this.DoClientSend(factory.Create()),
+                            this.GetRetryPolicy(),
+                            new HDInsightSubscriptionAbstractionContext(GetValidCredentials(), source.Token),
+                            new Logger());
+
+                if (result.ExecutionOutput.StatusCode != HttpStatusCode.Accepted && result.ExecutionOutput.StatusCode != HttpStatusCode.OK)
+                {
+                    throw new HttpLayerException(result.ExecutionOutput.StatusCode, result.ExecutionOutput.Content, result.Attempts, result.TotalTime);
+                }
+
+                return result.ExecutionOutput;
+            }
         }
 
         internal async Task<IHttpResponseMessageAbstraction> DoClientSend(IHttpClientAbstraction client)
@@ -95,17 +113,22 @@
             client.RequestHeaders.Add("test", "value");
             client.RequestUri = new Uri("http://www.microsoft.com");
             client.Timeout = new TimeSpan(0, 5, 0);
-            return await client.SendAsync();
+            var ret = await client.SendAsync();
+            if (ret.StatusCode != HttpStatusCode.Accepted && ret.StatusCode != HttpStatusCode.OK)
+            {
+                throw new HttpLayerException(ret.StatusCode, ret.Content);
+            }
+            return ret;
         }
 
-        internal bool ShouldRetry(IHttpResponseMessageAbstraction response)
+        internal IRetryPolicy GetRetryPolicy()
         {
-            return response.StatusCode != HttpStatusCode.OK && response.StatusCode != HttpStatusCode.Accepted;
+            return RetryPolicyFactory.CreateExponentialRetryPolicy(TimeSpan.FromSeconds(0), TimeSpan.FromSeconds(1), TimeSpan.FromMilliseconds(100), 3, 0.2);
         }
 
         [TestMethod]
         [TestCategory(TestRunMode.CheckIn)]
-        public async Task WhenAnHttpMethodFailesARetryIsPerformed()
+        public async Task WhenAnHttpMethodFailsARetryIsPerformed()
         {
             this.AddHttpResponse(new HttpResponseMessageAbstraction(HttpStatusCode.BadGateway, new HttpResponseHeadersAbstraction(), "Transient Failure"));
             this.AddHttpResponse(new HttpResponseMessageAbstraction(HttpStatusCode.Accepted, new HttpResponseHeadersAbstraction(), "<Okay />"));
@@ -118,64 +141,32 @@
 
         [TestMethod]
         [TestCategory(TestRunMode.CheckIn)]
-        public async Task OperationCancledNotByUserShouldRetry()
-        {
-            IHttpResponseMessageAbstraction response;
-            var factory = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>();
-            using (CancellationTokenSource source = new CancellationTokenSource())
-            {
-                this.AddHttpException(new OperationCanceledException("Operation Canceled", source.Token));
-                this.AddHttpResponse(new HttpResponseMessageAbstraction(HttpStatusCode.Accepted, new HttpResponseHeadersAbstraction(), "<Okay />"));
-                var context = new HDInsightSubscriptionAbstractionContext(GetValidCredentials(), source.Token);
-                response = await factory.Retry(context, this.DoClientSend, this.ShouldRetry, 3, this.pollInterval, false);
-            }
-            Assert.AreEqual(2, this.attempts);
-            Assert.AreEqual(0, this.responses.Count);
-            Assert.AreEqual(HttpStatusCode.Accepted, response.StatusCode);
-            Assert.AreEqual("<Okay />", response.Content);
-        }
-
-        [TestMethod]
-        [TestCategory(TestRunMode.CheckIn)]
         public async Task TimeOutExceptionOnTheHttpCallShouldRetry()
         {
-            IHttpResponseMessageAbstraction response;
             var factory = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>();
+            OperationExecutionResult<IHttpResponseMessageAbstraction> response;
+
             using (CancellationTokenSource source = new CancellationTokenSource())
             {
                 this.AddHttpException(new TimeoutException("The Operation Timed Out"));
                 this.AddHttpResponse(new HttpResponseMessageAbstraction(HttpStatusCode.Accepted, new HttpResponseHeadersAbstraction(), "<Okay />"));
-                var context = new HDInsightSubscriptionAbstractionContext(GetValidCredentials(), source.Token);
-                response = await factory.Retry(context, this.DoClientSend, this.ShouldRetry, 3, this.pollInterval, false);
+                response =
+                    await
+                    OperationExecutor.ExecuteOperationWithRetry(
+                        () => this.DoClientSend(factory.Create()),
+                        this.GetRetryPolicy(),
+                        new HDInsightSubscriptionAbstractionContext(GetValidCredentials(), source.Token),
+                        new Logger());
             }
             Assert.AreEqual(2, this.attempts);
             Assert.AreEqual(0, this.responses.Count);
-            Assert.AreEqual(HttpStatusCode.Accepted, response.StatusCode);
-            Assert.AreEqual("<Okay />", response.Content);
+            Assert.AreEqual(HttpStatusCode.Accepted, response.ExecutionOutput.StatusCode);
+            Assert.AreEqual("<Okay />", response.ExecutionOutput.Content);
         }
 
         [TestMethod]
         [TestCategory(TestRunMode.CheckIn)]
-        public async Task TaskCancledNotByUserShouldRetry()
-        {
-            IHttpResponseMessageAbstraction response;
-            var factory = ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>();
-            using (CancellationTokenSource source = new CancellationTokenSource())
-            {
-                this.AddHttpException(new TaskCanceledException("Operation Canceled"));
-                this.AddHttpResponse(new HttpResponseMessageAbstraction(HttpStatusCode.Accepted, new HttpResponseHeadersAbstraction(), "<Okay />"));
-                var context = new HDInsightSubscriptionAbstractionContext(GetValidCredentials(), source.Token);
-                response = await factory.Retry(context, this.DoClientSend, this.ShouldRetry, 3, this.pollInterval, false);
-            }
-            Assert.AreEqual(2, this.attempts);
-            Assert.AreEqual(0, this.responses.Count);
-            Assert.AreEqual(HttpStatusCode.Accepted, response.StatusCode);
-            Assert.AreEqual("<Okay />", response.Content);
-        }
-
-        [TestMethod]
-        [TestCategory(TestRunMode.CheckIn)]
-        public async Task TaskCancledByUserShouldNotRetry()
+        public async Task TaskCanceledByUserShouldNotRetry()
         {
             try
             {
@@ -185,8 +176,15 @@
                 {
                     var context = new HDInsightSubscriptionAbstractionContext(GetValidCredentials(), source.Token);
                     source.Cancel();
-                    await factory.Retry(context, this.DoClientSend, this.ShouldRetry, 3, this.pollInterval, false);
+                    var val = await
+                    OperationExecutor.ExecuteOperationWithRetry(
+                        () => this.DoClientSend(factory.Create()),
+                        this.GetRetryPolicy(),
+                        context,
+                        new Logger());
+                    Assert.IsNotNull(val.ExecutionOutput);
                 }
+                Assert.Fail("Should have thrown an operation cancelled exception");
             }
             catch (OperationCanceledException tex)
             {
@@ -215,16 +213,24 @@
             this.pollInterval = TimeSpan.FromMilliseconds(10);
             this.timeout = TimeSpan.FromMilliseconds(100);
             this.AddHttpResponse(new HttpResponseMessageAbstraction(HttpStatusCode.BadGateway, new HttpResponseHeadersAbstraction(), "Transient Failure"), 11);
-            var response = await this.PerformRequest();
-            Assert.IsTrue(this.attempts > 1);
-            Assert.IsTrue(this.responses.Count < 10);
-            Assert.AreEqual(HttpStatusCode.BadGateway, response.StatusCode);
-            Assert.AreEqual("Transient Failure", response.Content);
+            IHttpResponseMessageAbstraction response;
+            try
+            {
+                response = await this.PerformRequest();
+                Assert.Fail("Should have failed.");
+            }
+            catch (HttpLayerException ex)
+            {
+                Assert.IsTrue(this.attempts > 1);
+                Assert.IsTrue(this.responses.Count < 10);
+                Assert.AreEqual(HttpStatusCode.BadGateway, ex.RequestStatusCode);
+                Assert.AreEqual("Transient Failure", ex.RequestContent);
+            }
         }
 
         [TestMethod]
         [TestCategory(TestRunMode.CheckIn)]
-        public async Task WhenMultipleHttpRequestsProduceExceptionsAndAndTheTimeoutIsReachedTheResultIsAnExcpetion()
+        public async Task WhenMultipleHttpRequestsProduceExceptionsAndAndTheTimeoutIsReachedTheResultIsAnException()
         {
             try
             {
@@ -252,19 +258,51 @@
 
             var manager = ServiceLocator.Instance.Locate<IServiceLocationSimulationManager>().MockingLevel = ServiceLocationMockingLevel.ApplyIndividualTestMockingOnly;
             var individual = ServiceLocator.Instance.Locate<IServiceLocationIndividualTestManager>();
-            var timingManager = new HttpOperationManager();
-            timingManager.RetryCount = 3;
-            timingManager.RetryInterval = TimeSpan.FromMilliseconds(10);
-            //individual.Override<IHttpOperationManager>(timingManager);
 
             var client = ServiceLocator.Instance.Locate<IHDInsightClientFactory>().Create(credentails);
 
             this.AddHttpResponse(new HttpResponseMessageAbstraction(HttpStatusCode.InternalServerError, new HttpResponseHeadersAbstraction(), "Server Problem"));
             this.AddHttpResponse(goodResponse);
+
+            //The fist list containers on an HdInsightClient performs a get resource provider properties call.
+            //so let us add the response for that into the set of responses for the restclient.
+            dynamic xml = DynaXmlBuilder.Create(false, Formatting.None);
+            xml.xmlns("http://schemas.microsoft.com/windowsazure")
+               .Root
+               .b
+                 .ResourceProviderProperty
+                 .b
+                   .Key("Test")
+                   .Value("Value")
+                 .d
+               .d
+               .End();
+
+            this.AddHttpResponse(new HttpResponseMessageAbstraction(HttpStatusCode.OK, new HttpResponseHeadersAbstraction(), xml.ToString()));
             var results = client.ListClusters();
-            Assert.AreEqual(2, this.attempts);
+            Assert.AreEqual(3, this.attempts);
             Assert.AreEqual(0, this.responses.Count);
             Assert.IsTrue(results.Any());
+        }
+
+        [TestMethod]
+        [TestCategory(TestRunMode.CheckIn)]
+        public async Task TaskDoesNotRetryOn401Error()
+        {
+            var credentails = IntegrationTestBase.GetValidCredentials();
+            var restLayer = ServiceLocator.Instance.Locate<IHDInsightManagementRestClientFactory>().Create(credentails, GetAbstractionContext(), false);
+            var goodResponse = await restLayer.ListCloudServices();
+
+            var manager = ServiceLocator.Instance.Locate<IServiceLocationSimulationManager>().MockingLevel = ServiceLocationMockingLevel.ApplyIndividualTestMockingOnly;
+            var individual = ServiceLocator.Instance.Locate<IServiceLocationIndividualTestManager>();
+
+            var client = ServiceLocator.Instance.Locate<IHDInsightClientFactory>().Create(credentails);
+
+            this.AddHttpResponse(new HttpResponseMessageAbstraction(HttpStatusCode.Unauthorized, new HttpResponseHeadersAbstraction(), "401 Unauthorized"));
+            this.AddHttpResponse(goodResponse);
+            var results = this.PerformRequest();
+            Assert.AreEqual(1, this.attempts);
+            Assert.IsNotNull(results.Exception);
         }
 
         [TestMethod]
@@ -273,10 +311,6 @@
         {
             var manager = ServiceLocator.Instance.Locate<IServiceLocationSimulationManager>().MockingLevel = ServiceLocationMockingLevel.ApplyIndividualTestMockingOnly;
             var individual = ServiceLocator.Instance.Locate<IServiceLocationIndividualTestManager>();
-            var timingManager = new HttpOperationManager();
-            timingManager.RetryCount = 3;
-            timingManager.RetryInterval = TimeSpan.FromMilliseconds(10);
-            individual.Override<IHttpOperationManager>(timingManager);
 
             dynamic xml = DynaXmlBuilder.Create(false, Formatting.None);
             xml.xmlns("http://schemas.microsoft.com/windowsazure")
@@ -295,6 +329,7 @@
 
             this.AddHttpResponse(new HttpResponseMessageAbstraction(HttpStatusCode.InternalServerError, new HttpResponseHeadersAbstraction(), "Server Problem"));
             this.AddHttpResponse(new HttpResponseMessageAbstraction(HttpStatusCode.OK, new HttpResponseHeadersAbstraction(), content));
+
             var properties = await client.GetResourceProviderProperties();
             Assert.AreEqual(2, this.attempts);
             Assert.AreEqual(0, this.responses.Count);

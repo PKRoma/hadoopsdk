@@ -19,6 +19,7 @@ namespace Microsoft.Hadoop.Avro.Schema
     using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.IO;
+    using System.Linq;
     using Newtonsoft.Json;
 
     /// <summary>
@@ -102,5 +103,242 @@ namespace Microsoft.Hadoop.Avro.Schema
         /// <param name="writer">The writer.</param>
         /// <param name="seenSchemas">The seen schemas.</param>
         internal abstract void ToJsonSafe(JsonTextWriter writer, HashSet<NamedSchema> seenSchemas);
+
+        #region Schema creation methods.
+
+        /// <summary>
+        /// Creates a <see cref="NullSchema" /> instance.
+        /// </summary>
+        /// <returns>An instance of the <see cref="NullSchema" />.</returns>
+        public static NullSchema CreateNull()
+        {
+            return new NullSchema();
+        }
+
+        /// <summary>
+        /// Creates a <see cref="BooleanSchema" /> instance.
+        /// </summary>
+        /// <returns>An instance of the <see cref="BooleanSchema" />.</returns>
+        public static BooleanSchema CreateBoolean()
+        {
+            return new BooleanSchema();
+        }
+
+        /// <summary>
+        /// Creates a <see cref="IntSchema" /> instance.
+        /// </summary>
+        /// <returns>An instance of the <see cref="IntSchema" />.</returns>
+        public static IntSchema CreateInt()
+        {
+            return new IntSchema();
+        }
+
+        /// <summary>
+        /// Creates a <see cref="LongSchema" /> instance.
+        /// </summary>
+        /// <returns>An instance of the <see cref="LongSchema" />.</returns>
+        public static LongSchema CreateLong()
+        {
+            return new LongSchema();
+        }
+
+        /// <summary>
+        /// Creates a <see cref="DoubleSchema" /> instance.
+        /// </summary>
+        /// <returns>An instance of the <see cref="DoubleSchema" />.</returns>
+        public static DoubleSchema CreateDouble()
+        {
+            return new DoubleSchema();
+        }
+
+        /// <summary>
+        /// Creates a <see cref="FloatSchema" /> instance.
+        /// </summary>
+        /// <returns>An instance of the <see cref="FloatSchema" />.</returns>
+        public static FloatSchema CreateFloat()
+        {
+            return new FloatSchema();
+        }
+
+        /// <summary>
+        /// Creates a <see cref="StringSchema" /> instance.
+        /// </summary>
+        /// <returns>An instance of the <see cref="StringSchema" />.</returns>
+        public static StringSchema CreateString()
+        {
+            return new StringSchema();
+        }
+
+        /// <summary>
+        /// Creates a <see cref="BytesSchema" /> instance.
+        /// </summary>
+        /// <returns>An instance of the <see cref="BytesSchema" />.</returns>
+        public static BytesSchema CreateBytes()
+        {
+            return new BytesSchema();
+        }
+
+        /// <summary>
+        /// Creates a <see cref="RecordSchema" /> instance.
+        /// </summary>
+        /// <param name="name">Record name.</param>
+        /// <param name="ns">Record namespace.</param>
+        /// <returns>An instance of the <see cref="RecordSchema" />.</returns>
+        public static RecordSchema CreateRecord(string name, string ns)
+        {
+            return new RecordSchema(new NamedEntityAttributes(new SchemaName(name, ns), new List<string>(), string.Empty), typeof(AvroRecord));
+        }
+
+        /// <summary>
+        /// Sets the fields.
+        /// </summary>
+        /// <param name="record">
+        /// The record.
+        /// </param>
+        /// <param name="fields">
+        /// The fields.
+        /// </param>
+        public static void SetFields(RecordSchema record, IEnumerable<RecordField> fields)
+        {
+            if (record == null)
+            {
+                throw new ArgumentNullException("record");
+            }
+
+            if (fields == null)
+            {
+                throw new ArgumentNullException("fields");
+            }
+
+            if (record.Fields.Count != 0)
+            {
+                throw new InvalidOperationException("Fields can be set only on empty record.");
+            }
+
+            int fieldPosition = 0;
+            foreach (var field in fields)
+            {
+                record.AddField(new RecordField(field.NamedEntityAttributes, field.TypeSchema, field.Order, field.HasDefaultValue, field.DefaultValue, field.MemberInfo, fieldPosition++));
+            }
+        }
+
+        /// <summary>
+        /// Creates a <see cref="RecordField" /> instance.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="fieldType">The field type.</param>
+        /// <returns>An instance of the <see cref="RecordField" />.</returns>
+        public static RecordField CreateField(string fieldName, TypeSchema fieldType)
+        {
+            if (string.IsNullOrEmpty(fieldName))
+            {
+                throw new ArgumentException("Field name is not allowed to be null or empty.");
+            }
+
+            if (fieldType == null)
+            {
+                throw new ArgumentNullException("fieldType");
+            }
+
+            return new RecordField(
+                new NamedEntityAttributes(new SchemaName(fieldName), new List<string>(), string.Empty),
+                fieldType,
+                SortOrder.Ascending,
+                false,
+                null,
+                null,
+                -1);
+        }
+
+        /// <summary>
+        /// Creates a <see cref="RecordField" /> instance.
+        /// </summary>
+        /// <param name="fieldName">The field name.</param>
+        /// <param name="fieldType">The field type.</param>
+        /// <param name="ns">The namespace.</param>
+        /// <param name="aliases">The name aliases.</param>
+        /// <param name="doc">The field documentation.</param>
+        /// <param name="defaultValue">The field default value.</param>
+        /// <param name="order">The field sorting order.</param>
+        /// <returns>An instance of the <see cref="RecordField" />.</returns>
+        public static RecordField CreateField(string fieldName, TypeSchema fieldType, string ns, IEnumerable<string> aliases, string doc, object defaultValue, SortOrder order)
+        {
+            return new RecordField(
+                new NamedEntityAttributes(new SchemaName(fieldName, ns), aliases, doc),
+                fieldType,
+                order,
+                defaultValue == null,
+                defaultValue,
+                null,
+                -1);
+        }
+
+        /// <summary>
+        /// Creates a <see cref="FixedSchema" /> instance.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <param name="ns">The namespace.</param>
+        /// <param name="size">The size.</param>
+        /// <returns>An instance of the <see cref="FixedSchema" />.</returns>
+        public static FixedSchema CreateFixed(string name, string ns, int size)
+        {
+            return new FixedSchema(new NamedEntityAttributes(new SchemaName(name, ns), new List<string>(), string.Empty), size, typeof(byte[]));
+        }
+
+        /// <summary>
+        /// Creates a <see cref="EnumSchema" /> instance.
+        /// </summary>
+        /// <param name="name">The name.</param>
+        /// <param name="ns">The namespace.</param>
+        /// <param name="values">The values of the enum.</param>
+        /// <returns>An instance of the <see cref="EnumSchema" />.</returns>
+        public static EnumSchema CreateEnumeration(string name, string ns, IEnumerable<string> values)
+        {
+            if (values == null)
+            {
+                throw new ArgumentNullException("values");
+            }
+
+            var result = new EnumSchema(new NamedEntityAttributes(new SchemaName(name, ns), new List<string>(), string.Empty), typeof(Enum));
+            values.ToList().ForEach(result.AddSymbol);
+            return result;
+        }
+
+        /// <summary>
+        /// Creates a <see cref="ArraySchema" /> instance.
+        /// </summary>
+        /// <param name="itemSchema">The schema of the items.</param>
+        /// <returns>An instance of the <see cref="ArraySchema" />.</returns>
+        public static ArraySchema CreateArray(TypeSchema itemSchema)
+        {
+            return new ArraySchema(itemSchema, typeof(Array));
+        }
+
+        /// <summary>
+        /// Creates a <see cref="MapSchema" /> instance.
+        /// </summary>
+        /// <param name="valueSchema">The schema of the values.</param>
+        /// <returns>An instance of the <see cref="MapSchema" />.</returns>
+        public static MapSchema CreateMap(TypeSchema valueSchema)
+        {
+            return new MapSchema(new StringSchema(), valueSchema, typeof(Dictionary<,>));
+        }
+
+        /// <summary>
+        /// Creates a <see cref="UnionSchema" /> instance.
+        /// </summary>
+        /// <param name="schemas">The schemas.</param>
+        /// <returns>An instance of the <see cref="UnionSchema" />.</returns>
+        public static UnionSchema CreateUnion(params TypeSchema[] schemas)
+        {
+            if (schemas == null)
+            {
+                throw new ArgumentNullException("schemas");
+            }
+
+            return new UnionSchema(new List<TypeSchema>(schemas), typeof(List<>));
+        }
+
+        #endregion //Schema creation methods.
     }
 }

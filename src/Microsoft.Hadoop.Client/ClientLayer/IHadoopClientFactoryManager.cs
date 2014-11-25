@@ -47,9 +47,23 @@ namespace Microsoft.Hadoop.Client.ClientLayer
         /// <param name="credentials">
         /// The credentials.
         /// </param>
+        /// <param name="userAgentString">
+        /// Custome useragent string to pass.
+        /// </param>
         /// <returns>
         /// A new Hadoop client capable of communicating with a Hadoop cluster.
         /// </returns>
-        IJobSubmissionClient Create(IJobSubmissionClientCredential credentials);
+        IJobSubmissionClient Create(IJobSubmissionClientCredential credentials, string userAgentString);
+
+        /// <summary>
+        /// Creates a new Hadoop Application History Client with the given credentials.
+        /// </summary>
+        /// <param name="credentials">
+        /// The credentials.
+        /// </param>
+        /// <returns>
+        /// A new Hadoop Application History client capable of communicating with a Hadoop cluster and listing application history.
+        /// </returns>
+        IHadoopApplicationHistoryClient CreateHadoopApplicationHistoryClient(IJobSubmissionClientCredential credentials);
     }
 }

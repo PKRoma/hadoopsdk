@@ -295,7 +295,8 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
                 Input = "asv://input",
                 Output = "asv://output",
                 Mapper = "asv://mapper",
-                Reducer = "asv://reducer"
+                Reducer = "asv://reducer",
+                Combiner = "asv://combiner"
             };
 
             var payloadConverter = new PayloadConverterBase();
@@ -305,6 +306,36 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             Assert.IsTrue(payload.Contains(string.Format("{0}={1}", WebHCatConstants.Output, Uri.EscapeDataString(streamingMapReduceJob.Output))));
             Assert.IsTrue(payload.Contains(string.Format("{0}={1}", WebHCatConstants.Mapper, Uri.EscapeDataString(streamingMapReduceJob.Mapper))));
             Assert.IsTrue(payload.Contains(string.Format("{0}={1}", WebHCatConstants.Reducer, Uri.EscapeDataString(streamingMapReduceJob.Reducer))));
+            Assert.IsTrue(payload.Contains(string.Format("{0}={1}", WebHCatConstants.Combiner, Uri.EscapeDataString(streamingMapReduceJob.Combiner))));
+        }
+
+        [TestMethod]
+        [TestCategory("CheckIn")]
+        [TestCategory("Payload")]
+        public void CanSerializeValidStreamingMapReduceJobRequest_Defines()
+        {
+            var streamingMapReduceJob = new StreamingMapReduceJobCreateParameters()
+            {
+                Input = "asv://input",
+                Output = "asv://output",
+                Mapper = "asv://mapper",
+                Reducer = "asv://reducer",
+            };
+
+            streamingMapReduceJob.Defines.Add(new KeyValuePair<string, string>("definekey1", "definevalue1"));
+            streamingMapReduceJob.Defines.Add(new KeyValuePair<string, string>("definekey2", "definevalue2"));
+            streamingMapReduceJob.Defines.Add(new KeyValuePair<string, string>("definekey3", "definevalue3"));
+            var payloadConverter = new PayloadConverterBase();
+            var payload = payloadConverter.SerializeStreamingMapReduceRequest("hadoop", streamingMapReduceJob);
+            Assert.IsTrue(payload.Contains(string.Format("{0}={1}", WebHCatConstants.Input, Uri.EscapeDataString(streamingMapReduceJob.Input))));
+            Assert.IsTrue(payload.Contains(string.Format("{0}={1}", WebHCatConstants.Output, Uri.EscapeDataString(streamingMapReduceJob.Output))));
+            Assert.IsTrue(payload.Contains(string.Format("{0}={1}", WebHCatConstants.Mapper, Uri.EscapeDataString(streamingMapReduceJob.Mapper))));
+            Assert.IsTrue(payload.Contains(string.Format("{0}={1}", WebHCatConstants.Reducer, Uri.EscapeDataString(streamingMapReduceJob.Reducer))));
+
+            foreach (var define in streamingMapReduceJob.Defines)
+            {
+                Assert.IsTrue(payload.Contains(Uri.EscapeDataString(string.Format("{0}={1}", define.Key, define.Value))));
+            }
         }
 
         [TestMethod]
@@ -384,7 +415,6 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             Assert.IsTrue(payload.Contains(string.Format("{0}={1}", WebHCatConstants.Input, Uri.EscapeDataString(streamingMapReduceJob.Input))));
             Assert.IsTrue(payload.Contains(string.Format("{0}={1}", WebHCatConstants.Output, Uri.EscapeDataString(streamingMapReduceJob.Output))));
             Assert.IsTrue(payload.Contains(string.Format("{0}={1}", WebHCatConstants.Mapper, Uri.EscapeDataString(streamingMapReduceJob.Mapper))));
-            Assert.IsTrue(payload.Contains(string.Format("{0}={1}", WebHCatConstants.Reducer, Uri.EscapeDataString(PayloadConverterBase.NoneReducer))));
         }
 
         [TestMethod]

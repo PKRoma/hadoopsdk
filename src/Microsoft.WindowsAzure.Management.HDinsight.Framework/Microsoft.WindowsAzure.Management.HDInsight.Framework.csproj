@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Microsoft.WindowsAzure.Management.HDInsight.Framework</RootNamespace>
     <AssemblyName>Microsoft.WindowsAzure.Management.HDInsight.Framework</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -21,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -29,16 +30,55 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Coverage|AnyCPU'">
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Net.Http, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
-    <Reference Include="System.Net.Http.WebRequest, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Net.Http.WebRequest" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.ServiceModel.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Rest\CodeGen\CompileException.cs" />
+    <Compile Include="Rest\CodeGen\HttpRestClientCodeGenerator.cs" />
+    <Compile Include="Rest\Contract.cs" />
+    <Compile Include="Rest\CustomMessageHandlers\HttpLoggingHandler.cs" />
+    <Compile Include="Rest\Formatters\JsonRequestFormatter.cs" />
+    <Compile Include="Rest\Formatters\JsonResponseFormatter.cs" />
+    <Compile Include="Rest\Formatters\XmlOrJsonResponseFormatter.cs" />
+    <Compile Include="Rest\Formatters\XmlRequestFormatter.cs" />
+    <Compile Include="Rest\Formatters\XmlResponseFormatter.cs" />
+    <Compile Include="Rest\HttpRequestParameters.cs" />
+    <Compile Include="Rest\HttpRestClient.cs" />
+    <Compile Include="Rest\HttpRestClientConfiguration.cs" />
+    <Compile Include="Rest\HttpRestClientFactory.cs" />
+    <Compile Include="Rest\HttpRestDefinitionAttribute.cs" />
+    <Compile Include="Rest\HttpRestInterfaceValidationErrorCode.cs" />
+    <Compile Include="Rest\HttpRestInterfaceValidationException.cs" />
+    <Compile Include="Rest\HttpRestInterfaceValidator.cs" />
+    <Compile Include="Rest\HttpRestInvoke.cs" />
+    <Compile Include="Rest\HttpRestRequestFormatterAttributeBase.cs" />
+    <Compile Include="Rest\HttpRestResponseFormatterAttributeBase.cs" />
+    <Compile Include="Rest\IHttpMessageProcessingHandler.cs" />
+    <Compile Include="Rest\IRequestFormatter.cs" />
+    <Compile Include="Rest\IResponseFormatter.cs" />
+    <Compile Include="Rest\IRetryPolicy.cs" />
+    <Compile Include="Rest\CustomMessageHandlers\CustomHeaderAttribute.cs" />
+    <Compile Include="Rest\CustomMessageHandlers\ExpectedStatusCodeValidatorAttribute.cs" />
+    <Compile Include="Rest\CustomMessageHandlers\InvalidExpectedStatusCodeException.cs" />
+    <Compile Include="Rest\Retries\HttpRestClientRetryPolicy.cs" />
+    <Compile Include="Rest\Retries\NoRetryPolicy.cs" />
     <Compile Include="ServiceLocation\IRegisteringService.cs" />
     <Compile Include="ServiceLocation\IServiceLocationAssemblySweep.cs" />
     <Compile Include="ServiceLocation\IServiceLocationRegistrarProxyFactory.cs" />
@@ -62,14 +102,17 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Microsoft.HDInsight.Net.Http.Formatting\Microsoft.HDInsight.Net.Http.Formatting.csproj">
+      <Project>{148bd053-7fdc-4e8c-bcc8-016ea61fcaaa}</Project>
+      <Name>Microsoft.HDInsight.Net.Http.Formatting</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Microsoft.WindowsAzure.Management.HDInsight.Framework.Core\Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.csproj">
       <Project>{55787775-8b25-436f-b9b9-c2b60ef80b20}</Project>
       <Name>Microsoft.WindowsAzure.Management.HDInsight.Framework.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Microsoft.HDInsight.Threading\Microsoft.HDInsight.Threading.csproj">
-      <Project>{dbffc131-e089-4173-9b9e-6826fe596faf}</Project>
-      <Name>Microsoft.HDInsight.Threading</Name>
-    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="..\..\build\targets\Project.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -42,7 +42,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.Web
         /// <summary>
         ///     Gets or sets the request content.
         /// </summary>
-        string Content { get; set; }
+        HttpContent Content { get; set; }
 
         /// <summary>
         ///     Gets the request headers collection.

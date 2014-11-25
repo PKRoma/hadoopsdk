@@ -14,15 +14,15 @@
 // permissions and limitations under the License.
 namespace Microsoft.Hadoop.Avro.Serializers
 {
-    using System;
     using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.Linq.Expressions;
+    using System.Reflection;
     using System.Runtime.Serialization;
     using Microsoft.Hadoop.Avro.Schema;
 
     /// <summary>
-    ///     Only possible fixed value is Guid. It is handled in the <see cref="GuidSerializer"/>. Here only skipper is implemented.
+    ///     Possible fixed values are Guid and byte[] attributed with <see cref="AvroFixedAttribute"/>.
     /// </summary>
     internal sealed class FixedSerializer : ObjectSerializerBase<FixedSchema>
     {
@@ -65,6 +65,27 @@ namespace Microsoft.Hadoop.Avro.Serializers
         protected override void SkipSafe(IDecoder decoder)
         {
             decoder.SkipFixed(this.Schema.Size);
+        }
+
+        protected override Expression BuildSerializerSafe(Expression encoder, Expression value)
+        {
+            PropertyInfo length = typeof(byte[]).GetProperty("Length");
+            var exception = Expression.Constant(
+                    new SerializationException(
+                        string.Format(
+                            CultureInfo.InvariantCulture,
+                            "The size of the array does not match the size of the fixed '{0}'.",
+                            this.Schema.Size)));
+
+            return Expression.Condition(
+                Expression.Equal(Expression.Constant(this.Schema.Size), Expression.Property(value, length)),
+                Expression.Call(encoder, this.Encode("Fixed"), new[] { value }),
+                Expression.Throw(exception));
+        }
+
+        protected override Expression BuildDeserializerSafe(Expression decoder)
+        {
+            return Expression.Call(decoder, this.Decode("Fixed"), new Expression[] { Expression.Constant(this.Schema.Size) });
         }
     }
 }

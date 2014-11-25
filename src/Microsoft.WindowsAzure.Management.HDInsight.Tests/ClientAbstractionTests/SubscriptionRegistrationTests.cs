@@ -24,6 +24,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.AzureManagementClient;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestClient;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Retries;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
     using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities;
 
@@ -40,18 +41,6 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
         public override void TestCleanup()
         {
             base.TestCleanup();
-        }
-
-        [TestMethod]
-        [TestCategory("Integration")]
-        [TestCategory("Nightly")]
-        [TestCategory("SubscriptionRegistrationClient")]
-        [TestCategory("Scenario")]
-        public async Task ICanPerformA_PositiveSubscriptionValidation_Using_SubscriptionRegistrationAbstraction_AgainstAzure() // Always goes against azure to quickly validate end2end
-        {
-            IHDInsightCertificateCredential credentials = IntegrationTestBase.GetValidCredentials();
-            var client = new SubscriptionRegistrationClient(credentials, GetAbstractionContext(), false);
-            Assert.IsTrue(await client.ValidateSubscriptionLocation("East US 2"));
         }
 
         [TestMethod]

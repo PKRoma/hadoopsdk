@@ -22,6 +22,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Locati
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestClient;
     using Microsoft.WindowsAzure.Management.HDInsight;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Retries;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
 
     internal class LocationFinderClient : ILocationFinderClient

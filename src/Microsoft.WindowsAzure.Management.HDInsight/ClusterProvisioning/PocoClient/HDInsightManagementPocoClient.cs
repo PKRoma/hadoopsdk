@@ -16,21 +16,26 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
 {
     using System;
     using System.Collections.Generic;
+    using System.Collections.ObjectModel;
     using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.Linq;
+    using System.Net;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Asv;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.AzureManagementClient;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.ClusterManager;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.LocationFinder;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestClient;
     using Microsoft.WindowsAzure.Management.HDInsight;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Retries;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Logging;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
     using Microsoft.WindowsAzure.Management.HDInsight.Logging;
@@ -87,51 +92,23 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
             var result = clusters.FirstOrDefault(cluster => cluster.Name.Equals(dnsName, StringComparison.OrdinalIgnoreCase));
             return result;
         }
-
-        public void ValidateAsvAccounts(ClusterCreateParameters details)
+        
+        public async Task<ClusterDetails> ListContainer(string dnsName, string location)
         {
-            var defaultStorageAccount = new WabStorageAccountConfiguration(
-                details.DefaultStorageAccountName, details.DefaultStorageAccountKey, details.DefaultStorageContainer);
-            // Flattens all the configurations into a single list for more uniform validation
-            var asvList = ResolveStorageAccounts(details.AdditionalStorageAccounts).ToList();
-            asvList.Add(ResolveStorageAccount(defaultStorageAccount));
-
-            // Basic validation on the ASV configurations
-            if (string.IsNullOrEmpty(details.DefaultStorageContainer))
-            {
-                throw new InvalidOperationException("Invalid Container. Default Storage Account Container cannot be null or empty");
-            }
-            if (asvList.Any(asv => string.IsNullOrEmpty(asv.Name) || string.IsNullOrEmpty(asv.Key)))
-            {
-                throw new InvalidOperationException("Invalid Azure Configuration. Credentials cannot be null or empty");
-            }
-
-            if (asvList.GroupBy(asv => asv.Name).Count(group => group.Count() > 1) > 0)
-            {
-                throw new InvalidOperationException("Invalid Azure Storage credential. Duplicated values detected");
-            }
-
-            // Validates that we can establish the connection to the ASV Names and the default container
-            var client = ServiceLocator.Instance.Locate<IAsvValidatorClientFactory>().Create();
-            asvList.ForEach(asv => client.ValidateAccount(asv.Name, asv.Key).WaitForResult());
-
-            var resolvedAccounts = ResolveStorageAccounts(details.AdditionalStorageAccounts);
-            details.AdditionalStorageAccounts.Clear();
-            details.AdditionalStorageAccounts.AddRange(resolvedAccounts);
-
-            var resolvedDefaultStorageAccount = ResolveStorageAccount(defaultStorageAccount);
-            details.DefaultStorageAccountName = resolvedDefaultStorageAccount.Name;
-
-            client.CreateContainerIfNotExists(details.DefaultStorageAccountName,
-                                              details.DefaultStorageAccountKey,
-                                              details.DefaultStorageContainer).WaitForResult();
+            var clusters = await this.ListContainers();
+            var result = clusters.FirstOrDefault(cluster => cluster.Name.Equals(dnsName, StringComparison.OrdinalIgnoreCase) && cluster.Location.Equals(location, StringComparison.OrdinalIgnoreCase));
+            return result;
         }
 
         public async Task CreateContainer(ClusterCreateParameters details)
         {
             this.LogMessage("Create Cluster Requested", Severity.Informational, Verbosity.Diagnostic);
-            // Validates that the AzureStorage Configurations are valid.
-            this.ValidateAsvAccounts(details);
+            // Validates that the AzureStorage Configurations are valid and optionally append FQDN suffix to the storage account name
+            AsvValidationHelper.ValidateAndResolveAsvAccountsAndPrep(details);
+
+            // Validates that the config actions' Uris are downloadable.
+            UriEndpointValidator.ValidateAndResolveConfigActionEndpointUris(details);
+
             var overrideHandlers = ServiceLocator.Instance.Locate<IHDInsightClusterOverrideManager>().GetHandlers(this.credentials, this.Context, this.ignoreSslErrors);
 
             var rdfeCapabilitiesClient =
@@ -141,6 +118,13 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
             {
                 throw new InvalidOperationException(string.Format(
                     "Your subscription cannot create clusters, please contact Support"));
+            }
+
+            // For container resource type, config actions should never be enabled
+            if (details.ConfigActions != null && details.ConfigActions.Count > 0)
+            {
+                throw new InvalidOperationException(string.Format(
+                    "Your subscription cannot create customized clusters, please contact Support"));
             }
 
             // Validates the region for the cluster creation
@@ -154,20 +138,30 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
                         string.Join(",", availableLocations)));
             }
 
-            AssertHighAvailibityCapabilityEnabled(capabilities, details);
-
             // Validates whether the subscription\location needs to be initialized
             var registrationClient = ServiceLocator.Instance.Locate<ISubscriptionRegistrationClientFactory>().Create(this.credentials, this.Context, this.ignoreSslErrors);
+            await registrationClient.RegisterSubscription();
             if (!await registrationClient.ValidateSubscriptionLocation(details.Location))
             {
-                await registrationClient.RegisterSubscription();
                 await registrationClient.RegisterSubscriptionLocation(details.Location);
             }
 
             // Creates the cluster
             var client = ServiceLocator.Instance.Locate<IHDInsightManagementRestClientFactory>().Create(this.credentials, this.Context, this.ignoreSslErrors);
-            string payload = overrideHandlers.PayloadConverter.SerializeClusterCreateRequest(details);
-            await client.CreateContainer(details.Name, details.Location, payload);
+            if (details.ClusterType == ClusterType.HBase || details.ClusterType == ClusterType.Storm)
+            {
+                string payload = overrideHandlers.PayloadConverter.SerializeClusterCreateRequestV3(details);
+                await client.CreateContainer(details.Name, details.Location, payload, 3);
+            }
+            else
+            {
+                if (!details.VirtualNetworkId.IsNullOrEmpty() || !details.SubnetName.IsNullOrEmpty())
+                {
+                    throw new InvalidOperationException("Create Hadoop clusters within a virtual network is not permitted.");
+                }
+                string payload = overrideHandlers.PayloadConverter.SerializeClusterCreateRequest(details);
+                await client.CreateContainer(details.Name, details.Location, payload);
+            }
         }
 
         public async Task DeleteContainer(string dnsName)
@@ -178,7 +172,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
 
             if (cluster == null)
             {
-                throw new InvalidOperationException(string.Format("The cluster '{0}' doesn't exist.", dnsName));
+                throw new HDInsightClusterDoesNotExistException(string.Format("The cluster '{0}' doesn't exist.", dnsName));
             }
             await this.DeleteContainer(cluster.Name, cluster.Location);
         }
@@ -187,6 +181,11 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
         {
             var client = ServiceLocator.Instance.Locate<IHDInsightManagementRestClientFactory>().Create(this.credentials, this.Context, this.ignoreSslErrors);
             await client.DeleteContainer(dnsName, location);
+        }
+
+        public Task<Guid> ChangeClusterSize(string dnsName, string location, int newSize)
+        {
+            throw new NotImplementedException();
         }
 
         public async Task<Guid> EnableDisableProtocol(UserChangeRequestUserType requestType, UserChangeRequestOperationType operation, string dnsName, string location, string userName, string password, DateTimeOffset expiration)
@@ -203,21 +202,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
             return resultId.Data;
         }
 
-        [SuppressMessage("Microsoft.Usage", "CA1806:DoNotIgnoreMethodResults", MessageId = "System.Boolean.TryParse(System.String,System.Boolean@)", Justification = "Need to do a non-throwing parse of the boolean value.")]
-        [SuppressMessage("Microsoft.Naming", "CA2204:Literals should be spelled correctly", MessageId = "EnsureHighAvailability", Justification = "Needed to show proper error message.")]
-        internal static void AssertHighAvailibityCapabilityEnabled(IEnumerable<KeyValuePair<string, string>> capabilities, ClusterCreateParameters details)
-        {
-            if (details.EnsureHighAvailability)
-            {
-                var headNodeHACapability = capabilities.FirstOrDefault(capability => capability.Key == HighAvailabilityCapabilitityName);
-                if (headNodeHACapability.Key.IsNull())
-                {
-                    throw new InvalidOperationException("Your subscription cannot create clusters with EnsureHighAvailability set to true, please contact Support.");
-                }
-            }
-        }
-
-        // This method is used by the NonPublic SDK.  Be aware of braking changes to that project when you alter it.
+        // This method is used by the NonPublic SDK.  Be aware of breaking changes to that project when you alter it.
         internal static async Task EnableDisableUser(IHDInsightSubscriptionAbstractionContext context,
                                                      UserChangeRequestUserType requestType,
                                                      UserChangeRequestOperationType operation,
@@ -297,28 +282,6 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
         private bool HasClusterCreateCapability(IEnumerable<KeyValuePair<string, string>> capabilities)
         {
             return capabilities.Any(capability => capability.Key == ClusterCrudCapabilitityName);
-        }
-
-        internal static IEnumerable<WabStorageAccountConfiguration> ResolveStorageAccounts(IEnumerable<WabStorageAccountConfiguration> storageAccounts)
-        {
-            return storageAccounts.Select(ResolveStorageAccount).ToList();
-        }
-
-        internal static WabStorageAccountConfiguration ResolveStorageAccount(WabStorageAccountConfiguration storageAccount)
-        {
-            return new WabStorageAccountConfiguration(
-                GetFullyQualifiedStorageAccountName(storageAccount.Name), storageAccount.Key, storageAccount.Container);
-        }
-
-        internal static string GetFullyQualifiedStorageAccountName(string accountName)
-        {
-            // accountName
-            if (accountName.IndexOf(".", StringComparison.OrdinalIgnoreCase) == -1)
-            {
-                return string.Format(CultureInfo.InvariantCulture, "{0}.blob.core.windows.net", accountName);
-            }
-
-            return accountName;
         }
 
         public ILogger Logger { get; private set; }

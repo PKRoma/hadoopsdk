@@ -28,6 +28,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.AzureM
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestClient;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Retries;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
     using Microsoft.WindowsAzure.Management.HDInsight;
 
@@ -59,7 +60,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.AzureM
                 client.RequestUri = new Uri(this.credentials.Endpoint, new Uri(relativeUri, UriKind.Relative));
                 client.RequestHeaders.Add(HDInsightRestConstants.XMsVersion);
                 client.RequestHeaders.Add(HDInsightRestConstants.Accept);
-                client.Content = string.Empty;
+                client.Content = new StringContent(string.Empty);
                 client.Method = HttpMethod.Put;
 
                 // Sends, validates and parses the response
@@ -155,9 +156,13 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.AzureM
 
                 client.RequestHeaders.Add(HDInsightRestConstants.XMsVersion);
                 client.RequestHeaders.Add(HDInsightRestConstants.Accept);
-                client.Content = payload;
+                if (payload != null)
+                {
+                    client.Content = new StringContent(payload);
+                }
+                
                 client.Method = method;
-
+                
                 // Sends, validates and parses the response
                 var httpResponse = await client.SendAsync();
                 return new Tuple<HttpStatusCode, string>(httpResponse.StatusCode, httpResponse.Content);

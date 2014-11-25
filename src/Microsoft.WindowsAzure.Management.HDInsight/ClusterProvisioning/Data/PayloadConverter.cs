@@ -17,6 +17,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using System.ComponentModel;
     using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.IO;
@@ -26,9 +27,10 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
     using System.Text;
     using System.Xml;
     using System.Xml.Linq;
+    using System.Security.Cryptography.X509Certificates;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning;
+    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Data;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.VersionFinder;
-    using Microsoft.WindowsAzure.Management.HDInsight;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.DynamicXml.Reader;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.DynamicXml.Writer;
@@ -69,7 +71,13 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
         private const string BlobContainersElementName = "BlobContainers";
         private const string Create = "Create";
         private const string SchemaVersion20 = "2.0";
-
+        private const string WorkerNodeRoleName = "WorkerNodeRole";
+        private const string HeadNodeRoleName = "HeadNodeRole";
+        private const string ClusterTypePropertyName = "Type";
+        private const string HadoopAndHBaseType = "MR,HBase";
+        private const string HadoopAndStormType = "MR,Storm";
+        private const string ContainersResourceType = "containers";
+      
         /// <summary>
         /// Provides the namespace for the May2013 contracts.
         /// </summary>
@@ -234,6 +242,29 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
         }
 
         /// <inheritdoc />
+        public string SerializeClusterCreateRequestV3(ClusterCreateParameters cluster)
+        {
+            Contracts.May2014.ClusterCreateParameters ccp = null;
+            if (cluster.ClusterType == ClusterType.HBase)
+            {
+                ccp = HDInsightClusterRequestGenerator.Create3XClusterForMapReduceAndHBaseTemplate(cluster);
+            }
+            else if (cluster.ClusterType == ClusterType.Storm)
+            {
+                ccp = HDInsightClusterRequestGenerator.Create3XClusterForMapReduceAndStormTemplate(cluster);
+            }
+            else if (cluster.ClusterType == ClusterType.Hadoop)
+            {
+                ccp = HDInsightClusterRequestGenerator.Create3XClusterFromMapReduceTemplate(cluster);
+            }
+            else
+            {
+                throw new InvalidDataException("Invalid cluster type");
+            }
+            return this.CreateClusterRequest_ToInternalV3(ccp);
+        }
+
+        /// <inheritdoc />
         public string SerializeClusterCreateRequest(ClusterCreateParameters cluster)
         {
             return this.CreateClusterRequest_ToInternal(cluster);
@@ -244,8 +275,10 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
         private string CreateClusterRequest_ToInternal(ClusterCreateParameters cluster)
         {
             dynamic dynaXml = DynaXmlBuilder.Create(false, Formatting.None);
-
-            var headNodeCount = cluster.EnsureHighAvailability ? 2 : 1;
+            // The RP translates 1 XL into 2 L for SU 4 and up.
+            // This is done as part of the HA improvement where in the RP would never
+            // create clusters without 2 nodes for SU 4 release (May '14) and up.
+            var headnodeCount = cluster.HeadNodeSize == NodeVMSize.Default ? 1 : 2;
             dynaXml.xmlns("http://schemas.microsoft.com/windowsazure")
                    .Resource
                    .b
@@ -266,15 +299,15 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
                            .b
                              .ClusterRole
                              .b
-                               .Count(headNodeCount)
+                               .Count(headnodeCount)
                                .RoleType(ClusterRoleType.HeadNode)
-                               .VMSize(NodeVMSize.ExtraLarge)
+                               .VMSize(cluster.HeadNodeSize.ToNodeVMSize())
                              .d
                              .ClusterRole
                              .b
                                .Count(cluster.ClusterSizeInNodes)
                                .RoleType(ClusterRoleType.DataNode)
-                               .VMSize(NodeVMSize.Large)
+                               .VMSize(NodeVMSizeInternal.Large)
                              .d
                            .d
                          .Version(cluster.Version)
@@ -365,6 +398,32 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
             }
 
             return xml;
+        }
+
+        private string CreateClusterRequest_ToInternalV3(Contracts.May2014.ClusterCreateParameters ccp)
+        {
+            var ccpAsXmlString = ccp.SerializeAndOptionallyWriteToStream();
+            var doc = new XmlDocument();
+            using (var stringReader = new StringReader(ccpAsXmlString))
+            {
+                using (var reader = XmlReader.Create(stringReader))
+                {
+                    doc.Load(reader);
+                }
+            }
+            var resource = new RDFEResource { SchemaVersion = "3.0", IntrinsicSettings = new XmlNode[] { doc.DocumentElement } };
+
+            using (var str = new MemoryStream())
+            {
+                var serializer = new DataContractSerializer(typeof(RDFEResource));
+                serializer.WriteObject(str, resource);
+
+                str.Position = 0;
+                using (var reader = new StreamReader(str))
+                {
+                    return reader.ReadToEnd();
+                }
+            }
         }
 
         private void SerializeHiveConfiguration(ClusterCreateParameters cluster, dynamic dynaXml)
@@ -466,7 +525,8 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
                                     let resourceNamespace = this.GetStringValue(resource, ResourceProviderNamespaceElementName)
                                     let intrinsicSettings = this.GetIntrinsicSettings(resource)
                                     let storageAccounts = this.GetStorageAccounts(resource, intrinsicSettings)
-                                    where resourceNamespace == deploymentNamespace
+                                    let rdfeResourceType = this.GetStringValue(resource, TypeElementName)
+                                    where resourceNamespace == deploymentNamespace && rdfeResourceType.Equals(ContainersResourceType, StringComparison.OrdinalIgnoreCase)
                                     let versionString = this.GetClusterProperty(resource, intrinsicSettings, VersionName)
                                     select new ClusterDetails()
                                     {
@@ -485,11 +545,38 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
                                         AdditionalStorageAccounts = this.GetAdditionalStorageAccounts(storageAccounts),
                                         VersionNumber = this.ConvertStringToVersion(versionString),
                                         Error = this.DeserializeClusterError(resource),
-                                        SubscriptionId = subscriptionId
+                                        SubscriptionId = subscriptionId,
+                                        ClusterType = this.GetClusterType(resource, intrinsicSettings)
                                     };
 
             clusterList.AddRange(clusterEnumerable);
             return clusterList;
+        }
+
+        internal ClusterType GetClusterType(XElement resource, IEnumerable<KeyValuePair<string, string>> intrinsicSettings)
+        {
+            string clusterType = this.GetClusterProperty(resource, intrinsicSettings, ClusterTypePropertyName);
+            if (clusterType != null && clusterType.Equals(HadoopAndHBaseType))
+            {
+                return ClusterType.HBase;
+            }
+            else if (clusterType != null && clusterType.Equals(HadoopAndStormType))
+            {
+                return ClusterType.Storm;
+            }
+            return ClusterType.Hadoop;
+        }
+
+        // Get a certificate object from a string property encoded as base 64.
+        private static X509Certificate2 GetCertificate(string property)
+        {
+            if (string.IsNullOrEmpty(property))
+            {
+                return null;
+            }
+
+            var bytes = Convert.FromBase64String(property);
+            return new X509Certificate2(bytes);
         }
 
         private IEnumerable<WabStorageAccountConfiguration> GetAdditionalStorageAccounts(IEnumerable<WabStorageAccountConfiguration> storageAccounts)

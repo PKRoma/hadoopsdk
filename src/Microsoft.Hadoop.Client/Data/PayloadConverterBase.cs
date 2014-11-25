@@ -71,9 +71,16 @@ namespace Microsoft.Hadoop.Client.Data
         {
             details.ArgumentNotNull("details");
             var values = new List<KeyValuePair<string, string>>();
+
             values.Add(new KeyValuePair<string, string>(WebHCatConstants.Input, details.Input));
             values.Add(new KeyValuePair<string, string>(WebHCatConstants.Output, details.Output));
             values.Add(new KeyValuePair<string, string>(WebHCatConstants.Mapper, details.Mapper));
+
+            if (!details.Combiner.IsNullOrEmpty())
+            {
+                values.Add(new KeyValuePair<string, string>(WebHCatConstants.Combiner, details.Combiner));
+            }
+
             if (details.Reducer.IsNullOrEmpty())
             {
                 values.Add(new KeyValuePair<string, string>(WebHCatConstants.Reducer, NoneReducer));

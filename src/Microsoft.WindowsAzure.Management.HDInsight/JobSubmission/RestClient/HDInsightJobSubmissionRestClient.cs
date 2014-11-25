@@ -129,7 +129,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission.RestClient
                 client.RequestHeaders.Add(HDInsightRestConstants.XMsVersion);
                 client.RequestHeaders.Add(HDInsightRestConstants.SchemaVersion2);
                 client.RequestHeaders.Add(HDInsightRestConstants.Accept);
-                client.Content = payLoad;
+                client.Content = new StringContent(payLoad);
 
                 IHttpResponseMessageAbstraction httpResponse = await client.SendAsync();
                 if (httpResponse.StatusCode != HttpStatusCode.Accepted)

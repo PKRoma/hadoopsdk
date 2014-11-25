@@ -16,7 +16,6 @@ namespace Microsoft.Hadoop.Avro.Schema
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.Globalization;
     using System.Linq;
     using System.Reflection;
@@ -30,6 +29,7 @@ namespace Microsoft.Hadoop.Avro.Schema
         private static readonly Dictionary<Type, Func<Type, PrimitiveTypeSchema>> RuntimeTypeToAvroSchema =
             new Dictionary<Type, Func<Type, PrimitiveTypeSchema>>
             {
+                { typeof(AvroNull), type => new NullSchema(type) },
                 { typeof(char), type => new IntSchema(type) },
                 { typeof(byte), type => new IntSchema(type) },
                 { typeof(sbyte), type => new IntSchema(type) },
@@ -379,6 +379,47 @@ namespace Microsoft.Hadoop.Avro.Schema
             return allKnownTypes.Where(t => t.CanBeKnownTypeOf(type));
         }
 
+        private TypeSchema TryBuildUnionSchema(Type memberType, MemberInfo memberInfo, Dictionary<string, NamedSchema> schemas, uint currentDepth)
+        {
+            var attribute = memberInfo.GetCustomAttributes(false).OfType<AvroUnionAttribute>().FirstOrDefault();
+            if (attribute == null)
+            {
+                return null;
+            }
+            
+            var result = attribute.TypeAlternatives.ToList();
+            if (memberType != typeof(object) && !memberType.IsAbstract && !memberType.IsInterface)
+            {
+                result.Add(memberType);
+            }
+
+            return new UnionSchema(result.Select(type => this.CreateNotNullableSchema(type, schemas, currentDepth + 1)).ToList(), memberType);
+        }
+
+        private FixedSchema TryBuildFixedSchema(Type memberType, MemberInfo memberInfo, NamedSchema parentSchema)
+        {
+            var result = memberInfo.GetCustomAttributes(false).OfType<AvroFixedAttribute>().FirstOrDefault();
+            if (result == null)
+            {
+                return null;
+            }
+
+            if (memberType != typeof(byte[]))
+            {
+                throw new SerializationException(
+                    string.Format(CultureInfo.InvariantCulture, "'{0}' can be set only to members of type byte[].", typeof(AvroFixedAttribute)));
+            }
+
+            var schemaNamespace = string.IsNullOrEmpty(result.Namespace) && !result.Name.Contains(".") && parentSchema != null
+                                      ? parentSchema.Namespace
+                                      : result.Namespace;
+
+            return new FixedSchema(
+                new NamedEntityAttributes(new SchemaName(result.Name, schemaNamespace), new List<string>(), string.Empty),
+                result.Size,
+                memberType);
+        }
+
         private void AddRecordFields(
             IEnumerable<MemberSerializationInfo> members,
             Dictionary<string, NamedSchema> schemas,
@@ -409,7 +450,10 @@ namespace Microsoft.Hadoop.Avro.Schema
                             info.MemberInfo.MemberType));
                 }
 
-                TypeSchema fieldSchema = this.CreateSchema(info.Nullable, memberType, schemas, currentDepth + 1);
+                TypeSchema fieldSchema = this.TryBuildUnionSchema(memberType, info.MemberInfo, schemas, currentDepth)
+                                         ?? this.TryBuildFixedSchema(memberType, info.MemberInfo, record)
+                                         ?? this.CreateSchema(info.Nullable, memberType, schemas, currentDepth + 1);
+
                 var aliases = info
                     .Aliases
                     .Select(alias => alias.Contains(".") ? alias : record.Namespace + "." + alias)

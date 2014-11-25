@@ -22,7 +22,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
     /// </summary>
     public class HDInsightAccessTokenCredential : IHDInsightAccessTokenCredential
     {
-        private const string ProductionEndPoint = @"https://management.core.windows.net:8443/";
+        private const string ProductionEndPoint = @"https://management.core.windows.net/";
 
         private const string ProductionNamespace = @"hdinsight";
 

@@ -25,11 +25,12 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
     using System.Threading.Tasks;
     using Microsoft.Hadoop.Client;
     using Microsoft.Hadoop.Client.WebHCatRest;
-    using Microsoft.HDInsight.Management.Contracts;
+    using Microsoft.WindowsAzure.Management.HDInsight.Contracts;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Retries;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
     using Microsoft.WindowsAzure.Management.HDInsight;
     using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities;
@@ -49,6 +50,11 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
         public override void TestCleanup()
         {
             base.TestCleanup();
+        }
+
+        internal IRetryPolicy GetRetryPolicy()
+        {
+            return RetryPolicyFactory.CreateExponentialRetryPolicy(TimeSpan.FromSeconds(0), TimeSpan.FromSeconds(1), TimeSpan.FromMilliseconds(100), 3, 0.2);
         }
 
         [TestMethod]
@@ -333,6 +339,10 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
                 Assert.IsTrue(clientEx.Message.Contains("connectivity changes are not supported for this cluster version"));
                 Help.DoNothing(clientEx);
             }
+            catch (InvalidOperationException)
+            {
+                //Tools upgrade required
+            }
             finally
             {
                 client.DeleteCluster(clusterDetails.Name);
@@ -361,7 +371,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
                 var manager = ServiceLocator.Instance.Locate<IHDInsightManagementPocoClientFactory>();
                 var pocoClient = manager.Create(credentials, GetAbstractionContext(), false);
 
-                clusterDetails.Version = "1.5.0.0.LargeSKU-amd64-134231";
+                clusterDetails.Version = "1.6.0.0.LargeSKU-amd64-134231";
                 client.CreateCluster(clusterDetails);
 
 

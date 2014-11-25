@@ -65,6 +65,7 @@
       <Word>Oozie</Word>
 	  <Word>Metastore</Word>
 	  <Word>Metastores</Word>
+      <Word>Avsc</Word>
     </Recognized>
     <Deprecated>
       <!-- 

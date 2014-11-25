@@ -19,10 +19,10 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.Versio
     using System.Collections.ObjectModel;
     using System.Linq;
     using System.Threading.Tasks;
-    using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestClient;
     using Microsoft.WindowsAzure.Management.HDInsight;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Retries;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
 
     internal class VersionFinderClient : IVersionFinderClient

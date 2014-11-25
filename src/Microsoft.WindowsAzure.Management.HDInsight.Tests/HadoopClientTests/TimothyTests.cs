@@ -18,12 +18,13 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
     using System.Net;
     using System.Threading;
     using Microsoft.Hadoop.Client;
-    using Microsoft.HDInsight.Management.Contracts;
+    using Microsoft.WindowsAzure.Management.HDInsight.Contracts;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning;
     using Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoClient;
     
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Retries;
     using Microsoft.WindowsAzure.Management.HDInsight.Framework.ServiceLocation;
     using Microsoft.WindowsAzure.Management.HDInsight.JobSubmission;
     using Microsoft.WindowsAzure.Management.HDInsight.TestUtilities;
@@ -42,6 +43,11 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.HadoopClientTests
         public override void TestCleanup()
         {
             base.TestCleanup();
+        }
+
+        internal IRetryPolicy GetRetryPolicy()
+        {
+            return RetryPolicyFactory.CreateExponentialRetryPolicy(TimeSpan.FromSeconds(0), TimeSpan.FromSeconds(1), TimeSpan.FromMilliseconds(100), 3, 0.2);
         }
 
         [TestMethod]

@@ -28,67 +28,74 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.JobSubmission.PocoClient
         private readonly BasicAuthCredential remoteCreds;
         private IAbstractionContext context;
         private readonly bool ignoreSslErrors;
+        private readonly string userAgentString;
 
-        internal HDInsightJobSubmissionPocoClient(BasicAuthCredential credentials, IAbstractionContext context, bool ignoreSslErrors)
+        internal HDInsightJobSubmissionPocoClient(BasicAuthCredential credentials, IAbstractionContext context, bool ignoreSslErrors, string userAgentString)
         {
             this.remoteCreds = credentials;
             this.context = context;
             this.ignoreSslErrors = ignoreSslErrors;
+            this.userAgentString = userAgentString ?? string.Empty;
         }
 
         /// <inheritdoc />
         public async Task<JobCreationResults> SubmitHiveJob(HiveJobCreateParameters details)
         {
-            var remoteClient = ServiceLocator.Instance.Locate<IRemoteHadoopJobSubmissionPocoClientFactory>().Create(this.remoteCreds, this.context, this.ignoreSslErrors);
+            var remoteClient = ServiceLocator.Instance.Locate<IRemoteHadoopJobSubmissionPocoClientFactory>().Create(this.remoteCreds, this.context, this.ignoreSslErrors, this.GetUserAgentString());
             return await remoteClient.SubmitHiveJob(details);
         }
 
         /// <inheritdoc />
         public async Task<JobCreationResults> SubmitMapReduceJob(MapReduceJobCreateParameters details)
         {
-            var remoteClient = ServiceLocator.Instance.Locate<IRemoteHadoopJobSubmissionPocoClientFactory>().Create(this.remoteCreds, this.context, this.ignoreSslErrors);
+            var remoteClient = ServiceLocator.Instance.Locate<IRemoteHadoopJobSubmissionPocoClientFactory>().Create(this.remoteCreds, this.context, this.ignoreSslErrors, this.GetUserAgentString());
             return await remoteClient.SubmitMapReduceJob(details);
+        }
+
+        public string GetUserAgentString()
+        {
+            return this.userAgentString;
         }
 
         /// <inheritdoc />
         public async Task<JobList> ListJobs()
         {
-            var remoteClient = ServiceLocator.Instance.Locate<IRemoteHadoopJobSubmissionPocoClientFactory>().Create(this.remoteCreds, this.context, this.ignoreSslErrors);
+            var remoteClient = ServiceLocator.Instance.Locate<IRemoteHadoopJobSubmissionPocoClientFactory>().Create(this.remoteCreds, this.context, this.ignoreSslErrors, this.GetUserAgentString());
             return await remoteClient.ListJobs();
         }
 
         /// <inheritdoc />
         public async Task<JobDetails> GetJob(string jobId)
         {
-            var remoteClient = ServiceLocator.Instance.Locate<IRemoteHadoopJobSubmissionPocoClientFactory>().Create(this.remoteCreds, this.context, this.ignoreSslErrors);
+            var remoteClient = ServiceLocator.Instance.Locate<IRemoteHadoopJobSubmissionPocoClientFactory>().Create(this.remoteCreds, this.context, this.ignoreSslErrors, this.GetUserAgentString());
             return await remoteClient.GetJob(jobId);
         }
 
         /// <inheritdoc />
         public async Task<JobCreationResults> SubmitPigJob(PigJobCreateParameters pigJobCreateParameters)
         {
-            var remoteClient = ServiceLocator.Instance.Locate<IRemoteHadoopJobSubmissionPocoClientFactory>().Create(this.remoteCreds, this.context, this.ignoreSslErrors);
+            var remoteClient = ServiceLocator.Instance.Locate<IRemoteHadoopJobSubmissionPocoClientFactory>().Create(this.remoteCreds, this.context, this.ignoreSslErrors, this.GetUserAgentString());
             return await remoteClient.SubmitPigJob(pigJobCreateParameters);
         }
 
         /// <inheritdoc />
         public async Task<JobCreationResults> SubmitSqoopJob(SqoopJobCreateParameters sqoopJobCreateParameters)
         {
-            var remoteClient = ServiceLocator.Instance.Locate<IRemoteHadoopJobSubmissionPocoClientFactory>().Create(this.remoteCreds, this.context, this.ignoreSslErrors);
+            var remoteClient = ServiceLocator.Instance.Locate<IRemoteHadoopJobSubmissionPocoClientFactory>().Create(this.remoteCreds, this.context, this.ignoreSslErrors, this.GetUserAgentString());
             return await remoteClient.SubmitSqoopJob(sqoopJobCreateParameters);
         }
 
         /// <inheritdoc />
         public async Task<JobCreationResults> SubmitStreamingJob(StreamingMapReduceJobCreateParameters pigJobCreateParameters)
         {
-            var remoteClient = ServiceLocator.Instance.Locate<IRemoteHadoopJobSubmissionPocoClientFactory>().Create(this.remoteCreds, this.context, this.ignoreSslErrors);
+            var remoteClient = ServiceLocator.Instance.Locate<IRemoteHadoopJobSubmissionPocoClientFactory>().Create(this.remoteCreds, this.context, this.ignoreSslErrors, this.GetUserAgentString());
             return await remoteClient.SubmitStreamingJob(pigJobCreateParameters);
         }
 
         /// <inheritdoc />
         public async Task<JobDetails> StopJob(string jobId)
         {
-            var remoteClient = ServiceLocator.Instance.Locate<IRemoteHadoopJobSubmissionPocoClientFactory>().Create(this.remoteCreds, this.context, this.ignoreSslErrors);
+            var remoteClient = ServiceLocator.Instance.Locate<IRemoteHadoopJobSubmissionPocoClientFactory>().Create(this.remoteCreds, this.context, this.ignoreSslErrors, this.GetUserAgentString());
             return await remoteClient.StopJob(jobId);
         }
     }

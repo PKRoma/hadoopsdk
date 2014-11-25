@@ -15,7 +15,6 @@
 namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.VersionFinder
 {
     using Microsoft.WindowsAzure.Management.HDInsight;
-    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library;
 
     internal class VersionFinderClientFactory : IVersionFinderClientFactory
     {

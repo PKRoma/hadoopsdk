@@ -15,7 +15,7 @@
 namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ServerDataObjects.Rdfe
 {
     using System.Runtime.Serialization;
-    using Microsoft.HDInsight.Management.Contracts.May2013;
+    using Microsoft.WindowsAzure.Management.HDInsight.Contracts.May2013;
 
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Naming",
         "CA1716:IdentifiersShouldNotMatchKeywords", MessageId = "Property", Justification = "Needed to preserve RDFE contract.")]

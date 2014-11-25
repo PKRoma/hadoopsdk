@@ -16,6 +16,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
 {
     using System.Threading;
     using Microsoft.WindowsAzure.Management.HDInsight;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Retries;
 
     /// <summary>
     /// A factory interface used to create new HDInsight management POCO clients.
@@ -26,15 +27,9 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
         /// Creates a new instance of the IHDInsightManagementPocoClient interface.
         /// This interface can be used to manage an HDInsight cluster.
         /// </summary>
-        /// <param name="credentials">
-        ///     The credentials to use when creating the client.
-        /// </param>
-        /// <param name="context">
-        /// A context containing a Cancellation Token that can be used to cancel the task.
-        /// </param>
-        /// <param name="ignoreSslErrors">
-        /// Specifies that server side SSL Errors should be ignored.
-        /// </param>
+        /// <param name="credentials">The credentials to use when creating the client.</param>
+        /// <param name="context">A context containing a Cancellation Token that can be used to cancel the task.</param>
+        /// <param name="ignoreSslErrors">Specifies that server side SSL Errors should be ignored.</param>
         /// <returns>
         /// A new instance of the IHDInsightManagmentPocoClient interface to be used
         /// to manage a cluster.

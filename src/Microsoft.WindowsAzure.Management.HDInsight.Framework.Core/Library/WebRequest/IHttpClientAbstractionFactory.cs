@@ -14,10 +14,7 @@
 // permissions and limitations under the License.
 namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.WebRequest
 {
-    using System;
     using System.Security.Cryptography.X509Certificates;
-    using System.Threading;
-    using System.Threading.Tasks;
 
     /// <summary>
     ///     Provides a factory for a class that Abstracts Http client requests.
@@ -173,6 +170,18 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.Web
         /// <summary>
         ///     Creates a new HttpClientAbstraction class.
         /// </summary>
+        /// <param name="ignoreSslErrors">
+        /// Instructs that server certificate errors should be ignored.
+        /// </param>
+        /// <param name="allowAutoRedirect">Allow auto redirection.</param>
+        /// <returns>
+        ///     A new instance of the HttpClientAbstraction.
+        /// </returns>
+        IHttpClientAbstraction Create(bool ignoreSslErrors, bool allowAutoRedirect);
+
+        /// <summary>
+        ///     Creates a new HttpClientAbstraction class.
+        /// </summary>
         /// <param name="context">
         /// The abstraction context to use.
         /// </param>
@@ -183,164 +192,5 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Library.Web
         ///     A new instance of the HttpClientAbstraction.
         /// </returns>
         IHttpClientAbstraction Create(IAbstractionContext context, bool ignoreSslErrors);
-
-        /// <summary>
-        ///     Performs multiple attempts of an HTTP Operation until the operation either succeeds or a timeout is reached.
-        /// </summary>
-        /// <param name="cert">
-        ///     The X509 cert to use when creating the client.
-        /// </param>
-        /// <param name="operation">
-        ///     The function that will perform the HTTP operation.
-        /// </param>
-        /// <param name="shouldRetry">
-        ///     A function that well determine the success or failure of the operation.
-        /// </param>
-        /// <param name="retryCount">
-        ///     The number of times the operation will be attempted before giving up.
-        /// </param>
-        /// <param name="retryInterval">
-        ///     The polling interval that should be used to wait between operations.
-        /// </param>
-        /// <param name="ignoreSslErrors">
-        ///     Specifies that server side SSL errors should be ignored.
-        /// </param>
-        /// <returns>
-        ///     The results of the HTTP operation.
-        /// </returns>
-        Task<IHttpResponseMessageAbstraction> Retry(X509Certificate2 cert, Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation, Func<IHttpResponseMessageAbstraction, bool> shouldRetry, int retryCount, TimeSpan retryInterval, bool ignoreSslErrors);
-
-        /// <summary>
-        ///     Performs multiple attempts of an HTTP Operation until the operation either succeeds or a timeout is reached.
-        /// </summary>
-        /// <param name="cert">
-        ///     The X509 cert to use.
-        /// </param>
-        /// <param name="context">
-        /// The abstraction context to use.
-        /// </param>
-        /// <param name="operation">
-        ///     The function that will perform the HTTP operation.
-        /// </param>
-        /// <param name="shouldRetry">
-        ///     A function that well determine the success or failure of the operation.
-        /// </param>
-        /// <param name="retryCount">
-        ///     The number of times the operation will be attempted before giving up.
-        /// </param>
-        /// <param name="retryInterval">
-        ///     The polling interval that should be used to wait between operations.
-        /// </param>
-        /// <param name="ignoreSslErrors">
-        ///     Specifies that server side SSL errors should be ignored.
-        /// </param>
-        /// <returns>
-        ///     The results of the HTTP operation.
-        /// </returns>
-        Task<IHttpResponseMessageAbstraction> Retry(X509Certificate2 cert, IAbstractionContext context, Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation, Func<IHttpResponseMessageAbstraction, bool> shouldRetry, int retryCount, TimeSpan retryInterval, bool ignoreSslErrors);
-
-        /// <summary>
-        ///     Performs multiple attempts of an HTTP Operation until the operation either succeeds or a timeout is reached.
-        /// </summary>
-        /// <param name="token">
-        ///     The access token to use.
-        /// </param>
-        /// <param name="operation">
-        ///     The function that will perform the HTTP operation.
-        /// </param>
-        /// <param name="shouldRetry">
-        ///     A function that well determine the success or failure of the operation.
-        /// </param>
-        /// <param name="retryCount">
-        ///     The number of times the operation will be attempted before giving up.
-        /// </param>
-        /// <param name="retryInterval">
-        ///     The polling interval that should be used to wait between operations.
-        /// </param>
-        /// <param name="ignoreSslErrors">
-        ///     Specifies that server side SSL errors should be ignored.
-        /// </param>
-        /// <returns>
-        ///     The results of the HTTP operation.
-        /// </returns>
-        Task<IHttpResponseMessageAbstraction> Retry(string token, Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation, Func<IHttpResponseMessageAbstraction, bool> shouldRetry, int retryCount, TimeSpan retryInterval, bool ignoreSslErrors);
-
-        /// <summary>
-        ///     Performs multiple attempts of an HTTP Operation until the operation either succeeds or a timeout is reached.
-        /// </summary>
-        /// <param name="token">
-        ///     The access token to use.
-        /// </param>
-        /// <param name="context">
-        /// The abstraction context to use.
-        /// </param>
-        /// <param name="operation">
-        ///     The function that will perform the HTTP operation.
-        /// </param>
-        /// <param name="shouldRetry">
-        ///     A function that well determine the success or failure of the operation.
-        /// </param>
-        /// <param name="retryCount">
-        ///     The number of times the operation will be attempted before giving up.
-        /// </param>
-        /// <param name="retryInterval">
-        ///     The polling interval that should be used to wait between operations.
-        /// </param>
-        /// <param name="ignoreSslErrors">
-        ///     Specifies that server side SSL errors should be ignored.
-        /// </param>
-        /// <returns>
-        ///     The results of the HTTP operation.
-        /// </returns>
-        Task<IHttpResponseMessageAbstraction> Retry(string token, IAbstractionContext context, Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation, Func<IHttpResponseMessageAbstraction, bool> shouldRetry, int retryCount, TimeSpan retryInterval, bool ignoreSslErrors);
-
-        /// <summary>
-        ///     Performs multiple attempts of an HTTP Operation until the operation either succeeds or a timeout is reached.
-        /// </summary>
-        /// <param name="operation">
-        ///     The function that will perform the HTTP operation.
-        /// </param>
-        /// <param name="shouldRetry">
-        ///     A function that well determine the success or failure of the operation.
-        /// </param>
-        /// <param name="retryCount">
-        ///     The number of times the operation will be attempted before giving up.
-        /// </param>
-        /// <param name="pollInterval">
-        ///     The polling interval that should be used to wait between operations.
-        /// </param>
-        /// <param name="ignoreSslErrors">
-        ///     Specifies that server side SSL errors should be ignored.
-        /// </param>
-        /// <returns>
-        ///     The results of the HTTP operation.
-        /// </returns>
-        Task<IHttpResponseMessageAbstraction> Retry(Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation, Func<IHttpResponseMessageAbstraction, bool> shouldRetry, int retryCount, TimeSpan pollInterval, bool ignoreSslErrors);
-
-        /// <summary>
-        ///     Performs multiple attempts of an HTTP Operation until the operation either succeeds or a timeout is reached.
-        /// </summary>
-        /// <param name="context">
-        /// The abstraction context to use.
-        /// </param>
-        /// <param name="operation">
-        ///     The function that will perform the HTTP operation.
-        /// </param>
-        /// <param name="shouldRetry">
-        ///     A function that well determine the success or failure of the operation.
-        /// </param>
-        /// <param name="retryCount">
-        ///     The number of times the operation will be attempted before giving up.
-        /// </param>
-        /// <param name="retryInterval">
-        ///     The polling interval that should be used to wait between operations.
-        /// </param>
-        /// <param name="ignoreSslErrors">
-        ///     Specifies that server side SSL errors should be ignored.
-        /// </param>
-        /// <returns>
-        ///     The results of the HTTP operation.
-        /// </returns>
-        Task<IHttpResponseMessageAbstraction> Retry(IAbstractionContext context, Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation, Func<IHttpResponseMessageAbstraction, bool> shouldRetry, int retryCount, TimeSpan retryInterval, bool ignoreSslErrors);
     }
 }

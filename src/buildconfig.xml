@@ -15,21 +15,13 @@
  
   <Version>
     <Major>1</Major>
-    <Minor>1</Minor>
-    <Patch>1</Patch>
+    <Minor>4</Minor>
+    <Patch>0</Patch>
   </Version>
   <Prepare>
     <CopyTree>
-      <From>Cmdlet</From>
-      <To>Cmdlet</To>
-    </CopyTree>
-    <CopyTree>
       <From>NonPublic\Source</From>
       <To>NonPublic\Source</To>
-    </CopyTree>
-    <CopyTree>
-      <From>Cmdlet</From>
-      <To>NonPublic\Library</To>
     </CopyTree>
     <CopyTree>
       <From>NonPublic\Library</From>
@@ -43,25 +35,22 @@
       <From>Lat</From>
       <To>Lat</To>
     </CopyTree>
-    <Zip folder="Cmdlet" name="Microsoft.WindowsAzure.Management.HDInsight.Cmdlets.zip" />
     <Zip folder="Lat" name="Microsoft.WindowsAzure.HDInsight.LogAnalysisTool.zip" />
     <NuGet id="Microsoft.Hadoop.Avro" outputFolder="Avro" >
-      <Title>Microsoft .NET Library for Avro</Title>
+      <Title>Microsoft Avro Library </Title>
       <ProjectUrl>http://hadoopsdk.codeplex.com</ProjectUrl>
       <Description>Provides a .NET API for Serializing data into the Avro format.</Description>
       <Dependencies>
-        <Dependency id="Newtonsoft.Json" version="5.0.5" />
+        <Dependency id="Newtonsoft.Json" version="6.0.4" />
       </Dependencies>
     </NuGet>
     <NuGet id="Microsoft.Hadoop.Client" outputFolder="HadoopClient">
       <Title>Microsoft .NET API for Hadoop</Title>
       <ProjectUrl>http://hadoopsdk.codeplex.com</ProjectUrl>
       <Description>Provides a .NET API for working with Hadoop clusters over HTTP</Description>
-      <NoReferences>
-        <NoReference targetFramework="net40" file="Microsoft.HDInsight.Threading.dll" />
-      </NoReferences>
       <Dependencies>
         <Dependency id="WindowsAzure.Storage" version="3.0.3.0"/>
+		<Dependency id="NewtonSoft.Json" version="6.0.4"/>
       </Dependencies>
       <Authors>Microsoft</Authors>
       <Owners>Microsoft Azure-sdk</Owners>
@@ -70,12 +59,27 @@
       <Tags>Microsoft Azure HDInsight Hadoop Scalable windowsazureofficial</Tags>
       <RequireLicenseAcceptance>true</RequireLicenseAcceptance>
     </NuGet>
+    <NuGet id="Microsoft.HadoopAppliance.Client" outputFolder="HadoopApplianceClient">
+      <Title>Microsoft .NET API for Hadoop Appliance</Title>
+      <ProjectUrl>http://hadoopsdk.codeplex.com</ProjectUrl>
+      <Description>Provides a .NET API for working with Hadoop Appliance over HTTP</Description>
+      <Dependencies>
+        <Dependency id="Microsoft.Hadoop.Client"/>
+        <Dependency id="Microsoft.WindowsAzure.Management.HDInsight"/>
+      </Dependencies>
+      <Authors>Microsoft</Authors>
+      <Owners>Microsoft Azure-sdk</Owners>
+      <IconUrl>http://go.microsoft.com/fwlink/?LinkID=288890</IconUrl>
+      <LicenseUrl>http://go.microsoft.com/fwlink/?LinkId=235170</LicenseUrl>
+      <Tags>Microsoft Azure HDInsight Hadoop Scalable windowsazureofficial Appliance OnPrem</Tags>
+      <RequireLicenseAcceptance>true</RequireLicenseAcceptance>
+    </NuGet>
     <NuGet id="Microsoft.WindowsAzure.Management.HDInsight" outputFolder="HDInsightSdk" >
       <Title>Windows Azure HDInsight</Title>
       <ProjectUrl>http://hadoopsdk.codeplex.com</ProjectUrl>
       <Description>Provides a .NET API for cluster management and job submission on Windows Azure HDInsight service.</Description>
       <NoReferences>
-        <NoReference targetFramework="net40" file="Microsoft.HDInsight.Threading.dll" />
+        <NoReference targetFramework="net40" file="Microsoft.WindowsAzure.Management.HDInsight.Contracts.dll" />
       </NoReferences>
       <Dependencies>
         <Dependency id="Microsoft.Hadoop.Client" />
@@ -105,14 +109,6 @@
       <From>NonPublic</From>
       <To>NonPublic</To>
     </CopyTree>
-    <CopyTree>
-      <From>Cmdlet</From>
-      <To>Cmdlet</To>
-    </CopyTree>
-    <Copy>
-      <From>Microsoft.WindowsAzure.Management.HDInsight.Cmdlets.zip</From>
-      <To>Microsoft.WindowsAzure.Management.HDInsight.Cmdlets.zip</To>
-    </Copy>
     <Copy>
       <From>Microsoft.WindowsAzure.HDInsight.LogAnalysisTool.zip</From>
       <To>Microsoft.WindowsAzure.HDInsight.LogAnalysisTool.zip</To>

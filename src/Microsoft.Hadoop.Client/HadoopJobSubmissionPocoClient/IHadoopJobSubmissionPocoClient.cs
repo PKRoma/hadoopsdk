@@ -23,6 +23,12 @@ namespace Microsoft.Hadoop.Client.HadoopJobSubmissionPocoClient
     internal interface IHadoopJobSubmissionPocoClient
     {
         /// <summary>
+        /// Retruns the UserAgent string to use for all submissions by this client.
+        /// </summary>
+        /// <returns>Custom useragent string if present.</returns>
+        string GetUserAgentString();
+
+        /// <summary>
         /// Lists the jobs on a Hadoop server.
         /// </summary>
         /// <returns>

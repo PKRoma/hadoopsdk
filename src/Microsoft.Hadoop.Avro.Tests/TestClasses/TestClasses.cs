@@ -1359,4 +1359,80 @@ namespace Microsoft.Hadoop.Avro.Tests
             return this.GenericMember.Equals(other.GenericMember);
         }
     }
+
+    [DataContract]
+    public class AvroFixedClass : IEquatable<AvroFixedClass>
+    {
+        [AvroFixed(7, "SomeNamespace.SomeName")]
+        [DataMember]
+        private byte[] Bytes { get; set; }
+
+        public static AvroFixedClass Create(int count)
+        {
+            return new AvroFixedClass { Bytes = Utilities.FixedBytes(count).ToArray() };
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        public bool Equals(AvroFixedClass other)
+        {
+            if (other == null)
+            {
+                return false;
+            }
+
+            return this.Bytes.SequenceEqual(other.Bytes);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return this.Equals(obj as AvroFixedClass);
+        }
+    }
+
+    [DataContract]
+    internal struct ComplexStruct
+    {
+        [DataMember]
+        private List<int> savedValues;
+
+        public ComplexStruct(List<int> vals)
+        {
+            this.savedValues = vals;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null)
+            {
+                return false;
+            }
+
+            var other = (ComplexStruct)obj;
+            if (this.savedValues == null && other.savedValues == null)
+            {
+                return true;
+            }
+
+            return this.savedValues.SequenceEqual(other.savedValues);
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
+
+        public static bool operator ==(ComplexStruct p1, ComplexStruct p2)
+        {
+            return p1.Equals(p2);
+        }
+
+        public static bool operator !=(ComplexStruct p1, ComplexStruct p2)
+        {
+            return !p1.Equals(p2);
+        }
+    }
 }

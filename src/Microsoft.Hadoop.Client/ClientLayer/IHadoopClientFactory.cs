@@ -37,5 +37,31 @@ namespace Microsoft.Hadoop.Client.ClientLayer
         /// A new HadoopClient that can be used to communicate with Hadoop.
         /// </returns>
         IJobSubmissionClient Create(T credential);
+
+        /// <summary>
+        /// Creates a new Hadoop client capable of connecting to Hadoop using the supplied credential and 
+        /// custom UserAgent. The custom userAgent is sent in addition to the default so the cluster can
+        /// log calls coming from different client SDK's.
+        /// </summary>
+        /// <param name="credential">
+        /// The credential to use.
+        /// </param>
+        /// <param name="customUserAgent">
+        /// The custom user agent to pass. Can be of format "agent1 agent2".</param>
+        /// <returns>
+        /// A new HadoopClient that can be used to communicate with Hadoop.
+        /// </returns>
+        IJobSubmissionClient Create(T credential, string customUserAgent);
+
+        /// <summary>
+        /// Creates a new Hadoop Application History client capable of retrieving application history from a Hadoop cluster.
+        /// </summary>
+        /// <param name="credential">
+        /// The credential to use.
+        /// </param>
+        /// <returns>
+        /// A new Hadoop Application History Client.
+        /// </returns>
+        IHadoopApplicationHistoryClient CreateHadoopApplicationHistoryClient(T credential);
     }
 }

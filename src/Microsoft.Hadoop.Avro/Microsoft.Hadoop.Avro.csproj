@@ -71,7 +71,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json">
-      <HintPath>..\packages\Newtonsoft.Json.5.0.5\lib\net40\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\packages\Newtonsoft.Json.6.0.4\lib\net40\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -84,10 +85,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AvroEnum.cs" />
+    <Compile Include="AvroFixedAttribute.cs" />
+    <Compile Include="AvroNull.cs" />
     <Compile Include="AvroRecord.cs" />
     <Compile Include="AvroSerializer.cs" />
     <Compile Include="AvroSerializer.Static.cs" />
     <Compile Include="AvroSerializerSettings.cs" />
+    <Compile Include="AvroUnionAttribute.cs" />
     <Compile Include="Container\CodecFactory.cs" />
     <Compile Include="Encoders\ISkipper.cs" />
     <Compile Include="Encoders\BinaryDecoder.cs" />
@@ -190,6 +194,22 @@
     <Compile Include="SerializerGenerator.cs" />
     <Compile Include="Resolvers\AvroDataContractResolver.cs" />
     <Compile Include="Resolvers\AvroPublicMemberContractResolver.cs" />
+    <Compile Include="Utils\CodeGenerator.cs" />
+    <Compile Include="Utils\GeneratorCore.cs" />
+    <Compile Include="Utils\Templates\ClassTemplate-Methods.cs" />
+    <Compile Include="Utils\Templates\ClassTemplate.cs">
+      <DependentUpon>ClassTemplate.tt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Utils\Templates\EnumTemplate-Methods.cs" />
+    <Compile Include="Utils\Templates\EnumTemplate.cs">
+      <DependentUpon>EnumTemplate.tt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Utils\Templates\ITemplate.cs" />
+    <Compile Include="Utils\Utilities.cs" />
     <Compile Include="TypeExtensions.cs" />
     <Compile Include="TypeSerializationInfo.cs" />
   </ItemGroup>
@@ -201,9 +221,19 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config">
-      <SubType>Designer</SubType>
+    <None Include="Utils\Templates\ClassTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>ClassTemplate.cs</LastGenOutput>
     </None>
+    <None Include="Utils\Templates\EnumTemplate.tt">
+      <Generator>TextTemplatingFilePreprocessor</Generator>
+      <LastGenOutput>EnumTemplate.cs</LastGenOutput>
+    </None>
+    <None Include="Utils\Templates\Utilities\DefaultValueTemplate.ttinclude" />
+    <None Include="Utils\Templates\Utilities\TypeTemplate.ttinclude" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <Import Project="..\..\build\targets\Project.CSharp.targets" />
   <Target Name="BeforeBuild">

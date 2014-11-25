@@ -17,6 +17,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning
     using System;
     using System.Security.Cryptography.X509Certificates;
     using System.Threading;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Retries;
 
     /// <summary>
     /// Factory for HDInsight.Client.
@@ -29,5 +30,14 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning
         /// <param name="credentials">The credentials to use to connect to the subscription.</param>
         /// <returns>Client object that can be used to interact with HDInsight clusters.</returns>
         IHDInsightClient Create(IHDInsightSubscriptionCredentials credentials);
+
+        /// <summary>
+        /// Creates the specified credentials.
+        /// </summary>
+        /// <param name="credentials">The credentials.</param>
+        /// <param name="httpOperationTimeout">The HTTP operation timeout.</param>
+        /// <param name="retryPolicy">The retry olicy.</param>
+        /// <returns>Client object that can be used to interact with HDInsight clusters.</returns>
+        IHDInsightClient Create(IHDInsightSubscriptionCredentials credentials, TimeSpan httpOperationTimeout, IRetryPolicy retryPolicy);
     }
 }

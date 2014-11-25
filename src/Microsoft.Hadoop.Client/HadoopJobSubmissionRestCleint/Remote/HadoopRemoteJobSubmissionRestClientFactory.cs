@@ -19,9 +19,9 @@ namespace Microsoft.Hadoop.Client.HadoopJobSubmissionRestCleint.Remote
 
     internal class HadoopRemoteJobSubmissionRestClientFactory : IHadoopRemoteJobSubmissionRestClientFactory
     {
-        public IHadoopJobSubmissionRestClient Create(IJobSubmissionClientCredential credentials, IAbstractionContext context, bool ignoreSslErrors)
+        public IHadoopJobSubmissionRestClient Create(IJobSubmissionClientCredential credentials, IAbstractionContext context, bool ignoreSslErrors, string userAgentString)
         {
-            return new HadoopRemoteJobSubmissionRestClient((BasicAuthCredential)credentials, context, ignoreSslErrors);
+            return new HadoopRemoteJobSubmissionRestClient((BasicAuthCredential)credentials, context, ignoreSslErrors, userAgentString);
         }
     }
 }

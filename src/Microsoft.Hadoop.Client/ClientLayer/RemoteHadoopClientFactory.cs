@@ -25,7 +25,17 @@ namespace Microsoft.Hadoop.Client.ClientLayer
     {
         public IJobSubmissionClient Create(BasicAuthCredential credential)
         {
-            return Help.SafeCreate(() => new RemoteHadoopClient(credential));
+            return Create(credential, string.Empty);
+        }
+
+        public IJobSubmissionClient Create(BasicAuthCredential credential, string customUserAgent)
+        {
+            return Help.SafeCreate(() => new RemoteHadoopClient(credential, customUserAgent));
+        }
+
+        public IHadoopApplicationHistoryClient CreateHadoopApplicationHistoryClient(BasicAuthCredential credential)
+        {
+            return Help.SafeCreate(() => new RemoteHadoopClient(credential, string.Empty));
         }
     }
 }

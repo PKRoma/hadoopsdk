@@ -26,6 +26,12 @@ namespace Microsoft.Hadoop.Client.WebHCatRest
     internal interface IHadoopJobSubmissionRestClient
     {
         /// <summary>
+        /// Retruns the UserAgent string to use for all submissions by this client.
+        /// </summary>
+        /// <returns>Custom user agent.</returns>
+        string GetUserAgentString();
+
+        /// <summary>
         /// Lists all jobs on the system.
         /// </summary>
         /// <returns>

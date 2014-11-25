@@ -123,7 +123,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             }
             Assert.IsNotNull(payLoad);
 
-            string endPoint = @"https://managementnext.rdfetest.dnsdemo4.com:443";
+            string endPoint = @"https://managementnext.rdfetest.dnsdemo4.com";
             string dnsName = "wfoley-tortuga-07";
             string cloudNamespace = @"hdinsight-wfoley";
             var creds = GetCredentials("hadoop");
@@ -133,7 +133,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.Tests.ClientAbstractionTes
             //dnsName = "Test-TestJobSubmit-20130624171952-f7e88";
             //subId = new Guid("0fec600d-7e0c-4282-ad96-9b515db0471b");
             //cloudNamespace = "hdinsight-current";
-            //endPoint = @"https://umapi.rdfetest.dnsdemo4.com:8443/";
+            //endPoint = @"https://umapi.rdfetest.dnsdemo4.com/";
 
             var conCreds = new HDInsightCertificateCredential(subId, x509, new Uri(endPoint), cloudNamespace);
             var client = ServiceLocator.Instance.Locate<IHDInsightJobSubmissionRestClientFactory>().Create(conCreds, GetAbstractionContext(), false);

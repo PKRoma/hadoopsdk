@@ -16,6 +16,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.PocoCl
 {
     using System.Threading;
     using Microsoft.WindowsAzure.Management.HDInsight;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Retries;
 
     internal class HDInsightManagementPocoClientFactory : IHDInsightManagementPocoClientFactory
     {

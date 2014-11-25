@@ -78,64 +78,7 @@ namespace Microsoft.WindowsAzure.Management.HDInsight
         /// <inheritdoc />
         public IHttpClientAbstraction Create(bool ignoreSslErrors)
         {
-            return ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>()
-                              .Create(ignoreSslErrors);
-        }
-
-        /// <inheritdoc />
-        public async Task<IHttpResponseMessageAbstraction> Retry(IHDInsightSubscriptionCredentials credentials,
-                                                                 IAbstractionContext context,
-                                                                 Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation,
-                                                                 Func<IHttpResponseMessageAbstraction, bool> shouldRetry,
-                                                                 int retryCount,
-                                                                 TimeSpan retryInterval,
-                                                                 bool ignoreSslErrors)
-        {
-            IHDInsightCertificateCredential certCreds = credentials as IHDInsightCertificateCredential;
-            IHDInsightAccessTokenCredential tokenCreds = credentials as IHDInsightAccessTokenCredential;
-            if (certCreds != null)
-            {
-                return await ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>()
-                                                    .Retry(certCreds.Certificate, context, operation, shouldRetry, retryCount, retryInterval, ignoreSslErrors);
-            }
-            if (tokenCreds != null)
-            {
-                return await ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>()
-                                                    .Retry(tokenCreds.AccessToken, context, operation, shouldRetry, retryCount, retryInterval, ignoreSslErrors);
-            }
-            throw new NotSupportedException("Credential Type is not supported");
-        }
-
-        /// <inheritdoc />
-        public async Task<IHttpResponseMessageAbstraction> Retry(IHDInsightSubscriptionCredentials credentials, Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation, Func<IHttpResponseMessageAbstraction, bool> shouldRetry, int retryCount, TimeSpan retryInterval, bool ignoreSslErrors)
-        {
-            IHDInsightCertificateCredential certCreds = credentials as IHDInsightCertificateCredential;
-            IHDInsightAccessTokenCredential tokenCreds = credentials as IHDInsightAccessTokenCredential;
-            if (certCreds != null)
-            {
-                return await ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>()
-                                                    .Retry(certCreds.Certificate, operation, shouldRetry, retryCount, retryInterval, ignoreSslErrors);
-            }
-            if (tokenCreds != null)
-            {
-                return await ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>()
-                                                    .Retry(tokenCreds.AccessToken, operation, shouldRetry, retryCount, retryInterval, ignoreSslErrors);
-            }
-            throw new NotSupportedException("Credential Type is not supported");
-        }
-
-        /// <inheritdoc />
-        public async Task<IHttpResponseMessageAbstraction> Retry(IAbstractionContext context, Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation, Func<IHttpResponseMessageAbstraction, bool> shouldRetry, int retryCount, TimeSpan retryInterval, bool ignoreSslErrors)
-        {
-            return await ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>()
-                                                .Retry(context, operation, shouldRetry, retryCount, retryInterval, ignoreSslErrors);
-        }
-
-        /// <inheritdoc />
-        public async Task<IHttpResponseMessageAbstraction> Retry(Func<IHttpClientAbstraction, Task<IHttpResponseMessageAbstraction>> operation, Func<IHttpResponseMessageAbstraction, bool> shouldRetry, int retryCount, TimeSpan retryInterval, bool ignoreSslErrors)
-        {
-            return await ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>()
-                                                .Retry(operation, shouldRetry, retryCount, retryInterval, ignoreSslErrors);
+            return ServiceLocator.Instance.Locate<IHttpClientAbstractionFactory>().Create(ignoreSslErrors);
         }
     }
 }

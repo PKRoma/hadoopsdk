@@ -76,6 +76,7 @@ namespace Microsoft.Hadoop.Avro.Container
             }
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", Justification = "Validated in base", MessageId = "0")]
         public override int Read(byte[] buffer, int offset, int count)
         {
             return this.buffer.Read(buffer, offset, count);
@@ -91,6 +92,7 @@ namespace Microsoft.Hadoop.Avro.Container
             throw new NotSupportedException();
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1062:Validate arguments of public methods", Justification = "Validated in base", MessageId = "0")]
         public override void Write(byte[] buffer, int offset, int count)
         {
             this.compressionStream.Write(buffer, offset, count);

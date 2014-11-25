@@ -15,6 +15,7 @@
 namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestClient
 {
     using Microsoft.WindowsAzure.Management.HDInsight;
+    using Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.Retries;
 
     /// <summary>
     /// Used to create instances of the IHDInsightManagementRestClient.
@@ -28,10 +29,10 @@ namespace Microsoft.WindowsAzure.Management.HDInsight.ClusterProvisioning.RestCl
         ///     The credentials to use when connecting to the client.
         /// </param>
         /// <param name="context">
-        /// The abstraction context.
+        ///     The abstraction context.
         /// </param>
         /// <param name="ignoreSslErrors">
-        /// Specifies that server side SSL errors should be ignored.
+        ///     Specifies that server side SSL errors should be ignored.
         /// </param>
         /// <returns>
         /// A new instance of the client.

@@ -12,36 +12,49 @@
 // 
 // See the Apache Version 2.0 License for specific language governing
 // permissions and limitations under the License.
+
 namespace Microsoft.Hadoop.Client
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
 
     /// <summary>
-    /// Provides Hard codes for key values.
+    ///     Provides Hard codes for key values.
     /// </summary>
     internal static class Constants
     {
         /// <summary>
-        /// The protocol string to use when using a Windows Azure Blob Storage account.
+        ///     The protocol string to use when using a HDFS.
+        /// </summary>
+        public const string HdfsProtocol = "hdfs";
+
+        /// <summary>
+        ///     The protocol scheme name to use when using a HDFS.
+        /// </summary>
+        public const string HdfsProtocolSchemeName = "hdfs://";
+
+        /// <summary>
+        ///     The interval to use when polling a Hadoop cluster.
+        /// </summary>
+        public const int PollingInterval = 30000;
+
+        /// <summary>
+        ///     The number of times to retry when communicating with a Hadoop cluster.
+        /// </summary>
+        public const int RetryCount = 5;
+
+        /// <summary>
+        ///     The protocol string to use when using a Windows Azure Blob Storage account.
         /// </summary>
         public const string WabsProtocol = "wasb";
 
         /// <summary>
-        /// The protocol scheme name to use when using a Windows Azure Blob Storage account.
+        ///     The protocol scheme name to use when using a Windows Azure Blob Storage account.
         /// </summary>
         public const string WabsProtocolSchemeName = "wasb://";
 
         /// <summary>
-        /// The interval to use when polling a Hadoop cluster.
+        ///     Represents Unix Epoch.
         /// </summary>
-        public const int PollingInterval = 5000;
-
-        /// <summary>
-        /// The number of times to retry when communicating with a Hadoop cluster.
-        /// </summary>
-        public const int RetryCount = 5;
+        public static readonly DateTime UnixEpoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
     }
 }

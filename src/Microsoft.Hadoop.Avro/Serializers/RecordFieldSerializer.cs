@@ -49,7 +49,16 @@ namespace Microsoft.Hadoop.Avro.Serializers
             }
 
             var member = this.GetMember(@object);
-            return this.schema.TypeSchema.Serializer.BuildSerializer(encoder, member);
+            if (this.schema.TypeSchema.RuntimeType.IsValueType ||
+                this.schema.MemberInfo is FieldInfo)
+            {
+                return this.schema.TypeSchema.Serializer.BuildSerializer(encoder, member);
+            }
+
+            var tmp = Expression.Variable(this.schema.TypeSchema.RuntimeType, Guid.NewGuid().ToString());
+            var assignment = Expression.Assign(tmp, member);
+            Expression serialized = this.schema.TypeSchema.Serializer.BuildSerializer(encoder, tmp);
+            return Expression.Block(new[] { tmp }, new[] { assignment, serialized });
         }
 
         public Expression BuildDeserializer(Expression decoder, Expression @object)
@@ -63,8 +72,18 @@ namespace Microsoft.Hadoop.Avro.Serializers
                 throw new ArgumentNullException("object");
             }
 
+            var value = this.schema.TypeSchema.Serializer.BuildDeserializer(decoder);
             var member = this.GetMember(@object);
-            return Expression.Assign(member, this.schema.TypeSchema.Serializer.BuildDeserializer(decoder));
+            if (@object.Type.IsValueType)
+            {
+                var tmp = Expression.Variable(value.Type);
+                return Expression.Block(
+                    new[] { tmp },
+                    Expression.Assign(tmp, value),
+                    Expression.Assign(member, tmp));
+            }
+
+            return Expression.Assign(member, value);
         }
 
         public Expression BuildSkipper(Expression decoder)
@@ -114,6 +133,7 @@ namespace Microsoft.Hadoop.Avro.Serializers
             {
                 throw new SerializationException(string.Format(CultureInfo.InvariantCulture, "Unsupported member '{0}'.", info));
             }
+
             return asPropertyInfo != null
                 ? Expression.Property(@object, asPropertyInfo)
                 : Expression.Field(@object, asFieldInfo);

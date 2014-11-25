@@ -16,12 +16,14 @@ namespace Microsoft.Hadoop.Avro
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.IO;
     using System.Linq;
     using System.Reflection;
     using System.Runtime.CompilerServices;
     using System.Runtime.Serialization;
     using System.Text.RegularExpressions;
+    using Microsoft.Hadoop.Avro.Schema;
 
     internal static class TypeExtensions
     {
@@ -176,6 +178,7 @@ namespace Microsoft.Hadoop.Avro
                 BindingFlags.NonPublic |
                 BindingFlags.Instance |
                 BindingFlags.DeclaredOnly;
+
             return t
                 .GetProperties(Flags)
                 .Where(p => !p.IsDefined(typeof(CompilerGeneratedAttribute), false)
@@ -239,9 +242,25 @@ namespace Microsoft.Hadoop.Avro
         public static bool CanBeKnownTypeOf(this Type type, Type baseType)
         {
             return !type.IsAbstract
-                && (type.IsSubclassOf(baseType)
-                    || type == baseType
-                    || (baseType.IsInterface && baseType.IsAssignableFrom(type)));
+                   && (type.IsSubclassOf(baseType) 
+                   || type == baseType 
+                   || (baseType.IsInterface && baseType.IsAssignableFrom(type))
+                   || (baseType.IsGenericType && baseType.IsInterface && baseType.GenericIsAssignable(baseType)
+                           && type.GetGenericArguments()
+                                  .Zip(baseType.GetGenericArguments(), (type1, type2) => new Tuple<Type, Type>(type1, type2))
+                                  .ToList()
+                                  .TrueForAll(tuple => CanBeKnownTypeOf(tuple.Item1, tuple.Item2))));
+        }
+
+        private static bool GenericIsAssignable(this Type type, Type instanceType)
+        {
+            if (!type.IsGenericType || !instanceType.IsGenericType)
+            {
+                return false;
+            }
+
+            var args = type.GetGenericArguments();
+            return args.Any() && type.IsAssignableFrom(instanceType.GetGenericTypeDefinition().MakeGenericType(args));
         }
 
         public static IEnumerable<Type> GetAllKnownTypes(this Type t)
@@ -269,6 +288,38 @@ namespace Microsoft.Hadoop.Avro
             }
             while (toRead > 0 && currentRead != 0);
             return currentOffset - offset;
+        }
+
+        public static void CheckPropertyGetters(IEnumerable<PropertyInfo> properties)
+        {
+            var missingGetter = properties.FirstOrDefault(p => p.GetGetMethod(true) == null);
+            if (missingGetter != null)
+            {
+                throw new SerializationException(
+                    string.Format(CultureInfo.InvariantCulture, "Property '{0}' of class '{1}' does not have a getter.", missingGetter.Name, missingGetter.DeclaringType.FullName));
+            }
+        }
+
+        public static DataMemberAttribute GetDataMemberAttribute(this PropertyInfo property)
+        {
+            return property
+                .GetCustomAttributes(false)
+                .OfType<DataMemberAttribute>()
+                .SingleOrDefault();
+        }
+
+        public static IList<PropertyInfo> RemoveDuplicates(IEnumerable<PropertyInfo> properties)
+        {
+            var result = new List<PropertyInfo>();
+            foreach (var p in properties)
+            {
+                if (result.Find(s => s.Name == p.Name) == null)
+                {
+                    result.Add(p);
+                }
+            }
+
+            return result;
         }
     }
 }

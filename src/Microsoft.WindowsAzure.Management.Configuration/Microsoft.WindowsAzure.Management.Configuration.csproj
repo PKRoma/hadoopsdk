@@ -9,8 +9,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Microsoft.WindowsAzure.Management.Configuration</RootNamespace>
     <AssemblyName>Microsoft.WindowsAzure.Management.Configuration</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -20,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -28,6 +30,10 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Coverage|AnyCPU'">
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -47,6 +53,7 @@
     <Compile Include="Data\HiveSiteConfigurationCollection.cs" />
     <Compile Include="Data\HdfsSiteConfigurationCollection.cs" />
     <Compile Include="Data\CoreSiteConfigurationCollection.cs" />
+    <Compile Include="Data\YarnSiteConfigurationCollection.cs" />
     <Compile Include="IAzureHDInsightClusterConfigurationAccessorFactory.cs" />
     <Compile Include="IAzureHDInsightClusterConfigurationAccessor.cs" />
     <Compile Include="IAzureHdInsightConfigurationRestClient.cs" />
@@ -64,10 +71,6 @@
     <ProjectReference Include="..\Microsoft.WindowsAzure.Management.HDInsight.Framework.Core\Microsoft.WindowsAzure.Management.HDInsight.Framework.Core.csproj">
       <Project>{55787775-8b25-436f-b9b9-c2b60ef80b20}</Project>
       <Name>Microsoft.WindowsAzure.Management.HDInsight.Framework.Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Microsoft.HDInsight.Threading\Microsoft.HDInsight.Threading.csproj">
-      <Project>{dbffc131-e089-4173-9b9e-6826fe596faf}</Project>
-      <Name>Microsoft.HDInsight.Threading</Name>
     </ProjectReference>
     <ProjectReference Include="..\Microsoft.WindowsAzure.Management.HDinsight.Framework\Microsoft.WindowsAzure.Management.HDInsight.Framework.csproj">
       <Project>{db09f70b-fd28-4cc8-86b3-883d71ca9a02}</Project>
