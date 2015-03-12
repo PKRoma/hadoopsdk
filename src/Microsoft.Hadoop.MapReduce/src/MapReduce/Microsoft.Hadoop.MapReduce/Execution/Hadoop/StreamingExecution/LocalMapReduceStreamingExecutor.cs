@@ -117,6 +117,8 @@ namespace Microsoft.Hadoop.MapReduce.Execution.Hadoop
             string dirName = "dotnetcli/" + this.JobGuid.ToString();
             string appDirectory = dirName + "/app";
 
+            hdfsFile.MakeDirectory(appDirectory);
+
             this.File.AsParallel().ForAll(file => this.hdfsFile.CopyFromLocal(file, hdfsFile.GetFullyQualifiedPath(appDirectory + "/" + Path.GetFileName(file))));
             IEnumerable<string> remoteFileList = this.File.Select(file => hdfsFile.GetFullyQualifiedPath(appDirectory + "/" + Path.GetFileName(file)));
 

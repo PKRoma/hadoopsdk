@@ -54,12 +54,16 @@
             hdfsPath = this.GetAbsolutePath(hdfsPath);
             var executor = this.MakeExecutor();
             executor.Arguments.Add(FsCommands.MkDir);
+            executor.Arguments.Add("-p");
             executor.Arguments.Add(hdfsPath);
             ProcessUtil.RunHadoopCommand_ThrowOnError(executor);
-            string stdErr = string.Join(Environment.NewLine, executor.StandardError);
-            if (stdErr.IndexOf("cannot create", StringComparison.Ordinal) != -1)
+            if (executor.StandardError != null)
             {
-                throw new StreamingException(stdErr);
+                string stdErr = string.Join(Environment.NewLine, executor.StandardError);
+                if (stdErr.IndexOf("cannot create", StringComparison.Ordinal) != -1)
+                {
+                    throw new StreamingException(stdErr);
+                }
             }
         }
 
@@ -80,6 +84,8 @@
         public override void CopyFromLocal(string localPath, string hdfsPath)
         {
             hdfsPath = this.GetAbsolutePath(hdfsPath);
+            string path = FormatSlashes(Path.GetDirectoryName(hdfsPath));
+            MakeDirectory(path);
             var executor = this.MakeExecutor();
             executor.Arguments.Add(FsCommands.CopyFromLocal);
             executor.Arguments.Add(localPath);
@@ -185,6 +191,8 @@
         private void PerformMoveFromLocal(string local, string hdfsPath)
         {
             hdfsPath = this.GetAbsolutePath(hdfsPath);
+            string path = FormatSlashes(Path.GetDirectoryName(hdfsPath));
+            MakeDirectory(path);
             var executor = this.MakeExecutor();
             executor.Arguments.Add(FsCommands.MoveFromLocal);
             executor.Arguments.Add(local);
@@ -200,6 +208,11 @@
                     File.Delete(local);
                 }
             }
+        }
+
+        private string FormatSlashes(string path)
+        {
+            return path.Replace('\\', '/');
         }
 
         private string PerformCopyToLocalLocal(string hdfsPath)

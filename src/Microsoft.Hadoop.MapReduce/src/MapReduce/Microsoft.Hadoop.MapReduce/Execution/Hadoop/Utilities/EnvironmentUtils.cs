@@ -32,6 +32,7 @@ namespace Microsoft.Hadoop.MapReduce
 
         internal const string HadoopExecutableName = "hadoop.cmd";
         internal const string HadoopStreamingJarName = "hadoop-streaming.jar";
+        internal const string HadoopStreamingJarSearchName = "hadoop-streaming-*.jar";
         internal const string MapDriverExeName = "Microsoft.Hadoop.MapDriver.exe";
         internal const string ReduceDriverExeName = "Microsoft.Hadoop.ReduceDriver.exe";
         internal const string CombineDriverExeName = "Microsoft.Hadoop.CombineDriver.exe";
@@ -71,7 +72,20 @@ namespace Microsoft.Hadoop.MapReduce
         }
         
         internal static string PathToStreamingJar {
-            get { return Path.Combine(Path.Combine(HadoopHome, "lib"), HadoopStreamingJarName); }
+            get
+            {
+                if (Directory.Exists(Path.Combine(Path.Combine(HadoopHome, "lib"), HadoopStreamingJarName)))
+                {
+                    return Path.Combine(Path.Combine(HadoopHome, "lib"), HadoopStreamingJarName);
+                }
+                var searchResults = Directory.GetFiles(Path.Combine(HadoopHome, "share\\hadoop\\tools\\lib"), HadoopStreamingJarSearchName, SearchOption.TopDirectoryOnly);
+                if (searchResults.Length != 0)
+                {
+                    return searchResults[0];
+                }
+                Logger.Write("Cannot find hadoop-streaming jar");
+                return null;
+            }
         }
 
         internal static string MRLibPath
