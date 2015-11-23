@@ -107,6 +107,14 @@ namespace Microsoft.Hadoop.MapReduce
             //         --> this is due to a bug in .NET4 framework. https://connect.microsoft.com/VisualStudio/feedback/details/611486/debugger-launch-is-now-crashing-my-net-application-after-upgrading-to-net-4-0
             //Debugger.Launch(); 
 
+            // Check if to set the encoding to UTF8
+            string encoding = Environment.GetEnvironmentVariable(EnvironmentUtils.EnvVarName_User_Encoding);
+            if (encoding != null && encoding.ToLowerInvariant().Equals("utf8", StringComparison.OrdinalIgnoreCase))
+            {
+                Console.InputEncoding = Encoding.UTF8;
+                Console.OutputEncoding = Encoding.UTF8;
+            }
+
             // read relevant environment variables
             string env_outputKeyFields = Environment.GetEnvironmentVariable(EnvironmentUtils.EnvVar_Stream_Num_Map_Output_Key_Fields);
             int numKeyFields = 1;

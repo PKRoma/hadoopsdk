@@ -70,6 +70,14 @@ namespace Microsoft.Hadoop.MapReduce
         /// </summary>
         public static void Main()
         {
+            // Check if to set the encoding to UTF8
+            string encoding = Environment.GetEnvironmentVariable(EnvironmentUtils.EnvVarName_User_Encoding);
+            if (encoding != null && encoding.ToLowerInvariant().Equals("utf8", StringComparison.OrdinalIgnoreCase))
+            {
+                Console.InputEncoding = Encoding.UTF8;
+                Console.OutputEncoding = Encoding.UTF8;
+            }
+
             // WARNING: If launch is used, you _must_ attach else the program will bail out immediately.  Use MsgBox.Show or similar for ignorable break.
             //         --> this is due to a bug in .NET4 framework. https://connect.microsoft.com/VisualStudio/feedback/details/611486/debugger-launch-is-now-crashing-my-net-application-after-upgrading-to-net-4-0
             //Debugger.Launch();

@@ -51,6 +51,8 @@ namespace Microsoft.Hadoop.MapReduce
         internal const string EnvVarName_User_CombinerTypeName = "MSFT_HADOOP_COMBINER_TYPE";
         private static string s_mrlibFolder;
 
+        internal const string EnvVarName_User_Encoding = "MSFT_HADOOP_ENCODING"; 
+
         internal static string TaskNode_PathToShippedResource(string fileName)
         {
             return fileName;
